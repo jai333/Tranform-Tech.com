@@ -1,0 +1,120 @@
+{% extends 'tracking_app/base.html' %}
+
+{% block title %}My Applications - ATS & CRM System{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2 class="page-title">
+        <i class="fas fa-clipboard-list"></i> My Applications
+    </h2>
+</div>
+
+{% if messages %}
+    <div class="messages-container animate-fade-in">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} glass-card">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<div class="card glass-card animate-slide-up">
+    <div class="card-body">
+        {% if applications %}
+            <div class="table-responsive animate-fade-in">
+                <table class="table hover-table">
+                    <thead>
+                        <tr>
+                            <th>Job Title</th>
+                            <th>Company</th>
+                            <th>Applied Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for application in applications %}
+                        <tr class="animate-fade-in" style="animation-delay: {{ forloop.counter0|add:1 }}0ms;">
+                            <td>
+                                <a href="{% url 'job-detail' application.job.id %}" class="job-title">
+                                    {{ application.job.title }}
+                                </a>
+                            </td>
+                            <td>{{ application.job.user.get_full_name|default:application.job.user.username }}</td>
+                            <td>{{ application.applied_date|date:"M d, Y" }}</td>
+                            <td>
+                                <span class="badge badge-{{ application.get_status_color }} glass-badge">
+                                    {{ application.get_status_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="btn-group">
+                                    <a href="{% url 'application-detail' application.id %}" class="btn-icon glass-icon" title="View Application">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    {% if application.status == 'pending' %}
+                                    <a href="{% url 'withdraw-application' application.id %}" class="btn-icon btn-danger glass-icon" title="Withdraw Application">
+                                        <i class="fas fa-undo"></i>
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty-state animate-fade-in">
+                <div class="icon">
+                    <i class="fas fa-clipboard-list fa-3x"></i>
+                </div>
+                <h4>No Applications Yet</h4>
+                <p>You haven't applied for any jobs yet.</p>
+                <a href="{% url 'job-list' %}" class="btn btn-primary glass-button">
+                    <i class="fas fa-briefcase"></i> Browse Jobs
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .job-title {
+        font-weight: 500;
+        color: var(--accent-color);
+        text-decoration: none;
+        position: relative;
+        transition: all 0.3s ease;
+    }
+    
+    .job-title:after {
+        content: '';
+        position: absolute;
+        width: 0;
+        height: 2px;
+        bottom: -2px;
+        left: 0;
+        background-color: var(--accent-color);
+        transition: width 0.3s ease;
+    }
+    
+    .job-title:hover {
+        color: var(--primary-color);
+    }
+    
+    .job-title:hover:after {
+        width: 100%;
+    }
+    
+    .hover-table tr {
+        transition: all 0.2s ease;
+    }
+    
+    .hover-table tr:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+</style>
+{% endblock %} 

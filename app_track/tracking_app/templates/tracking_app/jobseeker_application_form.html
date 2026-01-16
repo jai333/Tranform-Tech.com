@@ -1,0 +1,123 @@
+{% extends 'tracking_app/base.html' %}
+
+{% block title %}Apply for {{ job.title }} - ATS & CRM System{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+    <div>
+        <a href="{% url 'job-detail' job.id %}" class="btn btn-sm btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Job
+        </a>
+    </div>
+</div>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endif %}
+
+<div class="card">
+    <div class="card-header">
+        <h3 style="margin: 0;">
+            <i class="fas fa-paper-plane" style="margin-right: 0.5rem; color: var(--accent-color);"></i> 
+            Apply for: {{ job.title }}
+        </h3>
+    </div>
+    <div class="card-body">
+        <div class="application-job-info" style="margin-bottom: 2rem;">
+            <h4>Job Details</h4>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="profile-item">
+                        <div class="profile-label"><i class="fas fa-briefcase"></i> Position</div>
+                        <div class="profile-value">{{ job.title }}</div>
+                    </div>
+                    
+                    <div class="profile-item">
+                        <div class="profile-label"><i class="fas fa-map-marker-alt"></i> Location</div>
+                        <div class="profile-value">{{ job.location|default:"Remote" }}</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="profile-item">
+                        <div class="profile-label"><i class="fas fa-building"></i> Company</div>
+                        <div class="profile-value">{{ job.user.get_full_name|default:job.user.username }}</div>
+                    </div>
+                    
+                    <div class="profile-item">
+                        <div class="profile-label"><i class="fas fa-calendar-alt"></i> Posted</div>
+                        <div class="profile-value">{{ job.posting_date|date:"F d, Y" }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <form method="post" enctype="multipart/form-data" class="application-form">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="{{ form.cover_letter.id_for_label }}">
+                    <i class="fas fa-file-alt" style="margin-right: 0.5rem;"></i>Cover Letter
+                </label>
+                {{ form.cover_letter }}
+                {% if form.cover_letter.errors %}
+                <div class="error-message">
+                    {% for error in form.cover_letter.errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+                {% endif %}
+                <small class="form-text text-muted">Introduce yourself and explain why you're a good fit for this role.</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.resume.id_for_label }}">
+                    <i class="fas fa-file-pdf" style="margin-right: 0.5rem;"></i>Resume / CV
+                </label>
+                {{ form.resume }}
+                {% if form.resume.errors %}
+                <div class="error-message">
+                    {% for error in form.resume.errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+                {% endif %}
+                <small class="form-text text-muted">Upload your resume in PDF or Word format (max 5MB).</small>
+            </div>
+            
+            <div class="privacy-note" style="margin: 1.5rem 0; padding: 1rem; background-color: rgba(0,0,0,0.05); border-radius: 0.5rem;">
+                <p><i class="fas fa-shield-alt" style="margin-right: 0.5rem;"></i> <strong>Privacy Note:</strong> By submitting this application, you agree that the hiring manager can view your resume and the information you provide.</p>
+            </div>
+            
+            <div style="margin-top: 2rem; text-align: center;">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-paper-plane"></i> Submit Application
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .application-form .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .profile-item {
+        margin-bottom: 1rem;
+    }
+    
+    .profile-label {
+        font-weight: 500;
+        color: var(--text-secondary);
+        margin-bottom: 0.25rem;
+    }
+    
+    .profile-value {
+        font-weight: 400;
+    }
+</style>
+{% endblock %} 

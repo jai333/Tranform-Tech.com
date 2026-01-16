@@ -1,0 +1,232 @@
+{% extends 'tracking_app/base.html' %}
+
+{% block title %}Interview Details | Protingent India{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2 class="page-title"><i class="fas fa-calendar-alt"></i> Interview Details</h2>
+    <div>
+        <a href="{% url 'interview-list' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Interviews
+        </a>
+        {% if user.is_recruiter or user.is_admin_role or user.is_staff %}
+            {% if object.user == user or user.is_admin_role or user.is_staff %}
+                <a href="{% url 'interview-update' object.id %}" class="btn">
+                    <i class="fas fa-edit"></i> Edit
+                </a>
+                <a href="{% url 'interview-delete' object.id %}" class="btn btn-danger">
+                    <i class="fas fa-trash"></i> Delete
+                </a>
+            {% endif %}
+        {% endif %}
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="detail-section">
+            <h3 class="detail-section-title"><i class="fas fa-info-circle"></i> Basic Information</h3>
+            
+            <div class="detail-row">
+                <div class="detail-label">Status:</div>
+                <div class="detail-value">
+                    <span class="badge badge-{{ object.get_status_color }}">
+                        {{ object.get_status_display }}
+                    </span>
+                </div>
+            </div>
+            
+            <div class="detail-row">
+                <div class="detail-label">Interview Type:</div>
+                <div class="detail-value">
+                    <span class="badge badge-info">
+                        {{ object.get_type_display }}
+                    </span>
+                </div>
+            </div>
+            
+            <div class="detail-row">
+                <div class="detail-label">Candidate:</div>
+                <div class="detail-value">
+                    <a href="{% url 'candidate-detail' object.candidate.id %}" style="color: var(--accent-color);">
+                        {{ object.candidate.full_name }}
+                    </a>
+                </div>
+            </div>
+            
+            <div class="detail-row">
+                <div class="detail-label">Job Position:</div>
+                <div class="detail-value">
+                    <a href="{% url 'job-detail' object.job.id %}" style="color: var(--accent-color);">
+                        {{ object.job.title }}
+                    </a>
+                </div>
+            </div>
+            
+            <div class="detail-row">
+                <div class="detail-label">Date & Time:</div>
+                <div class="detail-value">{{ object.date_time|date:"F d, Y - H:i" }}</div>
+            </div>
+            
+            <div class="detail-row">
+                <div class="detail-label">Interviewer:</div>
+                <div class="detail-value">{{ object.interviewer }}</div>
+            </div>
+            
+            {% if object.type == "video" and object.meeting_url %}
+            <div class="detail-row video-meeting-row">
+                <div class="detail-label">Video Meeting:</div>
+                <div class="detail-value">
+                    <div class="meeting-card">
+                        <div class="meeting-header">
+                            <i class="fas fa-video meeting-icon"></i> Video Conference Details
+                        </div>
+                        <div class="meeting-details">
+                            <p class="meeting-info-text">A video meeting has been scheduled for this interview. Share this link with the candidate if needed.</p>
+                            <div class="meeting-url-display">
+                                <div class="meeting-url">{{ object.meeting_url }}</div>
+                                <button class="btn btn-sm btn-outline-primary copy-btn" onclick="copyMeetingUrl()">
+                                    <i class="fas fa-copy"></i> Copy URL
+                                </button>
+                            </div>
+                        </div>
+                        <div class="meeting-actions">
+                            <a href="{{ object.meeting_url }}" class="btn btn-primary">
+                                <i class="fas fa-video"></i> Join Video Meeting
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+        {% if object.feedback %}
+        <div class="detail-section">
+            <h3 class="detail-section-title"><i class="fas fa-comments"></i> Feedback</h3>
+            <div class="feedback-content">
+                {{ object.feedback|linebreaks }}
+            </div>
+        </div>
+        {% else %}
+        <div class="detail-section">
+            <h3 class="detail-section-title"><i class="fas fa-comments"></i> Feedback</h3>
+            <p class="text-muted">No feedback has been provided yet.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% if object.type == "video" and object.meeting_url %}
+<style>
+    .video-meeting-row {
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px dashed rgba(var(--accent-color-rgb), 0.2);
+    }
+    
+    .meeting-card {
+        background-color: transparent;
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+        margin-top: 0.5rem;
+        border: 1px solid rgba(var(--accent-color-rgb), 0.2);
+    }
+    
+    .meeting-header {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--accent-color);
+        margin-bottom: 1.25rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid rgba(var(--accent-color-rgb), 0.2);
+    }
+    
+    .meeting-icon {
+        margin-right: 0.5rem;
+        color: var(--accent-color);
+    }
+    
+    .meeting-details {
+        margin-bottom: 1.5rem;
+    }
+    
+    .meeting-info-text {
+        margin-bottom: 1rem;
+    }
+    
+    .meeting-url-display {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        background-color: rgba(var(--accent-color-rgb), 0.05);
+        padding: 0.75rem 1rem;
+        border-radius: 6px;
+        border: 1px solid rgba(var(--accent-color-rgb), 0.1);
+    }
+    
+    .meeting-url {
+        flex-grow: 1;
+        font-family: monospace;
+        font-size: 0.9rem;
+        color: inherit;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    .meeting-actions {
+        display: flex;
+        justify-content: center;
+    }
+    
+    .copy-btn {
+        white-space: nowrap;
+        border-color: var(--accent-color);
+        color: var(--accent-color);
+    }
+    
+    .copy-btn:hover {
+        background-color: var(--accent-color);
+        color: white;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get the accent color from CSS variable
+        const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim();
+        
+        // Convert hex to rgb
+        const rgb = hexToRgb(accentColor);
+        if (rgb) {
+            document.documentElement.style.setProperty('--accent-color-rgb', `${rgb.r}, ${rgb.g}, ${rgb.b}`);
+        }
+    });
+    
+    function hexToRgb(hex) {
+        // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
+        const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+        hex = hex.replace(shorthandRegex, function(m, r, g, b) {
+            return r + r + g + g + b + b;
+        });
+        
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? {
+            r: parseInt(result[1], 16),
+            g: parseInt(result[2], 16),
+            b: parseInt(result[3], 16)
+        } : null;
+    }
+    
+    function copyMeetingUrl() {
+        const url = "{{ object.meeting_url }}";
+        navigator.clipboard.writeText(url).then(() => {
+            alert("Meeting URL copied to clipboard!");
+        }).catch(err => {
+            console.error('Failed to copy meeting URL: ', err);
+        });
+    }
+</script>
+{% endif %}
+{% endblock %} 

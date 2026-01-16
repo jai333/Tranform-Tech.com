@@ -1,0 +1,608 @@
+{% extends 'tracking_app/base.html' %}
+{% load custom_filters %}
+
+{% block title %}Available Jobs - Protingent India{% endblock %}
+
+{% block extra_styles %}
+<style>
+    /* Search and filter section */
+    .search-form {
+        margin-bottom: 1.5rem;
+    }
+    
+    .search-wrapper {
+        background: var(--apple-card-bg);
+        backdrop-filter: blur(var(--apple-blur));
+        -webkit-backdrop-filter: blur(var(--apple-blur));
+        border-radius: 16px;
+        border: 1px solid var(--apple-border);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .search-row {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .search-box {
+        flex-grow: 1;
+        position: relative;
+    }
+    
+    .search-box i {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--apple-text-secondary);
+        pointer-events: none;
+    }
+    
+    .search-input {
+        background: var(--apple-input-bg);
+        border: 1px solid var(--apple-border);
+        border-radius: 12px;
+        color: var(--apple-text);
+        font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+        font-size: 1rem;
+        height: 3rem;
+        padding: 0 1rem 0 2.5rem;
+        width: 100%;
+        transition: all 0.25s ease;
+    }
+    
+    .search-input:focus {
+        outline: none;
+        border-color: var(--apple-accent);
+        box-shadow: 0 0 0 4px var(--apple-accent-glow);
+    }
+    
+    .filter-row {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+    
+    .filter-item {
+        position: relative;
+        flex: 1;
+        min-width: 180px;
+    }
+    
+    .filter-select {
+        appearance: none;
+        background: var(--apple-input-bg);
+        border: 1px solid var(--apple-border);
+        border-radius: 12px;
+        color: var(--apple-text);
+        font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+        font-size: 0.95rem;
+        height: 3rem;
+        padding: 0 1rem;
+        width: 100%;
+        cursor: pointer;
+        transition: all 0.25s ease;
+    }
+    
+    .filter-select:focus {
+        outline: none;
+        border-color: var(--apple-accent);
+        box-shadow: 0 0 0 4px var(--apple-accent-glow);
+    }
+    
+    .filter-item::after {
+        content: '\f078';
+        font-family: 'Font Awesome 5 Free';
+        font-weight: 900;
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--apple-text-secondary);
+        pointer-events: none;
+        font-size: 0.8rem;
+    }
+    
+    .actions-row {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+    
+    /* Button styling */
+    .filter-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        min-width: 120px;
+        height: 3rem;
+        padding: 0 1.5rem;
+        background: var(--apple-accent);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 0.95rem;
+        font-weight: 500;
+        letter-spacing: -0.01em;
+        transition: all 0.3s ease;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        cursor: pointer;
+    }
+    
+    .filter-btn:hover {
+        background: var(--apple-accent-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+    }
+    
+    .reset-btn {
+        background-color: rgba(255, 255, 255, 0.05);
+        color: var(--apple-text);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+    }
+    
+    .reset-btn:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+    
+    /* Job grid */
+    .job-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    /* Job card */
+    .job-card {
+        background: var(--apple-card-bg);
+        backdrop-filter: blur(var(--apple-blur));
+        -webkit-backdrop-filter: blur(var(--apple-blur));
+        border-radius: 16px;
+        border: 1px solid var(--apple-border);
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        animation: card-fade-in 0.5s ease-out;
+        animation-fill-mode: both;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    }
+    
+    .job-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25);
+        border-color: rgba(255, 255, 255, 0.15);
+    }
+    
+    @keyframes card-fade-in {
+        0% {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .job-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--apple-border);
+        position: relative;
+    }
+    
+    .job-badge {
+        display: inline-block;
+        padding: 0.35rem 0.75rem;
+        background-color: rgba(8, 145, 178, 0.15);
+        color: var(--apple-accent);
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        margin-bottom: 0.75rem;
+    }
+    
+    .job-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--apple-text);
+        letter-spacing: -0.02em;
+    }
+    
+    .job-title a {
+        color: var(--apple-text);
+        text-decoration: none;
+        transition: color 0.2s ease;
+    }
+    
+    .job-title a:hover {
+        color: var(--apple-accent);
+    }
+    
+    .job-company {
+        font-size: 1rem;
+        color: var(--apple-text-secondary);
+        margin-bottom: 1rem;
+        font-weight: 500;
+    }
+    
+    .job-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        font-size: 0.9rem;
+        color: var(--apple-text-secondary);
+    }
+    
+    .job-meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .job-content {
+        padding: 1.5rem;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .job-description {
+        color: var(--apple-text-secondary);
+        font-size: 0.95rem;
+        margin-bottom: 1.5rem;
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+    }
+    
+    .job-skills {
+        margin-top: auto;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    
+    .skill-badge {
+        padding: 0.35rem 0.75rem;
+        background-color: rgba(255, 255, 255, 0.05);
+        color: var(--apple-text-secondary);
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 400;
+    }
+    
+    .job-footer {
+        padding: 1.5rem;
+        border-top: 1px solid var(--apple-border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .job-date {
+        font-size: 0.85rem;
+        color: var(--apple-text-secondary);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .job-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .job-action {
+        min-width: auto;
+        height: 2.5rem;
+        padding: 0 1rem;
+    }
+    
+    .delete-btn {
+        background-color: var(--danger-color, #dc3545);
+    }
+    
+    .delete-btn:hover {
+        background-color: var(--danger-dark-color, #bd2130);
+    }
+    
+    /* Empty state */
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: var(--apple-card-bg);
+        backdrop-filter: blur(var(--apple-blur));
+        -webkit-backdrop-filter: blur(var(--apple-blur));
+        border-radius: 16px;
+        border: 1px solid var(--apple-border);
+        margin-bottom: 2rem;
+    }
+    
+    .empty-icon {
+        font-size: 3rem;
+        color: var(--apple-text-secondary);
+        opacity: 0.5;
+        margin-bottom: 1.5rem;
+    }
+    
+    .empty-state h3 {
+        font-weight: 500;
+        margin-bottom: 1rem;
+        color: var(--apple-text);
+    }
+    
+    .empty-state p {
+        color: var(--apple-text-secondary);
+        margin-bottom: 2rem;
+        max-width: 500px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
+    /* Pagination */
+    .pagination-wrapper {
+        display: flex;
+        justify-content: center;
+        margin-top: 2.5rem;
+    }
+    
+    .pagination {
+        display: flex;
+        gap: 0.5rem;
+        padding: 0.5rem;
+        background: rgba(15, 23, 42, 0.2);
+        border-radius: 16px;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    .page-item {
+        list-style: none;
+    }
+    
+    .page-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 40px;
+        height: 40px;
+        padding: 0 0.75rem;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--apple-text);
+        text-decoration: none;
+        transition: all 0.2s ease;
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+        border: 1px solid var(--apple-border);
+    }
+    
+    .page-link:hover {
+        background: rgba(255, 255, 255, 0.1);
+        transform: translateY(-2px);
+    }
+    
+    .page-item.active .page-link {
+        background-color: rgba(8, 145, 178, 0.2);
+        color: var(--apple-text);
+        box-shadow: 0 0 15px rgba(8, 145, 178, 0.2);
+        border-color: rgba(8, 145, 178, 0.3);
+    }
+    
+    /* Responsive styles */
+    @media (max-width: 768px) {
+        .job-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .search-row, 
+        .filter-row {
+            flex-direction: column;
+        }
+        
+        .filter-item {
+            width: 100%;
+        }
+        
+        .actions-row {
+            flex-direction: column;
+        }
+        
+        .filter-btn {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">
+        <i class="fas fa-briefcase"></i> Available Jobs
+    </h1>
+    {% if user.is_recruiter %}
+    <a href="{% url 'job-create' %}" class="btn">
+        <i class="fas fa-plus"></i> Post New Job
+    </a>
+    {% endif %}
+</div>
+
+<div class="search-wrapper">
+    <form method="get" action="{% url 'job-list' %}" class="search-form">
+        <div class="search-row">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" name="search" class="search-input" placeholder="Search job titles, companies or skills" value="{{ request.GET.search|default:'' }}">
+            </div>
+        </div>
+        
+        <div class="filter-row">
+            <div class="filter-item">
+                <select name="job_type" class="filter-select">
+                    <option value="">All Job Types</option>
+                    <option value="full-time" {% if request.GET.job_type == 'full-time' %}selected{% endif %}>Full-time</option>
+                    <option value="part-time" {% if request.GET.job_type == 'part-time' %}selected{% endif %}>Part-time</option>
+                    <option value="contract" {% if request.GET.job_type == 'contract' %}selected{% endif %}>Contract</option>
+                    <option value="temporary" {% if request.GET.job_type == 'temporary' %}selected{% endif %}>Temporary</option>
+                    <option value="internship" {% if request.GET.job_type == 'internship' %}selected{% endif %}>Internship</option>
+                </select>
+            </div>
+            
+            <div class="filter-item">
+                <select name="sort" class="filter-select">
+                    <option value="date" {% if request.GET.sort == 'date' or not request.GET.sort %}selected{% endif %}>Newest First</option>
+                    <option value="title" {% if request.GET.sort == 'title' %}selected{% endif %}>Job Title</option>
+                    <option value="company" {% if request.GET.sort == 'company' %}selected{% endif %}>Company</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="actions-row">
+            <button type="submit" class="filter-btn">
+                <i class="fas fa-filter"></i> Filter Results
+            </button>
+            <a href="{% url 'job-list' %}" class="filter-btn reset-btn">
+                <i class="fas fa-redo"></i> Reset Filters
+            </a>
+        </div>
+    </form>
+</div>
+
+{% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+{% if jobs %}
+    <div class="job-grid">
+        {% for job in jobs %}
+            <div class="job-card" style="animation-delay: {{ forloop.counter0|multiply:100 }}ms">
+                <div class="job-header">
+                    <span class="job-badge">{{ job.job_type|title }}</span>
+                    <h3 class="job-title">
+                        <a href="{% url 'job-detail' job.id %}">{{ job.title }}</a>
+                    </h3>
+                    <div class="job-company">{{ job.company }}</div>
+                    <div class="job-meta">
+                        <div class="job-meta-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>{{ job.location|default:"Remote" }}</span>
+                        </div>
+                        {% if job.salary %}
+                        <div class="job-meta-item">
+                            <i class="fas fa-money-bill-alt"></i>
+                            <span>{{ job.salary }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="job-content">
+                    <p class="job-description">{{ job.description|truncatewords:30 }}</p>
+                    <div class="job-skills">
+                        {% for skill in job.get_skills|slice:":3" %}
+                            <span class="skill-badge">{{ skill }}</span>
+                        {% endfor %}
+                        {% if job.get_skills|length > 3 %}
+                            <span class="skill-badge">+{{ job.get_skills|length|add:"-3" }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="job-footer">
+                    <div class="job-date">
+                        <i class="fas fa-clock"></i> 
+                        <span>Posted {{ job.created_at|timesince }} ago</span>
+                    </div>
+                    <div class="job-actions">
+                        {% if user.is_recruiter and job.user == user %}
+                            <a href="{% url 'job-update' job.id %}" class="filter-btn job-action" title="Edit job">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="{% url 'job-delete' job.id %}" class="filter-btn job-action delete-btn" title="Delete job">
+                                <i class="fas fa-trash-alt"></i>
+                            </a>
+                        {% else %}
+                            <a href="{% url 'job-detail' job.id %}" class="filter-btn job-action">
+                                <i class="fas fa-arrow-right"></i> View
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    
+    {% if is_paginated %}
+    <div class="pagination-wrapper">
+        <ul class="pagination">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?{% if request.GET.urlencode %}{{ request.GET.urlencode }}&{% endif %}page=1" aria-label="First">
+                        <span aria-hidden="true"><i class="fas fa-angle-double-left"></i></span>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?{% if request.GET.urlencode %}{{ request.GET.urlencode }}&{% endif %}page={{ page_obj.previous_page_number }}" aria-label="Previous">
+                        <span aria-hidden="true"><i class="fas fa-angle-left"></i></span>
+                    </a>
+                </li>
+            {% endif %}
+            
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                    <li class="page-item active"><a class="page-link" href="#">{{ num }}</a></li>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <li class="page-item"><a class="page-link" href="?{% if request.GET.urlencode %}{{ request.GET.urlencode }}&{% endif %}page={{ num }}">{{ num }}</a></li>
+                {% endif %}
+            {% endfor %}
+            
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?{% if request.GET.urlencode %}{{ request.GET.urlencode }}&{% endif %}page={{ page_obj.next_page_number }}" aria-label="Next">
+                        <span aria-hidden="true"><i class="fas fa-angle-right"></i></span>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?{% if request.GET.urlencode %}{{ request.GET.urlencode }}&{% endif %}page={{ page_obj.paginator.num_pages }}" aria-label="Last">
+                        <span aria-hidden="true"><i class="fas fa-angle-double-right"></i></span>
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+    </div>
+    {% endif %}
+{% else %}
+    <div class="empty-state">
+        <div class="empty-icon">
+            <i class="fas fa-search"></i>
+        </div>
+        <h3>No jobs found</h3>
+        <p>Try adjusting your search filters or check back later for new opportunities.</p>
+        
+        {% if user.is_recruiter %}
+        <div>
+            <a href="{% url 'job-create' %}" class="filter-btn">
+                <i class="fas fa-plus"></i> Post Your First Job
+            </a>
+        </div>
+        {% endif %}
+    </div>
+{% endif %}
+{% endblock %} 

@@ -1,0 +1,413 @@
+{% extends 'tracking_app/base.html' %}
+
+{% block title %}Login - Protingent India{% endblock %}
+
+{% block extra_styles %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600&display=swap');
+    
+    :root {
+        --apple-blur: 20px;
+        --apple-bg: rgba(30, 30, 32, 0.7);
+        --apple-border: rgba(140, 140, 140, 0.15);
+        --apple-text: rgba(255, 255, 255, 0.9);
+        --apple-text-secondary: rgba(255, 255, 255, 0.6);
+        --apple-accent: #0891B2;
+        --apple-accent-dark: #066b86;
+        --apple-accent-glow: rgba(8, 145, 178, 0.4);
+        --apple-error: #ff453a;
+        --apple-success: #30d158;
+        --apple-input-bg: rgba(40, 40, 42, 0.5);
+        --apple-card-bg: rgba(40, 40, 42, 0.7);
+    }
+    
+    body {
+        background-color: #000;
+        min-height: 100vh;
+        font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+        overflow-x: hidden;
+    }
+    
+    .auth-wrapper {
+        position: relative;
+        min-height: calc(100vh - 120px);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 3rem 1rem;
+        z-index: 1;
+    }
+    
+    /* Background effects */
+    .bg-gradient {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle at bottom right, #15293e 0%, #1a1a1c 50%);
+        opacity: 0.8;
+        z-index: -2;
+    }
+    
+    .bg-glow-1 {
+        position: fixed;
+        top: -150px;
+        right: -100px;
+        width: 500px;
+        height: 500px;
+        border-radius: 100%;
+        background: radial-gradient(circle, rgba(8, 145, 178, 0.2) 0%, rgba(8, 145, 178, 0) 70%);
+        filter: blur(50px);
+        z-index: -1;
+        animation: glow-pulse 10s infinite alternate ease-in-out;
+    }
+    
+    .bg-glow-2 {
+        position: fixed;
+        bottom: -200px;
+        left: -150px;
+        width: 600px;
+        height: 600px;
+        border-radius: 100%;
+        background: radial-gradient(circle, rgba(34, 197, 94, 0.15) 0%, rgba(34, 197, 94, 0) 70%);
+        filter: blur(60px);
+        z-index: -1;
+        animation: glow-pulse 12s infinite alternate-reverse ease-in-out;
+    }
+    
+    @keyframes glow-pulse {
+        0% {
+            opacity: 0.4;
+            transform: scale(1);
+        }
+        100% {
+            opacity: 0.7;
+            transform: scale(1.2);
+        }
+    }
+    
+    /* Modern glass card */
+    .auth-card {
+        background: var(--apple-bg);
+        backdrop-filter: blur(var(--apple-blur));
+        -webkit-backdrop-filter: blur(var(--apple-blur));
+        border-radius: 20px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+        width: 100%;
+        max-width: 440px;
+        border: 1px solid var(--apple-border);
+        overflow: hidden;
+        transform: translateY(0);
+        opacity: 1;
+        animation: card-fade-in 0.7s ease-out;
+    }
+    
+    @keyframes card-fade-in {
+        0% {
+            transform: translateY(30px);
+            opacity: 0;
+        }
+        100% {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+    
+    .auth-header {
+        padding: 2.5rem 2.5rem 1.5rem;
+        text-align: center;
+    }
+    
+    .auth-icon {
+        width: 60px;
+        height: 60px;
+        margin: 0 auto 1.5rem;
+        background: rgba(8, 145, 178, 0.15);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: icon-pulse 2s infinite ease-in-out;
+    }
+    
+    @keyframes icon-pulse {
+        0% {
+            box-shadow: 0 0 0 0 var(--apple-accent-glow);
+        }
+        70% {
+            box-shadow: 0 0 0 10px rgba(8, 145, 178, 0);
+        }
+        100% {
+            box-shadow: 0 0 0 0 rgba(8, 145, 178, 0);
+        }
+    }
+    
+    .auth-icon i {
+        font-size: 1.75rem;
+        color: var(--apple-accent);
+    }
+    
+    .auth-header h2 {
+        font-size: 2rem;
+        font-weight: 500;
+        color: var(--apple-text);
+        margin-bottom: 0.75rem;
+        letter-spacing: -0.02em;
+    }
+    
+    .auth-header p {
+        color: var(--apple-text-secondary);
+        font-size: 1.05rem;
+        font-weight: 300;
+        margin-bottom: 0;
+        letter-spacing: 0.01em;
+    }
+    
+    .auth-form {
+        padding: 1.5rem 2.5rem 2.5rem;
+    }
+    
+    .divider {
+        height: 1px;
+        background: linear-gradient(to right, rgba(255, 255, 255, 0.01), rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.01));
+        margin: 0.5rem 0 2rem;
+    }
+    
+    /* Form styling */
+    .form-group {
+        margin-bottom: 1.5rem;
+        position: relative;
+        animation: slide-up 0.4s ease-out both;
+    }
+    
+    .form-group:nth-child(1) { animation-delay: 0.1s; }
+    .form-group:nth-child(2) { animation-delay: 0.2s; }
+    
+    @keyframes slide-up {
+        0% {
+            transform: translateY(20px);
+            opacity: 0;
+        }
+        100% {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+    
+    .form-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+        color: var(--apple-text);
+        font-weight: 500;
+        letter-spacing: 0.01em;
+    }
+    
+    .form-label i {
+        margin-right: 0.5rem;
+        color: var(--apple-accent);
+    }
+    
+    .form-control {
+        background: var(--apple-input-bg);
+        border: 1px solid var(--apple-border);
+        height: 48px;
+        width: 100%;
+        padding: 0 1rem;
+        border-radius: 12px;
+        font-size: 1rem;
+        color: var(--apple-text);
+        transition: all 0.25s ease;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: var(--apple-accent);
+        box-shadow: 0 0 0 4px var(--apple-accent-glow);
+    }
+    
+    /* Button styling */
+    .form-actions {
+        margin-top: 2rem;
+        animation: slide-up 0.4s 0.3s ease-out both;
+    }
+    
+    .btn {
+        display: block;
+        width: 100%;
+        height: 50px;
+        border: none;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-weight: 500;
+        letter-spacing: 0.01em;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .btn-primary {
+        background: var(--apple-accent);
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        background: var(--apple-accent-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(8, 145, 178, 0.3);
+    }
+    
+    .btn-primary:active {
+        transform: translateY(0);
+        box-shadow: 0 4px 10px rgba(8, 145, 178, 0.2);
+    }
+    
+    .btn-ripple {
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.5);
+        transform: scale(0);
+        animation: ripple 0.6s ease-out;
+    }
+    
+    @keyframes ripple {
+        to {
+            transform: scale(2.5);
+            opacity: 0;
+        }
+    }
+    
+    /* Register link */
+    .auth-link {
+        text-align: center;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--apple-border);
+        animation: slide-up 0.4s 0.4s ease-out both;
+    }
+    
+    .auth-link p {
+        color: var(--apple-text-secondary);
+        font-size: 0.95rem;
+        margin: 0;
+    }
+    
+    .auth-link a {
+        color: var(--apple-accent);
+        text-decoration: none;
+        font-weight: 500;
+        position: relative;
+    }
+    
+    .auth-link a::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 0;
+        height: 1px;
+        background: var(--apple-accent);
+        transition: width 0.3s ease;
+    }
+    
+    .auth-link a:hover::after {
+        width: 100%;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 576px) {
+        .auth-card {
+            max-width: 100%;
+        }
+        
+        .auth-header, .auth-form {
+            padding-left: 1.5rem;
+            padding-right: 1.5rem;
+        }
+        
+        .auth-header h2 {
+            font-size: 1.75rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+    <div class="bg-gradient"></div>
+    <div class="bg-glow-1"></div>
+    <div class="bg-glow-2"></div>
+    
+    <div class="auth-card">
+        <div class="auth-header">
+            <div class="auth-icon">
+                <i class="fas fa-sign-in-alt"></i>
+            </div>
+            <h2>Welcome Back</h2>
+            <p>Sign in to access your account</p>
+            <div class="divider"></div>
+        </div>
+        
+        <div class="auth-form">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert {% if message.tags == 'error' %}alert-danger{% elif message.tags == 'success' %}alert-success{% else %}alert-info{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+            
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label for="username" class="form-label"><i class="fas fa-user"></i> Username</label>
+                    <input type="text" name="username" id="username" class="form-control" required autofocus>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password" class="form-label"><i class="fas fa-lock"></i> Password</label>
+                    <input type="password" name="password" id="password" class="form-control" required>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </button>
+                </div>
+            </form>
+            
+            <div class="auth-link">
+                <p>Don't have an account? <a href="{% url 'register' %}">Register here</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Add ripple effect to buttons
+    document.addEventListener('DOMContentLoaded', function() {
+        const buttons = document.querySelectorAll('.btn');
+        
+        buttons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                const x = e.clientX - e.target.getBoundingClientRect().left;
+                const y = e.clientY - e.target.getBoundingClientRect().top;
+                
+                const ripple = document.createElement('span');
+                ripple.classList.add('btn-ripple');
+                ripple.style.left = `${x}px`;
+                ripple.style.top = `${y}px`;
+                
+                this.appendChild(ripple);
+                
+                setTimeout(() => {
+                    ripple.remove();
+                }, 600);
+            });
+        });
+    });
+</script>
+{% endblock %} 

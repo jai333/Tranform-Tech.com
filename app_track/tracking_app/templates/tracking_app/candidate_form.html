@@ -1,0 +1,142 @@
+{% extends 'tracking_app/base.html' %}
+
+{% block title %}
+{% if object %}
+Edit Candidate - ATS & CRM System
+{% else %}
+Create Candidate - ATS & CRM System
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+    <h2>
+        <i class="fas fa-user-edit" style="margin-right: 0.5rem; color: var(--accent-color);"></i>
+        {% if object %}Edit Candidate{% else %}Create Candidate{% endif %}
+    </h2>
+    <a href="{% url 'candidate-list' %}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Candidates
+    </a>
+</div>
+
+<div class="card">
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label for="{{ form.name.id_for_label }}">
+                <i class="fas fa-user" style="margin-right: 0.5rem;"></i> Full Name
+            </label>
+            {{ form.name }}
+            {% if form.name.errors %}
+                <div class="error-message">
+                    {% for error in form.name.errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+        
+        <div class="form-group">
+            <label for="{{ form.email.id_for_label }}">
+                <i class="fas fa-envelope" style="margin-right: 0.5rem;"></i> Email
+            </label>
+            {{ form.email }}
+            {% if form.email.errors %}
+                <div class="error-message">
+                    {% for error in form.email.errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+        
+        <div class="form-group">
+            <label for="{{ form.phone.id_for_label }}">
+                <i class="fas fa-phone" style="margin-right: 0.5rem;"></i> Phone
+            </label>
+            {{ form.phone }}
+            {% if form.phone.errors %}
+                <div class="error-message">
+                    {% for error in form.phone.errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.resume.id_for_label }}">
+                <i class="fas fa-file-pdf" style="margin-right: 0.5rem;"></i> Resume
+            </label>
+            {% if object and object.resume %}
+                <p style="margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--text-secondary);">
+                    Current: <a href="{{ object.resume.url }}" target="_blank" style="color: var(--accent-color);">View Resume</a>
+                </p>
+            {% endif %}
+            {{ form.resume }}
+            {% if form.resume.errors %}
+                <div class="error-message">
+                    {% for error in form.resume.errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+            <small style="color: var(--text-secondary);">PDF, DOCX, or DOC files only. Max 5MB.</small>
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.desired_position.id_for_label }}">
+                <i class="fas fa-briefcase" style="margin-right: 0.5rem;"></i> Desired Position
+            </label>
+            {{ form.desired_position }}
+            {% if form.desired_position.errors %}
+                <div class="error-message">
+                    {% for error in form.desired_position.errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.skills.id_for_label }}">
+                <i class="fas fa-cogs" style="margin-right: 0.5rem;"></i> Skills
+            </label>
+            {{ form.skills }}
+            {% if form.skills.errors %}
+                <div class="error-message">
+                    {% for error in form.skills.errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+            <small style="color: var(--text-secondary);">Separate skills with commas (e.g., Python, JavaScript, Project Management)</small>
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.notes.id_for_label }}">
+                <i class="fas fa-sticky-note" style="margin-right: 0.5rem;"></i> Notes
+            </label>
+            {{ form.notes }}
+            {% if form.notes.errors %}
+                <div class="error-message">
+                    {% for error in form.notes.errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <button type="submit" class="btn">
+                {% if object %}
+                <i class="fas fa-save"></i> Update Candidate
+                {% else %}
+                <i class="fas fa-plus"></i> Create Candidate
+                {% endif %}
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %} 

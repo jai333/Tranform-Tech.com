@@ -1,0 +1,599 @@
+{% extends 'tracking_app/base.html' %}
+
+{% block title %}Profile - Protingent India{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .profile-container {
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+    
+    .profile-header {
+        margin-bottom: 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    
+    .profile-title {
+        font-size: 2rem;
+        font-weight: 600;
+        letter-spacing: -0.03em;
+        margin: 0;
+        color: var(--apple-text);
+    }
+    
+    .avatar-container {
+        position: relative;
+        margin-bottom: 2rem;
+    }
+    
+    .avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 60px;
+        background: linear-gradient(135deg, rgba(8, 145, 178, 0.2), rgba(34, 197, 94, 0.2));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+        position: relative;
+        border: 3px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+    }
+    
+    .avatar:hover {
+        transform: scale(1.05);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        border-color: rgba(8, 145, 178, 0.4);
+    }
+    
+    .avatar-initial {
+        font-size: 3rem;
+        font-weight: 600;
+        color: var(--apple-text);
+        text-transform: uppercase;
+    }
+    
+    .avatar-change {
+        position: absolute;
+        bottom: 0;
+        right: 50%;
+        transform: translateX(50%);
+        background: var(--apple-accent);
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        transition: all 0.2s ease;
+    }
+    
+    .avatar-change:hover {
+        background: var(--apple-accent-dark);
+        transform: translateX(50%) scale(1.1);
+    }
+    
+    .profile-grid {
+        display: grid;
+        grid-template-columns: 1fr 2fr;
+        gap: 1.5rem;
+    }
+    
+    .profile-card {
+        background: var(--apple-card-bg);
+        backdrop-filter: blur(var(--apple-blur));
+        -webkit-backdrop-filter: blur(var(--apple-blur));
+        border-radius: 20px;
+        border: 1px solid var(--apple-border);
+        padding: 0;
+        overflow: hidden;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        height: 100%;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .profile-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+    }
+    
+    .card-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--apple-border);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .card-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        background: rgba(8, 145, 178, 0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .card-icon i {
+        font-size: 1.25rem;
+        color: var(--apple-accent);
+    }
+    
+    .card-title {
+        font-size: 1.25rem;
+        font-weight: 500;
+        color: var(--apple-text);
+        margin: 0;
+        letter-spacing: -0.02em;
+    }
+    
+    .card-body {
+        padding: 1.5rem;
+    }
+    
+    .personal-info {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1.25rem;
+    }
+    
+    .info-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .info-label {
+        font-size: 0.85rem;
+        color: var(--apple-text-secondary);
+        font-weight: 400;
+        margin: 0;
+    }
+    
+    .info-value {
+        font-size: 1rem;
+        font-weight: 500;
+        color: var(--apple-text);
+        margin: 0;
+    }
+    
+    .role-badge {
+        display: inline-block;
+        padding: 0.35rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        background: rgba(8, 145, 178, 0.15);
+        color: var(--apple-accent);
+        border: 1px solid rgba(8, 145, 178, 0.2);
+    }
+    
+    .role-badge.admin {
+        background: rgba(34, 197, 94, 0.15);
+        color: var(--apple-success);
+        border: 1px solid rgba(34, 197, 94, 0.2);
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .stat-card {
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 12px;
+        padding: 1.25rem;
+        border: 1px solid var(--apple-border);
+        transition: all 0.2s ease;
+    }
+    
+    .stat-card:hover {
+        background: rgba(255, 255, 255, 0.05);
+        transform: translateY(-3px);
+    }
+    
+    .stat-title {
+        font-size: 0.9rem;
+        color: var(--apple-text-secondary);
+        margin: 0 0 0.5rem;
+    }
+    
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--apple-text);
+        margin: 0;
+        letter-spacing: -0.03em;
+    }
+    
+    .stat-icon {
+        margin-right: 0.5rem;
+        color: var(--apple-accent);
+    }
+    
+    .action-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .action-item {
+        margin-bottom: 0.5rem;
+    }
+    
+    .action-link {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+        border-radius: 12px;
+        color: var(--apple-text);
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+    
+    .action-link:hover {
+        background: rgba(255, 255, 255, 0.05);
+        transform: translateX(5px);
+    }
+    
+    .action-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        background: rgba(8, 145, 178, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .action-icon i {
+        font-size: 1rem;
+        color: var(--apple-accent);
+    }
+    
+    .action-text {
+        font-weight: 500;
+    }
+    
+    .logout-link {
+        color: var(--apple-error);
+    }
+    
+    .logout-link .action-icon {
+        background: rgba(255, 69, 58, 0.1);
+    }
+    
+    .logout-link .action-icon i {
+        color: var(--apple-error);
+    }
+    
+    @media (max-width: 768px) {
+        .profile-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="profile-header">
+        <h2 class="profile-title">My Profile</h2>
+    </div>
+    
+    {% if messages %}
+    <div class="messages-container">
+        {% for message in messages %}
+        <div class="alert {% if message.tags == 'error' %}alert-danger{% elif message.tags == 'success' %}alert-success{% else %}alert-info{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="profile-grid">
+            <div>
+                <div class="profile-card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <h3 class="card-title">Personal Information</h3>
+                    </div>
+                    
+                    <div class="card-body">
+                        <div class="avatar-container">
+                            <div class="avatar">
+                                {% if user.profile_image %}
+                                    <img src="{{ user.profile_image.url }}" alt="Profile Image" style="width: 100%; height: 100%; object-fit: cover;">
+                                {% else %}
+                                    <span class="avatar-initial">{{ user.username|slice:":1" }}</span>
+                                {% endif %}
+                            </div>
+                            <label for="id_profile_image" class="avatar-change" style="cursor: pointer;">
+                                <i class="fas fa-camera" style="color: white; font-size: 14px;"></i>
+                            </label>
+                            <input type="file" name="profile_image" id="id_profile_image" style="display: none;" accept="image/*">
+                        </div>
+                        
+                        <div class="personal-info">
+                            <div class="info-group">
+                                <p class="info-label">Username</p>
+                                <div class="form-group">
+                                    {{ form.username }}
+                                    {% if form.username.errors %}
+                                        <div class="invalid-feedback">
+                                            {{ form.username.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="info-group">
+                                <p class="info-label">Email</p>
+                                <div class="form-group">
+                                    {{ form.email }}
+                                    {% if form.email.errors %}
+                                        <div class="invalid-feedback">
+                                            {{ form.email.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="info-group">
+                                <p class="info-label">First Name</p>
+                                <div class="form-group">
+                                    {{ form.first_name }}
+                                    {% if form.first_name.errors %}
+                                        <div class="invalid-feedback">
+                                            {{ form.first_name.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="info-group">
+                                <p class="info-label">Last Name</p>
+                                <div class="form-group">
+                                    {{ form.last_name }}
+                                    {% if form.last_name.errors %}
+                                        <div class="invalid-feedback">
+                                            {{ form.last_name.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="info-group">
+                                <p class="info-label">About Me</p>
+                                <div class="form-group">
+                                    {{ form.about_me }}
+                                    {% if form.about_me.errors %}
+                                        <div class="invalid-feedback">
+                                            {{ form.about_me.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                    <div class="form-help">Tell others about your background, experience, and interests.</div>
+                                </div>
+                            </div>
+                            
+                            <div class="info-group">
+                                <p class="info-label">Skills</p>
+                                <div class="form-group">
+                                    {{ form.skills }}
+                                    {% if form.skills.errors %}
+                                        <div class="invalid-feedback">
+                                            {{ form.skills.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                    <div class="form-help">List your key skills, separated by commas.</div>
+                                </div>
+                            </div>
+                            
+                            <div class="info-group">
+                                <p class="info-label">Role</p>
+                                <p class="info-value">
+                                    {% if user.is_jobseeker %}
+                                        <span class="role-badge">Job Seeker</span>
+                                    {% elif user.is_recruiter %}
+                                        <span class="role-badge">Recruiter</span>
+                                    {% elif user.is_admin_role %}
+                                        <span class="role-badge admin">Administrator</span>
+                                    {% endif %}
+                                    
+                                    {% if user.is_staff %}
+                                        <span class="role-badge admin" style="margin-left: 0.5rem;">Staff</span>
+                                    {% endif %}
+                                </p>
+                            </div>
+                            
+                            <div class="info-group">
+                                <p class="info-label">Member Since</p>
+                                <p class="info-value">{{ user.date_joined|date:"F d, Y" }}</p>
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> Save Changes
+                                </button>
+                            </div>
+                            
+                            <div class="info-group mt-4">
+                                <p class="info-label">Public Profile Link</p>
+                                <div class="d-flex align-items-center">
+                                    <input type="text" class="form-control" value="{{ request.scheme }}://{{ request.get_host }}{% url 'public-profile' user.username %}" id="public-profile-link" readonly style="flex: 1; margin-right: 10px;">
+                                    <button class="btn btn-primary" onclick="copyProfileLink()" style="white-space: nowrap;">
+                                        <i class="fas fa-copy"></i> Copy
+                                    </button>
+                                </div>
+                                <p class="form-help">Share this link with others to let them view your public profile.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div>
+                <div class="profile-card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h3 class="card-title">Activity Dashboard</h3>
+                    </div>
+                    
+                    <div class="card-body">
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <p class="stat-title">
+                                    <i class="fas fa-users stat-icon"></i>Candidates
+                                </p>
+                                <h4 class="stat-value">{{ user.candidates.count }}</h4>
+                            </div>
+                            
+                            <div class="stat-card">
+                                <p class="stat-title">
+                                    <i class="fas fa-briefcase stat-icon"></i>Job Postings
+                                </p>
+                                <h4 class="stat-value">{{ user.jobs.count }}</h4>
+                            </div>
+                            
+                            <div class="stat-card">
+                                <p class="stat-title">
+                                    <i class="fas fa-file-alt stat-icon"></i>Applications
+                                </p>
+                                <h4 class="stat-value">{{ user.applications.count }}</h4>
+                            </div>
+                            
+                            <div class="stat-card">
+                                <p class="stat-title">
+                                    <i class="fas fa-calendar-check stat-icon"></i>Interviews
+                                </p>
+                                <h4 class="stat-value">{{ user.interviews.count }}</h4>
+                            </div>
+                        </div>
+                        
+                        <div class="profile-card" style="margin-top: 1.5rem;">
+                            <div class="card-header">
+                                <div class="card-icon">
+                                    <i class="fas fa-cog"></i>
+                                </div>
+                                <h3 class="card-title">Account Management</h3>
+                            </div>
+                            
+                            <div class="card-body">
+                                <ul class="action-list">
+                                    <li class="action-item">
+                                        <a href="#" class="action-link">
+                                            <div class="action-icon">
+                                                <i class="fas fa-lock"></i>
+                                            </div>
+                                            <span class="action-text">Change Password</span>
+                                        </a>
+                                    </li>
+                                    
+                                    <li class="action-item">
+                                        <a href="#" class="action-link">
+                                            <div class="action-icon">
+                                                <i class="fas fa-bell"></i>
+                                            </div>
+                                            <span class="action-text">Notification Settings</span>
+                                        </a>
+                                    </li>
+                                    
+                                    <li class="action-item">
+                                        <form method="post" action="{% url 'logout' %}" style="margin: 0;">
+                                            {% csrf_token %}
+                                            <button type="submit" class="action-link logout-link" style="width: 100%; text-align: left; border: none; background: none; cursor: pointer;">
+                                                <div class="action-icon">
+                                                    <i class="fas fa-sign-out-alt"></i>
+                                                </div>
+                                                <span class="action-text">Logout</span>
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    // Image preview functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const profileInput = document.getElementById('id_profile_image');
+        const avatar = document.querySelector('.avatar');
+        const avatarInitial = document.querySelector('.avatar-initial');
+        
+        profileInput?.addEventListener('change', function(e) {
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    // Remove initial if it exists
+                    if (avatarInitial) {
+                        avatarInitial.style.display = 'none';
+                    }
+                    
+                    // Check if image already exists
+                    let img = avatar.querySelector('img');
+                    if (!img) {
+                        img = document.createElement('img');
+                        img.style.width = '100%';
+                        img.style.height = '100%';
+                        img.style.objectFit = 'cover';
+                        avatar.appendChild(img);
+                    }
+                    
+                    img.src = e.target.result;
+                    img.style.display = 'block';
+                }
+                
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+    });
+    
+    function copyProfileLink() {
+        const copyText = document.getElementById("public-profile-link");
+        copyText.select();
+        copyText.setSelectionRange(0, 99999); // For mobile devices
+        
+        // Copy the text inside the text field
+        navigator.clipboard.writeText(copyText.value);
+        
+        // Alert the user that the link was copied
+        const button = document.querySelector('button[onclick="copyProfileLink()"]');
+        const originalText = button.innerHTML;
+        
+        button.innerHTML = '<i class="fas fa-check"></i> Copied!';
+        
+        setTimeout(() => {
+            button.innerHTML = originalText;
+        }, 2000);
+    }
+</script>
+{% endblock %} 

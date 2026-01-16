@@ -1,0 +1,260 @@
+{% extends 'tracking_app/base.html' %}
+
+{% block title %}Candidates | Protingent India{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2 class="page-title"><i class="fas fa-users"></i> Candidates</h2>
+    <a href="{% url 'candidate-create' %}" class="btn btn-primary glass-button">
+        <i class="fas fa-plus"></i> Add Candidate
+    </a>
+</div>
+
+{% if messages %}
+<div class="messages-container animate-fade-in">
+    {% for message in messages %}
+        <div class="alert {% if message.tags == 'error' %}alert-danger{% elif message.tags == 'success' %}alert-success{% elif message.tags == 'warning' %}alert-warning{% else %}alert-info{% endif %} glass-card">
+            {{ message }}
+        </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="card glass-card animate-slide-up">
+    <div class="card-header">
+        <form method="get" class="search-form animate-fade-in">
+            <div class="input-group">
+                <input type="text" name="search" class="form-control glass-input" placeholder="Search candidates..." value="{{ request.GET.search }}">
+                <button type="submit" class="btn btn-sm glass-button">
+                    <i class="fas fa-search"></i>
+                </button>
+                {% if request.GET.search %}
+                    <a href="{% url 'candidate-list' %}" class="btn btn-sm btn-secondary glass-button">
+                        <i class="fas fa-times"></i> Clear
+                    </a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+    <div class="card-body">
+        {% if candidates %}
+            <div class="table-responsive animate-fade-in">
+                <table class="table hover-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Location</th>
+                            <th>Added</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for candidate in candidates %}
+                        <tr class="animate-fade-in" style="animation-delay: {{ forloop.counter0|add:1 }}0ms;">
+                            <td>
+                                <a href="{% url 'candidate-detail' candidate.id %}" class="candidate-name">
+                                    {{ candidate.full_name }}
+                                </a>
+                            </td>
+                            <td>{{ candidate.email }}</td>
+                            <td>{{ candidate.phone|default:"-" }}</td>
+                            <td>{{ candidate.location|default:"-" }}</td>
+                            <td>{{ candidate.created_at|date:"M d, Y" }}</td>
+                            <td>
+                                <div class="btn-group">
+                                    <a href="{% url 'candidate-detail' candidate.id %}" class="btn-icon glass-icon" title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{% url 'candidate-update' candidate.id %}" class="btn-icon glass-icon" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{% url 'candidate-delete' candidate.id %}" class="btn-icon btn-danger glass-icon" title="Delete">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            {% if is_paginated %}
+            <div class="pagination glass-card animate-fade-in">
+                <span class="page-stats">
+                    Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ paginator.count }} candidates
+                </span>
+                <div class="page-controls">
+                    {% if page_obj.has_previous %}
+                        <a href="?{% if request.GET.search %}search={{ request.GET.search }}&{% endif %}page=1" class="page-control glass-button">
+                            <i class="fas fa-angle-double-left"></i>
+                        </a>
+                        <a href="?{% if request.GET.search %}search={{ request.GET.search }}&{% endif %}page={{ page_obj.previous_page_number }}" class="page-control glass-button">
+                            <i class="fas fa-angle-left"></i>
+                        </a>
+                    {% else %}
+                        <span class="page-control disabled">
+                            <i class="fas fa-angle-double-left"></i>
+                        </span>
+                        <span class="page-control disabled">
+                            <i class="fas fa-angle-left"></i>
+                        </span>
+                    {% endif %}
+                    
+                    <span class="page-current">
+                        Page {{ page_obj.number }} of {{ paginator.num_pages }}
+                    </span>
+                    
+                    {% if page_obj.has_next %}
+                        <a href="?{% if request.GET.search %}search={{ request.GET.search }}&{% endif %}page={{ page_obj.next_page_number }}" class="page-control glass-button">
+                            <i class="fas fa-angle-right"></i>
+                        </a>
+                        <a href="?{% if request.GET.search %}search={{ request.GET.search }}&{% endif %}page={{ paginator.num_pages }}" class="page-control glass-button">
+                            <i class="fas fa-angle-double-right"></i>
+                        </a>
+                    {% else %}
+                        <span class="page-control disabled">
+                            <i class="fas fa-angle-right"></i>
+                        </span>
+                        <span class="page-control disabled">
+                            <i class="fas fa-angle-double-right"></i>
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        {% else %}
+            <div class="empty-state animate-fade-in">
+                <div class="icon">
+                    <i class="fas fa-users fa-3x"></i>
+                </div>
+                <h4>No Candidates Found</h4>
+                {% if request.GET.search %}
+                    <p>No candidates match your search: <strong>{{ request.GET.search }}</strong></p>
+                    <a href="{% url 'candidate-list' %}" class="btn btn-sm glass-button">
+                        <i class="fas fa-list"></i> View All Candidates
+                    </a>
+                {% else %}
+                    <p>You haven't added any candidates yet.</p>
+                    <a href="{% url 'candidate-create' %}" class="btn btn-primary glass-button">
+                        <i class="fas fa-plus"></i> Add First Candidate
+                    </a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .candidate-name {
+        font-weight: 500;
+        color: var(--accent-color);
+        text-decoration: none;
+        position: relative;
+        transition: all 0.3s ease;
+    }
+
+    .candidate-name::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: var(--accent-color);
+        transition: width 0.3s ease;
+    }
+
+    .candidate-name:hover {
+        color: var(--primary-color);
+    }
+
+    .candidate-name:hover::after {
+        width: 100%;
+    }
+
+    .search-form {
+        width: 100%;
+        transition: all 0.3s ease;
+    }
+
+    .search-form:focus-within {
+        transform: scale(1.01);
+    }
+
+    .input-group {
+        max-width: 600px;
+    }
+
+    .hover-table tr {
+        transition: all 0.2s ease;
+    }
+    
+    .hover-table tr:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .glass-badge {
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(5px);
+        border-radius: 12px;
+        padding: 4px 8px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .glass-icon {
+        backdrop-filter: blur(5px);
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        margin: 0 3px;
+        transition: all 0.3s ease;
+    }
+    
+    .glass-icon:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateY(-2px);
+    }
+    
+    /* Animation classes */
+    .animate-fade-in {
+        animation: fadeIn 0.5s ease forwards;
+    }
+    
+    .animate-slide-up {
+        animation: slideUp 0.5s ease forwards;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    @keyframes slideUp {
+        from { 
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to { 
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .table-responsive {
+            margin-left: -1rem;
+            margin-right: -1rem;
+            width: calc(100% + 2rem);
+            overflow-x: auto;
+        }
+        
+        .page-stats {
+            display: none;
+        }
+    }
+</style>
+{% endblock %} 

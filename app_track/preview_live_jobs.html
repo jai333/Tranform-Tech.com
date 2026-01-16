@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0891B2">
+    <title>Available Jobs - Protingent India</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap">
+    
+    <style>
+        :root {
+            --prot-primary: #0891B2;
+            --prot-secondary: #06B6D4;
+            --prot-accent: #22D3EE;
+            --prot-dark: #0F172A;
+            --prot-light: #F8FAFC;
+            --prot-text-dark: #1E293B;
+            --prot-text-light: #F1F5F9;
+            --prot-border: #E2E8F0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            font-family: 'Montserrat', sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Light Mode (Default) */
+        body.light-mode {
+            background-color: #FFFFFF;
+            color: var(--prot-text-dark);
+        }
+
+        body.light-mode header,
+        body.light-mode nav,
+        body.light-mode .card,
+        body.light-mode .container {
+            background-color: #FFFFFF;
+            color: var(--prot-text-dark);
+            border-color: var(--prot-border);
+        }
+
+        /* Dark Mode */
+        body.dark-mode {
+            background-color: var(--prot-dark);
+            color: var(--prot-text-light);
+        }
+
+        body.dark-mode header,
+        body.dark-mode nav,
+        body.dark-mode .card,
+        body.dark-mode .container {
+            background-color: #1E293B;
+            color: var(--prot-text-light);
+            border-color: #334155;
+        }
+
+        /* Theme Toggle Button */
+        #themeToggleBtn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 3px solid #FFFFFF;
+            background: linear-gradient(135deg, #0891B2 0%, #06B6D4 100%);
+            color: #FFFFFF;
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(8, 145, 178, 0.4);
+            transition: all 0.3s ease;
+            outline: none;
+            padding: 0;
+        }
+
+        #themeToggleBtn:hover {
+            background: linear-gradient(135deg, #06B6D4 0%, #0891B2 100%);
+            box-shadow: 0 6px 25px rgba(8, 145, 178, 0.6);
+            transform: scale(1.1);
+        }
+
+        #themeToggleBtn:active {
+            transform: scale(0.95);
+            box-shadow: 0 2px 8px rgba(8, 145, 178, 0.4);
+        }
+
+        #themeToggleBtn:focus-visible {
+            box-shadow: 0 0 0 4px rgba(8, 145, 178, 0.2), 0 4px 15px rgba(8, 145, 178, 0.4);
+        }
+
+        /* Button Styles - Cyan Theme */
+        .btn, button, input[type="submit"], input[type="button"] {
+            background-color: var(--prot-primary);
+            color: #FFFFFF;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .btn:hover, button:hover, input[type="submit"]:hover, input[type="button"]:hover {
+            background-color: var(--prot-secondary);
+            box-shadow: 0 4px 12px rgba(8, 145, 178, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn:active, button:active, input[type="submit"]:active, input[type="button"]:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary {
+            background-color: var(--prot-primary);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--prot-secondary);
+        }
+
+        .btn-secondary {
+            background-color: #64748B;
+        }
+
+        .btn-secondary:hover {
+            background-color: #475569;
+        }
+
+        /* Header & Navigation */
+        header, nav {
+            background-color: #FFFFFF;
+            border-bottom: 1px solid var(--prot-border);
+            padding: 15px 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        body.dark-mode header,
+        body.dark-mode nav {
+            background-color: #1E293B;
+            border-bottom-color: #334155;
+        }
+
+        /* Container & Cards */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .card {
+            background-color: #FFFFFF;
+            border: 1px solid var(--prot-border);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+        }
+
+        body.dark-mode .card {
+            background-color: #1E293B;
+            border-color: #334155;
+        }
+
+        /* Form Inputs */
+        input, textarea, select {
+            background-color: #F8FAFC;
+            color: var(--prot-text-dark);
+            border: 1px solid var(--prot-border);
+            padding: 10px 12px;
+            border-radius: 6px;
+            font-family: 'Montserrat', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        body.dark-mode input,
+        body.dark-mode textarea,
+        body.dark-mode select {
+            background-color: #334155;
+            color: var(--prot-text-light);
+            border-color: #475569;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--prot-primary);
+            box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.1);
+        }
+
+        /* Links */
+        a {
+            color: var(--prot-primary);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        a:hover {
+            color: var(--prot-secondary);
+            text-decoration: underline;
+        }
+
+        /* Typography */
+        h1, h2, h3, h4, h5, h6 {
+            color: var(--prot-text-dark);
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        body.dark-mode h1,
+        body.dark-mode h2,
+        body.dark-mode h3,
+        body.dark-mode h4,
+        body.dark-mode h5,
+        body.dark-mode h6 {
+            color: var(--prot-text-light);
+        }
+
+        /* Utility Classes */
+        .text-center { text-align: center; }
+        .mt-20 { margin-top: 20px; }
+        .mb-20 { margin-bottom: 20px; }
+        .p-20 { padding: 20px; }
+
+    </style>
+
+    
+<style>
+    /* Search and filter section */
+    .search-form {
+        margin-bottom: 1.5rem;
+    }
+    
+    .search-wrapper {
+        background: var(--apple-card-bg);
+        backdrop-filter: blur(var(--apple-blur));
+        -webkit-backdrop-filter: blur(var(--apple-blur));
+        border-radius: 16px;
+        border: 1px solid var(--apple-border);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .search-row {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .search-box {
+        flex-grow: 1;
+        position: relative;
+    }
+    
+    .search-box i {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--apple-text-secondary);
+        pointer-events: none;
+    }
+    
+    .search-input {
+        background: var(--apple-input-bg);
+        border: 1px solid var(--apple-border);
+        border-radius: 12px;
+        color: var(--apple-text);
+        font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+        font-size: 1rem;
+        height: 3rem;
+        padding: 0 1rem 0 2.5rem;
+        width: 100%;
+        transition: all 0.25s ease;
+    }
+    
+    .search-input:focus {
+        outline: none;
+        border-color: var(--apple-accent);
+        box-shadow: 0 0 0 4px var(--apple-accent-glow);
+    }
+    
+    .filter-row {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+    
+    .filter-item {
+        position: relative;
+        flex: 1;
+        min-width: 180px;
+    }
+    
+    .filter-select {
+        appearance: none;
+        background: var(--apple-input-bg);
+        border: 1px solid var(--apple-border);
+        border-radius: 12px;
+        color: var(--apple-text);
+        font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+        font-size: 0.95rem;
+        height: 3rem;
+        padding: 0 1rem;
+        width: 100%;
+        cursor: pointer;
+        transition: all 0.25s ease;
+    }
+    
+    .filter-select:focus {
+        outline: none;
+        border-color: var(--apple-accent);
+        box-shadow: 0 0 0 4px var(--apple-accent-glow);
+    }
+    
+    .filter-item::after {
+        content: '\f078';
+        font-family: 'Font Awesome 5 Free';
+        font-weight: 900;
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--apple-text-secondary);
+        pointer-events: none;
+        font-size: 0.8rem;
+    }
+    
+    .actions-row {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+    
+    /* Button styling */
+    .filter-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        min-width: 120px;
+        height: 3rem;
+        padding: 0 1.5rem;
+        background: var(--apple-accent);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 0.95rem;
+        font-weight: 500;
+        letter-spacing: -0.01em;
+        transition: all 0.3s ease;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        cursor: pointer;
+    }
+    
+    .filter-btn:hover {
+        background: var(--apple-accent-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+    }
+    
+    .reset-btn {
+        background-color: rgba(255, 255, 255, 0.05);
+        color: var(--apple-text);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+    }
+    
+    .reset-btn:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+    
+    /* Job grid */
+    .job-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    /* Job card */
+    .job-card {
+        background: var(--apple-card-bg);
+        backdrop-filter: blur(var(--apple-blur));
+        -webkit-backdrop-filter: blur(var(--apple-blur));
+        border-radius: 16px;
+        border: 1px solid var(--apple-border);
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        animation: card-fade-in 0.5s ease-out;
+        animation-fill-mode: both;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    }
+    
+    .job-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25);
+        border-color: rgba(255, 255, 255, 0.15);
+    }
+    
+    @keyframes card-fade-in {
+        0% {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .job-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--apple-border);
+        position: relative;
+    }
+    
+    .job-badge {
+        display: inline-block;
+        padding: 0.35rem 0.75rem;
+        background-color: rgba(8, 145, 178, 0.15);
+        color: var(--apple-accent);
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        margin-bottom: 0.75rem;
+    }
+    
+    .job-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--apple-text);
+        letter-spacing: -0.02em;
+    }
+    
+    .job-title a {
+        color: var(--apple-text);
+        text-decoration: none;
+        transition: color 0.2s ease;
+    }
+    
+    .job-title a:hover {
+        color: var(--apple-accent);
+    }
+    
+    .job-company {
+        font-size: 1rem;
+        color: var(--apple-text-secondary);
+        margin-bottom: 1rem;
+        font-weight: 500;
+    }
+    
+    .job-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        font-size: 0.9rem;
+        color: var(--apple-text-secondary);
+    }
+    
+    .job-meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .job-content {
+        padding: 1.5rem;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .job-description {
+        color: var(--apple-text-secondary);
+        font-size: 0.95rem;
+        margin-bottom: 1.5rem;
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+    }
+    
+    .job-skills {
+        margin-top: auto;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    
+    .skill-badge {
+        padding: 0.35rem 0.75rem;
+        background-color: rgba(255, 255, 255, 0.05);
+        color: var(--apple-text-secondary);
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 400;
+    }
+    
+    .job-footer {
+        padding: 1.5rem;
+        border-top: 1px solid var(--apple-border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .job-date {
+        font-size: 0.85rem;
+        color: var(--apple-text-secondary);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .job-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .job-action {
+        min-width: auto;
+        height: 2.5rem;
+        padding: 0 1rem;
+    }
+    
+    .delete-btn {
+        background-color: var(--danger-color, #dc3545);
+    }
+    
+    .delete-btn:hover {
+        background-color: var(--danger-dark-color, #bd2130);
+    }
+    
+    /* Empty state */
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: var(--apple-card-bg);
+        backdrop-filter: blur(var(--apple-blur));
+        -webkit-backdrop-filter: blur(var(--apple-blur));
+        border-radius: 16px;
+        border: 1px solid var(--apple-border);
+        margin-bottom: 2rem;
+    }
+    
+    .empty-icon {
+        font-size: 3rem;
+        color: var(--apple-text-secondary);
+        opacity: 0.5;
+        margin-bottom: 1.5rem;
+    }
+    
+    .empty-state h3 {
+        font-weight: 500;
+        margin-bottom: 1rem;
+        color: var(--apple-text);
+    }
+    
+    .empty-state p {
+        color: var(--apple-text-secondary);
+        margin-bottom: 2rem;
+        max-width: 500px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
+    /* Pagination */
+    .pagination-wrapper {
+        display: flex;
+        justify-content: center;
+        margin-top: 2.5rem;
+    }
+    
+    .pagination {
+        display: flex;
+        gap: 0.5rem;
+        padding: 0.5rem;
+        background: rgba(15, 23, 42, 0.2);
+        border-radius: 16px;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    .page-item {
+        list-style: none;
+    }
+    
+    .page-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 40px;
+        height: 40px;
+        padding: 0 0.75rem;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--apple-text);
+        text-decoration: none;
+        transition: all 0.2s ease;
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+        border: 1px solid var(--apple-border);
+    }
+    
+    .page-link:hover {
+        background: rgba(255, 255, 255, 0.1);
+        transform: translateY(-2px);
+    }
+    
+    .page-item.active .page-link {
+        background-color: rgba(8, 145, 178, 0.2);
+        color: var(--apple-text);
+        box-shadow: 0 0 15px rgba(8, 145, 178, 0.2);
+        border-color: rgba(8, 145, 178, 0.3);
+    }
+    
+    /* Responsive styles */
+    @media (max-width: 768px) {
+        .job-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .search-row, 
+        .filter-row {
+            flex-direction: column;
+        }
+        
+        .filter-item {
+            width: 100%;
+        }
+        
+        .actions-row {
+            flex-direction: column;
+        }
+        
+        .filter-btn {
+            width: 100%;
+        }
+    }
+</style>
+
+</head>
+<body class="light-mode">
+    <!-- Theme Toggle Button -->
+    <button id="themeToggleBtn" aria-label="Toggle dark/light mode" title="Toggle Theme">
+        <i class="fas fa-sun"></i>
+    </button>
+
+    
+<div class="page-header">
+    <h1 class="page-title">
+        <i class="fas fa-briefcase"></i> Available Jobs
+    </h1>
+    
+</div>
+
+<div class="search-wrapper">
+    <form method="get" action="/jobs/" class="search-form">
+        <div class="search-row">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" name="search" class="search-input" placeholder="Search job titles, companies or skills" value="">
+            </div>
+        </div>
+        
+        <div class="filter-row">
+            <div class="filter-item">
+                <select name="job_type" class="filter-select">
+                    <option value="">All Job Types</option>
+                    <option value="full-time" >Full-time</option>
+                    <option value="part-time" >Part-time</option>
+                    <option value="contract" >Contract</option>
+                    <option value="temporary" >Temporary</option>
+                    <option value="internship" >Internship</option>
+                </select>
+            </div>
+            
+            <div class="filter-item">
+                <select name="sort" class="filter-select">
+                    <option value="date" selected>Newest First</option>
+                    <option value="title" >Job Title</option>
+                    <option value="company" >Company</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="actions-row">
+            <button type="submit" class="filter-btn">
+                <i class="fas fa-filter"></i> Filter Results
+            </button>
+            <a href="/jobs/" class="filter-btn reset-btn">
+                <i class="fas fa-redo"></i> Reset Filters
+            </a>
+        </div>
+    </form>
+</div>
+
+
+
+
+    <div class="empty-state">
+        <div class="empty-icon">
+            <i class="fas fa-search"></i>
+        </div>
+        <h3>No jobs found</h3>
+        <p>Try adjusting your search filters or check back later for new opportunities.</p>
+        
+        
+    </div>
+
+
+
+    <script>
+        // Theme Toggle Functionality
+        const themeToggleBtn = document.getElementById('themeToggleBtn');
+        const htmlElement = document.documentElement;
+        const body = document.body;
+
+        // Load saved theme preference
+        const savedTheme = localStorage.getItem('theme') || 'light-mode';
+        body.classList.remove('light-mode', 'dark-mode');
+        body.classList.add(savedTheme);
+        updateThemeIcon();
+
+        // Toggle theme on button click
+        themeToggleBtn.addEventListener('click', () => {
+            const isDarkMode = body.classList.contains('dark-mode');
+            
+            if (isDarkMode) {
+                body.classList.remove('dark-mode');
+                body.classList.add('light-mode');
+                localStorage.setItem('theme', 'light-mode');
+            } else {
+                body.classList.remove('light-mode');
+                body.classList.add('dark-mode');
+                localStorage.setItem('theme', 'dark-mode');
+            }
+            
+            updateThemeIcon();
+        });
+
+        // Update icon based on theme
+        function updateThemeIcon() {
+            const icon = themeToggleBtn.querySelector('i');
+            const isDarkMode = body.classList.contains('dark-mode');
+            
+            if (isDarkMode) {
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+                themeToggleBtn.title = 'Switch to Light Mode';
+            } else {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+                themeToggleBtn.title = 'Switch to Dark Mode';
+            }
+        }
+
+        // Respect system theme preference on first load
+        if (!localStorage.getItem('theme')) {
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (prefersDark) {
+                body.classList.remove('light-mode');
+                body.classList.add('dark-mode');
+                localStorage.setItem('theme', 'dark-mode');
+                updateThemeIcon();
+            }
+        }
+    </script>
+
+    
+</body>
+</html>

@@ -1,0 +1,1227 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Call • Protingent</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=SF+Pro+Text:wght@400;500;600&display=swap">
+    <script src="https://unpkg.com/simple-peer@9.11.1/simplepeer.min.js"></script>
+    <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
+    <!-- TensorFlow.js and BodyPix for background segmentation -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.20.0/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/body-pix@2.2.0/dist/body-pix.min.js"></script>
+    <style>
+        :root {
+            /* Apple official colors */
+            --apple-bg: #000000;
+            --apple-card-bg: rgba(28, 28, 30, 0.55);
+            --apple-border: rgba(84, 84, 88, 0.65);
+            --apple-border-thin: rgba(84, 84, 88, 0.25);
+            --apple-text: rgba(255, 255, 255, 0.92);
+            --apple-text-secondary: rgba(255, 255, 255, 0.62);
+            --apple-accent-blue: #0a84ff;
+            --apple-accent-green: #30d158;
+            --apple-accent-red: #ff453a;
+            --apple-blur: 40px;
+            
+            /* Sizes */
+            --border-radius-small: 12px;
+            --border-radius-medium: 16px;
+            --border-radius-large: 20px;
+            --control-size: 52px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        body {
+            font-family: 'SF Pro Text', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.6;
+            background-color: var(--apple-bg);
+            color: var(--apple-text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            letter-spacing: -0.01em;
+            overflow: hidden;
+        }
+        
+        /* Background gradient */
+        .apple-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at top, #1a1a1a 0%, #0c0c0c 80%);
+            z-index: -2;
+        }
+        
+        .apple-bg::before {
+            content: "";
+            position: absolute;
+            top: -40vh;
+            right: -20vw;
+            width: 80vw;
+            height: 80vh;
+            background: radial-gradient(ellipse at center, rgba(10, 132, 255, 0.08) 0%, rgba(10, 132, 255, 0) 70%);
+            filter: blur(60px);
+            z-index: -1;
+        }
+        
+        .apple-bg::after {
+            content: "";
+            position: absolute;
+            bottom: -40vh;
+            left: -20vw;
+            width: 80vw;
+            height: 80vh;
+            background: radial-gradient(ellipse at center, rgba(48, 209, 88, 0.08) 0%, rgba(48, 209, 88, 0) 70%);
+            filter: blur(60px);
+            z-index: -1;
+        }
+
+        main {
+            flex: 1;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 4px;
+            margin-bottom: 16px;
+        }
+
+        h1 {
+            color: var(--apple-text);
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-weight: 600;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        h1 i {
+            font-size: 18px;
+        }
+
+        /* Apple style pill button */
+        .apple-btn {
+            background-color: var(--apple-card-bg);
+            color: var(--apple-text);
+            border: none;
+            padding: 8px 16px;
+            font-size: 15px;
+            font-weight: 500;
+            border-radius: 24px;
+            backdrop-filter: blur(var(--apple-blur));
+            -webkit-backdrop-filter: blur(var(--apple-blur));
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.2s;
+            border: 1px solid var(--apple-border-thin);
+        }
+
+        .apple-btn:hover {
+            background-color: rgba(44, 44, 46, 0.65);
+        }
+        
+        .apple-btn:active {
+            transform: scale(0.97);
+        }
+
+        .apple-btn-danger {
+            color: var(--apple-accent-red);
+        }
+
+        /* Connection status */
+        .status-pill {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background-color: rgba(0, 0, 0, 0.25);
+            border-radius: 16px;
+            padding: 4px 10px;
+            font-size: 13px;
+            font-weight: 500;
+            letter-spacing: -0.01em;
+            backdrop-filter: blur(var(--apple-blur));
+            -webkit-backdrop-filter: blur(var(--apple-blur));
+            margin: 0 auto 24px;
+            width: fit-content;
+            color: var(--apple-text-secondary);
+            transition: all 0.3s ease;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--apple-accent-green);
+        }
+
+        .status-pill.connecting .status-dot {
+            background-color: #ff9f0a;
+            animation: pulse 1.5s infinite;
+        }
+
+        .status-pill.disconnected .status-dot {
+            background-color: var(--apple-accent-red);
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        /* Video container */
+        .video-grid {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 24px;
+            max-height: calc(100vh - 210px);
+        }
+
+        @media (max-width: 768px) {
+            .video-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .video-card {
+            position: relative;
+            border-radius: var(--border-radius-large);
+            overflow: hidden;
+            height: 100%;
+            background-color: #1c1c1e;
+            aspect-ratio: 16/9;
+        }
+
+        .video-card video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: var(--border-radius-large);
+            transition: all 0.5s ease;
+        }
+
+        .video-label {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 500;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            transition: all 0.3s ease;
+            opacity: 0.8;
+        }
+
+        /* Controls */
+        .control-bar {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px 0;
+            gap: 12px;
+        }
+
+        .control-btn {
+            width: var(--control-size);
+            height: var(--control-size);
+            border-radius: 50%;
+            background-color: var(--apple-card-bg);
+            border: none;
+            color: var(--apple-text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(var(--apple-blur));
+            -webkit-backdrop-filter: blur(var(--apple-blur));
+            border: 1px solid var(--apple-border-thin);
+        }
+
+        .control-btn:hover {
+            background-color: rgba(44, 44, 46, 0.65);
+        }
+
+        .control-btn:active {
+            transform: scale(0.95);
+        }
+
+        .control-btn.active {
+            background-color: var(--apple-accent-red);
+            color: white;
+            border-color: transparent;
+        }
+
+        .control-btn.end-call {
+            background-color: var(--apple-accent-red);
+            color: white;
+            border-color: transparent;
+        }
+
+        /* Chat related styles */
+        .chat-container {
+            position: absolute;
+            right: 24px;
+            bottom: 90px;
+            width: 320px;
+            height: 400px;
+            background-color: var(--apple-card-bg);
+            border-radius: var(--border-radius-medium);
+            display: flex;
+            flex-direction: column;
+            border: 1px solid var(--apple-border);
+            overflow: hidden;
+            backdrop-filter: blur(var(--apple-blur));
+            -webkit-backdrop-filter: blur(var(--apple-blur));
+            transition: all 0.3s ease;
+            transform: translateY(calc(100% + 16px));
+            z-index: 100;
+        }
+
+        .chat-container.show {
+            transform: translateY(0);
+        }
+
+        .chat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--apple-border-thin);
+        }
+
+        .chat-header h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--apple-text);
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 12px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .chat-message {
+            max-width: 80%;
+            padding: 8px 12px;
+            border-radius: 18px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .chat-message.own {
+            align-self: flex-end;
+            background-color: var(--apple-accent-blue);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .chat-message.other {
+            align-self: flex-start;
+            background-color: rgba(58, 58, 60, 0.8);
+            color: var(--apple-text);
+            border-bottom-left-radius: 4px;
+        }
+
+        .sender-name {
+            font-size: 12px;
+            margin-bottom: 2px;
+            opacity: 0.8;
+        }
+
+        .chat-input-container {
+            padding: 10px;
+            border-top: 1px solid var(--apple-border-thin);
+            display: flex;
+            gap: 8px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 10px 16px;
+            border-radius: 24px;
+            border: none;
+            background-color: rgba(58, 58, 60, 0.8);
+            color: var(--apple-text);
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px var(--apple-accent-blue);
+        }
+
+        .chat-send-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: var(--apple-accent-blue);
+            border: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .chat-send-btn:hover {
+            background-color: rgba(10, 132, 255, 0.8);
+        }
+        
+        .chat-send-btn:disabled {
+            background-color: rgba(10, 132, 255, 0.4);
+            cursor: not-allowed;
+        }
+
+        .chat-toggle-btn {
+            position: absolute;
+            right: 24px;
+            bottom: 24px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background-color: var(--apple-card-bg);
+            border: 1px solid var(--apple-border-thin);
+            color: var(--apple-text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(var(--apple-blur));
+            -webkit-backdrop-filter: blur(var(--apple-blur));
+            z-index: 101;
+        }
+
+        .chat-toggle-btn:hover {
+            background-color: rgba(44, 44, 46, 0.65);
+        }
+
+        .unread-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: var(--apple-accent-red);
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .unread-badge.show {
+            opacity: 1;
+        }
+
+        /* Background selector styles */
+        .background-selector {
+            position: absolute;
+            bottom: 90px;
+            left: 24px;
+            background-color: var(--apple-card-bg);
+            border: 1px solid var(--apple-border);
+            border-radius: var(--border-radius-medium);
+            padding: 16px;
+            backdrop-filter: blur(var(--apple-blur));
+            -webkit-backdrop-filter: blur(var(--apple-blur));
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 280px;
+            transform: translateY(calc(100% + 16px));
+            transition: all 0.3s ease;
+        }
+
+        .background-selector.show {
+            transform: translateY(0);
+        }
+
+        .background-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .background-selector h3 {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .background-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        .background-option {
+            width: 100%;
+            aspect-ratio: 16/9;
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .background-option:hover {
+            transform: scale(1.05);
+        }
+
+        .background-option.active {
+            border-color: var(--apple-accent-blue);
+        }
+
+        .background-option img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .background-none {
+            background: linear-gradient(45deg, #3a3a3c 25%, transparent 25%, transparent 75%, #3a3a3c 75%, #3a3a3c),
+                        linear-gradient(45deg, #3a3a3c 25%, transparent 25%, transparent 75%, #3a3a3c 75%, #3a3a3c);
+            background-size: 10px 10px;
+            background-position: 0 0, 5px 5px;
+            background-color: #2c2c2e;
+        }
+
+        .background-toggle-btn {
+            position: absolute;
+            left: 24px;
+            bottom: 24px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background-color: var(--apple-card-bg);
+            border: 1px solid var(--apple-border-thin);
+            color: var(--apple-text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(var(--apple-blur));
+            -webkit-backdrop-filter: blur(var(--apple-blur));
+            z-index: 101;
+        }
+
+        .background-toggle-btn:hover {
+            background-color: rgba(44, 44, 46, 0.65);
+        }
+
+        .background-toggle-btn.active {
+            color: var(--apple-accent-blue);
+            border-color: var(--apple-accent-blue);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        .video-card.connected video {
+            animation: fadeIn 0.5s ease forwards;
+        }
+    </style>
+</head>
+<body data-initiator="{{ is_initiator|yesno:'true,false' }}">
+    <div class="apple-bg"></div>
+    
+    <main>
+        <div class="header">
+            <h1><i class="fas fa-video-camera"></i> Video Interview</h1>
+            <button id="endBtn" class="apple-btn apple-btn-danger">
+                <i class="fas fa-xmark"></i> End
+            </button>
+        </div>
+
+        <div id="statusPill" class="status-pill connecting">
+            <span class="status-dot"></span>
+            <span id="statusText">Connecting...</span>
+        </div>
+
+        <div class="video-grid">
+            <div class="video-card local-video-card">
+                <canvas id="backgroundCanvas" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1;"></canvas>
+                <video id="localVideo" autoplay muted playsinline style="z-index: 0;"></video>
+                <div class="video-label" style="z-index: 2;">You</div>
+            </div>
+            <div class="video-card remote-video-card">
+                <video id="remoteVideo" autoplay playsinline></video>
+                <div class="video-label">{{ is_initiator|yesno:"Candidate,Interviewer" }}</div>
+            </div>
+        </div>
+        
+        <div class="control-bar">
+            <button id="muteBtn" class="control-btn">
+                <i class="fas fa-microphone"></i>
+            </button>
+            <button id="cameraBtn" class="control-btn">
+                <i class="fas fa-video"></i>
+            </button>
+            <button id="fullscreenBtn" class="control-btn">
+                <i class="fas fa-expand"></i>
+            </button>
+            <button id="endCallBtn" class="control-btn end-call">
+                <i class="fas fa-phone-slash"></i>
+            </button>
+        </div>
+
+        <!-- Background Selector -->
+        <button id="backgroundToggleBtn" class="background-toggle-btn">
+            <i class="fas fa-image"></i>
+        </button>
+        
+        <div id="backgroundSelector" class="background-selector">
+            <div class="background-header">
+                <h3>Choose Background</h3>
+                <button id="backgroundCloseBtn" class="apple-btn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="background-options">
+                <div class="background-option background-none active" data-bg="none">
+                </div>
+                <div class="background-option" data-bg="blur">
+                    <img src="https://placehold.co/80x45/2c2c2e/8E8E93?text=Blur" alt="Blur">
+                </div>
+                <div class="background-option" data-bg="office">
+                    <img src="https://images.unsplash.com/photo-1497366811353-6870744d04b2?ixlib=rb-4.0.3&auto=format&fit=crop&w=80&h=45&q=80" alt="Office">
+                </div>
+                <div class="background-option" data-bg="nature">
+                    <img src="https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?ixlib=rb-4.0.3&auto=format&fit=crop&w=80&h=45&q=80" alt="Nature">
+                </div>
+                <div class="background-option" data-bg="bookshelf">
+                    <img src="https://images.unsplash.com/photo-1507842217343-583bb7270b66?ixlib=rb-4.0.3&auto=format&fit=crop&w=80&h=45&q=80" alt="Bookshelf">
+                </div>
+                <div class="background-option" data-bg="beach">
+                    <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?ixlib=rb-4.0.3&auto=format&fit=crop&w=80&h=45&q=80" alt="Beach">
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat UI -->
+        <button id="chatToggleBtn" class="chat-toggle-btn">
+            <i class="fas fa-comment"></i>
+            <span id="unreadBadge" class="unread-badge">0</span>
+        </button>
+        
+        <div id="chatContainer" class="chat-container">
+            <div class="chat-header">
+                <h3>Chat</h3>
+                <button id="chatCloseBtn" class="apple-btn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="chatMessages" class="chat-messages"></div>
+            <div class="chat-input-container">
+                <input type="text" id="chatInput" class="chat-input" placeholder="Type a message..." />
+                <button id="chatSendBtn" class="chat-send-btn" disabled>
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+    const roomUUID = "{{ room_uuid }}";
+    const wsScheme = window.location.protocol === "https:" ? "wss" : "ws";
+    const socket = new WebSocket(`${wsScheme}://${window.location.host}/ws/video/${roomUUID}/`);
+    const statusText = document.getElementById('statusText');
+    const statusPill = document.getElementById('statusPill');
+    const remoteCard = document.querySelector('.remote-video-card');
+    let localStream;
+    let isSocketReady = false;
+    let isPeerDestroyed = false;
+
+    const isInitiator = document.body.dataset.initiator === 'true';
+    const peer = new SimplePeer({
+        initiator: isInitiator,
+        trickle: false,
+        config: { iceServers: [ { urls: 'stun:stun.l.google.com:19302' } ] }
+    });
+
+    socket.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        
+        if (data.type === 'chat') {
+            // Handle chat message
+            addChatMessage(data.message, data.sender_name, data.sender_id, data.timestamp);
+        } else {
+            // Handle WebRTC signaling messages
+            if (!isPeerDestroyed) {
+                try {
+                    peer.signal(data);
+                } catch (err) {
+                    console.error('Error signaling peer:', err);
+                }
+            } else {
+                console.log('Ignoring signal, peer is destroyed');
+            }
+        }
+    };
+    
+    socket.onopen = () => {
+        console.log('WebSocket connected');
+        isSocketReady = true;
+        statusText.textContent = 'Waiting for other participant...';
+    };
+
+    socket.onclose = () => {
+        isSocketReady = false;
+        statusPill.classList.remove('connecting');
+        statusPill.classList.add('disconnected');
+        statusText.textContent = 'Connection lost';
+    };
+
+    peer.on('signal', data => {
+        if (isSocketReady && !isPeerDestroyed) {
+            try {
+                socket.send(JSON.stringify(data));
+            } catch (err) {
+                console.error('Error sending signal:', err);
+            }
+        } else {
+            console.log('WebSocket not ready or peer destroyed, queuing signal data');
+            // Queue the signal data to be sent once the socket is ready
+            setTimeout(() => {
+                if (isSocketReady && !isPeerDestroyed) {
+                    try {
+                        socket.send(JSON.stringify(data));
+                    } catch (err) {
+                        console.error('Error sending delayed signal:', err);
+                    }
+                }
+            }, 1000);
+        }
+    });
+
+    peer.on('connect', () => {
+        statusPill.classList.remove('connecting');
+        statusText.textContent = 'Connected';
+        remoteCard.classList.add('connected');
+    });
+
+    peer.on('stream', stream => {
+        const remoteVideo = document.getElementById('remoteVideo');
+        remoteVideo.srcObject = stream;
+    });
+
+    peer.on('error', err => {
+        console.error('Peer error:', err);
+        statusPill.classList.remove('connecting');
+        statusPill.classList.add('disconnected');
+        statusText.textContent = 'Connection error';
+    });
+
+    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+        .then(stream => {
+            localStream = stream;
+            document.getElementById('localVideo').srcObject = stream;
+            stream.getTracks().forEach(track => peer.addTrack(track, stream));
+        })
+        .catch(e => {
+            console.error('getUserMedia error', e);
+            statusText.textContent = 'Camera access denied';
+            statusPill.classList.add('disconnected');
+        });
+
+    // Control buttons functionality
+    const muteBtn = document.getElementById('muteBtn');
+    const cameraBtn = document.getElementById('cameraBtn');
+    const fullscreenBtn = document.getElementById('fullscreenBtn');
+    const endCallBtn = document.getElementById('endCallBtn');
+    const endBtn = document.getElementById('endBtn');
+
+    muteBtn.addEventListener('click', () => {
+        if (localStream) {
+            const audioTrack = localStream.getAudioTracks()[0];
+            if (audioTrack) {
+                audioTrack.enabled = !audioTrack.enabled;
+                muteBtn.innerHTML = audioTrack.enabled ? 
+                    '<i class="fas fa-microphone"></i>' : 
+                    '<i class="fas fa-microphone-slash"></i>';
+                muteBtn.classList.toggle('active', !audioTrack.enabled);
+            }
+        }
+    });
+
+    cameraBtn.addEventListener('click', () => {
+        if (localStream) {
+            const videoTrack = localStream.getVideoTracks()[0];
+            if (videoTrack) {
+                videoTrack.enabled = !videoTrack.enabled;
+                cameraBtn.innerHTML = videoTrack.enabled ? 
+                    '<i class="fas fa-video"></i>' : 
+                    '<i class="fas fa-video-slash"></i>';
+                cameraBtn.classList.toggle('active', !videoTrack.enabled);
+            }
+        }
+    });
+
+    fullscreenBtn.addEventListener('click', () => {
+        const remoteVideo = document.getElementById('remoteVideo');
+        if (remoteVideo.requestFullscreen) {
+            remoteVideo.requestFullscreen();
+        } else if (remoteVideo.webkitRequestFullscreen) {
+            remoteVideo.webkitRequestFullscreen();
+        } else if (remoteVideo.msRequestFullscreen) {
+            remoteVideo.msRequestFullscreen();
+        }
+    });
+
+    function endCall() {
+        if (localStream) {
+            localStream.getTracks().forEach(track => track.stop());
+        }
+        isPeerDestroyed = true;
+        peer.destroy();
+        socket.close();
+        window.location.href = '/';
+    }
+
+    endCallBtn.addEventListener('click', endCall);
+    endBtn.addEventListener('click', endCall);
+    
+    // Chat functionality
+    const chatToggleBtn = document.getElementById('chatToggleBtn');
+    const chatCloseBtn = document.getElementById('chatCloseBtn');
+    const chatContainer = document.getElementById('chatContainer');
+    const chatInput = document.getElementById('chatInput');
+    const chatSendBtn = document.getElementById('chatSendBtn');
+    const chatMessages = document.getElementById('chatMessages');
+    const unreadBadge = document.getElementById('unreadBadge');
+    
+    let unreadCount = 0;
+    let chatVisible = false;
+    
+    // Toggle chat visibility
+    function toggleChat() {
+        chatVisible = !chatVisible;
+        chatContainer.classList.toggle('show', chatVisible);
+        if (chatVisible) {
+            chatInput.focus();
+            unreadCount = 0;
+            unreadBadge.textContent = '0';
+            unreadBadge.classList.remove('show');
+        }
+    }
+    
+    chatToggleBtn.addEventListener('click', toggleChat);
+    chatCloseBtn.addEventListener('click', toggleChat);
+    
+    // Enable/disable send button based on input
+    chatInput.addEventListener('input', () => {
+        chatSendBtn.disabled = chatInput.value.trim() === '';
+    });
+    
+    // Handle chat message submission
+    function sendChatMessage() {
+        const message = chatInput.value.trim();
+        if (message === '') return;
+        
+        const timestamp = new Date().toISOString();
+        
+        // Send message via WebSocket
+        socket.send(JSON.stringify({
+            type: 'chat',
+            message: message,
+            timestamp: timestamp
+        }));
+        
+        // Clear input
+        chatInput.value = '';
+        chatSendBtn.disabled = true;
+    }
+    
+    chatSendBtn.addEventListener('click', sendChatMessage);
+    chatInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') sendChatMessage();
+    });
+    
+    // Handle incoming chat messages
+    function addChatMessage(message, senderName, senderId, timestamp) {
+        const messageEl = document.createElement('div');
+        
+        // Check if message is from current user
+        const currentUserId = parseInt("{{ request.user.id }}");
+        const isOwnMessage = senderId === currentUserId;
+        messageEl.className = `chat-message ${isOwnMessage ? 'own' : 'other'}`;
+        
+        // Format timestamp
+        const date = new Date(timestamp);
+        const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        
+        // Create message content
+        if (!isOwnMessage) {
+            const senderNameEl = document.createElement('div');
+            senderNameEl.className = 'sender-name';
+            senderNameEl.textContent = senderName;
+            messageEl.appendChild(senderNameEl);
+        }
+        
+        const messageContent = document.createElement('div');
+        messageContent.textContent = message;
+        messageEl.appendChild(messageContent);
+        
+        const messageTime = document.createElement('div');
+        messageTime.style.fontSize = '10px';
+        messageTime.style.opacity = '0.7';
+        messageTime.style.textAlign = isOwnMessage ? 'right' : 'left';
+        messageTime.style.marginTop = '2px';
+        messageTime.textContent = timeStr;
+        messageEl.appendChild(messageTime);
+        
+        // Add message to chat
+        chatMessages.appendChild(messageEl);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        
+        // Increment unread counter if chat is not visible
+        if (!chatVisible && !isOwnMessage) {
+            unreadCount++;
+            unreadBadge.textContent = unreadCount;
+            unreadBadge.classList.add('show');
+        }
+    }
+
+    // Background change functionality
+    const backgroundToggleBtn = document.getElementById('backgroundToggleBtn');
+    const backgroundSelector = document.getElementById('backgroundSelector');
+    const backgroundCloseBtn = document.getElementById('backgroundCloseBtn');
+    const backgroundOptions = document.querySelectorAll('.background-option');
+    const localVideo = document.getElementById('localVideo');
+    const backgroundCanvas = document.getElementById('backgroundCanvas');
+    
+    let backgroundVisible = false;
+    let bodyPixModel = null;
+    let selectedBackground = 'none';
+    let backgroundEnabled = false;
+    let backgroundImage = null;
+    let virtualStream = null;
+    
+    // Background images URLs
+    const backgroundImages = {
+        'office': 'https://images.unsplash.com/photo-1497366811353-6870744d04b2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&h=1080&q=80',
+        'nature': 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&h=1080&q=80',
+        'bookshelf': 'https://images.unsplash.com/photo-1507842217343-583bb7270b66?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&h=1080&q=80',
+        'beach': 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&h=1080&q=80'
+    };
+    
+    // Toggle background selector visibility
+    function toggleBackgroundSelector() {
+        backgroundVisible = !backgroundVisible;
+        backgroundSelector.classList.toggle('show', backgroundVisible);
+    }
+    
+    backgroundToggleBtn.addEventListener('click', toggleBackgroundSelector);
+    backgroundCloseBtn.addEventListener('click', toggleBackgroundSelector);
+    
+    // Initialize BodyPix model
+    async function loadBodyPixModel() {
+        try {
+            console.log('Loading BodyPix model...');
+            bodyPixModel = await bodyPix.load({
+                architecture: 'MobileNetV1',
+                outputStride: 16,
+                multiplier: 0.75,
+                quantBytes: 2
+            });
+            console.log('BodyPix model loaded successfully');
+            
+            // Once model is loaded, enable the background button
+            backgroundToggleBtn.disabled = false;
+            backgroundToggleBtn.style.opacity = 1;
+        } catch (error) {
+            console.error('Failed to load BodyPix model:', error);
+            // Show error in UI
+            alert('Failed to load background model. Virtual backgrounds may not work.');
+        }
+    }
+    
+    // Set button to disabled state until model loads
+    backgroundToggleBtn.disabled = true;
+    backgroundToggleBtn.style.opacity = 0.5;
+    
+    // Call the function to load the model
+    loadBodyPixModel();
+    
+    // Preload background images to avoid delays
+    const preloadedImages = {};
+    
+    function preloadBackgroundImages() {
+        console.log('Preloading background images...');
+        Object.keys(backgroundImages).forEach(key => {
+            preloadedImages[key] = new Image();
+            preloadedImages[key].crossOrigin = "anonymous"; // Important for CORS
+            preloadedImages[key].src = backgroundImages[key];
+            preloadedImages[key].onload = () => console.log(`Background image ${key} preloaded`);
+            preloadedImages[key].onerror = (e) => console.error(`Failed to load ${key} background:`, e);
+        });
+    }
+    
+    preloadBackgroundImages();
+    
+    // Handle background option selection
+    backgroundOptions.forEach(option => {
+        option.addEventListener('click', async () => {
+            const bgType = option.dataset.bg;
+            console.log(`Selected background: ${bgType}`);
+            
+            // Remove active class from all options
+            backgroundOptions.forEach(opt => opt.classList.remove('active'));
+            
+            // Add active class to selected option
+            option.classList.add('active');
+            
+            // Update selected background
+            selectedBackground = bgType;
+            
+            if (selectedBackground === 'none') {
+                console.log('Disabling background');
+                disableVirtualBackground();
+            } else {
+                // Enable virtual background if needed
+                if (!backgroundEnabled) {
+                    console.log('Enabling background');
+                    await enableVirtualBackground();
+                }
+                
+                // Set background image if needed
+                if (selectedBackground !== 'blur' && backgroundImages[selectedBackground]) {
+                    if (preloadedImages[selectedBackground] && preloadedImages[selectedBackground].complete) {
+                        console.log(`Using preloaded ${selectedBackground} background`);
+                        backgroundImage = preloadedImages[selectedBackground];
+                    } else {
+                        console.log(`Loading ${selectedBackground} background on demand`);
+                        backgroundImage = new Image();
+                        backgroundImage.crossOrigin = "anonymous";
+                        backgroundImage.src = backgroundImages[selectedBackground];
+                    }
+                } else if (selectedBackground === 'blur') {
+                    console.log('Using blur background');
+                    backgroundImage = null;
+                }
+            }
+            
+            // Close the background selector panel
+            backgroundVisible = false;
+            backgroundSelector.classList.remove('show');
+        });
+    });
+    
+    // Enable virtual background
+    async function enableVirtualBackground() {
+        console.log('Enabling virtual background...');
+        
+        if (!bodyPixModel) {
+            console.error('BodyPix model not loaded yet');
+            alert('Background model is still loading. Please try again in a moment.');
+            return false;
+        }
+        
+        backgroundEnabled = true;
+        backgroundToggleBtn.classList.add('active');
+        
+        // Ensure canvas is visible
+        backgroundCanvas.style.display = 'block';
+        
+        // Start background processing if not already running
+        processBackground();
+        
+        return true;
+    }
+    
+    // Disable virtual background
+    function disableVirtualBackground() {
+        console.log('Disabling virtual background...');
+        backgroundEnabled = false;
+        backgroundToggleBtn.classList.remove('active');
+        
+        // Hide canvas
+        backgroundCanvas.style.display = 'none';
+    }
+    
+    // Process background segmentation and replacement
+    async function processBackground() {
+        if (!backgroundEnabled || !bodyPixModel) {
+            requestAnimationFrame(processBackground);
+            return;
+        }
+        
+        try {
+            const ctx = backgroundCanvas.getContext('2d');
+            
+            // Check if video is ready and has dimensions
+            if (!localVideo.videoWidth || !localVideo.videoHeight || localVideo.videoWidth === 0 || localVideo.videoHeight === 0) {
+                console.log('Video not ready yet, waiting...');
+                requestAnimationFrame(processBackground);
+                return;
+            }
+            
+            // Make sure canvas matches current video dimensions
+            if (backgroundCanvas.width !== localVideo.videoWidth || 
+                backgroundCanvas.height !== localVideo.videoHeight) {
+                console.log(`Updating canvas dimensions to ${localVideo.videoWidth}x${localVideo.videoHeight}`);
+                backgroundCanvas.width = localVideo.videoWidth;
+                backgroundCanvas.height = localVideo.videoHeight;
+            }
+            
+            // Segment the person
+            const segmentation = await bodyPixModel.segmentPerson(localVideo, {
+                flipHorizontal: false,
+                internalResolution: 'medium',
+                segmentationThreshold: 0.6
+            });
+            
+            // Generate person mask
+            const mask = bodyPix.toMask(
+                segmentation, 
+                {r: 0, g: 0, b: 0, a: 0}, // Foreground as transparent 
+                {r: 0, g: 0, b: 0, a: 255} // Background as opaque black
+            );
+            
+            // Clear the canvas
+            ctx.clearRect(0, 0, backgroundCanvas.width, backgroundCanvas.height);
+            
+            if (selectedBackground === 'blur') {
+                // For blur background
+                
+                // First draw blurred video
+                ctx.save();
+                ctx.filter = 'blur(15px)';
+                ctx.drawImage(localVideo, 0, 0, backgroundCanvas.width, backgroundCanvas.height);
+                ctx.restore();
+                
+                // Create a temporary canvas for the person
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = backgroundCanvas.width;
+                tempCanvas.height = backgroundCanvas.height;
+                const tempCtx = tempCanvas.getContext('2d');
+                
+                // Draw the original video to temp canvas
+                tempCtx.drawImage(localVideo, 0, 0);
+                
+                // Draw the person cutout on top of the blur
+                const imageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+                
+                // Apply mask
+                for (let i = 0; i < mask.data.length; i += 4) {
+                    // If this pixel is part of the person (mask is black where person is)
+                    if (mask.data[i+3] === 0) {
+                        // Copy this pixel from the original video
+                        ctx.fillStyle = `rgba(${imageData.data[i]}, ${imageData.data[i+1]}, ${imageData.data[i+2]}, 1)`;
+                        const x = (i / 4) % backgroundCanvas.width;
+                        const y = Math.floor((i / 4) / backgroundCanvas.width);
+                        ctx.fillRect(x, y, 1, 1);
+                    }
+                }
+                
+            } else if (backgroundImage) {
+                // For custom background image
+                
+                // Draw the custom background image first
+                ctx.drawImage(
+                    backgroundImage, 
+                    0, 0, 
+                    backgroundCanvas.width, backgroundCanvas.height
+                );
+                
+                // Create a temporary canvas with person
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = backgroundCanvas.width;
+                tempCanvas.height = backgroundCanvas.height;
+                const tempCtx = tempCanvas.getContext('2d');
+                
+                // Draw the original video to temp canvas
+                tempCtx.drawImage(localVideo, 0, 0);
+                
+                // Get image data from the video
+                const imageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+                
+                // Apply mask to overlay person on background
+                for (let i = 0; i < mask.data.length; i += 4) {
+                    // If this pixel is part of the person (mask is black where person is)
+                    if (mask.data[i+3] === 0) {
+                        // Copy this pixel from the original video
+                        ctx.fillStyle = `rgba(${imageData.data[i]}, ${imageData.data[i+1]}, ${imageData.data[i+2]}, 1)`;
+                        const x = (i / 4) % backgroundCanvas.width;
+                        const y = Math.floor((i / 4) / backgroundCanvas.width);
+                        ctx.fillRect(x, y, 1, 1);
+                    }
+                }
+            } else {
+                // Just hide canvas if no background selected
+                backgroundCanvas.style.display = 'none';
+                requestAnimationFrame(processBackground);
+                return;
+            }
+            
+            // Make sure canvas is visible
+            backgroundCanvas.style.display = 'block';
+            
+            // Continue processing frames
+            requestAnimationFrame(processBackground);
+            
+        } catch (error) {
+            console.error('Error processing background:', error);
+            // Try again
+            requestAnimationFrame(processBackground);
+        }
+    }
+    </script>
+</body>
+</html> 

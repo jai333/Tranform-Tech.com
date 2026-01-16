@@ -1,0 +1,179 @@
+{% extends 'tracking_app/base.html' %}
+
+{% block title %}My Scheduled Interviews - ATS & CRM System{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2 class="page-title">
+        <i class="fas fa-calendar-alt"></i> My Scheduled Interviews
+    </h2>
+</div>
+
+{% if messages %}
+    <div class="messages-container animate-fade-in">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} glass-card">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<div class="card glass-card animate-slide-up">
+    <div class="card-body">
+        {% if interviews %}
+            <div class="table-responsive animate-fade-in">
+                <table class="table hover-table">
+                    <thead>
+                        <tr>
+                            <th>Job Position</th>
+                            <th>Company</th>
+                            <th>Interview Date</th>
+                            <th>Interview Type</th>
+                            <th>Status</th>
+                            <th>Interviewer</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for interview in interviews %}
+                        <tr class="animate-fade-in animation-delay-{{ forloop.counter0 }}">
+                            <td>
+                                <a href="{% url 'job-detail' interview.job.id %}" class="job-title">
+                                    {{ interview.job.title }}
+                                </a>
+                            </td>
+                            <td>{{ interview.job.user.get_full_name|default:interview.job.user.username }}</td>
+                            <td>{{ interview.date_time|date:"M d, Y - h:i a" }}</td>
+                            <td>
+                                <span class="badge glass-badge">
+                                    {% if interview.type == 'phone' %}
+                                        <i class="fas fa-phone"></i> Phone
+                                    {% elif interview.type == 'video' %}
+                                        <i class="fas fa-video"></i> Video
+                                    {% elif interview.type == 'onsite' %}
+                                        <i class="fas fa-building"></i> On-site
+                                    {% elif interview.type == 'technical' %}
+                                        <i class="fas fa-laptop-code"></i> Technical
+                                    {% endif %}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge badge-{{ interview.get_status_color }} glass-badge">
+                                    {{ interview.get_status_display }}
+                                </span>
+                            </td>
+                            <td>{{ interview.interviewer }}</td>
+                            <td>
+                                {% if interview.type == 'video' and interview.meeting_url and interview.status == 'scheduled' %}
+                                    <a href="{{ interview.meeting_url }}" class="btn btn-sm btn-accent">
+                                        <i class="fas fa-video"></i> Join Meeting
+                                    </a>
+                                {% elif interview.type == 'phone' %}
+                                    <span class="badge badge-info">Phone Interview</span>
+                                {% elif interview.type == 'onsite' %}
+                                    <span class="badge badge-info">On-site Interview</span>
+                                {% elif interview.type == 'technical' %}
+                                    <span class="badge badge-info">Technical Interview</span>
+                                {% endif %}
+                                
+                                <a href="{% url 'my-interview-detail' interview.id %}" class="btn btn-sm btn-outline-accent ml-2">
+                                    <i class="fas fa-eye"></i> View Details
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty-state animate-fade-in">
+                <div class="icon">
+                    <i class="fas fa-calendar-alt fa-3x"></i>
+                </div>
+                <h4>No Interviews Scheduled</h4>
+                <p>You have no upcoming interviews scheduled at this time.</p>
+                <a href="{% url 'job-list' %}" class="btn btn-primary glass-button">
+                    <i class="fas fa-briefcase"></i> Browse Jobs
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .job-title {
+        font-weight: 500;
+        color: var(--accent-color);
+        text-decoration: none;
+        position: relative;
+        transition: all 0.3s ease;
+    }
+    
+    .job-title:after {
+        content: '';
+        position: absolute;
+        width: 0;
+        height: 2px;
+        bottom: -2px;
+        left: 0;
+        background-color: var(--accent-color);
+        transition: width 0.3s ease;
+    }
+    
+    .job-title:hover {
+        color: var(--primary-color);
+    }
+    
+    .job-title:hover:after {
+        width: 100%;
+    }
+    
+    .hover-table tr {
+        transition: all 0.2s ease;
+    }
+    
+    .hover-table tr:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .ml-2 {
+        margin-left: 0.5rem;
+    }
+    
+    .animation-delay-0 { animation-delay: 10ms; }
+    .animation-delay-1 { animation-delay: 20ms; }
+    .animation-delay-2 { animation-delay: 30ms; }
+    .animation-delay-3 { animation-delay: 40ms; }
+    .animation-delay-4 { animation-delay: 50ms; }
+    .animation-delay-5 { animation-delay: 60ms; }
+    .animation-delay-6 { animation-delay: 70ms; }
+    .animation-delay-7 { animation-delay: 80ms; }
+    .animation-delay-8 { animation-delay: 90ms; }
+    .animation-delay-9 { animation-delay: 100ms; }
+    
+    .btn-accent {
+        background-color: var(--accent-color);
+        border-color: var(--accent-color);
+        color: white;
+    }
+    
+    .btn-accent:hover {
+        background-color: var(--accent-color-dark, var(--accent-color));
+        border-color: var(--accent-color-dark, var(--accent-color));
+        filter: brightness(90%);
+    }
+    
+    .btn-outline-accent {
+        color: var(--accent-color);
+        border-color: var(--accent-color);
+        background-color: transparent;
+    }
+    
+    .btn-outline-accent:hover {
+        background-color: var(--accent-color);
+        color: white;
+    }
+</style>
+{% endblock %} 

@@ -1,0 +1,111 @@
+{% extends 'tracking_app/base.html' %}
+
+{% block title %}
+{% if object %}Edit Application{% else %}Create Application{% endif %} - ATS & CRM System
+{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
+    <h2>
+        <i class="fas fa-file-alt" style="margin-right: 0.5rem; color: var(--accent-color);"></i>
+        {% if object %}Update Application{% else %}Create Application{% endif %}
+    </h2>
+    <div>
+        {% if object %}
+            <a href="{% url 'application-detail' object.id %}" class="btn btn-sm btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Application
+            </a>
+        {% else %}
+            <a href="{% url 'application-list' %}" class="btn btn-sm btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Applications
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endif %}
+
+<div class="card">
+    <div class="card-header">
+        <h4>Application Details</h4>
+    </div>
+    <div class="card-body">
+        <form method="post" novalidate>
+            {% csrf_token %}
+            
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger">
+                    {% for error in form.non_field_errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+            
+            {% if not object %}
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="{{ form.candidate.id_for_label }}">
+                            <i class="fas fa-user"></i> Candidate
+                        </label>
+                        {{ form.candidate }}
+                        {% if form.candidate.errors %}
+                            <div class="error-message">
+                                {{ form.candidate.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group col-md-6">
+                        <label for="{{ form.job.id_for_label }}">
+                            <i class="fas fa-briefcase"></i> Job Position
+                        </label>
+                        {{ form.job }}
+                        {% if form.job.errors %}
+                            <div class="error-message">
+                                {{ form.job.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+            
+            <div class="form-group">
+                <label for="{{ form.status.id_for_label }}">
+                    <i class="fas fa-tasks"></i> Application Status
+                </label>
+                {{ form.status }}
+                {% if form.status.errors %}
+                    <div class="error-message">
+                        {{ form.status.errors }}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.notes.id_for_label }}">
+                    <i class="fas fa-sticky-note"></i> Notes
+                </label>
+                {{ form.notes }}
+                {% if form.notes.errors %}
+                    <div class="error-message">
+                        {{ form.notes.errors }}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn">
+                    <i class="fas fa-save"></i> 
+                    {% if object %}Update Application{% else %}Create Application{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,105 @@
+{% extends 'tracking_app/base.html' %}
+
+{% block title %}Delete Application - ATS & CRM System{% endblock %}
+
+{% block content %}
+<div class="delete-confirmation">
+    <div class="card">
+        <div class="card-header text-center">
+            <h3><i class="fas fa-exclamation-triangle text-danger"></i> Confirm Deletion</h3>
+        </div>
+        <div class="card-body">
+            <div class="text-center mb-4">
+                <p class="delete-message">
+                    Are you sure you want to delete the application of 
+                    <strong>{{ object.candidate.full_name }}</strong> for the position 
+                    <strong>{{ object.job.title }}</strong>?
+                </p>
+                <p class="text-danger">
+                    <i class="fas fa-exclamation-circle"></i> This action cannot be undone.
+                </p>
+            </div>
+            
+            <div class="application-summary">
+                <div class="summary-item">
+                    <span class="summary-label">Candidate:</span>
+                    <span class="summary-value">{{ object.candidate.full_name }}</span>
+                </div>
+                
+                <div class="summary-item">
+                    <span class="summary-label">Position:</span>
+                    <span class="summary-value">{{ object.job.title }}</span>
+                </div>
+                
+                <div class="summary-item">
+                    <span class="summary-label">Status:</span>
+                    <span class="badge badge-{{ object.get_status_color }}">
+                        {{ object.get_status_display }}
+                    </span>
+                </div>
+                
+                <div class="summary-item">
+                    <span class="summary-label">Applied Date:</span>
+                    <span class="summary-value">{{ object.applied_date|date:"M d, Y" }}</span>
+                </div>
+            </div>
+            
+            <form method="post">
+                {% csrf_token %}
+                <div class="delete-actions">
+                    <a href="{% url 'application-detail' object.id %}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Delete Application
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .delete-confirmation {
+        max-width: 600px;
+        margin: 3rem auto;
+    }
+    
+    .delete-message {
+        font-size: 1.1rem;
+    }
+    
+    .application-summary {
+        background-color: rgba(0, 0, 0, 0.05);
+        border-radius: 6px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .summary-item {
+        margin-bottom: 1rem;
+    }
+    
+    .summary-item:last-child {
+        margin-bottom: 0;
+    }
+    
+    .summary-label {
+        font-weight: 500;
+        margin-right: 0.5rem;
+        display: inline-block;
+        width: 120px;
+    }
+    
+    .delete-actions {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+    }
+    
+    .delete-actions a,
+    .delete-actions button {
+        flex: 1;
+    }
+</style>
+{% endblock %} 

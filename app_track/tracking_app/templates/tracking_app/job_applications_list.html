@@ -1,0 +1,489 @@
+{% extends 'tracking_app/base.html' %}
+
+{% block title %}Job Applications - ATS & CRM System{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2 class="page-title">
+        <i class="fas fa-clipboard-list"></i> Job Applications
+    </h2>
+</div>
+
+{% if messages %}
+    <div class="messages-container animate-fade-in">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} glass-card">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<div class="card glass-card animate-slide-up">
+    <div class="card-header">
+        <form method="GET" class="search-form animate-fade-in">
+            <div class="input-group">
+                <input 
+                    type="text" 
+                    name="search" 
+                    placeholder="Search applications..." 
+                    value="{{ request.GET.search|default:'' }}"
+                    class="form-control glass-input"
+                >
+                <button type="submit" class="btn btn-sm glass-button">
+                    <i class="fas fa-search"></i>
+                </button>
+                {% if request.GET.search %}
+                    <a href="{% url 'job-applications-list' %}" class="btn btn-sm btn-secondary glass-button">
+                        <i class="fas fa-times"></i> Clear
+                    </a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+    
+    <div class="card-body">
+        {% if applications %}
+            {% if jobs_with_applications %}
+                <div class="job-applications-container">
+                    {% for job_id, job_data in jobs_with_applications.items %}
+                        <div class="job-section mb-4 animate-fade-in" style="animation-delay: {{ forloop.counter0|add:1 }}00ms;">
+                            <div class="job-header">
+                                <div class="job-title-wrapper">
+                                    <h4 class="mb-2">
+                                        <a href="{% url 'job-detail' job_data.job.id %}" class="job-title">
+                                            <i class="fas fa-briefcase mr-2"></i> {{ job_data.job.title }}
+                                        </a>
+                                    </h4>
+                                    <div class="job-meta">
+                                        <span class="badge badge-info glass-badge mr-2">
+                                            <i class="fas fa-user-tie mr-1"></i> {{ job_data.applications|length }} Applicant{{ job_data.applications|length|pluralize }}
+                                        </span>
+                                        <span class="job-location">
+                                            <i class="fas fa-map-marker-alt mr-1"></i> {{ job_data.job.location }}
+                                        </span>
+                                        {% if job_data.job.department %}
+                                        <span class="job-department ml-2">
+                                            <i class="fas fa-sitemap mr-1"></i> {{ job_data.job.department }}
+                                        </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="applicants-grid">
+                                {% for application in job_data.applications %}
+                                    <div class="applicant-card animate-fade-in" style="animation-delay: {{ forloop.counter0|add:1 }}0ms;">
+                                        <div class="applicant-header">
+                                            <div class="applicant-profile">
+                                                {% if application.applicant.profile_image %}
+                                                    <img src="{{ application.applicant.profile_image.url }}" alt="{{ application.applicant.get_full_name }}" class="profile-image">
+                                                {% else %}
+                                                    <div class="profile-initials">
+                                                        {{ application.applicant.get_initials }}
+                                                    </div>
+                                                {% endif %}
+                                                <div class="applicant-info">
+                                                    <a href="{% url 'public-profile' application.applicant.username %}" class="applicant-name">
+                                                        {{ application.applicant.get_full_name|default:application.applicant.username }}
+                                                    </a>
+                                                    {% if application.applicant.headline %}
+                                                        <div class="applicant-headline">{{ application.applicant.headline }}</div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                            <div class="status-badge">
+                                                <span class="badge badge-{{ application.get_status_color }} glass-badge">
+                                                    {{ application.get_status_display }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="applicant-details">
+                                            <div class="detail-item">
+                                                <div class="detail-label"><i class="fas fa-envelope mr-1"></i> Email:</div>
+                                                <div class="detail-value">{{ application.applicant.email }}</div>
+                                            </div>
+                                            {% if application.applicant.phone %}
+                                                <div class="detail-item">
+                                                    <div class="detail-label"><i class="fas fa-phone mr-1"></i> Phone:</div>
+                                                    <div class="detail-value">{{ application.applicant.phone }}</div>
+                                                </div>
+                                            {% endif %}
+                                            <div class="detail-item">
+                                                <div class="detail-label"><i class="fas fa-calendar mr-1"></i> Applied:</div>
+                                                <div class="detail-value">{{ application.applied_date|date:"M d, Y" }}</div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="applicant-actions">
+                                            <a href="{% url 'application-detail' application.id %}" class="action-button" title="View Application">
+                                                <i class="fas fa-eye"></i> View
+                                            </a>
+                                            <a href="{% url 'public-profile' application.applicant.username %}" class="action-button" title="View Profile">
+                                                <i class="fas fa-user"></i> Profile
+                                            </a>
+                                            {% if application.resume %}
+                                                <a href="{{ application.resume.url }}" target="_blank" class="action-button" title="View Resume">
+                                                    <i class="fas fa-file-alt"></i> Resume
+                                                </a>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% if not forloop.last %}
+                            <hr class="job-divider">
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="applications-list">
+                    {% for application in applications %}
+                        <div class="application-card animate-fade-in" style="animation-delay: {{ forloop.counter0|add:1 }}0ms;">
+                            <div class="application-main">
+                                <div class="applicant-info">
+                                    <a href="{% url 'public-profile' application.applicant.username %}" class="applicant-name">
+                                        {{ application.applicant.get_full_name|default:application.applicant.username }}
+                                    </a>
+                                </div>
+                                <div class="job-info">
+                                    <a href="{% url 'job-detail' application.job.id %}" class="job-title">
+                                        <i class="fas fa-briefcase mr-1"></i> {{ application.job.title }}
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="application-meta">
+                                <div class="applied-date">
+                                    <i class="fas fa-calendar-alt mr-1"></i> {{ application.applied_date|date:"M d, Y" }}
+                                </div>
+                                <div class="application-status">
+                                    <span class="badge badge-{{ application.get_status_color }} glass-badge">
+                                        {{ application.get_status_display }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="application-actions">
+                                <a href="{% url 'application-detail' application.id %}" class="action-button" title="View Application">
+                                    <i class="fas fa-eye"></i> View
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <!-- Pagination -->
+            {% if is_paginated %}
+            <div class="pagination glass-card animate-fade-in">
+                <span class="page-stats">
+                    Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ paginator.count }} applications
+                </span>
+                <div class="page-controls">
+                    {% if page_obj.has_previous %}
+                        <a href="?page=1{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" class="page-control glass-button">
+                            <i class="fas fa-angle-double-left"></i>
+                        </a>
+                        <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" class="page-control glass-button">
+                            <i class="fas fa-angle-left"></i>
+                        </a>
+                    {% else %}
+                        <span class="page-control disabled">
+                            <i class="fas fa-angle-double-left"></i>
+                        </span>
+                        <span class="page-control disabled">
+                            <i class="fas fa-angle-left"></i>
+                        </span>
+                    {% endif %}
+                    
+                    <span class="page-current">
+                        Page {{ page_obj.number }} of {{ paginator.num_pages }}
+                    </span>
+                    
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" class="page-control glass-button">
+                            <i class="fas fa-angle-right"></i>
+                        </a>
+                        <a href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" class="page-control glass-button">
+                            <i class="fas fa-angle-double-right"></i>
+                        </a>
+                    {% else %}
+                        <span class="page-control disabled">
+                            <i class="fas fa-angle-right"></i>
+                        </span>
+                        <span class="page-control disabled">
+                            <i class="fas fa-angle-double-right"></i>
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        {% else %}
+            <div class="empty-state animate-fade-in">
+                <div class="icon">
+                    <i class="fas fa-clipboard-list fa-3x"></i>
+                </div>
+                <h4>No Applications</h4>
+                <p>There are no job applications to review at this time.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    /* Job applications styling */
+    .job-applications-container {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+    
+    .job-header {
+        background-color: rgba(255, 255, 255, 0.05);
+        padding: 1.25rem;
+        border-radius: 12px;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .job-title-wrapper {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .job-title {
+        font-weight: 600;
+        color: var(--apple-accent);
+        text-decoration: none;
+        transition: all 0.3s ease;
+        font-size: 1.25rem;
+    }
+    
+    .job-title:hover {
+        color: var(--apple-accent-dark);
+    }
+    
+    .job-meta {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.75rem;
+        margin-top: 0.5rem;
+        font-size: 0.9rem;
+        color: var(--apple-text-secondary);
+    }
+    
+    .job-divider {
+        border-top: 1px dashed rgba(255, 255, 255, 0.1);
+        margin: 2rem 0;
+    }
+    
+    /* Applicants grid */
+    .applicants-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 1.25rem;
+    }
+    
+    .applicant-card {
+        background-color: rgba(255, 255, 255, 0.03);
+        border-radius: 12px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        border: 1px solid var(--apple-border);
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .applicant-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+    
+    .applicant-header {
+        padding: 1.25rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        border-bottom: 1px solid var(--apple-border);
+    }
+    
+    .applicant-profile {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .profile-image {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+    
+    .profile-initials {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background-color: var(--apple-accent);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 18px;
+    }
+    
+    .applicant-info {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .applicant-name {
+        font-weight: 500;
+        color: var(--apple-text);
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+    
+    .applicant-name:hover {
+        color: var(--apple-accent);
+    }
+    
+    .applicant-headline {
+        font-size: 0.85rem;
+        color: var(--apple-text-secondary);
+        margin-top: 0.25rem;
+    }
+    
+    .applicant-details {
+        padding: 1.25rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        flex-grow: 1;
+    }
+    
+    .detail-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+    
+    .detail-label {
+        font-size: 0.85rem;
+        color: var(--apple-text-secondary);
+    }
+    
+    .detail-value {
+        color: var(--apple-text);
+        word-break: break-word;
+    }
+    
+    .applicant-actions {
+        display: flex;
+        gap: 0.5rem;
+        padding: 1rem 1.25rem;
+        background-color: rgba(0, 0, 0, 0.1);
+        justify-content: flex-start;
+    }
+    
+    .action-button {
+        padding: 0.5rem 0.75rem;
+        background-color: rgba(255, 255, 255, 0.05);
+        color: var(--apple-text);
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 0.85rem;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .action-button:hover {
+        background-color: var(--apple-accent);
+        color: white;
+    }
+    
+    /* Application cards for non-grouped view */
+    .applications-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .application-card {
+        background-color: rgba(255, 255, 255, 0.03);
+        border-radius: 12px;
+        padding: 1.25rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border: 1px solid var(--apple-border);
+        transition: all 0.3s ease;
+    }
+    
+    .application-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+    
+    .application-main {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .application-meta {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 0.5rem;
+    }
+    
+    .applied-date {
+        font-size: 0.85rem;
+        color: var(--apple-text-secondary);
+    }
+    
+    /* Status badges */
+    .status-badge {
+        display: flex;
+        justify-content: flex-end;
+    }
+    
+    /* Responsive styles */
+    @media (max-width: 768px) {
+        .applicants-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .application-card {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+        
+        .application-meta {
+            width: 100%;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .applicant-header {
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .status-badge {
+            width: 100%;
+            justify-content: flex-start;
+        }
+    }
+</style>
+{% endblock %} 

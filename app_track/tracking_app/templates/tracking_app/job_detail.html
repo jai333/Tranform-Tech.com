@@ -1,0 +1,530 @@
+{% extends 'tracking_app/base.html' %}
+
+{% block title %}{{ job.title }} - ATS & CRM System{% endblock %}
+
+{% block content %}
+<div class="job-detail-container">
+    <!-- Top action bar -->
+    <div class="action-bar">
+        <div class="back-button">
+            <a href="{% url 'job-list' %}" class="btn btn-sm btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Jobs
+            </a>
+        </div>
+        {% if is_recruiter %}
+        <div class="management-actions">
+            <a href="{% url 'job-update' job.id %}" class="btn btn-sm btn-primary">
+                <i class="fas fa-edit"></i> Edit
+            </a>
+            <a href="{% url 'job-delete' job.id %}" class="btn btn-sm btn-danger">
+                <i class="fas fa-trash"></i> Delete
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    {% if messages %}
+    <div class="messages-container">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} fade show">
+                {{ message }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="job-content-grid">
+        <!-- Left column - Job information card -->
+        <div class="job-info-col">
+            <div class="card job-header-card">
+                <div class="card-header">
+                    <div class="job-title-container">
+                        <i class="fas fa-briefcase title-icon"></i>
+                        <h2 class="job-title">{{ job.title }}</h2>
+                    </div>
+                    <div class="job-company">{{ job.company }}</div>
+                    <div class="job-department">{{ job.department }}</div>
+                </div>
+                <div class="card-body">
+                    <div class="info-section">
+                        <h4 class="section-title">Location & Type</h4>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <div class="info-label"><i class="fas fa-map-marker-alt"></i> Location</div>
+                                <div class="info-value emphasis">{{ job.location }}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label"><i class="fas fa-building"></i> Type</div>
+                                <div class="info-value">{{ job.get_job_type_display }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="info-section">
+                        <h4 class="section-title">Compensation</h4>
+                        <div class="info-grid">
+                            <div class="info-item highlight">
+                                <div class="info-label"><i class="fas fa-dollar-sign"></i> Salary</div>
+                                <div class="info-value emphasis">{{ job.salary }}</div>
+                            </div>
+                            {% if job.experience %}
+                            <div class="info-item">
+                                <div class="info-label"><i class="fas fa-briefcase"></i> Experience</div>
+                                <div class="info-value">{{ job.experience }}</div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="info-section">
+                        <h4 class="section-title">Timeline</h4>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <div class="info-label"><i class="fas fa-calendar-alt"></i> Posted</div>
+                                <div class="info-value">{{ job.created_at|date:"F d, Y" }}</div>
+                            </div>
+                            <div class="info-item deadline-item">
+                                <div class="info-label"><i class="fas fa-calendar-check"></i> Deadline</div>
+                                <div class="info-value emphasis">{{ job.deadline|date:"F d, Y" }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="info-section">
+                        <h4 class="section-title">Status</h4>
+                        <div class="status-badge">
+                            <span class="badge badge-{{ job.get_status_color }}">{{ job.get_status_display }}</span>
+                        </div>
+                    </div>
+
+                    {% if job.skills %}
+                    <div class="info-section">
+                        <h4 class="section-title">Key Skills</h4>
+                        <div class="skills-container">
+                            {% for skill in job.skills.split|slice:':5' %}
+                                <span class="skill-tag">{{ skill }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if not is_recruiter %}
+            <div class="card application-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-file-upload"></i> Apply for this position</h3>
+                </div>
+                <div class="card-body text-center">
+                    {% if user.is_authenticated %}
+                        {% if already_applied %}
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle"></i> You have already applied for this position on {{ application_date|date:"F d, Y" }}.
+                                <div class="mt-2 d-flex justify-content-center gap-2">
+                                    <a href="{% url 'application-detail' application_id %}" class="btn btn-sm btn-info">
+                                        <i class="fas fa-eye"></i> View Application
+                                    </a>
+                                    {% if application_status == 'withdrawn' %}
+                                    <a href="{% url 'apply-for-job' job.id %}" class="btn btn-sm btn-success">
+                                        <i class="fas fa-paper-plane"></i> Reapply
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% else %}
+                            <p>Interested in this position? Submit your resume and cover letter.</p>
+                            <a href="{% url 'apply-for-job' job.id %}" class="btn btn-lg btn-primary apply-button">
+                                <i class="fas fa-paper-plane"></i> Apply Now
+                            </a>
+                            <div class="mt-3 application-actions">
+                                <button class="btn btn-sm btn-outline-secondary">
+                                    <i class="fas fa-share-alt"></i> Share
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary">
+                                    <i class="fas fa-bookmark"></i> Save
+                                </button>
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <p>You need to log in to apply for this position.</p>
+                        <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-lg btn-primary">
+                            <i class="fas fa-sign-in-alt"></i> Log In to Apply
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Right column - Job description and applicants -->
+        <div class="job-detail-col">
+            <div class="card description-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-file-alt"></i> Job Description</h3>
+                </div>
+                <div class="card-body">
+                    <div class="description-section">
+                        <h4><i class="fas fa-tasks"></i> Description</h4>
+                        <div class="description-content">{{ job.description|linebreaks }}</div>
+                    </div>
+                    
+                    <div class="description-section">
+                        <h4><i class="fas fa-list-check"></i> Requirements</h4>
+                        <div class="description-content">{{ job.requirements|linebreaks }}</div>
+                    </div>
+                    
+                    <div class="description-section">
+                        <h4><i class="fas fa-star"></i> Benefits</h4>
+                        <div class="description-content">{{ job.benefits|linebreaks }}</div>
+                    </div>
+                </div>
+            </div>
+            
+            {% if is_recruiter %}
+            <div class="card applicants-card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3><i class="fas fa-users"></i> Applicants ({{ applications|length }})</h3>
+                        <a href="{% url 'application-create' %}?job={{ job.id }}" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Add Application
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if applications %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Candidate</th>
+                                        <th>Status</th>
+                                        <th>Applied Date</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for application in applications %}
+                                    <tr>
+                                        <td>
+                                            <a href="{% url 'candidate-detail' application.candidate.id %}" class="candidate-link">
+                                                {{ application.candidate.full_name }}
+                                            </a>
+                                        </td>
+                                        <td>
+                                            <span class="badge badge-{{ application.get_status_color }}">{{ application.get_status_display }}</span>
+                                        </td>
+                                        <td>{{ application.applied_date|date:"M d, Y" }}</td>
+                                        <td>
+                                            <div class="action-buttons">
+                                                <a href="{% url 'application-detail' application.id %}" class="btn btn-sm btn-icon" title="View Details">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a href="{% url 'application-update' application.id %}" class="btn btn-sm btn-icon" title="Edit Application">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="empty-state">
+                            <div class="empty-icon">
+                                <i class="fas fa-users fa-3x"></i>
+                            </div>
+                            <h4>No Applicants</h4>
+                            <p>There are no applications for this job yet.</p>
+                            <a href="{% url 'application-create' %}?job={{ job.id }}" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Add Applicant
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+/* Job detail page specific styles */
+.job-detail-container {
+    padding: 1.5rem 0;
+}
+
+.action-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.management-actions .btn {
+    margin-left: 0.5rem;
+}
+
+.messages-container {
+    margin-bottom: 1.5rem;
+}
+
+.job-content-grid {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 1.5rem;
+}
+
+.job-info-col .card,
+.job-detail-col .card {
+    margin-bottom: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border: none;
+}
+
+.job-header-card .card-header {
+    background-color: var(--dark-bg-color);
+    color: #fff;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    padding: 1.2rem;
+}
+
+.job-title-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.title-icon {
+    margin-right: 0.75rem;
+    color: var(--accent-color);
+    font-size: 1.4rem;
+}
+
+.job-title {
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: 600;
+}
+
+.job-company {
+    font-size: 1.2rem;
+    margin-bottom: 0.25rem;
+}
+
+.job-department {
+    font-size: 1rem;
+    opacity: 0.8;
+}
+
+.info-section {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.info-section:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.section-title {
+    font-size: 1.1rem;
+    font-weight: 500;
+    margin-bottom: 0.75rem;
+    color: var(--dark-color);
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.info-item {
+    padding: 0.75rem;
+    background-color: rgba(0, 0, 0, 0.03);
+    border-radius: 6px;
+}
+
+.info-item.highlight {
+    background-color: rgba(var(--accent-color-rgb), 0.1);
+}
+
+.info-label {
+    display: flex;
+    align-items: center;
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-secondary);
+}
+
+.info-label i {
+    margin-right: 0.5rem;
+    min-width: 16px;
+    color: var(--accent-color);
+}
+
+.info-value {
+    font-size: 1.1rem;
+}
+
+.info-value.emphasis {
+    font-weight: 600;
+    color: var(--accent-color);
+}
+
+.deadline-item .info-value {
+    color: #e74c3c;
+    font-weight: 500;
+}
+
+.status-badge {
+    display: flex;
+    justify-content: center;
+}
+
+.status-badge .badge {
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+}
+
+.skills-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.skill-tag {
+    display: inline-block;
+    background-color: var(--accent-color);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+}
+
+.application-card {
+    border-top: 4px solid var(--accent-color);
+}
+
+.apply-button {
+    padding: 0.75rem 2rem;
+    margin: 1rem 0;
+    font-weight: 500;
+}
+
+.application-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.description-card .card-header h3,
+.applicants-card .card-header h3,
+.application-card .card-header h3 {
+    margin: 0;
+    display: flex;
+    align-items: center;
+}
+
+.description-card .card-header h3 i,
+.applicants-card .card-header h3 i,
+.application-card .card-header h3 i {
+    margin-right: 0.75rem;
+    color: var(--accent-color);
+}
+
+.description-section {
+    margin-bottom: 2rem;
+}
+
+.description-section:last-child {
+    margin-bottom: 0;
+}
+
+.description-section h4 {
+    display: flex;
+    align-items: center;
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.05);
+}
+
+.description-section h4 i {
+    margin-right: 0.75rem;
+    color: var(--accent-color);
+}
+
+.description-content {
+    line-height: 1.6;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem 0;
+}
+
+.empty-icon {
+    margin-bottom: 1rem;
+}
+
+.empty-icon i {
+    color: var(--accent-color);
+    opacity: 0.6;
+}
+
+.candidate-link {
+    color: var(--accent-color);
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.candidate-link:hover {
+    text-decoration: underline;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-icon {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+}
+
+/* Mobile responsive styles */
+@media (max-width: 992px) {
+    .job-content-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .action-bar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .management-actions {
+        margin-top: 1rem;
+        align-self: flex-end;
+    }
+}
+</style>
+{% endblock %} 

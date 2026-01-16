@@ -1,0 +1,36 @@
+# Django core
+Django==5.2
+asgiref==3.7.2
+sqlparse==0.4.4
+tzdata==2024.1
+
+# Django channels for WebSockets
+channels==4.0.0
+channels-redis==4.1.0
+daphne==4.0.0
+redis==5.0.1
+
+# Additional channels dependencies
+autobahn==23.6.2
+twisted==23.10.0
+txaio==23.1.1
+
+# Cryptography and security
+cryptography==41.0.6
+pyOpenSSL==23.3.0
+service-identity==24.1.0
+
+# Image handling
+Pillow==10.1.0
+
+# Frontend assets
+whitenoise==6.6.0
+
+# WebRTC and Real-time communication
+websockets==11.0.3
+
+# Development tools
+django-debug-toolbar==4.2.0
+
+# Production ready
+gunicorn==21.2.0 

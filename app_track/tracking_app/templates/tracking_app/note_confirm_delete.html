@@ -1,0 +1,41 @@
+{% extends 'tracking_app/base.html' %}
+
+{% block title %}Delete Note{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            <div class="card">
+                <div class="card-header">
+                    <h2>
+                        <i class="fas fa-trash" style="margin-right: 0.5rem; color: var(--accent-color);"></i>
+                        Delete Note
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <p>Are you sure you want to delete this note for {{ object.candidate.full_name }}?</p>
+                    <div class="note-item">
+                        <div class="note-header">
+                            <div class="note-info">
+                                <strong>{{ object.created_by.get_full_name|default:object.created_by.username }}</strong> 
+                                <span class="text-muted">| {{ object.created_at|date:"M d, Y H:i" }}</span>
+                            </div>
+                        </div>
+                        <div class="note-content">
+                            {{ object.content|linebreaks }}
+                        </div>
+                    </div>
+                    <form method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash"></i> Delete Note
+                        </button>
+                        <a href="{% url 'candidate-detail' object.candidate.id %}" class="btn btn-secondary">Cancel</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

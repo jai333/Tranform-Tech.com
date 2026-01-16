@@ -1,0 +1,372 @@
+{% extends 'tracking_app/base.html' %}
+
+{% block title %}Interview Details - {{ interview.job.title }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2 class="page-title">
+        <i class="fas fa-calendar-alt"></i> Interview Details
+    </h2>
+    <div>
+        <a href="{% url 'my-interviews' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to My Interviews
+        </a>
+    </div>
+</div>
+
+{% if messages %}
+    <div class="messages-container animate-fade-in">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} glass-card">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<div class="card glass-card animate-slide-up">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="detail-section">
+                    <h3 class="detail-section-title"><i class="fas fa-info-circle"></i> Interview Information</h3>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="detail-item">
+                                <div class="detail-label">Job Position:</div>
+                                <div class="detail-value h5">
+                                    <a href="{% url 'job-detail' interview.job.id %}" class="text-primary">
+                                        {{ interview.job.title }}
+                                    </a>
+                                </div>
+                            </div>
+                            
+                            <div class="detail-item">
+                                <div class="detail-label">Company:</div>
+                                <div class="detail-value">{{ interview.job.company }}</div>
+                            </div>
+                            
+                            <div class="detail-item">
+                                <div class="detail-label">Department:</div>
+                                <div class="detail-value">{{ interview.job.department|default:"Not specified" }}</div>
+                            </div>
+                            
+                            <div class="detail-item">
+                                <div class="detail-label">Location:</div>
+                                <div class="detail-value">{{ interview.job.location|default:"Not specified" }}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="detail-item">
+                                <div class="detail-label">Status:</div>
+                                <div class="detail-value">
+                                    <span class="badge badge-{{ interview.get_status_color }}">
+                                        {{ interview.get_status_display }}
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div class="detail-item">
+                                <div class="detail-label">Interview Type:</div>
+                                <div class="detail-value">
+                                    <span class="badge badge-info">
+                                        {% if interview.type == 'phone' %}
+                                            <i class="fas fa-phone"></i> Phone
+                                        {% elif interview.type == 'video' %}
+                                            <i class="fas fa-video"></i> Video
+                                        {% elif interview.type == 'onsite' %}
+                                            <i class="fas fa-building"></i> On-site
+                                        {% elif interview.type == 'technical' %}
+                                            <i class="fas fa-laptop-code"></i> Technical
+                                        {% endif %}
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div class="detail-item">
+                                <div class="detail-label">Date & Time:</div>
+                                <div class="detail-value">{{ interview.date_time|date:"F d, Y - h:i a" }}</div>
+                            </div>
+                            
+                            <div class="detail-item">
+                                <div class="detail-label">Interviewer:</div>
+                                <div class="detail-value">{{ interview.interviewer }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Meeting information for video interviews -->
+                    {% if interview.type == 'video' and interview.meeting_url %}
+                    <div class="mt-4 meeting-section">
+                        <h3 class="video-meeting-title">
+                            <i class="fas fa-video"></i> Video Meeting Information
+                        </h3>
+                        
+                        <div class="meeting-card">
+                            <div class="meeting-info">
+                                <p class="meeting-intro">Your video interview has been scheduled. Click the button below to join the meeting at the scheduled time.</p>
+                                
+                                <div class="meeting-details">
+                                    <div class="meeting-detail-item">
+                                        <span class="meeting-label"><i class="fas fa-calendar"></i> Date:</span>
+                                        <span class="meeting-value">{{ interview.date_time|date:"F d, Y" }}</span>
+                                    </div>
+                                    
+                                    <div class="meeting-detail-item">
+                                        <span class="meeting-label"><i class="fas fa-clock"></i> Time:</span>
+                                        <span class="meeting-value">{{ interview.date_time|date:"h:i a" }}</span>
+                                    </div>
+                                    
+                                    <div class="meeting-detail-item meeting-url-item">
+                                        <span class="meeting-label"><i class="fas fa-link"></i> Meeting URL:</span>
+                                        <span class="meeting-value">
+                                            <a href="{{ interview.meeting_url }}">{{ interview.meeting_url }}</a>
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <div class="meeting-button-container">
+                                    <a href="{{ interview.meeting_url }}" target="_blank" class="btn btn-primary btn-lg meeting-button">
+                                        <i class="fas fa-video"></i> Join Video Meeting
+                                    </a>
+                                </div>
+                                
+                                <div class="meeting-tips">
+                                    <h4><i class="fas fa-lightbulb"></i> Tips for a Successful Video Interview</h4>
+                                    <ul>
+                                        <li>Test your camera and microphone before the interview</li>
+                                        <li>Find a quiet place with good lighting</li>
+                                        <li>Dress professionally</li>
+                                        <li>Have your resume and notes handy</li>
+                                        <li>Join a few minutes early to check your connection</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h4><i class="fas fa-clipboard-list"></i> Preparation Checklist</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="checklist">
+                            <div class="checklist-item">
+                                <input type="checkbox" id="research" class="checklist-input">
+                                <label for="research" class="checklist-label">Research the company</label>
+                            </div>
+                            <div class="checklist-item">
+                                <input type="checkbox" id="resume" class="checklist-input">
+                                <label for="resume" class="checklist-label">Review your resume</label>
+                            </div>
+                            <div class="checklist-item">
+                                <input type="checkbox" id="questions" class="checklist-input">
+                                <label for="questions" class="checklist-label">Prepare your questions</label>
+                            </div>
+                            <div class="checklist-item">
+                                <input type="checkbox" id="outfit" class="checklist-input">
+                                <label for="outfit" class="checklist-label">Plan your outfit</label>
+                            </div>
+                            <div class="checklist-item">
+                                <input type="checkbox" id="location" class="checklist-input">
+                                <label for="location" class="checklist-label">Confirm interview location/method</label>
+                            </div>
+                            {% if interview.type == "video" %}
+                            <div class="checklist-item">
+                                <input type="checkbox" id="tech" class="checklist-input">
+                                <label for="tech" class="checklist-label">Test your camera and microphone</label>
+                            </div>
+                            <div class="checklist-item">
+                                <input type="checkbox" id="background" class="checklist-input">
+                                <label for="background" class="checklist-label">Clean up your background</label>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .detail-section-title {
+        border-bottom: 1px solid #eee;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+        color: var(--primary-color);
+    }
+    
+    .detail-item {
+        margin-bottom: 15px;
+    }
+    
+    .detail-label {
+        font-weight: 500;
+        color: #666;
+        margin-bottom: 5px;
+    }
+    
+    .detail-value {
+        font-size: 16px;
+    }
+    
+    .video-meeting-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid var(--accent-color);
+        color: var(--accent-color);
+    }
+    
+    .meeting-section {
+        border-radius: 8px;
+        padding: 20px;
+        margin-top: 2rem;
+        background-color: transparent;
+        border: 1px solid rgba(var(--accent-color-rgb), 0.2);
+    }
+    
+    .meeting-card {
+        background-color: transparent;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+    
+    .meeting-intro {
+        font-size: 16px;
+        color: inherit;
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
+    
+    .meeting-details {
+        margin: 1.5rem 0;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        background-color: rgba(var(--accent-color-rgb), 0.05);
+        padding: 1.5rem;
+        border-radius: 8px;
+        border: 1px solid rgba(var(--accent-color-rgb), 0.1);
+    }
+    
+    .meeting-url-item {
+        grid-column: span 2;
+    }
+    
+    .meeting-detail-item {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .meeting-label {
+        font-weight: 600;
+        color: rgba(var(--accent-color-rgb), 0.8);
+        margin-bottom: 0.5rem;
+        font-size: 0.875rem;
+        text-transform: uppercase;
+    }
+    
+    .meeting-value {
+        font-size: 1.25rem;
+        color: inherit;
+        font-weight: 500;
+    }
+    
+    .meeting-button-container {
+        text-align: center;
+        margin: 2rem 0;
+    }
+    
+    .meeting-button {
+        padding: 0.75rem 2rem;
+        font-size: 1.25rem;
+        background-color: var(--accent-color);
+        border-color: var(--accent-color);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+    
+    .meeting-button:hover {
+        background-color: var(--accent-color-dark, var(--accent-color));
+        border-color: var(--accent-color-dark, var(--accent-color));
+        transform: translateY(-2px);
+        box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+    }
+    
+    .meeting-tips {
+        background-color: rgba(var(--accent-color-rgb), 0.03);
+        border-radius: 8px;
+        padding: 15px;
+        margin-top: 20px;
+        border-left: 4px solid var(--accent-color);
+    }
+    
+    .meeting-tips h4 {
+        font-size: 18px;
+        margin-bottom: 10px;
+        color: var(--accent-color);
+    }
+    
+    .meeting-tips ul {
+        padding-left: 20px;
+    }
+    
+    .meeting-tips li {
+        margin-bottom: 5px;
+    }
+    
+    .checklist-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    
+    .checklist-input {
+        margin-right: 10px;
+    }
+    
+    .checklist-label {
+        font-size: 16px;
+        margin-bottom: 0;
+    }
+</style>
+
+<!-- Add this script to ensure theme color variables are available in rgba format -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get the accent color from CSS variable
+        const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim();
+        
+        // Convert hex to rgb
+        const rgb = hexToRgb(accentColor);
+        if (rgb) {
+            document.documentElement.style.setProperty('--accent-color-rgb', `${rgb.r}, ${rgb.g}, ${rgb.b}`);
+        }
+    });
+    
+    function hexToRgb(hex) {
+        // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
+        const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+        hex = hex.replace(shorthandRegex, function(m, r, g, b) {
+            return r + r + g + g + b + b;
+        });
+        
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? {
+            r: parseInt(result[1], 16),
+            g: parseInt(result[2], 16),
+            b: parseInt(result[3], 16)
+        } : null;
+    }
+</script>
+{% endblock %} 

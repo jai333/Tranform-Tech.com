@@ -1,0 +1,387 @@
+{% extends 'tracking_app/base.html' %}
+
+{% block title %}
+{% if object %}Edit Job{% else %}Create Job{% endif %} - Protingent India
+{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .form-section {
+        margin-bottom: 2rem;
+        padding-bottom: 2rem;
+        border-bottom: 1px solid var(--apple-border);
+    }
+    
+    .form-section:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+    
+    .form-section-title {
+        margin-bottom: 1.5rem;
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--apple-text);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .form-section-title i {
+        color: var(--apple-accent);
+        font-size: 1.5rem;
+        opacity: 0.9;
+    }
+    
+    .form-row {
+        display: flex;
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-col {
+        flex: 1;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: var(--apple-text);
+    }
+    
+    .form-control {
+        background: var(--apple-input-bg);
+        border: 1px solid var(--apple-border);
+        border-radius: 12px;
+        color: var(--apple-text);
+        font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+        padding: 0.75rem 1rem;
+        width: 100%;
+        transition: all 0.25s ease;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: var(--apple-accent);
+        box-shadow: 0 0 0 4px var(--apple-accent-glow);
+    }
+    
+    textarea.form-control {
+        min-height: 120px;
+        resize: vertical;
+    }
+    
+    .form-help {
+        display: block;
+        margin-top: 0.5rem;
+        font-size: 0.875rem;
+        color: var(--apple-text-secondary);
+    }
+    
+    .error-message {
+        color: var(--apple-error);
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+    }
+    
+    .form-actions {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+    
+    .submit-btn {
+        min-width: 180px;
+    }
+    
+    @media (max-width: 768px) {
+        .form-row {
+            flex-direction: column;
+            gap: 0;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">
+        <i class="fas fa-briefcase"></i> {% if object %}Edit Job{% else %}Post a New Job{% endif %}
+    </h1>
+    <a href="{% url 'job-list' %}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Jobs
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="post" novalidate>
+            {% csrf_token %}
+            
+            {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+                {% for error in form.non_field_errors %}
+                    {{ error }}
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            <div class="form-section">
+                <h3 class="form-section-title">
+                    <i class="fas fa-info-circle"></i> Basic Information
+                </h3>
+                
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="{{ form.title.id_for_label }}">Job Title*</label>
+                            {{ form.title }}
+                            {% if form.title.errors %}
+                            <div class="error-message">
+                                {% for error in form.title.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            {% if form.title.help_text %}
+                            <small class="form-help">{{ form.title.help_text }}</small>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="{{ form.company.id_for_label }}">Company Name*</label>
+                            {{ form.company }}
+                            {% if form.company.errors %}
+                            <div class="error-message">
+                                {% for error in form.company.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            {% if form.company.help_text %}
+                            <small class="form-help">{{ form.company.help_text }}</small>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="{{ form.department.id_for_label }}">Department</label>
+                            {{ form.department }}
+                            {% if form.department.errors %}
+                            <div class="error-message">
+                                {% for error in form.department.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            {% if form.department.help_text %}
+                            <small class="form-help">{{ form.department.help_text }}</small>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="{{ form.location.id_for_label }}">Location</label>
+                            {{ form.location }}
+                            {% if form.location.errors %}
+                            <div class="error-message">
+                                {% for error in form.location.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <small class="form-help">Enter the job location or specify "Remote" if applicable</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="{{ form.job_type.id_for_label }}">Job Type*</label>
+                            {{ form.job_type }}
+                            {% if form.job_type.errors %}
+                            <div class="error-message">
+                                {% for error in form.job_type.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            {% if form.job_type.help_text %}
+                            <small class="form-help">{{ form.job_type.help_text }}</small>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="{{ form.status.id_for_label }}">Listing Status*</label>
+                            {{ form.status }}
+                            {% if form.status.errors %}
+                            <div class="error-message">
+                                {% for error in form.status.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            {% if form.status.help_text %}
+                            <small class="form-help">{{ form.status.help_text }}</small>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="{{ form.salary.id_for_label }}">Salary Range</label>
+                            {{ form.salary }}
+                            {% if form.salary.errors %}
+                            <div class="error-message">
+                                {% for error in form.salary.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            {% if form.salary.help_text %}
+                            <small class="form-help">{{ form.salary.help_text }}</small>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="{{ form.deadline.id_for_label }}">Application Deadline</label>
+                            {{ form.deadline }}
+                            {% if form.deadline.errors %}
+                            <div class="error-message">
+                                {% for error in form.deadline.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            {% if form.deadline.help_text %}
+                            <small class="form-help">{{ form.deadline.help_text }}</small>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <h3 class="form-section-title">
+                    <i class="fas fa-briefcase"></i> Job Details
+                </h3>
+                
+                <div class="form-group">
+                    <label for="{{ form.description.id_for_label }}">Job Description*</label>
+                    {{ form.description }}
+                    {% if form.description.errors %}
+                    <div class="error-message">
+                        {% for error in form.description.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    {% if form.description.help_text %}
+                    <small class="form-help">{{ form.description.help_text }}</small>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.requirements.id_for_label }}">Requirements & Qualifications</label>
+                    {{ form.requirements }}
+                    {% if form.requirements.errors %}
+                    <div class="error-message">
+                        {% for error in form.requirements.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    {% if form.requirements.help_text %}
+                    <small class="form-help">{{ form.requirements.help_text }}</small>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.benefits.id_for_label }}">Benefits & Perks</label>
+                    {{ form.benefits }}
+                    {% if form.benefits.errors %}
+                    <div class="error-message">
+                        {% for error in form.benefits.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    {% if form.benefits.help_text %}
+                    <small class="form-help">{{ form.benefits.help_text }}</small>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <h3 class="form-section-title">
+                    <i class="fas fa-certificate"></i> Skills & Experience
+                </h3>
+                
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="{{ form.skills.id_for_label }}">Required Skills</label>
+                            {{ form.skills }}
+                            {% if form.skills.errors %}
+                            <div class="error-message">
+                                {% for error in form.skills.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <small class="form-help">Enter skills separated by commas (e.g., Python, JavaScript, Project Management)</small>
+                        </div>
+                    </div>
+                    
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="{{ form.experience.id_for_label }}">Experience Level</label>
+                            {{ form.experience }}
+                            {% if form.experience.errors %}
+                            <div class="error-message">
+                                {% for error in form.experience.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            {% if form.experience.help_text %}
+                            <small class="form-help">{{ form.experience.help_text }}</small>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn submit-btn">
+                    <i class="fas fa-save"></i> {% if object %}Update Job{% else %}Post Job{% endif %}
+                </button>
+                
+                <a href="{% url 'job-list' %}" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %} 

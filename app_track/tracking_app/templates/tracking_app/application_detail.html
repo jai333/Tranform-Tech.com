@@ -1,0 +1,601 @@
+{% extends 'tracking_app/base.html' %}
+
+{% block title %}Application Detail - ATS & CRM System{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="d-flex align-items-center">
+        <a href="{% if user.is_recruiter %}{% url 'job-applications-list' %}{% else %}{% url 'my-applications' %}{% endif %}" class="back-button glass-button me-3">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <h2 class="page-title mb-0">
+            <i class="fas fa-clipboard-check"></i> Application Details
+        </h2>
+    </div>
+</div>
+
+{% if messages %}
+    <div class="messages-container animate-fade-in">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} glass-card">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card glass-card animate-slide-up">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">
+                    <span class="badge badge-{{ application.get_status_color }} glass-badge me-2">
+                        {{ application.get_status_display }}
+                    </span>
+                    Application for {{ application.job.title }}
+                </h5>
+                <div class="application-meta">
+                    <span class="text-muted">
+                        <i class="far fa-calendar-alt"></i> Applied on {{ application.applied_date|date:"M d, Y" }}
+                    </span>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Job Details</h6>
+                        <dl class="row">
+                            <dt class="col-sm-4">Company</dt>
+                            <dd class="col-sm-8">{{ application.job.company }}</dd>
+                            
+                            <dt class="col-sm-4">Location</dt>
+                            <dd class="col-sm-8">{{ application.job.location }}</dd>
+                            
+                            <dt class="col-sm-4">Salary</dt>
+                            <dd class="col-sm-8">{% if application.job.salary %}{{ application.job.salary }}{% else %}Not specified{% endif %}</dd>
+                            
+                            <dt class="col-sm-4">Job Type</dt>
+                            <dd class="col-sm-8">{{ application.job.job_type }}</dd>
+                        </dl>
+                        <a href="{% url 'job-detail' application.job.id %}" class="btn glass-button btn-sm">
+                            <i class="fas fa-external-link-alt"></i> View Full Job Posting
+                        </a>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Application Timeline</h6>
+                        <ul class="timeline">
+                            <li class="timeline-item">
+                                <div class="timeline-marker"></div>
+                                <div class="timeline-content">
+                                    <h6 class="timeline-title">Application Submitted</h6>
+                                    <p class="timeline-date">{{ application.applied_date|date:"M d, Y" }}</p>
+                                </div>
+                            </li>
+                            {% if application.status != 'applied' %}
+                            <li class="timeline-item">
+                                <div class="timeline-marker"></div>
+                                <div class="timeline-content">
+                                    <h6 class="timeline-title">Status Changed to {{ application.get_status_display }}</h6>
+                                    <p class="timeline-date">{{ application.updated_at|date:"M d, Y" }}</p>
+                                </div>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="application-content mb-4">
+                    <h6 class="text-muted">Cover Letter</h6>
+                    <div class="glass-card p-3">
+                        {% if application.cover_letter %}
+                            <p>{{ application.cover_letter|linebreaks }}</p>
+                        {% else %}
+                            <p class="text-muted">No cover letter submitted.</p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                {% if application.status == 'accepted' %}
+                <div class="application-content mb-4">
+                    <h6 class="text-muted">Scheduled Interview</h6>
+                    <div class="glass-card p-3">
+                        {% with candidates=candidate_list %}
+                            {% if candidates %}
+                                {% with interview=interviews|first %}
+                                    {% if interview %}
+                                        <div class="interview-details">
+                                            <div class="interview-item">
+                                                <strong><i class="far fa-calendar-alt"></i> Date:</strong> 
+                                                {{ interview.date_time|date:"F d, Y" }}
+                                            </div>
+                                            <div class="interview-item">
+                                                <strong><i class="far fa-clock"></i> Time:</strong> 
+                                                {{ interview.date_time|date:"h:i a" }}
+                                            </div>
+                                            <div class="interview-item">
+                                                <strong><i class="fas fa-user-tie"></i> Interviewer:</strong> 
+                                                {{ interview.interviewer }}
+                                            </div>
+                                            <div class="interview-item">
+                                                <strong><i class="fas fa-video"></i> Type:</strong> 
+                                                {{ interview.get_type_display }}
+                                            </div>
+                                            <div class="interview-status mt-3">
+                                                <span class="badge badge-{{ interview.get_status_color }} glass-badge">
+                                                    {{ interview.get_status_display }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        
+                                        {% if user.is_jobseeker %}
+                                        <div class="mt-3">
+                                            <a href="{% url 'my-interviews' %}" class="btn glass-button">
+                                                <i class="fas fa-calendar-alt"></i> View All Interviews
+                                            </a>
+                                        </div>
+                                        {% endif %}
+                                    {% else %}
+                                        <p>No interview has been scheduled yet. The hiring team will contact you soon.</p>
+                                    {% endif %}
+                                {% endwith %}
+                            {% else %}
+                                <p>No interview has been scheduled yet. The hiring team will contact you soon.</p>
+                            {% endif %}
+                        {% endwith %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <div class="application-content">
+                    <h6 class="text-muted">Resume/CV</h6>
+                    <div class="glass-card p-3">
+                        {% if application.resume %}
+                            <a href="{{ application.resume.url }}" class="btn glass-button" target="_blank">
+                                <i class="fas fa-file-pdf"></i> View Resume
+                            </a>
+                        {% else %}
+                            <p class="text-muted">No resume uploaded.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card glass-card animate-slide-up" style="animation-delay: 200ms;">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    {% if user.is_recruiter %}
+                        <i class="fas fa-user"></i> Applicant
+                    {% else %}
+                        <i class="fas fa-building"></i> Company
+                    {% endif %}
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if user.is_recruiter %}
+                    <div class="applicant-profile text-center mb-3">
+                        <div class="avatar-container mb-3">
+                            {% if application.applicant.profile.profile_picture %}
+                                <img src="{{ application.applicant.profile.profile_picture.url }}" alt="Profile Picture" class="rounded-circle profile-image">
+                            {% else %}
+                                <div class="avatar-placeholder">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <h5 class="mb-1">{{ application.applicant.get_full_name|default:application.applicant.username }}</h5>
+                        <p class="text-muted">{{ application.applicant.profile.headline|default:"" }}</p>
+                        <a href="{% url 'public-profile' application.applicant.username %}" class="btn glass-button">
+                            <i class="fas fa-user-circle"></i> View Profile
+                        </a>
+                    </div>
+                    
+                    <h6 class="text-muted">Contact Information</h6>
+                    <ul class="list-unstyled">
+                        {% if application.applicant.email %}
+                            <li><i class="far fa-envelope me-2"></i> {{ application.applicant.email }}</li>
+                        {% endif %}
+                        {% if application.applicant.profile.phone %}
+                            <li><i class="fas fa-phone me-2"></i> {{ application.applicant.profile.phone }}</li>
+                        {% endif %}
+                        {% if application.applicant.profile.location %}
+                            <li><i class="fas fa-map-marker-alt me-2"></i> {{ application.applicant.profile.location }}</li>
+                        {% endif %}
+                    </ul>
+                    
+                    <div class="action-buttons mt-4">
+                        <h6 class="text-muted">Actions</h6>
+                        {% if application.status == 'applied' %}
+                            <form method="post" action="{% url 'update-application-status' application.id %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="status" value="reviewing">
+                                <button type="submit" class="btn glass-button w-100 mb-2">
+                                    <i class="fas fa-eye"></i> Mark as Reviewing
+                                </button>
+                            </form>
+                        {% endif %}
+                        
+                        {% if application.status != 'rejected' %}
+                            <form method="post" action="{% url 'update-application-status' application.id %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="status" value="rejected">
+                                <button type="submit" class="btn glass-button btn-danger w-100 mb-2">
+                                    <i class="fas fa-times-circle"></i> Reject Application
+                                </button>
+                            </form>
+                        {% endif %}
+                        
+                        {% if application.status != 'accepted' %}
+                            <form method="post" action="{% url 'update-application-status' application.id %}" class="interview-scheduler-form">
+                                {% csrf_token %}
+                                <input type="hidden" name="status" value="accepted">
+                                
+                                <div class="scheduler-card">
+                                    <div class="scheduler-header">
+                                        <i class="fas fa-calendar-check"></i>
+                                        <h5>Schedule Interview</h5>
+                                    </div>
+                                    
+                                    <div class="scheduler-body">
+                                        <div class="form-group mb-3">
+                                            <label for="interview_date" class="form-label">
+                                                <i class="far fa-calendar-alt"></i> Interview Date & Time
+                                            </label>
+                                            <div class="input-group">
+                                                <span class="input-group-text glass-input-icon">
+                                                    <i class="far fa-calendar-alt"></i>
+                                                </span>
+                                                <input 
+                                                    type="datetime-local" 
+                                                    id="interview_date" 
+                                                    name="interview_date" 
+                                                    class="form-control glass-input" 
+                                                    required
+                                                    min="{{ now|date:'Y-m-d' }}T00:00"
+                                                    oninvalid="this.setCustomValidity('Please select a valid future date and time')"
+                                                    oninput="this.setCustomValidity('')"
+                                                >
+                                            </div>
+                                            <small class="text-muted">Select a date and time for the interview</small>
+                                        </div>
+                                        
+                                        <div class="form-group mb-3">
+                                            <label for="interview_type" class="form-label">
+                                                <i class="fas fa-video"></i> Interview Type
+                                            </label>
+                                            <div class="interview-type-selector">
+                                                <div class="type-option">
+                                                    <input type="radio" id="type_video" name="interview_type" value="video" checked>
+                                                    <label for="type_video" class="type-label">
+                                                        <div class="type-icon"><i class="fas fa-video"></i></div>
+                                                        <div class="type-name">Video</div>
+                                                    </label>
+                                                </div>
+                                                <div class="type-option">
+                                                    <input type="radio" id="type_phone" name="interview_type" value="phone">
+                                                    <label for="type_phone" class="type-label">
+                                                        <div class="type-icon"><i class="fas fa-phone"></i></div>
+                                                        <div class="type-name">Phone</div>
+                                                    </label>
+                                                </div>
+                                                <div class="type-option">
+                                                    <input type="radio" id="type_technical" name="interview_type" value="technical">
+                                                    <label for="type_technical" class="type-label">
+                                                        <div class="type-icon"><i class="fas fa-laptop-code"></i></div>
+                                                        <div class="type-name">Technical</div>
+                                                    </label>
+                                                </div>
+                                                <div class="type-option">
+                                                    <input type="radio" id="type_onsite" name="interview_type" value="onsite">
+                                                    <label for="type_onsite" class="type-label">
+                                                        <div class="type-icon"><i class="fas fa-building"></i></div>
+                                                        <div class="type-name">On-site</div>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="form-group mb-3">
+                                            <label for="interview_notes" class="form-label">
+                                                <i class="fas fa-sticky-note"></i> Notes (Optional)
+                                            </label>
+                                            <textarea 
+                                                id="interview_notes" 
+                                                name="interview_notes" 
+                                                class="form-control glass-input" 
+                                                rows="2"
+                                                placeholder="Add any additional details for the candidate..."
+                                            ></textarea>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="scheduler-footer">
+                                        <button type="submit" class="btn glass-button btn-success w-100 accept-btn">
+                                            <i class="fas fa-check-circle"></i> Accept & Schedule Interview
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <div class="company-profile">
+                        <h5 class="mb-1">{{ application.job.company }}</h5>
+                        <p class="text-muted">{{ application.job.location }}</p>
+                        
+                        <div class="action-buttons mt-4">
+                            {% if application.status == 'applied' or application.status == 'reviewing' %}
+                                <a href="{% url 'withdraw-application' application.id %}" class="btn glass-button btn-danger w-100">
+                                    <i class="fas fa-times-circle"></i> Withdraw Application
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .timeline {
+        list-style: none;
+        padding: 0;
+        position: relative;
+    }
+    
+    .timeline:before {
+        content: '';
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: var(--accent-color);
+        left: 8px;
+        margin-left: -1.5px;
+        opacity: 0.5;
+    }
+    
+    .timeline-item {
+        margin-bottom: 15px;
+        position: relative;
+        padding-left: 30px;
+    }
+    
+    .timeline-marker {
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        border: 2px solid var(--accent-color);
+        background: var(--card-bg);
+        left: 0;
+        top: 4px;
+    }
+    
+    .timeline-title {
+        margin: 0;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+    
+    .timeline-date {
+        margin: 0;
+        font-size: 0.8rem;
+        color: var(--text-muted);
+    }
+    
+    .avatar-container {
+        width: 100px;
+        height: 100px;
+        margin: 0 auto;
+        position: relative;
+    }
+    
+    .profile-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .avatar-placeholder {
+        width: 100%;
+        height: 100%;
+        background-color: var(--accent-color);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        font-size: 2rem;
+    }
+    
+    /* Interview Scheduler Styles */
+    .interview-scheduler-form {
+        margin-top: 1.5rem;
+    }
+    
+    .scheduler-card {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border-radius: 16px;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+    
+    .scheduler-card:hover {
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+        transform: translateY(-2px);
+    }
+    
+    .scheduler-header {
+        padding: 1rem;
+        background: rgba(var(--accent-color-rgb), 0.2);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .scheduler-header i {
+        font-size: 1.25rem;
+        color: var(--accent-color);
+    }
+    
+    .scheduler-header h5 {
+        margin: 0;
+        font-weight: 600;
+    }
+    
+    .scheduler-body {
+        padding: 1.5rem;
+    }
+    
+    .scheduler-footer {
+        padding: 1rem 1.5rem 1.5rem;
+    }
+    
+    .form-label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+    }
+    
+    .form-label i {
+        color: var(--accent-color);
+        width: 16px;
+    }
+    
+    .input-group-text.glass-input-icon {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: var(--accent-color);
+        border-right: none;
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+    }
+    
+    /* Custom datetime input styling */
+    input[type="datetime-local"] {
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--text-color);
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        width: 100%;
+        transition: all 0.2s ease;
+    }
+    
+    .input-group input[type="datetime-local"] {
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+    }
+    
+    input[type="datetime-local"]:focus {
+        outline: none;
+        border-color: var(--accent-color);
+        box-shadow: 0 0 0 3px rgba(var(--accent-color-rgb), 0.25);
+    }
+    
+    textarea.glass-input {
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--text-color);
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        width: 100%;
+        transition: all 0.2s ease;
+        resize: vertical;
+    }
+    
+    textarea.glass-input:focus {
+        outline: none;
+        border-color: var(--accent-color);
+        box-shadow: 0 0 0 3px rgba(var(--accent-color-rgb), 0.25);
+    }
+    
+    /* Interview type selector */
+    .interview-type-selector {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0.75rem;
+    }
+    
+    @media (max-width: 768px) {
+        .interview-type-selector {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+    
+    .type-option {
+        flex: 1;
+    }
+    
+    .type-option input[type="radio"] {
+        display: none;
+    }
+    
+    .type-label {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        height: 100%;
+        text-align: center;
+    }
+    
+    .type-icon {
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+        color: var(--text-secondary);
+        transition: all 0.2s ease;
+    }
+    
+    .type-name {
+        font-weight: 500;
+    }
+    
+    .type-option input[type="radio"]:checked + .type-label {
+        background: rgba(var(--accent-color-rgb), 0.15);
+        border-color: var(--accent-color);
+    }
+    
+    .type-option input[type="radio"]:checked + .type-label .type-icon {
+        color: var(--accent-color);
+    }
+    
+    .type-label:hover {
+        background: rgba(255, 255, 255, 0.1);
+        transform: translateY(-2px);
+    }
+    
+    /* Accept button */
+    .accept-btn {
+        padding: 0.75rem;
+        font-weight: 500;
+        letter-spacing: 0.01em;
+        text-transform: uppercase;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+    }
+    
+    .accept-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(var(--accent-color-rgb), 0.3);
+    }
+</style>
+{% endblock %} 

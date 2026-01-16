@@ -1,0 +1,168 @@
+{% extends 'tracking_app/base.html' %}
+
+{% block title %}Interviews | Protingent India{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2 class="page-title"><i class="fas fa-calendar-alt"></i> Interviews</h2>
+    <a href="{% url 'interview-create' %}" class="btn">
+        <i class="fas fa-plus"></i> Schedule Interview
+    </a>
+</div>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endif %}
+
+<div class="card">
+    <div class="card-header">
+        <form method="GET" class="search-form">
+            <div class="input-group">
+                <input 
+                    type="text" 
+                    name="search" 
+                    placeholder="Search interviews..." 
+                    value="{{ request.GET.search|default:'' }}"
+                    class="form-control"
+                >
+                <button type="submit" class="btn btn-sm">
+                    <i class="fas fa-search"></i>
+                </button>
+                {% if request.GET.search %}
+                    <a href="{% url 'interview-list' %}" class="btn btn-sm btn-secondary">
+                        <i class="fas fa-times"></i> Clear
+                    </a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+    <div class="card-body">
+        {% if interviews %}
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Candidate</th>
+                            <th>Job</th>
+                            <th>Interview Date</th>
+                            <th>Interviewer</th>
+                            <th>Type</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for interview in interviews %}
+                        <tr>
+                            <td>
+                                <a href="{% url 'candidate-detail' interview.candidate.id %}" style="font-weight: 500; color: var(--accent-color);">
+                                    {{ interview.candidate.full_name }}
+                                </a>
+                            </td>
+                            <td>
+                                <a href="{% url 'job-detail' interview.job.id %}" style="color: var(--accent-color);">
+                                    {{ interview.job.title }}
+                                </a>
+                            </td>
+                            <td>{{ interview.date_time|date:"M d, Y H:i" }}</td>
+                            <td>{{ interview.interviewer }}</td>
+                            <td>
+                                <span class="badge badge-info">
+                                    {{ interview.get_type_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge badge-{{ interview.get_status_color }}">
+                                    {{ interview.get_status_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="btn-group">
+                                    <a href="{% url 'interview-detail' interview.id %}" class="btn-icon" title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{% url 'interview-update' interview.id %}" class="btn-icon" title="Edit Interview">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{% url 'interview-delete' interview.id %}" class="btn-icon btn-danger" title="Delete Interview">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination -->
+            {% if is_paginated %}
+            <div class="pagination">
+                <span class="page-stats">
+                    Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ paginator.count }} interviews
+                </span>
+                <div class="page-controls">
+                    {% if page_obj.has_previous %}
+                        <a href="?page=1{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" class="page-control">
+                            <i class="fas fa-angle-double-left"></i>
+                        </a>
+                        <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" class="page-control">
+                            <i class="fas fa-angle-left"></i>
+                        </a>
+                    {% else %}
+                        <span class="page-control disabled">
+                            <i class="fas fa-angle-double-left"></i>
+                        </span>
+                        <span class="page-control disabled">
+                            <i class="fas fa-angle-left"></i>
+                        </span>
+                    {% endif %}
+                    
+                    <span class="page-current">
+                        Page {{ page_obj.number }} of {{ paginator.num_pages }}
+                    </span>
+                    
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" class="page-control">
+                            <i class="fas fa-angle-right"></i>
+                        </a>
+                        <a href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" class="page-control">
+                            <i class="fas fa-angle-double-right"></i>
+                        </a>
+                    {% else %}
+                        <span class="page-control disabled">
+                            <i class="fas fa-angle-right"></i>
+                        </span>
+                        <span class="page-control disabled">
+                            <i class="fas fa-angle-double-right"></i>
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        {% else %}
+            <div class="empty-state">
+                <div class="icon">
+                    <i class="fas fa-calendar-alt fa-3x" style="color: var(--accent-color);"></i>
+                </div>
+                <h4>No Interviews Scheduled</h4>
+                {% if request.GET.search %}
+                    <p>No interviews match your search criteria: <strong>{{ request.GET.search }}</strong></p>
+                    <a href="{% url 'interview-list' %}" class="btn">
+                        <i class="fas fa-list"></i> View All Interviews
+                    </a>
+                {% else %}
+                    <p>There are no interviews scheduled at this time.</p>
+                    <a href="{% url 'interview-create' %}" class="btn">
+                        <i class="fas fa-plus"></i> Schedule First Interview
+                    </a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %} 

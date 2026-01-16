@@ -1,0 +1,53 @@
+{% extends 'tracking_app/base.html' %}
+
+{% block title %}
+    {% if form.instance.id %}
+        Edit Note
+    {% else %}
+        Add Note
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header">
+                    <h2>
+                        <i class="fas fa-sticky-note" style="margin-right: 0.5rem; color: var(--accent-color);"></i>
+                        {% if form.instance.id %}
+                            Edit Note
+                        {% else %}
+                            Add Note for {{ candidate.full_name }}
+                        {% endif %}
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="{{ form.content.id_for_label }}">Content</label>
+                            {{ form.content.errors }}
+                            {{ form.content|safe }}
+                        </div>
+                        <button type="submit" class="btn">
+                            <i class="fas fa-save"></i> 
+                            {% if form.instance.id %}
+                                Update Note
+                            {% else %}
+                                Add Note
+                            {% endif %}
+                        </button>
+                        {% if form.instance.id %}
+                            <a href="{% url 'candidate-detail' form.instance.candidate.id %}" class="btn btn-secondary">Cancel</a>
+                        {% else %}
+                            <a href="{% url 'candidate-detail' candidate.id %}" class="btn btn-secondary">Cancel</a>
+                        {% endif %}
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

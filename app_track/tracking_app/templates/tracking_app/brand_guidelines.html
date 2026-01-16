@@ -1,0 +1,104 @@
+{% extends 'tracking_app/base.html' %}
+{% block title %}Brand Guidelines - Protingent{% endblock %}
+
+{% block extra_styles %}
+<style>
+.brand-palette { display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1rem; }
+.color-swatch { width: 160px; border-radius: 8px; padding: 1rem; color: white; box-shadow: 0 6px 18px rgba(0,0,0,0.25); }
+.color-label { margin-top: 0.75rem; font-size: 0.9rem; color: var(--apple-text); }
+.brand-section { margin: 2rem 0; }
+.brand-logo { display: flex; gap: 1rem; align-items: center; }
+.brand-logo img { height: 64px; }
+.brand-usage { background: rgba(255,255,255,0.02); padding: 1rem; border-radius: 12px; }
+.example-button { margin-top: 1rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-header">
+    <h1 class="page-title">Brand Guidelines</h1>
+    <p style="color:var(--apple-text-secondary); margin-top:0.5rem;">Overview of logo, colors, typography and basic usage for the Protingent UI.</p>
+  </div>
+  <div class="card-body">
+    <section class="brand-section">
+      <h2>Logo</h2>
+      <div class="brand-logo">
+        <img src="https://www.protingent.com/wp-content/uploads/2024/09/logo-2x.png" alt="Protingent Logo">
+        <div>
+          <p style="color:var(--apple-text); font-weight:600;">Primary logo</p>
+          <p style="color:var(--apple-text-secondary); margin:0.25rem 0 0;">Use this logo on white or dark backgrounds. Maintain clear space equal to the height of the logomark on all sides.</p>
+          <p style="margin-top:0.5rem;"><a class="btn btn-secondary" href="https://www.protingent.com/wp-content/uploads/2024/09/logo-2x.png" target="_blank">Download PNG</a></p>
+        </div>
+      </div>
+    </section>
+
+    <section class="brand-section">
+      <h2>Color Palette</h2>
+      <p style="color:var(--apple-text-secondary);">Primary and supportive colors used across the product. Use the CSS variables declared in `base.html` for consistency.</p>
+      <div class="brand-palette">
+        <div style="background:var(--apple-bg);" class="color-swatch">
+          <div style="font-weight:700;">--apple-bg</div>
+          <div class="color-label">#000000</div>
+        </div>
+        <div style="background:var(--apple-card-bg);" class="color-swatch">
+          <div style="font-weight:700;">--apple-card-bg</div>
+          <div class="color-label">rgba(30,30,32,0.7)</div>
+        </div>
+        <div style="background:var(--apple-accent);" class="color-swatch">
+          <div style="font-weight:700;">--apple-accent</div>
+          <div class="color-label">#0891B2</div>
+        </div>
+        <div style="background:var(--apple-accent-dark);" class="color-swatch">
+          <div style="font-weight:700;">--apple-accent-dark</div>
+          <div class="color-label">#066b86</div>
+        </div>
+        <div style="background:var(--apple-error);" class="color-swatch">
+          <div style="font-weight:700;">--apple-error</div>
+          <div class="color-label">#ff453a</div>
+        </div>
+        <div style="background:var(--apple-success);" class="color-swatch">
+          <div style="font-weight:700;">--apple-success</div>
+          <div class="color-label">#30d158</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="brand-section">
+      <h2>Typography</h2>
+      <p style="color:var(--apple-text-secondary);">Primary font: 'SF Pro Display' (system fallback used where unavailable). Use font-weight and sizes consistent with the UI scale.</p>
+      <div class="brand-usage">
+        <h1 style="margin:0;">H1 — Page title / Hero</h1>
+        <h2 style="margin-top:0.75rem;">H2 — Section title</h2>
+        <h3 style="margin-top:0.5rem;">H3 — Card / Block title</h3>
+        <p style="margin-top:0.75rem; color:var(--apple-text-secondary);">Body copy example: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat a ante.</p>
+        <button class="btn example-button">Primary button</button>
+        <button class="btn btn-secondary example-button">Secondary button</button>
+      </div>
+    </section>
+
+    <section class="brand-section">
+      <h2>Spacing & Layout</h2>
+      <p style="color:var(--apple-text-secondary);">Use consistent spacing tokens: small (8px), medium (16px), large (24-32px), and section padding 48-120px depending on context.</p>
+      <div style="margin-top:1rem;" class="brand-usage">
+        <p style="margin:0;">Do not alter the logo proportions. Keep UI elements aligned to the 8px grid where possible.</p>
+      </div>
+    </section>
+
+    <section class="brand-section">
+      <h2>Example usage</h2>
+      <div class="brand-usage">
+        <p style="color:var(--apple-text); font-weight:600;">Card with accent</p>
+        <div style="background:var(--apple-card-bg); padding:1rem; border-radius:12px; margin-top:0.5rem; display:flex; align-items:center; gap:1rem;">
+          <img src="https://www.protingent.com/wp-content/uploads/2024/09/logo-2x.png" alt="logo" style="height:40px;">
+          <div>
+            <div style="color:var(--apple-text); font-weight:600;">Protingent</div>
+            <div style="color:var(--apple-text-secondary); font-size:0.95rem;">Building great talent experiences — example card.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</div>
+{% endblock %}

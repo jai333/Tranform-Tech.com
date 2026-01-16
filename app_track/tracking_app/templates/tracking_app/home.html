@@ -1,0 +1,1069 @@
+{% extends 'tracking_app/base.html' %}
+
+{% block title %}Protingent India{% endblock %}
+
+{% block extra_styles %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    
+    /* Override base styles for landing page */
+    body {
+        overflow-x: hidden;
+        font-family: 'Inter', sans-serif;
+    }
+    #canvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: -1;
+        width: 100%;
+        height: 100%;
+    }
+    .container {
+        width: 100%;
+        max-width: 100%;
+        padding: 0;
+    }
+    .landing-content {
+        position: relative;
+        margin: 120px auto 60px; /* Increased top margin for better spacing */
+        text-align: center;
+        z-index: 1;
+        width: 90%; /* Slightly narrower for better focus */
+        max-width: 1200px;
+        background: rgba(26, 32, 44, 0.7);
+        padding: 4rem; /* Increased padding */
+        border-radius: 24px; /* Slightly larger radius */
+        backdrop-filter: blur(15px);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        overflow: hidden;
+    }
+    
+    /* Main brand section styling */
+    .hero-section {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 4rem; /* Increased spacing */
+        position: relative;
+    }
+    
+    .company-name {
+        font-size: 5.5rem; /* Larger size */
+        font-weight: 800;
+        margin-bottom: 1.5rem; /* Increased spacing */
+        background: linear-gradient(to right, #0891B2, #22C55E);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        letter-spacing: -0.02em;
+        line-height: 1.1;
+        text-align: center;
+        animation: fadeIn 1.2s ease-out forwards;
+    }
+    
+    .tagline {
+        font-size: 2rem; /* Larger size */
+        color: rgba(255, 255, 255, 0.95); /* Increased opacity for better readability */
+        font-weight: 400;
+        text-align: center;
+        max-width: 800px;
+        margin: 0 auto 4rem; /* Increased bottom margin */
+        letter-spacing: 0.01em;
+        animation: slideUp 1.2s ease-out forwards;
+    }
+    
+    .cta-container {
+        margin-bottom: 5rem; /* Increased spacing below CTAs */
+        display: flex;
+        justify-content: center;
+        gap: 2rem; /* More space between buttons */
+        flex-wrap: wrap;
+        width: 100%;
+    }
+    .landing-cta {
+        padding: 16px 36px; /* Larger padding */
+        background: rgba(8, 145, 178, 0.9);
+        color: white;
+        text-decoration: none;
+        border: none;
+        border-radius: 14px; /* Slightly rounded corners */
+        font-weight: 600;
+        font-size: 1.125rem; /* Larger text */
+        transition: all 0.3s ease;
+        box-shadow: 0 8px 20px rgba(8, 145, 178, 0.25);
+        white-space: nowrap;
+        min-width: 180px; /* Wider buttons */
+        text-align: center;
+    }
+    .landing-cta:hover {
+        transform: translateY(-3px); /* Slightly increased hover effect */
+        background: rgba(8, 145, 178, 1);
+        box-shadow: 0 12px 28px rgba(8, 145, 178, 0.4);
+    }
+    .landing-cta.secondary {
+        background: rgba(255, 255, 255, 0.1);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
+    .landing-cta.secondary:hover {
+        background: rgba(255, 255, 255, 0.15);
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.3);
+    }
+    
+    /* Section spacing and dividers */
+    .section-divider {
+        height: 1px;
+        width: 80%;
+        margin: 0 auto 3rem;
+        background: linear-gradient(to right, 
+            rgba(255, 255, 255, 0.01), 
+            rgba(255, 255, 255, 0.15),
+            rgba(255, 255, 255, 0.01));
+    }
+    
+    /* Features grid styling */
+    .features {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Slightly wider items */
+        gap: 2rem; /* Increased spacing */
+        margin-top: 1rem;
+        width: 100%;
+    }
+    .feature-item {
+        background: rgba(26, 32, 44, 0.5);
+        backdrop-filter: blur(10px);
+        border-radius: 18px; /* Slightly larger radius */
+        padding: 2rem; /* More padding */
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        transition: all 0.3s ease;
+        box-sizing: border-box;
+        color: #F8F9FA;
+        text-align: left;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15); /* Added subtle shadow */
+    }
+    .feature-item:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        border-color: rgba(34, 197, 94, 0.3);
+    }
+    .feature-icon {
+        font-size: 2rem;
+        margin-bottom: 1.5rem; /* Increased spacing */
+        color: #22C55E;
+        background: rgba(34, 197, 94, 0.15);
+        width: 70px; /* Larger icon container */
+        height: 70px; /* Larger icon container */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 16px; /* Slightly larger radius */
+        margin-bottom: 1.5rem;
+    }
+    .feature-item h3 {
+        color: white;
+        font-weight: 600;
+        margin-bottom: 1rem; /* Increased spacing */
+        font-size: 1.375rem; /* Larger header */
+    }
+    .feature-item p {
+        color: rgba(255, 255, 255, 0.8); /* Higher contrast for better readability */
+        font-size: 1rem;
+        line-height: 1.7; /* Increased line height */
+        margin-top: auto;
+    }
+    
+    /* Hiring Process Section Styling - converted to horizontal timeline */
+    .hiring-process {
+        margin: 6rem auto 5rem; /* Increased spacing */
+        padding: 0;
+        position: relative;
+    }
+    
+    .section-title {
+        text-align: center;
+        font-size: 2.75rem; /* Larger title */
+        margin-bottom: 4rem; /* More space below title */
+        color: white;
+        font-weight: 600;
+    }
+    
+    .process-container {
+        position: relative;
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+    
+    /* Horizontal line connecting steps */
+    .process-line-container {
+        position: absolute;
+        left: 10%;
+        right: 10%;
+        top: 60px; /* Position line to align with step markers */
+        z-index: 0;
+    }
+    
+    .process-line {
+        height: 4px; /* Slightly thicker line */
+        background-color: rgba(78, 123, 234, 0.15); /* More visible line */
+        width: 100%;
+        position: relative;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+    
+    .line-glow {
+        position: absolute;
+        width: 30%;
+        height: 100%;
+        background: linear-gradient(
+            90deg,
+            rgba(78, 123, 234, 0) 0%,
+            rgba(78, 123, 234, 1) 50%,
+            rgba(78, 123, 234, 0) 100%
+        );
+        filter: blur(2px);
+        animation: lineGlow 4s infinite linear;
+        top: 0;
+        left: -30%;
+    }
+    
+    /* Process steps grid - horizontal layout */
+    .process-steps-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 2rem; /* Increased spacing */
+        padding: 0;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .process-step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        position: relative;
+        transition: transform 0.3s;
+    }
+    
+    /* Step marker styling */
+    .step-marker {
+        width: 80px; /* Larger markers */
+        height: 80px; /* Larger markers */
+        background: rgba(78, 123, 234, 0.15);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 2rem; /* More space below markers */
+        position: relative;
+        border: 1px solid rgba(255, 255, 255, 0.2); /* Slightly more visible border */
+        box-shadow: 0 10px 30px rgba(14, 21, 47, 0.35); /* Enhanced shadow */
+        z-index: 2;
+    }
+    
+    .step-icon {
+        font-size: 1.75rem; /* Larger icons */
+        color: rgba(78, 123, 234, 1);
+    }
+    
+    .step-number {
+        position: absolute;
+        top: -6px;
+        right: -6px;
+        background: linear-gradient(135deg, #4e7bea 0%, #3a67d6 100%);
+        color: white;
+        font-size: 0.9rem; /* Slightly larger number */
+        font-weight: 600;
+        width: 28px; /* Larger number badge */
+        height: 28px; /* Larger number badge */
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* Enhanced shadow */
+    }
+    
+    /* Step content styling */
+    .step-content {
+        background: rgba(26, 32, 44, 0.6);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        padding: 1.75rem; /* More padding */
+        border-radius: 18px; /* Slightly larger radius */
+        box-shadow: 0 6px 25px rgba(0, 0, 0, 0.25); /* Enhanced shadow */
+        border: 1px solid rgba(78, 123, 234, 0.15);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .step-content h3 {
+        color: white;
+        font-size: 1.25rem; /* Larger heading */
+        margin-bottom: 1rem; /* More space below heading */
+        font-weight: 600;
+    }
+    
+    .step-content p {
+        color: rgba(255, 255, 255, 0.8); /* Higher contrast for readability */
+        font-size: 0.95rem;
+        line-height: 1.7; /* Increased line height */
+        margin: 0;
+    }
+
+    /* Contact section styling */
+    .contact-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    .contact-card {
+        display: flex;
+        align-items: flex-start;
+        background: rgba(22, 28, 36, 0.7);
+        border-radius: 20px;
+        padding: 2rem;
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .contact-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+    }
+    
+    .contact-icon {
+        font-size: 1.75rem;
+        color: #0891B2;
+        margin-right: 2rem;
+        padding: 1rem;
+        background: rgba(8, 145, 178, 0.1);
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 60px;
+        height: 60px;
+        flex-shrink: 0;
+    }
+    
+    .contact-details {
+        flex: 1;
+    }
+    
+    .contact-details h3 {
+        font-size: 1.5rem;
+        font-weight: 500;
+        margin-bottom: 1rem;
+        color: white;
+        letter-spacing: -0.01em;
+    }
+    
+    .contact-details p {
+        margin-bottom: 0.4rem;
+        font-size: 1.125rem;
+        color: rgba(255, 255, 255, 0.85);
+        line-height: 1.6;
+    }
+    
+    .contact-details a {
+        color: rgba(255, 255, 255, 0.85);
+        text-decoration: none;
+        transition: color 0.2s ease;
+    }
+    
+    .contact-details a:hover {
+        color: #0891B2;
+    }
+    
+    /* Apple-inspired about section styling */
+    #about {
+        margin-top: 6rem;
+        padding-top: 2rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        width: 100%;
+    }
+    
+    #about h2 {
+        font-size: 2.5rem;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        margin-bottom: 3rem;
+        color: white;
+        text-align: center;
+    }
+    
+    .about-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    .about-card {
+        background: rgba(22, 28, 36, 0.7);
+        border-radius: 20px;
+        padding: 3rem;
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+    
+    .about-card p {
+        font-size: 1.25rem;
+        line-height: 1.8;
+        color: rgba(255, 255, 255, 0.9);
+        margin-bottom: 2rem;
+        letter-spacing: -0.01em;
+    }
+    
+    .about-card p:last-child {
+        margin-bottom: 0;
+    }
+    
+    @media (max-width: 768px) {
+        .about-card {
+            padding: 2rem;
+        }
+        
+        .about-card p {
+            font-size: 1.125rem;
+            margin-bottom: 1.5rem;
+        }
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 1200px) {
+        .landing-content {
+            padding: 3rem;
+        }
+        
+        .company-name {
+            font-size: 5rem;
+        }
+        
+        .section-title {
+            font-size: 2.5rem;
+        }
+    }
+    
+    @media (max-width: 992px) {
+        .landing-content {
+            width: 95%;
+            max-width: 95%;
+            padding: 2.5rem;
+            margin-top: 100px;
+        }
+        
+        .company-name {
+            font-size: 4.25rem;
+        }
+        
+        .tagline {
+            font-size: 1.75rem;
+        }
+        
+        .process-steps-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 3rem 2rem;
+        }
+        
+        .process-line-container {
+            display: none;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .landing-content {
+            padding: 2rem;
+            width: 95%;
+            max-width: none;
+            margin-top: 90px;
+        }
+        
+        .company-name {
+            font-size: 3.75rem;
+        }
+        
+        .tagline {
+            font-size: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+        
+        .cta-container {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: center;
+        }
+        
+        .landing-cta {
+            width: 80%;
+        }
+        
+        .section-title {
+            font-size: 2.25rem;
+            margin-bottom: 2.5rem;
+        }
+        
+        .contact-card {
+            padding: 1.5rem;
+        }
+        
+        .contact-icon {
+            font-size: 1.5rem;
+            margin-right: 1.5rem;
+            padding: 0.75rem;
+            width: 50px;
+            height: 50px;
+        }
+        
+        .contact-details h3 {
+            font-size: 1.25rem;
+        }
+        
+        .contact-details p {
+            font-size: 1rem;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .landing-content {
+            width: 100%;
+            border-radius: 0;
+            padding: 1.5rem 1rem;
+            margin-top: 80px;
+            margin-bottom: 0;
+        }
+        
+        .company-name {
+            font-size: 3rem;
+        }
+        
+        .tagline {
+            font-size: 1.3rem;
+            margin-bottom: 2rem;
+        }
+        
+        .process-steps-grid {
+            grid-template-columns: 1fr;
+            gap: 2.5rem;
+        }
+        
+        .landing-cta {
+            width: 100%;
+        }
+    }
+    
+    /* Hide the default footer on this page */
+    footer {
+        display: none;
+    }
+    
+    /* Smooth scrolling for navigation */
+    html {
+        scroll-behavior: smooth;
+    }
+    
+    /* Section spacing */
+    #features, #about, #contact {
+        scroll-margin-top: 100px;
+        padding-top: 10px;
+    }
+    
+    /* Ensure content is properly spaced */
+    #about, #contact {
+        margin-top: 5rem; /* Increased spacing */
+        padding-top: 1.5rem; /* More padding */
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        width: 100%;
+    }
+    
+    /* Ensure section headers are visible */
+    #about h2, #contact h2, #features h2 {
+        font-size: 2.25rem; /* Larger title */
+        margin-bottom: 2rem; /* More space below title */
+        color: white;
+        text-align: left;
+        font-weight: 600;
+    }
+    
+    /* Clean, professional animations */
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    @keyframes slideUp {
+        from { 
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to { 
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @keyframes lineGlow {
+        0% {
+            left: -30%;
+        }
+        100% {
+            left: 100%;
+        }
+    }
+    
+    @keyframes floatAnimation {
+        0% {
+            transform: translateY(0);
+        }
+        50% {
+            transform: translateY(-8px);
+        }
+        100% {
+            transform: translateY(0);
+        }
+    }
+    
+    .copyright {
+        margin-top: 6rem;
+        padding-bottom: 2.5rem;
+        text-align: center;
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 0.9rem;
+        font-weight: 400;
+        letter-spacing: 0.02em;
+    }
+    
+    .copyright p {
+        opacity: 0.7;
+        transition: opacity 0.2s ease;
+    }
+    
+    .copyright p:hover {
+        opacity: 1;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<canvas id="canvas"></canvas>
+
+<div class="landing-content">
+    <div class="decorative-shape shape-1"></div>
+    <div class="decorative-shape shape-2"></div>
+    
+    <div class="hero-section">
+        <h1 class="company-name">Protingent India</h1>
+        <h2 class="tagline">Illuminating the Future of Talent Acquisition</h2>
+    </div>
+    
+    <div class="cta-container">
+        <a href="{% url 'job-list' %}" class="landing-cta">Browse Jobs</a>
+        <a href="{% url 'candidate-list' %}" class="landing-cta secondary">View Candidates</a>
+    </div>
+    
+    <!-- Hiring Process Section -->
+    <section class="hiring-process">
+        <h2 class="section-title">Our Hiring Process</h2>
+        <div class="process-container">
+            <!-- Visual line connecting the steps -->
+            <div class="process-line-container">
+                <div class="process-line">
+                    <div class="line-glow"></div>
+                </div>
+            </div>
+            
+            <!-- Responsive grid for steps -->
+            <div class="process-steps-grid">
+                <!-- Step 1 -->
+                <div class="process-step">
+                    <div class="step-marker">
+                        <div class="step-icon">
+                            <i class="fas fa-building"></i>
+                        </div>
+                        <div class="step-number">1</div>
+                    </div>
+                    <div class="step-content">
+                        <h3>Companies Post Job</h3>
+                        <p>Companies create detailed job listings with requirements, qualifications, and benefits to attract the right talent.</p>
+                    </div>
+                </div>
+                
+                <!-- Step 2 -->
+                <div class="process-step">
+                    <div class="step-marker">
+                        <div class="step-icon">
+                            <i class="fas fa-user-tie"></i>
+                        </div>
+                        <div class="step-number">2</div>
+                    </div>
+                    <div class="step-content">
+                        <h3>Candidates Apply</h3>
+                        <p>Qualified candidates submit their applications with resumes and cover letters highlighting their skills and experience.</p>
+                    </div>
+                </div>
+                
+                <!-- Step 3 -->
+                <div class="process-step">
+                    <div class="step-marker">
+                        <div class="step-icon">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <div class="step-number">3</div>
+                    </div>
+                    <div class="step-content">
+                        <h3>Companies Review</h3>
+                        <p>Hiring teams evaluate applications, conduct interviews, and assess candidates to find the perfect match for their team.</p>
+                    </div>
+                </div>
+                
+                <!-- Step 4 -->
+                <div class="process-step">
+                    <div class="step-marker">
+                        <div class="step-icon">
+                            <i class="fas fa-handshake"></i>
+                        </div>
+                        <div class="step-number">4</div>
+                    </div>
+                    <div class="step-content">
+                        <h3>Hired</h3>
+                        <p>Successful candidates receive job offers and start their exciting new position with their new employer.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <div class="section-divider"></div>
+    
+    <div id="features">
+        <h2 class="section-title">Key Features</h2>
+        <div class="features">
+            <div class="feature-item">
+                <div class="feature-icon"><i class="fas fa-search"></i></div>
+                <h3>Find Talent</h3>
+                <p>Discover and manage the best candidates for your open positions quickly and efficiently.</p>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon"><i class="fas fa-tasks"></i></div>
+                <h3>Track Applications</h3>
+                <p>Monitor the entire recruitment pipeline from application to hire with powerful analytics.</p>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon"><i class="fas fa-calendar-check"></i></div>
+                <h3>Schedule Interviews</h3>
+                <p>Seamlessly organize and track candidate interviews with our intuitive scheduling tools.</p>
+            </div>
+        </div>
+    </div>
+    
+    <div id="about">
+        <h2>About Protingent India LLP</h2>
+        <div class="about-container">
+            <div class="about-card">
+                <p>
+                    Our people and culture drive exceptional results. At Protingent India LLP, we provide comprehensive talent acquisition and recruitment solutions to help companies find the right talent efficiently.
+                </p>
+                <p>
+                    We specialize in RPO (Recruitment Process Outsourcing) services and talent sourcing, helping organizations build exceptional teams through our innovative recruitment solutions.
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <div id="contact">
+        <h2>Contact Us</h2>
+        <div class="contact-container">
+            <div class="contact-card">
+                <div class="contact-icon">
+                    <i class="fas fa-map-marker-alt"></i>
+                </div>
+                <div class="contact-details">
+                    <h3>Address</h3>
+                    <p>Protingent India LLP</p>
+                    <p>4th floor, Jaipur Centre, 420, Tonk Rd</p>
+                    <p>Choti Chopad, Chandrakala Colony</p>
+                    <p>Durgapura, Jaipur, Rajasthan 302018</p>
+                </div>
+            </div>
+            <div class="contact-card">
+                <div class="contact-icon">
+                    <i class="fas fa-envelope"></i>
+                </div>
+                <div class="contact-details">
+                    <h3>Email</h3>
+                    <p><a href="mailto:it@protingentindia.com">it@protingentindia.com</a></p>
+                </div>
+            </div>
+            <div class="contact-card">
+                <div class="contact-icon">
+                    <i class="fas fa-phone"></i>
+                </div>
+                <div class="contact-details">
+                    <h3>Phone</h3>
+                    <p><a href="tel:9664131355">9664131355</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="copyright">
+    <p>&copy; 2024 All rights Reserved Protingent India LLP</p>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+    // Initialize Three.js scene
+    const canvas = document.getElementById('canvas');
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({
+        canvas: canvas,
+        antialias: true
+    });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setClearColor(0x0F172A); // Deep blue background
+
+    // Create city grid with more subtle colors
+    const gridSize = 25;
+    const gridDivisions = 25;
+    const gridHelper = new THREE.GridHelper(gridSize, gridDivisions, 0x0891B2, 0x1e293b);
+    scene.add(gridHelper);
+    
+    // Add fog for depth - more subtle, professional fog
+    scene.fog = new THREE.FogExp2(0x0F172A, 0.04);
+    
+    // Add sun element (teal circle)
+    const sunGeometry = new THREE.CircleGeometry(5, 32);
+    const sunMaterial = new THREE.MeshBasicMaterial({
+        color: 0x0891B2,
+        transparent: true,
+        opacity: 0.8
+    });
+    const sun = new THREE.Mesh(sunGeometry, sunMaterial);
+    sun.position.set(0, 5, -30);
+    scene.add(sun);
+    
+    // Add a glow around the sun
+    const sunGlowGeometry = new THREE.CircleGeometry(7, 32);
+    const sunGlowMaterial = new THREE.MeshBasicMaterial({
+        color: 0x22C55E,
+        transparent: true,
+        opacity: 0.3
+    });
+    const sunGlow = new THREE.Mesh(sunGlowGeometry, sunGlowMaterial);
+    sunGlow.position.set(0, 5, -31);
+    scene.add(sunGlow);
+    
+    // Add light beams
+    const lights = [];
+    const lightColors = [0x0891B2, 0x22C55E, 0x475569, 0x334155];
+    
+    for (let i = 0; i < 15; i++) { // Fewer lights for cleaner look
+        const light = new THREE.PointLight(
+            lightColors[Math.floor(Math.random() * lightColors.length)],
+            0.8, // Less intense
+            8 // Larger range
+        );
+        
+        // Position lights in a circle around the scene
+        const angle = (i / 15) * Math.PI * 2;
+        const radius = 10 + Math.random() * 5;
+        light.position.x = Math.cos(angle) * radius;
+        light.position.z = Math.sin(angle) * radius;
+        light.position.y = 0.5 + Math.random() * 2;
+        
+        scene.add(light);
+        lights.push({
+            light: light,
+            baseX: light.position.x,
+            baseZ: light.position.z,
+            speed: 0.005 + Math.random() * 0.01, // Slower movement
+            intensity: 0.8,
+            intensityDirection: 0.005 // Subtle pulse
+        });
+    }
+    
+    // Add buildings
+    const buildings = [];
+    const buildingGeometry = new THREE.BoxGeometry(1, 1, 1);
+    
+    for (let i = 0; i < 60; i++) { // Fewer buildings for cleaner look
+        const buildingHeight = 1 + Math.random() * 5;
+        const building = new THREE.Mesh(
+            buildingGeometry,
+            new THREE.MeshBasicMaterial({
+                color: Math.random() > 0.85 ? 0x0891B2 : 0x1e293b, // Some teal buildings
+                wireframe: true,
+                transparent: true,
+                opacity: 0.7 // More transparent for subtlety
+            })
+        );
+        
+        // Position buildings randomly on the grid
+        building.position.x = (Math.random() - 0.5) * gridSize * 0.9;
+        building.position.z = (Math.random() - 0.5) * gridSize * 0.9;
+        building.position.y = buildingHeight / 2;
+        building.scale.set(1, buildingHeight, 1);
+        
+        scene.add(building);
+        buildings.push(building);
+    }
+    
+    // Add horizon light strip
+    const horizonGeometry = new THREE.PlaneGeometry(150, 6);
+    const horizonMaterial = new THREE.MeshBasicMaterial({
+        color: 0x0891B2,
+        transparent: true,
+        opacity: 0.4
+    });
+    const horizon = new THREE.Mesh(horizonGeometry, horizonMaterial);
+    horizon.position.z = -40;
+    horizon.position.y = 1.5;
+    scene.add(horizon);
+    
+    // Add secondary horizon glow
+    const horizonGlowGeometry = new THREE.PlaneGeometry(150, 10);
+    const horizonGlowMaterial = new THREE.MeshBasicMaterial({
+        color: 0x22C55E,
+        transparent: true,
+        opacity: 0.2
+    });
+    const horizonGlow = new THREE.Mesh(horizonGlowGeometry, horizonGlowMaterial);
+    horizonGlow.position.z = -41;
+    horizonGlow.position.y = 1.5;
+    scene.add(horizonGlow);
+    
+    // Add streaking lights (more subtle)
+    const streakCount = 50; // Fewer streaks
+    const streaks = [];
+    const streakGeometry = new THREE.BoxGeometry(0.03, 0.03, 1.5); // Thinner
+    
+    for (let i = 0; i < streakCount; i++) {
+        const isTeal = Math.random() > 0.5;
+        const streak = new THREE.Mesh(
+            streakGeometry,
+            new THREE.MeshBasicMaterial({
+                color: isTeal ? 0x0891B2 : 0x22C55E,
+                transparent: true,
+                opacity: 0.4 // More subtle
+            })
+        );
+        
+        // Position streaks randomly
+        streak.position.x = (Math.random() - 0.5) * gridSize * 2;
+        streak.position.z = -gridSize + Math.random() * gridSize * 2;
+        streak.position.y = 0.03;
+        
+        scene.add(streak);
+        streaks.push({
+            mesh: streak,
+            speed: 0.05 + Math.random() * 0.1 // Slower
+        });
+    }
+    
+    // Add light strips on sides of the "road"
+    function createLightStrip(x, z, length) {
+        const stripGeometry = new THREE.BoxGeometry(0.05, 0.05, length);
+        const stripMaterial = new THREE.MeshBasicMaterial({
+            color: 0x22C55E,
+            transparent: true,
+            opacity: 0.4
+        });
+        const strip = new THREE.Mesh(stripGeometry, stripMaterial);
+        strip.position.set(x, 0.05, z);
+        scene.add(strip);
+        return strip;
+    }
+    
+    // Left and right strips along the "road"
+    const leftStrip = createLightStrip(-8, 0, gridSize * 2);
+    const rightStrip = createLightStrip(8, 0, gridSize * 2);
+    
+    // Position camera
+    camera.position.y = 2.5;
+    camera.position.z = 6;
+    camera.rotation.x = -0.2;
+    
+    // Animation variables
+    let time = 0;
+    
+    // Animation loop
+    function animate() {
+        requestAnimationFrame(animate);
+        time += 0.007; // Slower animation
+        
+        // Animate sun/moon pulsing
+        const pulseFactor = 0.97 + Math.sin(time) * 0.03; // More subtle pulse
+        sun.scale.set(pulseFactor, pulseFactor, 1);
+        sunGlow.scale.set(1 + pulseFactor * 0.05, 1 + pulseFactor * 0.05, 1);
+        
+        // Animate light intensity and colors
+        lights.forEach(lightObj => {
+            lightObj.light.position.y = lightObj.light.position.y + Math.sin(time) * 0.005;
+            lightObj.intensity += lightObj.intensityDirection;
+            
+            if (lightObj.intensity > 1.2) {
+                lightObj.intensityDirection = -0.005;
+            } else if (lightObj.intensity < 0.6) {
+                lightObj.intensityDirection = 0.005;
+            }
+            
+            lightObj.light.intensity = lightObj.intensity;
+        });
+        
+        // Animate buildings with subtle pulse
+        buildings.forEach((building, index) => {
+            building.scale.y = building.scale.y + Math.sin(time + index) * 0.005;
+        });
+        
+        // Animate streaking lights
+        streaks.forEach(streak => {
+            streak.mesh.position.z += streak.speed;
+            
+            // Reset streaks that have gone past the camera
+            if (streak.mesh.position.z > 10) {
+                streak.mesh.position.z = -gridSize;
+                streak.mesh.position.x = (Math.random() - 0.5) * gridSize * 2;
+            }
+        });
+        
+        // Animate horizon glow
+        const horizonPulse = 0.4 + Math.sin(time * 0.3) * 0.2; // More subtle pulse
+        horizonMaterial.opacity = horizonPulse;
+        horizonGlowMaterial.opacity = horizonPulse * 0.5;
+        
+        // Rotate grid to create motion effect
+        gridHelper.rotation.y = time * 0.05; // Slower rotation
+        
+        // Render the scene
+        renderer.render(scene, camera);
+    }
+    
+    // Handle window resize
+    window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+    
+    // Start animation
+    animate();
+</script>
+{% endblock %} 
