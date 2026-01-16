@@ -1,0 +1,72 @@
+PROPRIETARY SOFTWARE LICENSE AGREEMENT
+
+This Proprietary Software License Agreement ("Agreement") is entered into as of January 17, 2026,
+between Protingent India LLP ("Owner") and any individual or entity accessing this software ("User").
+
+1. GRANT OF LICENSE
+Owner hereby grants User a limited, non-exclusive, non-transferable license to use this software
+("Software") solely for User's internal business purposes, subject to the terms and conditions
+of this Agreement. This license does NOT permit User to:
+- Distribute, sell, or sublicense the Software
+- Modify, adapt, or create derivative works
+- Reverse engineer, decompile, or disassemble the Software
+- Use the Software in any commercial product without explicit written consent
+- Share the Software with third parties
+
+2. OWNERSHIP AND INTELLECTUAL PROPERTY
+All rights, title, and interest in and to the Software, including all intellectual property rights,
+are owned exclusively by Protingent India LLP. The Software is protected by copyright law and
+international copyright treaties. User acquires no ownership rights in the Software.
+
+3. RESTRICTIONS
+User SHALL NOT:
+- Copy, reproduce, or duplicate the Software in whole or in part
+- Modify, enhance, or create derivative works of the Software
+- Translate, port, or adapt the Software
+- Reverse engineer, disassemble, or decompile the Software
+- Remove or alter any proprietary notices, labels, or marks on the Software
+- Use the Software in any manner that violates applicable laws or regulations
+- Transfer or assign this license to any third party without written consent
+
+4. CONFIDENTIALITY
+The Software contains confidential and trade secret information of Protingent India LLP.
+User agrees to maintain the confidentiality of the Software and not disclose it to any
+third parties without prior written consent from Owner.
+
+5. NO WARRANTY
+THE SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+PARTICULAR PURPOSE, AND NONINFRINGEMENT. OWNER MAKES NO REPRESENTATION OR WARRANTY
+ABOUT THE ACCURACY, RELIABILITY, COMPLETENESS, OR TIMELINESS OF THE SOFTWARE.
+
+6. LIMITATION OF LIABILITY
+IN NO EVENT SHALL OWNER BE LIABLE FOR ANY DAMAGES (INCLUDING, WITHOUT LIMITATION,
+INCIDENTAL, CONSEQUENTIAL, SPECIAL, OR PUNITIVE DAMAGES) ARISING OUT OF OR RELATED
+TO THE USE OF OR INABILITY TO USE THE SOFTWARE, EVEN IF OWNER HAS BEEN ADVISED
+OF THE POSSIBILITY OF SUCH DAMAGES.
+
+7. TERMINATION
+Owner may terminate this license immediately if User violates any term of this Agreement.
+Upon termination, User must destroy all copies of the Software in User's possession.
+
+8. GOVERNING LAW
+This Agreement shall be governed by and construed in accordance with the laws of India,
+without regard to its conflict of law principles. Any legal proceedings related to this
+Agreement shall be brought exclusively in the courts located in Jaipur, Rajasthan, India.
+
+9. ENTIRE AGREEMENT
+This Agreement constitutes the entire agreement between the parties and supersedes all
+prior negotiations, representations, and agreements, whether written or oral.
+
+10. SEVERABILITY
+If any provision of this Agreement is found to be invalid or unenforceable, the remaining
+provisions shall continue in full force and effect.
+
+11. CONTACT
+For inquiries regarding licensing, distribution, or any modifications to this Agreement,
+contact Protingent India LLP at it@protingentindia.com
+
+---
+
+Copyright © 2026 Protingent India LLP. All rights reserved.
+Unauthorized use, reproduction, or distribution is strictly prohibited.

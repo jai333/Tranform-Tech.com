@@ -4,14 +4,40 @@
 
 ## License
 
-This project is licensed under the Apache License 2.0. See the `LICENSE` file for details.
+This project is available under a **Dual License Model**:
+
+1. **Proprietary License** (Primary) - See `PROPRIETARY_LICENSE.txt`
+   - Restricted usage for authorized parties only
+   - Commercial use prohibited without explicit permission
+   - Best for internal and private use
+   - Contact: it@protingentindia.com for licensing inquiries
+
+2. **Apache License 2.0** (Secondary) - See `LICENSE` file
+   - Optional permissive license for approved distributions
+   - Includes patent protection and grants
+   - Only applies if explicitly granted by Protingent India LLP
+
+## Usage Rights
+
+**Default**: All rights reserved under Proprietary License.
+
+You are authorized to:
+- Use this software internally within Protingent India LLP
+- Modify code for internal business purposes
+- Deploy to production servers owned by Protingent India LLP
+
+You are NOT authorized to:
+- Share or distribute the software
+- Sublicense or resell
+- Use in competing products
+- Reverse engineer or decompile
+- Claim ownership or authorship
 
 ## Patent Protection
 
-This software is protected under Apache License 2.0, which includes explicit patent grants and protections:
-
-- **Patent Grant**: Each contributor grants you a perpetual, worldwide, non-exclusive, royalty-free patent license to make, use, and distribute the Work.
-- **Patent Retaliation Clause**: If you initiate patent litigation against any entity, your patent licenses under this project are terminated.
+This software is protected under both:
+- **Proprietary License**: Explicit trade secret protection
+- **Apache License 2.0** (if applicable): Patent grants and protections
 
 ## Ownership
 
@@ -23,17 +49,21 @@ This software is protected under Apache License 2.0, which includes explicit pat
 
 ## Permitted Uses
 
-Under Apache 2.0, you may:
-- Use this software for any purpose
-- Modify and distribute copies
-- Include in proprietary applications
+Under the Proprietary License, usage is restricted to:
+- Internal development and testing
+- Deployment within Protingent India LLP infrastructure
+- Authorized team members only
+
+Any other use requires written consent from Protingent India LLP.
 
 ## Conditions
 
-You must:
-- Include a copy of the license
-- State significant changes made
-- Preserve copyright, patent, trademark, and attribution notices
+All users must:
+- Preserve copyright and proprietary notices
+- Not distribute, share, or sublicense
+- Maintain confidentiality of the source code
+- Report security vulnerabilities to: it@protingentindia.com
+- Comply with all applicable laws
 
 ## Disclaimer
 
