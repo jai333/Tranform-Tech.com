@@ -359,3 +359,224 @@ class Note(models.Model):
 
     def __str__(self):
         return f"Note for {self.candidate} by {self.created_by}"
+
+
+# AI/ML Related Models
+
+class ResumeData(models.Model):
+    """Store parsed resume data and extracted information"""
+    candidate = models.OneToOneField(Candidate, on_delete=models.CASCADE, related_name='resume_data')
+    resume_file = models.FileField(upload_to='resumes/', null=True, blank=True)
+    
+    # Extracted contact information
+    email = models.EmailField(blank=True, null=True)
+    phone = models.CharField(max_length=20, blank=True, null=True)
+    linkedin_url = models.URLField(blank=True, null=True)
+    
+    # Extracted professional information
+    skills = models.JSONField(default=list, help_text="List of extracted skills with proficiency levels")
+    experience_years = models.FloatField(null=True, blank=True, help_text="Total years of experience")
+    education = models.JSONField(default=list, help_text="List of education details")
+    certifications = models.JSONField(default=list, help_text="List of certifications")
+    
+    # Metadata
+    raw_text = models.TextField(blank=True, null=True, help_text="Raw extracted text from resume")
+    parse_status = models.CharField(
+        max_length=20,
+        choices=[
+            ('pending', 'Pending'),
+            ('processing', 'Processing'),
+            ('success', 'Success'),
+            ('failed', 'Failed'),
+        ],
+        default='pending'
+    )
+    parse_error = models.TextField(blank=True, null=True)
+    
+    parsed_date = models.DateTimeField(auto_now_add=True)
+    updated_date = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return f"Resume data for {self.candidate.full_name}"
+
+
+class JobMatch(models.Model):
+    """Store job-to-candidate matching scores and analysis"""
+    candidate = models.ForeignKey(Candidate, on_delete=models.CASCADE, related_name='job_matches')
+    job = models.ForeignKey(Job, on_delete=models.CASCADE, related_name='candidate_matches')
+    
+    # Match scores (0-100)
+    overall_score = models.IntegerField(help_text="Overall match score 0-100")
+    skill_match_score = models.IntegerField(help_text="Skill match percentage")
+    experience_match_score = models.IntegerField(help_text="Experience match percentage")
+    education_match_score = models.IntegerField(help_text="Education match percentage")
+    culture_fit_score = models.IntegerField(help_text="Culture fit percentage")
+    availability_score = models.IntegerField(help_text="Availability match percentage")
+    
+    # Analysis data
+    matching_skills = models.JSONField(default=list, help_text="Skills that match job requirements")
+    missing_skills = models.JSONField(default=list, help_text="Required skills candidate doesn't have")
+    experience_gap = models.TextField(blank=True, null=True, help_text="Experience gaps analysis")
+    recommendations = models.JSONField(default=list, help_text="Recommendations for improvement")
+    
+    is_auto_matched = models.BooleanField(default=False, help_text="Auto-matched by AI algorithm")
+    calculated_date = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        unique_together = ('candidate', 'job')
+        ordering = ['-overall_score']
+    
+    def __str__(self):
+        return f"{self.candidate.full_name} -> {self.job.title} ({self.overall_score}%)"
+
+
+class CandidateAISummary(models.Model):
+    """AI-generated summaries and insights about candidates"""
+    candidate = models.OneToOneField(Candidate, on_delete=models.CASCADE, related_name='ai_summary')
+    
+    # AI Generated summaries
+    professional_summary = models.TextField(help_text="AI-generated professional summary")
+    key_strengths = models.JSONField(default=list, help_text="Top 5 key strengths")
+    development_areas = models.JSONField(default=list, help_text="Areas for development")
+    ideal_roles = models.JSONField(default=list, help_text="Recommended job roles")
+    
+    # Scores and ratings
+    overall_profile_score = models.IntegerField(help_text="Overall candidate quality score 0-100")
+    communication_score = models.IntegerField(help_text="Communication skills score")
+    technical_score = models.IntegerField(help_text="Technical skills score")
+    leadership_score = models.IntegerField(help_text="Leadership potential score")
+    
+    # Summary metadata
+    summary_date = models.DateTimeField(auto_now_add=True)
+    updated_date = models.DateTimeField(auto_now=True)
+    generated_by = models.CharField(max_length=50, default='ai_engine')
+    
+    def __str__(self):
+        return f"AI Summary for {self.candidate.full_name}"
+
+
+class AdvancedSearch(models.Model):
+    """Store saved advanced search filters and queries"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='saved_searches')
+    
+    name = models.CharField(max_length=255, help_text="Name of the saved search")
+    description = models.TextField(blank=True, null=True)
+    
+    # Search filters
+    skills_filter = models.JSONField(default=list, help_text="Required skills")
+    experience_min = models.FloatField(null=True, blank=True)
+    experience_max = models.FloatField(null=True, blank=True)
+    location_filter = models.JSONField(default=list, help_text="Location preferences")
+    salary_min = models.IntegerField(null=True, blank=True)
+    salary_max = models.IntegerField(null=True, blank=True)
+    job_type_filter = models.JSONField(default=list, help_text="Job types")
+    education_filter = models.JSONField(default=list, help_text="Education requirements")
+    
+    # Query metadata
+    is_active = models.BooleanField(default=True)
+    created_date = models.DateTimeField(auto_now_add=True)
+    updated_date = models.DateTimeField(auto_now=True)
+    last_used_date = models.DateTimeField(null=True, blank=True)
+    result_count = models.IntegerField(default=0, help_text="Number of results from last search")
+    
+    class Meta:
+        ordering = ['-updated_date']
+    
+    def __str__(self):
+        return f"{self.user.username}'s search: {self.name}"
+
+
+class ThirdPartyIntegration(models.Model):
+    """Configuration for third-party integrations (Bullhorn, LinkedIn, etc.)"""
+    PROVIDER_CHOICES = [
+        ('bullhorn', 'Bullhorn'),
+        ('linkedin', 'LinkedIn'),
+        ('greenhouse', 'Greenhouse'),
+        ('workday', 'Workday'),
+        ('generic_api', 'Generic API'),
+    ]
+    
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='integrations')
+    provider = models.CharField(max_length=50, choices=PROVIDER_CHOICES)
+    
+    # Credentials and configuration
+    api_key = models.CharField(max_length=255, blank=True, null=True)
+    api_secret = models.CharField(max_length=255, blank=True, null=True)
+    oauth_token = models.TextField(blank=True, null=True)
+    refresh_token = models.TextField(blank=True, null=True)
+    api_endpoint = models.URLField(blank=True, null=True, help_text="Custom API endpoint for generic APIs")
+    
+    # Field mappings for data sync
+    field_mappings = models.JSONField(default=dict, help_text="Mapping of internal fields to provider fields")
+    
+    # Sync configuration
+    is_active = models.BooleanField(default=True)
+    auto_sync_enabled = models.BooleanField(default=False)
+    last_sync_date = models.DateTimeField(null=True, blank=True)
+    
+    created_date = models.DateTimeField(auto_now_add=True)
+    updated_date = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return f"{self.user.username}'s {self.get_provider_display()} integration"
+
+
+class SyncLog(models.Model):
+    """Log all sync operations between systems"""
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('in_progress', 'In Progress'),
+        ('success', 'Success'),
+        ('failed', 'Failed'),
+        ('partial', 'Partially Synced'),
+    ]
+    
+    integration = models.ForeignKey(ThirdPartyIntegration, on_delete=models.CASCADE, related_name='sync_logs')
+    sync_type = models.CharField(max_length=50, help_text="e.g., 'sync_candidates', 'sync_jobs'")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    
+    # Sync details
+    records_processed = models.IntegerField(default=0)
+    records_successful = models.IntegerField(default=0)
+    records_failed = models.IntegerField(default=0)
+    error_message = models.TextField(blank=True, null=True)
+    
+    # Metadata
+    started_at = models.DateTimeField(auto_now_add=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    duration_seconds = models.IntegerField(null=True, blank=True)
+    
+    class Meta:
+        ordering = ['-started_at']
+    
+    def __str__(self):
+        return f"{self.integration} - {self.sync_type} ({self.status})"
+
+
+class FieldMappingConfig(models.Model):
+    """Configuration for field mappings between systems"""
+    integration = models.ForeignKey(ThirdPartyIntegration, on_delete=models.CASCADE, related_name='field_configs')
+    
+    internal_field = models.CharField(max_length=100, help_text="Field name in our system")
+    external_field = models.CharField(max_length=100, help_text="Field name in external system")
+    field_type = models.CharField(
+        max_length=50,
+        choices=[
+            ('string', 'String'),
+            ('integer', 'Integer'),
+            ('date', 'Date'),
+            ('boolean', 'Boolean'),
+            ('json', 'JSON'),
+        ],
+        default='string'
+    )
+    
+    is_required = models.BooleanField(default=False)
+    is_bidirectional = models.BooleanField(default=False, help_text="Sync in both directions")
+    transform_function = models.CharField(max_length=255, blank=True, null=True, help_text="Optional data transformation")
+    
+    class Meta:
+        unique_together = ('integration', 'internal_field', 'external_field')
+    
+    def __str__(self):
+        return f"{self.integration} - {self.internal_field} -> {self.external_field}"

@@ -1,6 +1,7 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
 from . import views
+from . import ai_views
 
 urlpatterns = [
     path('', views.home, name='home'),
@@ -73,4 +74,13 @@ urlpatterns = [
     path('notes/create/', views.NoteCreateView.as_view(), name='note-create'),
     path('notes/<int:pk>/update/', views.NoteUpdateView.as_view(), name='note-update'),
     path('notes/<int:pk>/delete/', views.NoteDeleteView.as_view(), name='note-delete'),
-] 
+    
+    # AI/ML Features URLs
+    path('api/parse-resume/', ai_views.parse_resume_api, name='parse-resume-api'),
+    path('api/calculate-job-match/', ai_views.calculate_job_match_api, name='calculate-job-match-api'),
+    path('api/candidate/<int:candidate_id>/matches/', ai_views.get_candidate_matches, name='get-candidate-matches'),
+    path('api/job/<int:job_id>/candidates/', ai_views.get_job_candidates, name='get-job-candidates'),
+    path('api/save-search/', ai_views.save_advanced_search, name='save-advanced-search'),
+    path('api/candidate/<int:candidate_id>/ai-summary/', ai_views.get_candidate_ai_summary, name='get-candidate-ai-summary'),
+    path('candidate/<int:candidate_id>/ai-profile/', ai_views.candidate_detail_with_ai, name='candidate-ai-profile'),
+]

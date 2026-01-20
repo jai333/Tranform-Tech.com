@@ -1,0 +1,487 @@
+{% extends "tracking_app/base.html" %}
+{% load custom_filters %}
+
+{% block title %}{{ candidate.full_name }} - AI Profile{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Candidate Basic Info -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h3>{{ candidate.full_name }}</h3>
+                    <p class="mb-0 small">Candidate Profile with AI Insights</p>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Email:</strong> {{ candidate.email }}</p>
+                            <p><strong>Phone:</strong> {{ candidate.phone }}</p>
+                            <p><strong>Application Date:</strong> {{ candidate.application_date }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            {% if resume_data %}
+                                <p><strong>Resume Status:</strong> <span class="badge bg-success">Parsed</span></p>
+                                <p><strong>Experience:</strong> {{ resume_data.experience_years }} years</p>
+                            {% else %}
+                                <p><strong>Resume Status:</strong> <span class="badge bg-warning">Not Parsed</span></p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resume Upload Section -->
+            {% if not resume_data %}
+            <div class="card mb-4 border-warning">
+                <div class="card-header bg-warning text-dark">
+                    <h5><i class="fas fa-upload"></i> Upload & Parse Resume</h5>
+                </div>
+                <div class="card-body">
+                    <form id="resumeForm" class="mb-3">
+                        <input type="hidden" id="candidateId" value="{{ candidate.id }}">
+                        <div class="mb-3">
+                            <label for="resumeFile" class="form-label">Select Resume File (PDF, DOCX, TXT)</label>
+                            <input type="file" class="form-control" id="resumeFile" name="resume" accept=".pdf,.docx,.txt" required>
+                            <small class="text-muted">Supported formats: PDF, Word Document, Text File</small>
+                        </div>
+                        <button type="submit" class="btn btn-warning" id="parseBtn">
+                            <i class="fas fa-brain"></i> Parse with AI
+                        </button>
+                    </form>
+                    <div id="parseStatus" style="display: none;">
+                        <div class="alert alert-info">
+                            <span id="statusMessage">Processing resume...</span>
+                            <div class="spinner-border spinner-border-sm ms-2" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Parsed Resume Data -->
+            {% if resume_data %}
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5><i class="fas fa-file-alt"></i> Extracted Resume Information</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Skills Section -->
+                    <div class="mb-4">
+                        <h6><i class="fas fa-code"></i> Technical Skills</h6>
+                        <div class="d-flex flex-wrap gap-2">
+                            {% for skill in resume_data.skills %}
+                                {% if skill.name %}
+                                    <span class="badge bg-info">
+                                        {{ skill.name }}
+                                        {% if skill.proficiency %}
+                                            <small>({{ skill.proficiency }})</small>
+                                        {% endif %}
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-info">{{ skill }}</span>
+                                {% endif %}
+                            {% empty %}
+                                <p class="text-muted">No skills extracted</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Education Section -->
+                    <div class="mb-4">
+                        <h6><i class="fas fa-graduation-cap"></i> Education</h6>
+                        {% if resume_data.education %}
+                            <ul class="list-unstyled">
+                                {% for edu in resume_data.education %}
+                                    <li class="mb-2">
+                                        <strong>{{ edu.degree }}</strong> in {{ edu.field }}
+                                        <br><small class="text-muted">{{ edu.institution }} ({{ edu.year }})</small>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="text-muted">No education data extracted</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Certifications Section -->
+                    <div class="mb-4">
+                        <h6><i class="fas fa-certificate"></i> Certifications</h6>
+                        {% if resume_data.certifications %}
+                            <ul class="list-unstyled">
+                                {% for cert in resume_data.certifications %}
+                                    <li class="mb-2">
+                                        <strong>{{ cert.name }}</strong>
+                                        <br><small class="text-muted">{{ cert.issuer }} ({{ cert.date }})</small>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="text-muted">No certifications extracted</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Contact Info Section -->
+                    <div class="mb-4">
+                        <h6><i class="fas fa-phone"></i> Contact Information</h6>
+                        <p class="mb-1">
+                            <strong>Email:</strong> {{ resume_data.email|default:"Not found" }}
+                        </p>
+                        <p class="mb-1">
+                            <strong>Phone:</strong> {{ resume_data.phone|default:"Not found" }}
+                        </p>
+                        {% if resume_data.linkedin_url %}
+                            <p>
+                                <strong>LinkedIn:</strong> 
+                                <a href="{{ resume_data.linkedin_url }}" target="_blank">{{ resume_data.linkedin_url }}</a>
+                            </p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- AI Summary Section -->
+            {% if ai_summary %}
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5><i class="fas fa-lightbulb"></i> AI-Generated Summary</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Scores -->
+                    <div class="row mb-4">
+                        <div class="col-md-6 mb-3">
+                            <div class="score-box">
+                                <h6>Overall Profile Score</h6>
+                                <div class="progress" style="height: 25px;">
+                                    <div class="progress-bar bg-success" role="progressbar" 
+                                         style="width: {{ ai_summary.overall_profile_score }}%" 
+                                         aria-valuenow="{{ ai_summary.overall_profile_score }}" 
+                                         aria-valuemin="0" aria-valuemax="100">
+                                        {{ ai_summary.overall_profile_score }}%
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="score-box">
+                                <h6>Technical Skills Score</h6>
+                                <div class="progress" style="height: 25px;">
+                                    <div class="progress-bar bg-primary" role="progressbar" 
+                                         style="width: {{ ai_summary.technical_score }}%" 
+                                         aria-valuenow="{{ ai_summary.technical_score }}" 
+                                         aria-valuemin="0" aria-valuemax="100">
+                                        {{ ai_summary.technical_score }}%
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="score-box">
+                                <h6>Communication Score</h6>
+                                <div class="progress" style="height: 25px;">
+                                    <div class="progress-bar bg-warning" role="progressbar" 
+                                         style="width: {{ ai_summary.communication_score }}%" 
+                                         aria-valuenow="{{ ai_summary.communication_score }}" 
+                                         aria-valuemin="0" aria-valuemax="100">
+                                        {{ ai_summary.communication_score }}%
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="score-box">
+                                <h6>Leadership Potential</h6>
+                                <div class="progress" style="height: 25px;">
+                                    <div class="progress-bar bg-danger" role="progressbar" 
+                                         style="width: {{ ai_summary.leadership_score }}%" 
+                                         aria-valuenow="{{ ai_summary.leadership_score }}" 
+                                         aria-valuemin="0" aria-valuemax="100">
+                                        {{ ai_summary.leadership_score }}%
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Professional Summary -->
+                    <div class="mb-4">
+                        <h6><i class="fas fa-paragraph"></i> Professional Summary</h6>
+                        <p>{{ ai_summary.professional_summary }}</p>
+                    </div>
+
+                    <!-- Key Strengths -->
+                    <div class="mb-4">
+                        <h6><i class="fas fa-star"></i> Key Strengths</h6>
+                        <ul class="list-group">
+                            {% for strength in ai_summary.key_strengths %}
+                                <li class="list-group-item">
+                                    <i class="fas fa-check-circle text-success"></i> {{ strength }}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+
+                    <!-- Development Areas -->
+                    <div class="mb-4">
+                        <h6><i class="fas fa-arrows-alt"></i> Areas for Development</h6>
+                        <ul class="list-group">
+                            {% for area in ai_summary.development_areas %}
+                                <li class="list-group-item">
+                                    <i class="fas fa-lightbulb"></i> {{ area }}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+
+                    <!-- Ideal Roles -->
+                    <div class="mb-4">
+                        <h6><i class="fas fa-briefcase"></i> Ideal Job Roles</h6>
+                        <div class="d-flex flex-wrap gap-2">
+                            {% for role in ai_summary.ideal_roles %}
+                                <span class="badge bg-purple">{{ role }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Job Matches Section -->
+            {% if top_matches %}
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <h5><i class="fas fa-handshake"></i> Top Job Matches</h5>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Job Title</th>
+                                <th>Overall Score</th>
+                                <th>Skills Match</th>
+                                <th>Experience</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for match in top_matches %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ match.job.title }}</strong>
+                                        <br><small class="text-muted">{{ match.job.company }}</small>
+                                    </td>
+                                    <td>
+                                        <div class="match-badge" style="background: linear-gradient(90deg, #dc3545 0%, #ffc107 50%, #28a745 100%);">
+                                            <span style="color: white; font-weight: bold;">{{ match.overall_score }}%</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge" 
+                                              style="background-color: {% if match.skill_match_score > 70 %}#28a745{% elif match.skill_match_score > 40 %}#ffc107{% else %}#dc3545{% endif %}">
+                                            {{ match.skill_match_score }}%
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge" 
+                                              style="background-color: {% if match.experience_match_score > 70 %}#28a745{% elif match.experience_match_score > 40 %}#ffc107{% else %}#dc3545{% endif %}">
+                                            {{ match.experience_match_score }}%
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'job-detail' match.job.id %}" class="btn btn-sm btn-primary">
+                                            View Job
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Quick Stats -->
+            <div class="card mb-4">
+                <div class="card-header bg-dark text-white">
+                    <h5><i class="fas fa-chart-bar"></i> Quick Stats</h5>
+                </div>
+                <div class="card-body">
+                    {% if resume_data %}
+                        <div class="mb-3">
+                            <p><strong>Total Skills:</strong></p>
+                            <h4 class="text-primary">{{ resume_data.skills|length }}</h4>
+                        </div>
+                        <div class="mb-3">
+                            <p><strong>Years of Experience:</strong></p>
+                            <h4 class="text-success">{{ resume_data.experience_years|floatformat:1 }}</h4>
+                        </div>
+                        <div class="mb-3">
+                            <p><strong>Education Level:</strong></p>
+                            <h4 class="text-info">{{ resume_data.education|length }} Degree(s)</h4>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">Upload resume to see statistics</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card mb-4">
+                <div class="card-header bg-dark text-white">
+                    <h5><i class="fas fa-tasks"></i> Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'candidate-update' candidate.id %}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-edit"></i> Edit Profile
+                        </a>
+                        <button type="button" class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#matchJobModal">
+                            <i class="fas fa-search"></i> Find Matching Jobs
+                        </button>
+                        <a href="{% url 'candidate-list' %}" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-arrow-left"></i> Back to Candidates
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resume Info -->
+            {% if resume_data %}
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h5><i class="fas fa-file-pdf"></i> Resume File</h5>
+                </div>
+                <div class="card-body">
+                    <p class="small text-muted mb-2">Parsed on: {{ resume_data.parsed_date|date:"M d, Y H:i" }}</p>
+                    {% if resume_data.resume_file %}
+                        <a href="{{ resume_data.resume_file.url }}" class="btn btn-sm btn-primary" target="_blank">
+                            <i class="fas fa-download"></i> Download
+                        </a>
+                    {% endif %}
+                    <button class="btn btn-sm btn-warning" id="reparseBtn">
+                        <i class="fas fa-redo"></i> Re-parse
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Match Job Modal -->
+<div class="modal fade" id="matchJobModal" tabindex="-1" aria-labelledby="matchJobModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="matchJobModalLabel">Calculate Job Match</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <label for="jobSelect" class="form-label">Select a Job</label>
+                <select class="form-select" id="jobSelect">
+                    <option value="">-- Choose a job --</option>
+                    <!-- This would be populated by JavaScript from available jobs -->
+                </select>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="calculateMatchBtn">
+                    <i class="fas fa-calculator"></i> Calculate Match
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .match-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 60px;
+        padding: 8px 12px;
+        border-radius: 6px;
+        font-weight: bold;
+    }
+
+    .score-box {
+        padding: 15px;
+        background-color: #f8f9fa;
+        border-radius: 6px;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const resumeForm = document.getElementById('resumeForm');
+    const parseBtn = document.getElementById('parseBtn');
+    const parseStatus = document.getElementById('parseStatus');
+    const statusMessage = document.getElementById('statusMessage');
+    const candidateId = document.getElementById('candidateId').value;
+
+    if (resumeForm) {
+        resumeForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData();
+            formData.append('candidate_id', candidateId);
+            formData.append('resume', document.getElementById('resumeFile').files[0]);
+
+            parseBtn.disabled = true;
+            parseStatus.style.display = 'block';
+            statusMessage.textContent = 'Processing resume with AI...';
+
+            fetch('/api/parse-resume/', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                parseStatus.style.display = 'none';
+                if (data.success) {
+                    statusMessage.textContent = 'Resume parsed successfully!';
+                    setTimeout(() => {
+                        location.reload();
+                    }, 2000);
+                } else {
+                    alert('Error: ' + data.error);
+                    parseBtn.disabled = false;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error parsing resume: ' + error);
+                parseBtn.disabled = false;
+                parseStatus.style.display = 'none';
+            });
+        });
+    }
+
+    // CSRF token helper
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+});
+</script>
+{% endblock %}
