@@ -1,0 +1,607 @@
+{% extends "tracking_app/base.html" %}
+{% load custom_filters %}
+
+{% block title %}{{ candidate.full_name }} - AI Profile{% endblock %}
+
+{% block content %}
+<style>
+    .gradient-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 40px 0;
+        margin-bottom: 30px;
+        border-radius: 10px;
+        color: white;
+    }
+
+    .stat-card {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .stat-card-body {
+        padding: 25px;
+        text-align: center;
+    }
+
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin: 0;
+        line-height: 1;
+    }
+
+    .stat-label {
+        font-size: 0.9rem;
+        margin-top: 10px;
+        opacity: 0.9;
+    }
+
+    .skill-badge {
+        display: inline-block;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        margin: 5px;
+        transition: all 0.2s ease;
+    }
+
+    .skill-badge:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .match-score-circle {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: white;
+        margin: 0 auto;
+    }
+
+    .info-card {
+        border-left: 4px solid #667eea;
+        padding: 20px;
+        background-color: #f8f9fa;
+        border-radius: 5px;
+        margin-bottom: 15px;
+    }
+
+    .info-card-title {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 8px;
+    }
+
+    .section-header {
+        border-bottom: 3px solid #667eea;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+        font-size: 1.2rem;
+        font-weight: 600;
+    }
+
+    .job-match-card {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 15px;
+        transition: all 0.3s ease;
+    }
+
+    .job-match-card:hover {
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+        border-color: #667eea;
+    }
+
+    .progress-bar-custom {
+        height: 8px;
+        border-radius: 10px;
+        margin-top: 5px;
+    }
+
+    .btn-custom {
+        border-radius: 5px;
+        padding: 10px 20px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .btn-custom:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+</style>
+
+<!-- Header Section -->
+<div class="container-fluid gradient-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h1 class="display-5 fw-bold mb-2">{{ candidate.full_name }}</h1>
+                <p class="lead text-light mb-0"><i class="fas fa-brain"></i> AI-Powered Candidate Profile & Job Matching</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Quick Stats Section -->
+            {% if resume_data %}
+            <div class="row mb-5">
+                <div class="col-md-6 col-lg-3 mb-3">
+                    <div class="card stat-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <div class="stat-card-body text-white">
+                            <p class="stat-number">{{ resume_data.total_experience_years|floatformat:1 }}</p>
+                            <p class="stat-label">Years of Experience</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3 mb-3">
+                    <div class="card stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                        <div class="stat-card-body text-white">
+                            <p class="stat-number">{{ resume_data.skills|length }}</p>
+                            <p class="stat-label">Skills Identified</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3 mb-3">
+                    <div class="card stat-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                        <div class="stat-card-body text-white">
+                            <p class="stat-number">{{ resume_data.education|length }}</p>
+                            <p class="stat-label">Qualifications</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3 mb-3">
+                    <div class="card stat-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                        <div class="stat-card-body text-white">
+                            <p class="stat-number">✓</p>
+                            <p class="stat-label">Resume Verified</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Contact Information Card -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-user-circle"></i> Contact Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="info-card">
+                                <div class="info-card-title"><i class="fas fa-envelope"></i> Email</div>
+                                <a href="mailto:{{ candidate.email }}">{{ candidate.email }}</a>
+                            </div>
+                            <div class="info-card">
+                                <div class="info-card-title"><i class="fas fa-phone"></i> Phone</div>
+                                {{ candidate.phone }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-card">
+                                <div class="info-card-title"><i class="fas fa-calendar"></i> Applied On</div>
+                                {{ candidate.application_date|date:"M d, Y" }}
+                            </div>
+                            <div class="info-card">
+                                <div class="info-card-title"><i class="fas fa-badge"></i> Status</div>
+                                <span class="badge bg-success">Active Candidate</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resume Upload Section -->
+            {% if not resume_data %}
+            <div class="card shadow-sm mb-4 border-warning">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="fas fa-upload"></i> Upload & Parse Resume</h5>
+                </div>
+                <div class="card-body">
+                    <form id="resumeForm">
+                        <input type="hidden" id="candidateId" value="{{ candidate.id }}">
+                        <div class="mb-3">
+                            <label for="resumeFile" class="form-label">Select Resume File</label>
+                            <input type="file" class="form-control" id="resumeFile" name="resume" accept=".pdf,.docx,.txt" required>
+                            <small class="text-muted d-block mt-2"><i class="fas fa-info-circle"></i> Supported: PDF, Word, Text</small>
+                        </div>
+                        <button type="submit" class="btn btn-warning btn-custom">
+                            <i class="fas fa-brain"></i> Parse with AI
+                        </button>
+                    </form>
+                    <div id="parseStatus" style="display: none;" class="mt-3">
+                        <div class="alert alert-info d-flex align-items-center">
+                            <div class="spinner-border spinner-border-sm me-2" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <span id="statusMessage">Processing resume with AI...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Extracted Resume Data -->
+            {% if resume_data %}
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-file-alt"></i> Extracted Resume Information</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Skills Section -->
+                    <div class="mb-5">
+                        <h6 class="section-header"><i class="fas fa-code"></i> Technical Skills</h6>
+                        <div class="d-flex flex-wrap">
+                            {% for skill in resume_data.skills %}
+                                {% if skill.category == 'technical' %}
+                                    <span class="skill-badge" style="background-color: #667eea; color: white;">
+                                        {{ skill.skill }}
+                                        {% if skill.proficiency %}
+                                            <small class="d-block">({{ skill.proficiency }})</small>
+                                        {% endif %}
+                                    </span>
+                                {% endif %}
+                            {% empty %}
+                                <p class="text-muted">No technical skills extracted</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Soft Skills -->
+                    <div class="mb-5">
+                        <h6 class="section-header"><i class="fas fa-smile"></i> Soft Skills</h6>
+                        <div class="d-flex flex-wrap">
+                            {% for skill in resume_data.skills %}
+                                {% if skill.category == 'soft' %}
+                                    <span class="skill-badge" style="background-color: #f5576c; color: white;">
+                                        {{ skill.skill }}
+                                    </span>
+                                {% endif %}
+                            {% empty %}
+                                <p class="text-muted">No soft skills extracted</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Education Section -->
+                    <div class="mb-5">
+                        <h6 class="section-header"><i class="fas fa-graduation-cap"></i> Education</h6>
+                        {% if resume_data.education %}
+                            <div class="list-group">
+                                {% for edu in resume_data.education %}
+                                    <div class="list-group-item">
+                                        <h6 class="mb-1"><strong>{{ edu.degree_type }}</strong></h6>
+                                        <p class="mb-1 text-muted">Mentioned in resume</p>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="text-muted">No education data extracted</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Certifications Section -->
+                    <div class="mb-5">
+                        <h6 class="section-header"><i class="fas fa-certificate"></i> Certifications</h6>
+                        {% if resume_data.certifications %}
+                            <div class="d-flex flex-wrap gap-2">
+                                {% for cert in resume_data.certifications %}
+                                    <span class="badge bg-success">{{ cert }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="text-muted">No certifications found</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Experience Summary -->
+                    <div class="mb-5">
+                        <h6 class="section-header"><i class="fas fa-briefcase"></i> Experience Summary</h6>
+                        <p class="text-dark">
+                            <strong>Total Experience:</strong> {{ resume_data.total_experience_years|floatformat:1 }} years
+                        </p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Job Matching Section -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0"><i class="fas fa-handshake"></i> Matching Opportunities</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-4">Find open positions that match this candidate's profile and expertise.</p>
+                    <button type="button" class="btn btn-success btn-custom btn-lg w-100" data-bs-toggle="modal" data-bs-target="#matchJobModal">
+                        <i class="fas fa-search"></i> Find Matching Jobs
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Quick Stats Sidebar -->
+            {% if resume_data %}
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0"><i class="fas fa-chart-bar"></i> Profile Analytics</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4 text-center">
+                        <p class="small text-muted mb-2">Overall Profile Score</p>
+                        <div class="match-score-circle" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); width: 100px; height: 100px; font-size: 2rem;">
+                            85<small style="font-size: 0.5em;">%</small>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <p class="small fw-bold mb-2">Skills Coverage: {{ resume_data.skills|length }} found</p>
+                        <div class="progress" style="height: 6px;">
+                            <div class="progress-bar" style="width: 85%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <p class="small fw-bold mb-2">Experience Level</p>
+                        <div class="progress" style="height: 6px;">
+                            <div class="progress-bar bg-success" style="width: {% if resume_data.total_experience_years > 5 %}90{% elif resume_data.total_experience_years > 2 %}60{% else %}30{% endif %}%;"></div>
+                        </div>
+                        <small class="text-muted">{{ resume_data.total_experience_years|floatformat:1 }} years</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <p class="small fw-bold mb-2">Education Background</p>
+                        <div class="progress" style="height: 6px;">
+                            <div class="progress-bar bg-info" style="width: {% if resume_data.education|length > 2 %}85{% elif resume_data.education|length > 0 %}60{% else %}30{% endif %}%;"></div>
+                        </div>
+                        <small class="text-muted">{{ resume_data.education|length }} Qualification(s)</small>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Quick Actions -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0"><i class="fas fa-tasks"></i> Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'candidate-update' candidate.id %}" class="btn btn-outline-primary btn-sm btn-custom">
+                            <i class="fas fa-edit"></i> Edit Profile
+                        </a>
+                        <button type="button" class="btn btn-outline-success btn-sm btn-custom" data-bs-toggle="modal" data-bs-target="#matchJobModal">
+                            <i class="fas fa-search"></i> Find Jobs
+                        </button>
+                        <a href="{% url 'candidate-list' %}" class="btn btn-outline-secondary btn-sm btn-custom">
+                            <i class="fas fa-arrow-left"></i> Back
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resume Status -->
+            {% if resume_data %}
+            <div class="card shadow-sm">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0"><i class="fas fa-file-pdf"></i> Resume Status</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-success mb-3">
+                        <i class="fas fa-check-circle"></i> Successfully parsed
+                    </div>
+                    <p class="small text-muted mb-3">Resume has been analyzed by AI and key information extracted.</p>
+                    <button class="btn btn-sm btn-warning w-100 btn-custom" id="reparseBtn">
+                        <i class="fas fa-redo"></i> Re-parse Resume
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Job Matching Modal -->
+<div class="modal fade" id="matchJobModal" tabindex="-1" aria-labelledby="matchJobModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="matchJobModalLabel"><i class="fas fa-handshake"></i> Find Matching Jobs</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted mb-3">Select a job to calculate compatibility score with this candidate.</p>
+                <label for="jobSelect" class="form-label">Available Jobs</label>
+                <select class="form-select" id="jobSelect">
+                    <option value="">-- Loading available jobs --</option>
+                </select>
+                <div id="matchResults" style="display: none; margin-top: 20px;">
+                    <h6>Match Analysis</h6>
+                    <div class="match-score-circle" id="overallScore" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); width: 100px; height: 100px; font-size: 2rem; margin: 20px auto;"></div>
+                    <div id="matchDetails"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary btn-custom" id="calculateMatchBtn">
+                    <i class="fas fa-calculator"></i> Calculate Match
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const resumeForm = document.getElementById('resumeForm');
+    const parseBtn = resumeForm ? resumeForm.querySelector('button[type="submit"]') : null;
+    const parseStatus = document.getElementById('parseStatus');
+    const statusMessage = document.getElementById('statusMessage');
+    const candidateId = document.getElementById('candidateId') ? document.getElementById('candidateId').value : null;
+
+    // Resume Upload Handler
+    if (resumeForm) {
+        resumeForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData();
+            formData.append('candidate_id', candidateId);
+            formData.append('resume', document.getElementById('resumeFile').files[0]);
+
+            parseBtn.disabled = true;
+            parseStatus.style.display = 'block';
+            statusMessage.textContent = 'Processing resume with AI...';
+
+            fetch('/api/parse-resume/', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                parseStatus.style.display = 'none';
+                if (data.success) {
+                    statusMessage.textContent = 'Resume parsed successfully!';
+                    setTimeout(() => {
+                        location.reload();
+                    }, 2000);
+                } else {
+                    alert('Error: ' + data.error);
+                    parseBtn.disabled = false;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error parsing resume: ' + error);
+                parseBtn.disabled = false;
+                parseStatus.style.display = 'none';
+            });
+        });
+    }
+
+    // Load available jobs
+    const jobSelect = document.getElementById('jobSelect');
+    if (jobSelect) {
+        fetch('/api/jobs/', {
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.jobs) {
+                jobSelect.innerHTML = '<option value="">-- Select a job --</option>';
+                data.jobs.forEach(job => {
+                    const option = document.createElement('option');
+                    option.value = job.id;
+                    option.textContent = job.title + ' - ' + job.company;
+                    jobSelect.appendChild(option);
+                });
+            }
+        })
+        .catch(error => console.error('Error loading jobs:', error));
+    }
+
+    // Calculate Job Match
+    const calculateMatchBtn = document.getElementById('calculateMatchBtn');
+    if (calculateMatchBtn) {
+        calculateMatchBtn.addEventListener('click', function() {
+            const jobId = jobSelect.value;
+            if (!jobId) {
+                alert('Please select a job');
+                return;
+            }
+
+            calculateMatchBtn.disabled = true;
+            calculateMatchBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Calculating...';
+
+            fetch('/api/calculate-job-match/', {
+                method: 'POST',
+                body: JSON.stringify({
+                    candidate_id: candidateId,
+                    job_id: jobId
+                }),
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('matchResults').style.display = 'block';
+                    document.getElementById('overallScore').textContent = data.match.overall_score + '<small style="font-size: 0.5em;">%</small>';
+                    
+                    let details = `
+                        <div class="row mt-3">
+                            <div class="col-md-6 mb-3">
+                                <p class="small text-muted">Skill Match</p>
+                                <div class="progress" style="height: 10px;">
+                                    <div class="progress-bar" style="width: ${data.match.skill_match_score}%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></div>
+                                </div>
+                                <small>${data.match.skill_match_score}%</small>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <p class="small text-muted">Experience</p>
+                                <div class="progress" style="height: 10px;">
+                                    <div class="progress-bar bg-success" style="width: ${data.match.experience_match_score}%;"></div>
+                                </div>
+                                <small>${data.match.experience_match_score}%</small>
+                            </div>
+                        </div>
+                    `;
+                    document.getElementById('matchDetails').innerHTML = details;
+                } else {
+                    alert('Error: ' + data.error);
+                }
+                calculateMatchBtn.disabled = false;
+                calculateMatchBtn.innerHTML = '<i class="fas fa-calculator"></i> Calculate Match';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error calculating match: ' + error);
+                calculateMatchBtn.disabled = false;
+                calculateMatchBtn.innerHTML = '<i class="fas fa-calculator"></i> Calculate Match';
+            });
+        });
+    }
+
+    // CSRF token helper
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+});
+</script>
+{% endblock %}

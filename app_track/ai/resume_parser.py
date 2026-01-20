@@ -134,11 +134,11 @@ class ResumeParser:
         if emails:
             contact_info['email'] = emails[0]
         
-        # Phone regex
-        phone_pattern = r'(\+?1?\s?)?(\([0-9]{3}\)|[0-9]{3})[\s.-]?[0-9]{3}[\s.-]?[0-9]{4}'
+        # Phone regex - simplified for better compatibility
+        phone_pattern = r'(\d{3}[-.\s]?\d{3}[-.\s]?\d{4}|\+?\d{1,3}[-.\s]?\d{3}[-.\s]?\d{3}[-.\s]?\d{4})'
         phones = re.findall(phone_pattern, text)
         if phones:
-            contact_info['phone'] = phones[0][2] if phones[0][2] else phones[0][0]
+            contact_info['phone'] = phones[0] if isinstance(phones[0], str) else phones[0][0] if len(phones[0]) > 0 else ''
         
         # LinkedIn
         linkedin_pattern = r'linkedin\.com/in/[\w-]+'

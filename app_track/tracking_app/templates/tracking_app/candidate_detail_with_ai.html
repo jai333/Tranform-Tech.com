@@ -1,32 +1,75 @@
-{% extends "tracking_app/base.html" %}
+  {% extends "tracking_app/base.html" %}
 {% load custom_filters %}
 
 {% block title %}{{ candidate.full_name }} - AI Profile{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
+<div class="container-fluid mt-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px 0; margin-bottom: 30px; border-radius: 10px;">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8">
+                <h1 class="text-white mb-2">{{ candidate.full_name }}</h1>
+                <p class="text-light">AI-Powered Candidate Profile & Job Matching Dashboard</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
     <div class="row">
         <div class="col-lg-8">
-            <!-- Candidate Basic Info -->
-            <div class="card mb-4">
+            <!-- Quick Stats Section -->
+            {% if resume_data %}
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card text-center border-0 shadow-sm" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <div class="card-body text-white">
+                            <h3 class="card-title mb-0">{{ resume_data.total_experience_years|floatformat:1 }}</h3>
+                            <p class="card-text small">Years of Experience</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center border-0 shadow-sm" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                        <div class="card-body text-white">
+                            <h3 class="card-title mb-0">{{ resume_data.skills|length }}</h3>
+                            <p class="card-text small">Skills Identified</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center border-0 shadow-sm" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                        <div class="card-body text-white">
+                            <h3 class="card-title mb-0">{{ resume_data.education|length }}</h3>
+                            <p class="card-text small">Qualifications</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center border-0 shadow-sm" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                        <div class="card-body text-white">
+                            <h3 class="card-title mb-0">✓</h3>
+                            <p class="card-text small">Resume Parsed</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Candidate Contact Info -->
+            <div class="card mb-4 shadow-sm">
                 <div class="card-header bg-primary text-white">
-                    <h3>{{ candidate.full_name }}</h3>
-                    <p class="mb-0 small">Candidate Profile with AI Insights</p>
+                    <h5 class="mb-0"><i class="fas fa-user-circle"></i> Contact Information</h5>
                 </div>
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
-                            <p><strong>Email:</strong> {{ candidate.email }}</p>
+                            <p><strong>Email:</strong> <a href="mailto:{{ candidate.email }}">{{ candidate.email }}</a></p>
                             <p><strong>Phone:</strong> {{ candidate.phone }}</p>
-                            <p><strong>Application Date:</strong> {{ candidate.application_date }}</p>
                         </div>
                         <div class="col-md-6">
-                            {% if resume_data %}
-                                <p><strong>Resume Status:</strong> <span class="badge bg-success">Parsed</span></p>
-                                <p><strong>Experience:</strong> {{ resume_data.experience_years }} years</p>
-                            {% else %}
-                                <p><strong>Resume Status:</strong> <span class="badge bg-warning">Not Parsed</span></p>
-                            {% endif %}
+                            <p><strong>Applied:</strong> {{ candidate.application_date }}</p>
+                            <p><strong>Status:</strong> <span class="badge bg-info">Active Candidate</span></p>
                         </div>
                     </div>
                 </div>
