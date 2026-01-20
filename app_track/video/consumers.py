@@ -1,6 +1,5 @@
 import json
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import models
 from tracking_app.models import Interview
 from channels.db import database_sync_to_async
