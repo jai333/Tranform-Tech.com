@@ -388,7 +388,7 @@ class CandidateListView(LoginRequiredMixin, JobSeekerRestrictedMixin, ListView):
                 email__icontains=search_query
             )
         return queryset.only(
-            'id', 'first_name', 'last_name', 'email', 'phone', 'location', 
+            'id', 'first_name', 'last_name', 'email', 'phone', 
             'application_date', 'user_id', 'user__first_name', 'user__last_name'
         )
 

@@ -45,7 +45,6 @@
                             <th>Name</th>
                             <th>Email</th>
                             <th>Phone</th>
-                            <th>Location</th>
                             <th>Added</th>
                             <th>Actions</th>
                         </tr>
@@ -60,8 +59,7 @@
                             </td>
                             <td>{{ candidate.email }}</td>
                             <td>{{ candidate.phone|default:"-" }}</td>
-                            <td>{{ candidate.location|default:"-" }}</td>
-                            <td>{{ candidate.created_at|date:"M d, Y" }}</td>
+                            <td>{{ candidate.application_date|date:"M d, Y" }}</td>
                             <td>
                                 <div class="btn-group">
                                     <a href="{% url 'candidate-detail' candidate.id %}" class="btn-icon glass-icon" title="View Details">
