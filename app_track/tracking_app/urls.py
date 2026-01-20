@@ -78,6 +78,7 @@ urlpatterns = [
     # AI/ML Features URLs
     path('api/parse-resume/', ai_views.parse_resume_api, name='parse-resume-api'),
     path('api/calculate-job-match/', ai_views.calculate_job_match_api, name='calculate-job-match-api'),
+    path('api/jobs/', ai_views.get_jobs_api, name='get-jobs-api'),
     path('api/candidate/<int:candidate_id>/matches/', ai_views.get_candidate_matches, name='get-candidate-matches'),
     path('api/job/<int:job_id>/candidates/', ai_views.get_job_candidates, name='get-job-candidates'),
     path('api/save-search/', ai_views.save_advanced_search, name='save-advanced-search'),

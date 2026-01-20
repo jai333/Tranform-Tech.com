@@ -391,3 +391,24 @@ def candidate_detail_with_ai(request, candidate_id):
     }
     
     return render(request, 'tracking_app/candidate_detail_with_ai.html', context)
+
+
+@login_required
+@require_http_methods(["GET"])
+def get_jobs_api(request):
+    """
+    API endpoint to get all available jobs for job matching
+    Returns: JSON with job list
+    """
+    try:
+        jobs = Job.objects.all().values('id', 'title', 'company')
+        return JsonResponse({
+            'success': True,
+            'jobs': list(jobs)
+        })
+    except Exception as e:
+        logger.error(f"Error fetching jobs: {str(e)}")
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
