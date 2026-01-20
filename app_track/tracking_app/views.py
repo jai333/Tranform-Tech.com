@@ -374,16 +374,23 @@ class CandidateListView(LoginRequiredMixin, JobSeekerRestrictedMixin, ListView):
     template_name = 'tracking_app/candidate_list.html'
     context_object_name = 'candidates'
     ordering = ['-application_date']
-    paginate_by = 10
+    paginate_by = 20
     
     def get_queryset(self):
-        queryset = super().get_queryset()
+        queryset = super().get_queryset().select_related('user').prefetch_related('application_set')
         search_query = self.request.GET.get('search', '')
         if search_query:
-            queryset = queryset.filter(first_name__icontains=search_query) | \
-                      queryset.filter(last_name__icontains=search_query) | \
-                      queryset.filter(email__icontains=search_query)
-        return queryset
+            queryset = queryset.filter(
+                first_name__icontains=search_query
+            ) | queryset.filter(
+                last_name__icontains=search_query
+            ) | queryset.filter(
+                email__icontains=search_query
+            )
+        return queryset.only(
+            'id', 'first_name', 'last_name', 'email', 'phone', 'location', 
+            'application_date', 'user_id', 'user__first_name', 'user__last_name'
+        )
 
 class CandidateDetailView(LoginRequiredMixin, JobSeekerRestrictedMixin, DetailView):
     model = Candidate

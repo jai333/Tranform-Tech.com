@@ -210,12 +210,13 @@ def get_candidate_matches(request, candidate_id):
     try:
         candidate = get_object_or_404(Candidate, id=candidate_id)
         
-        # Get all job matches, ordered by score
-        matches = JobMatch.objects.filter(candidate=candidate).order_by('-overall_score')
+        # Get all job matches with prefetched job data (optimize N+1 queries)
+        matches = JobMatch.objects.filter(
+            candidate=candidate
+        ).select_related('job').order_by('-overall_score')[:20]
         
-        match_list = []
-        for match in matches:
-            match_list.append({
+        match_list = [
+            {
                 'job_id': match.job.id,
                 'job_title': match.job.title,
                 'overall_score': match.overall_score,
@@ -224,7 +225,9 @@ def get_candidate_matches(request, candidate_id):
                 'education_match_score': match.education_match_score,
                 'matching_skills': match.matching_skills,
                 'missing_skills': match.missing_skills,
-            })
+            }
+            for match in matches
+        ]
         
         return JsonResponse({
             'success': True,
@@ -251,12 +254,13 @@ def get_job_candidates(request, job_id):
     try:
         job = get_object_or_404(Job, id=job_id)
         
-        # Get all job matches, ordered by score
-        matches = JobMatch.objects.filter(job=job).order_by('-overall_score')
+        # Get all job matches with prefetched candidate data (optimize N+1 queries)
+        matches = JobMatch.objects.filter(
+            job=job
+        ).select_related('candidate').order_by('-overall_score')[:20]
         
-        candidate_list = []
-        for match in matches:
-            candidate_list.append({
+        candidate_list = [
+            {
                 'candidate_id': match.candidate.id,
                 'candidate_name': match.candidate.full_name,
                 'overall_score': match.overall_score,
@@ -265,7 +269,9 @@ def get_job_candidates(request, job_id):
                 'education_match_score': match.education_match_score,
                 'matching_skills': match.matching_skills,
                 'missing_skills': match.missing_skills,
-            })
+            }
+            for match in matches
+        ]
         
         return JsonResponse({
             'success': True,
@@ -364,24 +370,29 @@ def candidate_detail_with_ai(request, candidate_id):
     """
     View candidate profile with AI insights
     """
-    candidate = get_object_or_404(Candidate, id=candidate_id)
+    from django.db.models import Prefetch
+    
+    # Prefetch related data to reduce database queries
+    top_matches_prefetch = Prefetch(
+        'jobmatch_set',
+        JobMatch.objects.select_related('job').order_by('-overall_score')[:5]
+    )
+    
+    candidate = get_object_or_404(
+        Candidate.objects.select_related(
+            'resume_data', 'ai_summary', 'user'
+        ).prefetch_related(top_matches_prefetch),
+        id=candidate_id
+    )
     
     # Get resume data if exists
-    resume_data = None
-    try:
-        resume_data = candidate.resume_data
-    except ResumeData.DoesNotExist:
-        pass
+    resume_data = candidate.resume_data if hasattr(candidate, 'resume_data') else None
     
     # Get AI summary if exists
-    ai_summary = None
-    try:
-        ai_summary = candidate.ai_summary
-    except CandidateAISummary.DoesNotExist:
-        pass
+    ai_summary = candidate.ai_summary if hasattr(candidate, 'ai_summary') else None
     
-    # Get top job matches
-    top_matches = JobMatch.objects.filter(candidate=candidate).order_by('-overall_score')[:5]
+    # Get top job matches from prefetch
+    top_matches = list(candidate.jobmatch_set.all())[:5]
     
     context = {
         'candidate': candidate,
@@ -401,7 +412,8 @@ def get_jobs_api(request):
     Returns: JSON with job list
     """
     try:
-        jobs = Job.objects.all().values('id', 'title', 'company')
+        # Only fetch necessary fields for performance
+        jobs = Job.objects.all().only('id', 'title', 'company').values('id', 'title', 'company')
         return JsonResponse({
             'success': True,
             'jobs': list(jobs)

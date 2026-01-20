@@ -141,6 +141,15 @@ LOGIN_URL = 'login'
 # CSRF Trusted Origins for ngrok
 CSRF_TRUSTED_ORIGINS = ['https://26464c660ea8.ngrok-free.app', 'https://preview-jaisu-8000.loca.lt']
 
+# Database connection pooling for better performance
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+        'CONN_MAX_AGE': 600,  # Connection pooling
+    }
+}
+
 # Channels settings
 CHANNEL_LAYERS = {
     'default': {
