@@ -1,6 +1,6 @@
 # COPYRIGHT NOTICE
 
-**Copyright © 2026 Protingent India LLP. All rights reserved.**
+**Copyright © 2026 Jai Sukhwal. All rights reserved.**
 
 ## License
 
@@ -10,7 +10,7 @@ This project is available under a **Dual License Model**:
    - Restricted usage for authorized parties only
    - Commercial use prohibited without explicit permission
    - Best for internal and private use
-   - Contact: it@protingentindia.com for licensing inquiries
+   - Contact: jaisukhwal41@gmail.com for licensing inquiries
 
 2. **Apache License 2.0** (Secondary) - See `LICENSE` file
    - Optional permissive license for approved distributions
@@ -41,10 +41,10 @@ This software is protected under both:
 
 ## Ownership
 
-**Protingent India LLP** is the copyright owner and licensor of this ATS & CRM system.
+**Jai Sukhwal** is the copyright owner and licensor of this ATS & CRM system.
 
 - **Repository**: https://github.com/jai333/ATS-CRM-Protingent
-- **Owner**: Protingent India LLP
+- **Owner**: Jai Sukhwal
 - **Registration Date**: January 17, 2026
 
 ## Permitted Uses
@@ -54,7 +54,7 @@ Under the Proprietary License, usage is restricted to:
 - Deployment within Protingent India LLP infrastructure
 - Authorized team members only
 
-Any other use requires written consent from Protingent India LLP.
+Any other use requires written consent from Jai Sukhwal.
 
 ## Conditions
 
@@ -62,7 +62,7 @@ All users must:
 - Preserve copyright and proprietary notices
 - Not distribute, share, or sublicense
 - Maintain confidentiality of the source code
-- Report security vulnerabilities to: it@protingentindia.com
+- Report security vulnerabilities to: jaisukhwal41@gmail.com
 - Comply with all applicable laws
 
 ## Disclaimer

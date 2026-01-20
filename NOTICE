@@ -1,0 +1,23 @@
+NOTICE
+
+ATS-CRM-Protingent
+Copyright 2026 Jai Sukhwal
+
+This product includes software developed by Jai Sukhwal.
+
+This software is licensed under:
+1. Proprietary License (Default) - See PROPRIETARY_LICENSE.txt
+2. Apache License 2.0 (Optional) - See LICENSE
+
+Included third-party software and their licenses:
+- Django (BSD License)
+- jQuery (MIT License)
+- Select2 (MIT License)
+- XRegExp (MIT License)
+- Django Admin Interface components (BSD License)
+
+For complete third-party license information, see the staticfiles directory.
+
+Author & Developer: Jai Sukhwal (jaisukhwal41@gmail.com)
+Repository: https://github.com/jai333/ATS-CRM-Protingent
+Year: 2026

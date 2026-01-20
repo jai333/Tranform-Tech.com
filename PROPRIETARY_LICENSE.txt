@@ -1,7 +1,7 @@
 PROPRIETARY SOFTWARE LICENSE AGREEMENT
 
 This Proprietary Software License Agreement ("Agreement") is entered into as of January 17, 2026,
-between Protingent India LLP ("Owner") and any individual or entity accessing this software ("User").
+between Jai Sukhwal ("Owner") and any individual or entity accessing this software ("User").
 
 1. GRANT OF LICENSE
 Owner hereby grants User a limited, non-exclusive, non-transferable license to use this software
@@ -15,7 +15,7 @@ of this Agreement. This license does NOT permit User to:
 
 2. OWNERSHIP AND INTELLECTUAL PROPERTY
 All rights, title, and interest in and to the Software, including all intellectual property rights,
-are owned exclusively by Protingent India LLP. The Software is protected by copyright law and
+are owned exclusively by Jai Sukhwal. The Software is protected by copyright law and
 international copyright treaties. User acquires no ownership rights in the Software.
 
 3. RESTRICTIONS
@@ -29,7 +29,7 @@ User SHALL NOT:
 - Transfer or assign this license to any third party without written consent
 
 4. CONFIDENTIALITY
-The Software contains confidential and trade secret information of Protingent India LLP.
+The Software contains confidential and trade secret information of Jai Sukhwal.
 User agrees to maintain the confidentiality of the Software and not disclose it to any
 third parties without prior written consent from Owner.
 
