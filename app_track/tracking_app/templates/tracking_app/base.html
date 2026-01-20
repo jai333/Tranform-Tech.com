@@ -143,6 +143,11 @@
             will-change: transform;
             height: 70px;
         }
+
+        body.light-theme header {
+            background-color: rgba(255, 255, 255, 0.7);
+            box-shadow: 0 5px 30px rgba(0, 0, 0, 0.1);
+        }
         
         .header-content {
             display: flex;
@@ -202,6 +207,12 @@
             justify-content: center;
             overflow-x: auto;
         }
+
+        body.light-theme nav ul {
+            background-color: rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
         
         nav li {
             margin: 0;
@@ -220,6 +231,10 @@
             letter-spacing: -0.01em;
             font-size: 0.95rem;
         }
+
+        body.light-theme nav a {
+            color: rgba(0, 0, 0, 0.7);
+        }
         
         nav a i {
             font-size: 1.1rem;
@@ -230,11 +245,22 @@
             background-color: rgba(255, 255, 255, 0.1);
             transform: translateY(-1px);
         }
+
+        body.light-theme nav a:hover {
+            background-color: rgba(0, 0, 0, 0.08);
+            color: rgba(0, 0, 0, 0.9);
+        }
         
         nav a.active {
             color: var(--apple-text);
             background-color: rgba(8, 145, 178, 0.2);
             box-shadow: 0 0 15px rgba(8, 145, 178, 0.2);
+        }
+
+        body.light-theme nav a.active {
+            background-color: rgba(8, 145, 178, 0.15);
+            color: rgba(0, 0, 0, 0.95);
+            box-shadow: 0 0 15px rgba(8, 145, 178, 0.15);
         }
         
         .auth-links {
