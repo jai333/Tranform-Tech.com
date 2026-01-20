@@ -1,0 +1,298 @@
+/* Hiring Process Section - Premium Glass Morphism Design */
+.hiring-process {
+  padding: 120px 0;
+  position: relative;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  overflow: hidden;
+}
+
+.hiring-process::before {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  background: url('../img/subtle-pattern.png');
+  opacity: 0.03;
+  pointer-events: none;
+}
+
+.hiring-process .section-title {
+  text-align: center;
+  font-size: 2.5rem;
+  font-weight: 600;
+  margin-bottom: 60px;
+  color: #333;
+  position: relative;
+  letter-spacing: -0.5px;
+}
+
+.hiring-process .section-title::after {
+  content: '';
+  display: block;
+  width: 80px;
+  height: 3px;
+  background: linear-gradient(90deg, #0066ff, #00c2ff);
+  margin: 15px auto 0;
+  border-radius: 2px;
+}
+
+.process-container {
+  position: relative;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.process-journey {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 0;
+  min-height: 600px;
+}
+
+/* Path styling */
+.process-path {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  height: 100%;
+  transform: translateX(-50%);
+  z-index: 1;
+}
+
+.path-track {
+  width: 3px;
+  height: 100%;
+  background-color: rgba(200, 200, 200, 0.3);
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.path-glow {
+  width: 3px;
+  height: 0%;
+  background: linear-gradient(to bottom, #0066ff, #00c2ff);
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  box-shadow: 0 0 15px rgba(0, 102, 255, 0.5);
+  animation: pathGlow 4s ease-in-out infinite;
+  border-radius: 3px;
+}
+
+@keyframes pathGlow {
+  0% {
+    height: 0%;
+    opacity: 0.7;
+  }
+  50% {
+    height: 100%;
+    opacity: 1;
+  }
+  100% {
+    height: 100%;
+    opacity: 0.7;
+  }
+}
+
+/* Process Steps */
+.process-step {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  margin: 40px 0;
+  z-index: 2;
+}
+
+.process-step:nth-child(odd) {
+  flex-direction: row;
+}
+
+.process-step:nth-child(even) {
+  flex-direction: row-reverse;
+}
+
+.step-content {
+  width: 40%;
+  padding: 30px;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 18px;
+  box-shadow: 
+    0 10px 20px rgba(0, 0, 0, 0.05),
+    0 6px 6px rgba(0, 0, 0, 0.02),
+    0 0 0 1px rgba(255, 255, 255, 0.7) inset;
+  transition: all 0.4s ease;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  transform: translateY(0);
+  animation: float 6s infinite ease-in-out;
+}
+
+.step-content h3 {
+  font-size: 1.5rem;
+  font-weight: 500;
+  margin-bottom: 12px;
+  color: #333;
+  letter-spacing: -0.3px;
+}
+
+.step-content p {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #555;
+  margin-bottom: 0;
+}
+
+.step-connector {
+  flex: 1;
+  height: 3px;
+  background: linear-gradient(90deg, 
+    rgba(0, 102, 255, 0.1), 
+    rgba(0, 194, 255, 0.3), 
+    rgba(0, 102, 255, 0.1));
+  position: relative;
+  max-width: 150px;
+}
+
+.step-marker {
+  width: 80px;
+  height: 80px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  box-shadow: 
+    0 10px 20px rgba(0, 0, 0, 0.05),
+    0 6px 6px rgba(0, 0, 0, 0.02),
+    0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  z-index: 3;
+  transition: all 0.4s ease;
+}
+
+.step-icon {
+  font-size: 24px;
+  color: #0066ff;
+  position: absolute;
+  z-index: 1;
+}
+
+.step-number {
+  position: absolute;
+  bottom: -5px;
+  right: -5px;
+  width: 30px;
+  height: 30px;
+  background: linear-gradient(135deg, #0066ff, #00c2ff);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 14px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Animation for floating effect */
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+/* Apply different animations to each step */
+.step-1 .step-content {
+  animation-delay: 0s;
+}
+.step-2 .step-content {
+  animation-delay: 1.5s;
+}
+.step-3 .step-content {
+  animation-delay: 3s;
+}
+.step-4 .step-content {
+  animation-delay: 4.5s;
+}
+
+/* Journey particles for visual flair */
+.journey-particles {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
+
+/* Hover effects */
+.step-content:hover {
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 
+    0 15px 30px rgba(0, 0, 0, 0.1),
+    0 10px 10px rgba(0, 0, 0, 0.03),
+    0 0 0 1px rgba(255, 255, 255, 0.9) inset;
+}
+
+.step-marker:hover {
+  transform: scale(1.1);
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+  .process-step {
+    flex-direction: column !important;
+    align-items: center;
+    margin: 60px 0;
+  }
+  
+  .step-content {
+    width: 80%;
+    margin-bottom: 25px;
+    order: 2;
+  }
+  
+  .step-marker {
+    order: 1;
+    margin-bottom: 25px;
+  }
+  
+  .step-connector {
+    display: none;
+  }
+  
+  .process-path {
+    left: 50%;
+  }
+  
+  .hiring-process {
+    padding: 80px 0;
+  }
+}
+
+@media (max-width: 576px) {
+  .step-content {
+    width: 95%;
+  }
+  
+  .hiring-process .section-title {
+    font-size: 2rem;
+  }
+} 
