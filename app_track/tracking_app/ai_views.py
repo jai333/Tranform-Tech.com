@@ -366,33 +366,32 @@ def get_candidate_ai_summary(request, candidate_id):
 
 
 @login_required
+@login_required
 def candidate_detail_with_ai(request, candidate_id):
     """
     View candidate profile with AI insights
     """
     from django.db.models import Prefetch
     
-    # Prefetch related data to reduce database queries
-    top_matches_prefetch = Prefetch(
-        'jobmatch_set',
-        JobMatch.objects.select_related('job').order_by('-overall_score')[:5]
-    )
-    
-    candidate = get_object_or_404(
-        Candidate.objects.select_related(
-            'resume_data', 'ai_summary', 'user'
-        ).prefetch_related(top_matches_prefetch),
-        id=candidate_id
-    )
+    # Get candidate with optimized queries
+    candidate = get_object_or_404(Candidate, id=candidate_id)
     
     # Get resume data if exists
-    resume_data = candidate.resume_data if hasattr(candidate, 'resume_data') else None
+    resume_data = None
+    try:
+        resume_data = candidate.resume_data
+    except ResumeData.DoesNotExist:
+        pass
     
     # Get AI summary if exists
-    ai_summary = candidate.ai_summary if hasattr(candidate, 'ai_summary') else None
+    ai_summary = None
+    try:
+        ai_summary = candidate.ai_summary
+    except CandidateAISummary.DoesNotExist:
+        pass
     
-    # Get top job matches from prefetch
-    top_matches = list(candidate.jobmatch_set.all())[:5]
+    # Get top job matches
+    top_matches = JobMatch.objects.filter(candidate=candidate).select_related('job').order_by('-overall_score')[:5]
     
     context = {
         'candidate': candidate,
