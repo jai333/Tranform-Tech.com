@@ -201,7 +201,7 @@
                                 <h6>Overall Profile Score</h6>
                                 <div class="progress" style="height: 25px;">
                                     <div class="progress-bar bg-success" role="progressbar" 
-                                         style="width: {{ ai_summary.overall_profile_score }}%" 
+                                         style="width: {{ ai_summary.overall_profile_score }}%;"
                                          aria-valuenow="{{ ai_summary.overall_profile_score }}" 
                                          aria-valuemin="0" aria-valuemax="100">
                                         {{ ai_summary.overall_profile_score }}%
@@ -214,7 +214,7 @@
                                 <h6>Technical Skills Score</h6>
                                 <div class="progress" style="height: 25px;">
                                     <div class="progress-bar bg-primary" role="progressbar" 
-                                         style="width: {{ ai_summary.technical_score }}%" 
+                                         style="width: {{ ai_summary.technical_score }}%;"
                                          aria-valuenow="{{ ai_summary.technical_score }}" 
                                          aria-valuemin="0" aria-valuemax="100">
                                         {{ ai_summary.technical_score }}%
@@ -227,7 +227,7 @@
                                 <h6>Communication Score</h6>
                                 <div class="progress" style="height: 25px;">
                                     <div class="progress-bar bg-warning" role="progressbar" 
-                                         style="width: {{ ai_summary.communication_score }}%" 
+                                         style="width: {{ ai_summary.communication_score }}%;"
                                          aria-valuenow="{{ ai_summary.communication_score }}" 
                                          aria-valuemin="0" aria-valuemax="100">
                                         {{ ai_summary.communication_score }}%
@@ -240,7 +240,7 @@
                                 <h6>Leadership Potential</h6>
                                 <div class="progress" style="height: 25px;">
                                     <div class="progress-bar bg-danger" role="progressbar" 
-                                         style="width: {{ ai_summary.leadership_score }}%" 
+                                         style="width: {{ ai_summary.leadership_score }}%;"
                                          aria-valuenow="{{ ai_summary.leadership_score }}" 
                                          aria-valuemin="0" aria-valuemax="100">
                                         {{ ai_summary.leadership_score }}%
@@ -324,13 +324,13 @@
                                     </td>
                                     <td>
                                         <span class="badge" 
-                                              style="background-color: {% if match.skill_match_score > 70 %}#28a745{% elif match.skill_match_score > 40 %}#ffc107{% else %}#dc3545{% endif %}">
+                                              style="background-color: {% if match.skill_match_score > 70 %}#28a745{% elif match.skill_match_score > 40 %}#ffc107{% else %}#dc3545{% endif %};">
                                             {{ match.skill_match_score }}%
                                         </span>
                                     </td>
                                     <td>
                                         <span class="badge" 
-                                              style="background-color: {% if match.experience_match_score > 70 %}#28a745{% elif match.experience_match_score > 40 %}#ffc107{% else %}#dc3545{% endif %}">
+                                              style="background-color: {% if match.experience_match_score > 70 %}#28a745{% elif match.experience_match_score > 40 %}#ffc107{% else %}#dc3545{% endif %};">
                                             {{ match.experience_match_score }}%
                                         </span>
                                     </td>
