@@ -3,27 +3,24 @@ Resume Parser Service
 Handles resume file parsing and data extraction
 """
 
-import os
 import re
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List
 import json
 
 # Document parsing
 from docx import Document
 import PyPDF2
-import pdfplumber
+try:
+    import pdfplumber
+except ImportError:
+    pdfplumber = None
 
 # NLP
-import spacy
-from nltk.tokenize import sent_tokenize
-import nltk
-
-# Download required NLTK data
 try:
-    nltk.data.find('tokenizers/punkt')
-except LookupError:
-    nltk.download('punkt')
+    import spacy
+except ImportError:
+    spacy = None
 
 
 class ResumeParser:
@@ -31,10 +28,7 @@ class ResumeParser:
     
     def __init__(self):
         """Initialize parser with NLP model"""
-        try:
-            self.nlp = spacy.load("en_core_web_sm")
-        except OSError:
-            raise Exception("Please install spaCy model: python -m spacy download en_core_web_sm")
+        self.nlp = self._load_nlp()
         
         # Common skill keywords
         self.technical_skills = [
@@ -54,6 +48,19 @@ class ResumeParser:
             'Creativity', 'Adaptability', 'Negotiation', 'Presentation',
             'Writing', 'Research', 'Decision Making', 'Mentoring'
         ]
+
+    def _load_nlp(self):
+        """Load spaCy when available, but allow parser fallback without it."""
+        if spacy is None:
+            return None
+
+        try:
+            return spacy.load("en_core_web_sm")
+        except OSError:
+            try:
+                return spacy.blank("en")
+            except Exception:
+                return None
     
     def parse_file(self, file_path: str) -> Dict:
         """
@@ -89,8 +96,8 @@ class ResumeParser:
         Returns:
             Structured resume data
         """
-        # Process with spaCy
-        doc = self.nlp(text)
+        # Process with spaCy when available
+        doc = self.nlp(text) if self.nlp else None
         
         # Extract information
         result = {
@@ -109,12 +116,25 @@ class ResumeParser:
     def _extract_from_pdf(self, file_path: str) -> str:
         """Extract text from PDF file"""
         text = ""
+
+        if pdfplumber is not None:
+            try:
+                with pdfplumber.open(file_path) as pdf:
+                    for page in pdf.pages:
+                        page_text = page.extract_text() or ""
+                        if page_text:
+                            text += page_text + "\n"
+                if text.strip():
+                    return text
+            except Exception as e:
+                print(f"Error extracting PDF with pdfplumber: {e}")
+
         try:
-            with pdfplumber.open(file_path) as pdf:
-                for page in pdf.pages:
-                    text += page.extract_text() + "\n"
+            reader = PyPDF2.PdfReader(file_path)
+            pages = [page.extract_text() or "" for page in reader.pages]
+            text = "\n".join(page for page in pages if page)
         except Exception as e:
-            print(f"Error extracting PDF: {e}")
+            print(f"Error extracting PDF with PyPDF2: {e}")
         
         return text
     
@@ -151,6 +171,9 @@ class ResumeParser:
     def _extract_personal_info(self, doc) -> Dict:
         """Extract name and location using NLP"""
         personal_info = {}
+
+        if doc is None:
+            return personal_info
         
         # Extract entities
         for ent in doc.ents:

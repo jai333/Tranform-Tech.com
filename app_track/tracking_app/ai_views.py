@@ -1,23 +1,60 @@
 """
 AI/ML functionality views and API endpoints
 """
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth.decorators import login_required
-from django.views.decorators.csrf import csrf_exempt
 from django.core.files.storage import default_storage
 import json
 import logging
-from pathlib import Path
 
 from tracking_app.models import (
     Candidate, Job, ResumeData, JobMatch, CandidateAISummary, AdvancedSearch
 )
-from ai.resume_parser import ResumeParser
 from ai.scoring_engine import MatchingEngine
 
 logger = logging.getLogger(__name__)
+
+
+def _normalize_linkedin_url(linkedin_url):
+    if not linkedin_url:
+        return None
+
+    if linkedin_url.startswith(('http://', 'https://')):
+        return linkedin_url
+
+    return f'https://{linkedin_url}'
+
+
+def _extract_resume_contact_fields(parsed_data):
+    contact_info = parsed_data.get('contact_info') or {}
+    experience_years = parsed_data.get('experience_years')
+
+    if experience_years is None:
+        experience_years = parsed_data.get('total_experience_years')
+
+    return {
+        'email': parsed_data.get('email') or contact_info.get('email'),
+        'phone': parsed_data.get('phone') or contact_info.get('phone'),
+        'linkedin_url': _normalize_linkedin_url(
+            parsed_data.get('linkedin_url') or contact_info.get('linkedin')
+        ),
+        'experience_years': experience_years,
+    }
+
+
+def _build_resume_defaults(parsed_data, resume_file):
+    return {
+        'resume_file': resume_file,
+        **_extract_resume_contact_fields(parsed_data),
+        'skills': parsed_data.get('skills', []),
+        'education': parsed_data.get('education', []),
+        'certifications': parsed_data.get('certifications', []),
+        'raw_text': parsed_data.get('raw_text'),
+        'parse_status': 'success',
+        'parse_error': '',
+    }
 
 
 @login_required
@@ -45,41 +82,38 @@ def parse_resume_api(request):
         file_path = default_storage.save(f'temp_resumes/{resume_file.name}', resume_file)
         
         # Parse resume
-        parser = ResumeParser()
         try:
+            from ai.resume_parser import ResumeParser
+        except ImportError as e:
+            logger.error(f"Resume parser dependencies unavailable: {str(e)}")
+            default_storage.delete(file_path)
+            return JsonResponse({
+                'success': False,
+                'error': 'Resume parsing dependencies are not installed. The main application is available, but AI resume parsing is temporarily unavailable.'
+            }, status=503)
+
+        try:
+            parser = ResumeParser()
             parsed_data = parser.parse_file(default_storage.path(file_path))
+            resume_defaults = _build_resume_defaults(parsed_data, resume_file)
             
             # Create or update ResumeData record
-            resume_data, created = ResumeData.objects.update_or_create(
+            ResumeData.objects.update_or_create(
                 candidate=candidate,
-                defaults={
-                    'resume_file': resume_file,
-                    'email': parsed_data.get('email'),
-                    'phone': parsed_data.get('phone'),
-                    'linkedin_url': parsed_data.get('linkedin_url'),
-                    'skills': parsed_data.get('skills', []),
-                    'experience_years': parsed_data.get('experience_years'),
-                    'education': parsed_data.get('education', []),
-                    'certifications': parsed_data.get('certifications', []),
-                    'raw_text': parsed_data.get('raw_text'),
-                    'parse_status': 'success',
-                }
+                defaults=resume_defaults
             )
-            
-            # Clean up temporary file
-            default_storage.delete(file_path)
             
             return JsonResponse({
                 'success': True,
                 'message': 'Resume parsed successfully',
                 'data': {
-                    'skills': parsed_data.get('skills', []),
-                    'experience_years': parsed_data.get('experience_years'),
-                    'education': parsed_data.get('education', []),
-                    'certifications': parsed_data.get('certifications', []),
-                    'email': parsed_data.get('email'),
-                    'phone': parsed_data.get('phone'),
-                    'linkedin_url': parsed_data.get('linkedin_url'),
+                    'skills': resume_defaults['skills'],
+                    'experience_years': resume_defaults['experience_years'],
+                    'education': resume_defaults['education'],
+                    'certifications': resume_defaults['certifications'],
+                    'email': resume_defaults['email'],
+                    'phone': resume_defaults['phone'],
+                    'linkedin_url': resume_defaults['linkedin_url'],
                 }
             })
             
@@ -92,12 +126,12 @@ def parse_resume_api(request):
                     'parse_error': str(e),
                 }
             )
-            default_storage.delete(file_path)
-            
             return JsonResponse({
                 'success': False,
                 'error': f'Failed to parse resume: {str(e)}'
             }, status=400)
+        finally:
+            default_storage.delete(file_path)
             
     except Exception as e:
         logger.error(f"Resume upload error: {str(e)}")
