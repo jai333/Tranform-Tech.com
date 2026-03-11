@@ -1,5 +1,6 @@
 import shutil
 import tempfile
+from unittest.mock import Mock, patch
 
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -34,6 +35,22 @@ class ResumeParserTests(TestCase):
         self.assertEqual(parsed['total_experience_years'], 1.0)
         self.assertIn('Python', [skill['skill'] for skill in parsed['skills']])
         self.assertIn('Django', [skill['skill'] for skill in parsed['skills']])
+
+    def test_extract_from_pdf_uses_pypdf_fallback_when_pdfplumber_unavailable(self):
+        parser = ResumeParser()
+        mock_reader = Mock()
+        mock_reader.pages = [
+            Mock(extract_text=Mock(return_value='Page one')),
+            Mock(extract_text=Mock(return_value='Page two')),
+        ]
+
+        with patch('ai.resume_parser.pdfplumber', None), patch(
+            'ai.resume_parser.PdfReader', return_value=mock_reader
+        ) as pdf_reader:
+            text = parser._extract_from_pdf('resume.pdf')
+
+        self.assertEqual(text, 'Page one\nPage two')
+        pdf_reader.assert_called_once_with('resume.pdf')
 
 
 class ParseResumeApiTests(TestCase):

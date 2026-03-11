@@ -10,7 +10,7 @@ import json
 
 # Document parsing
 from docx import Document
-import PyPDF2
+from pypdf import PdfReader
 try:
     import pdfplumber
 except ImportError:
@@ -130,11 +130,11 @@ class ResumeParser:
                 print(f"Error extracting PDF with pdfplumber: {e}")
 
         try:
-            reader = PyPDF2.PdfReader(file_path)
+            reader = PdfReader(file_path)
             pages = [page.extract_text() or "" for page in reader.pages]
             text = "\n".join(page for page in pages if page)
         except Exception as e:
-            print(f"Error extracting PDF with PyPDF2: {e}")
+            print(f"Error extracting PDF with pypdf: {e}")
         
         return text
     

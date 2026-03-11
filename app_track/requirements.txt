@@ -1,7 +1,7 @@
 # Django core
-Django==5.2
+Django==5.2.12
 asgiref==3.8.1
-sqlparse==0.4.4
+sqlparse==0.5.4
 tzdata==2024.1
 
 # Django channels for WebSockets
@@ -12,20 +12,20 @@ redis==5.0.1
 
 # Additional channels dependencies
 autobahn==23.6.2
-twisted==23.10.0
+twisted==25.5.0
 txaio==23.1.1
 
 # Cryptography and security
-cryptography==41.0.6
-pyOpenSSL==23.3.0
+cryptography==46.0.5
+pyOpenSSL==25.3.0
 service-identity==24.1.0
 
 # Image handling
-Pillow==10.1.0
+Pillow==12.1.0
 
 # Document parsing
 python-docx==1.1.2
-PyPDF2==3.0.1
+pypdf==6.1.1
 
 # Frontend assets
 whitenoise==6.6.0
@@ -37,4 +37,4 @@ websockets==11.0.3
 django-debug-toolbar==4.2.0
 
 # Production ready
-gunicorn==21.2.0 
+gunicorn==22.0.0
