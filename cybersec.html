@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber Security | Transform.io</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;600&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .feature-list { list-style: none; margin-top: 16px; padding:0;}
+        .feature-list li { display: flex; gap: 12px; margin-bottom: 12px; font-size: 0.95rem; color: var(--text-gray); }
+        .feature-list li i { color: var(--primary); font-size: 1.4rem; margin-top: 2px;}
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; }
+        .huge-title { font-size: 3rem; letter-spacing: -0.03em; color: white; margin-bottom: 24px; line-height: 1.1; }
+        .sub-tag { color: var(--accent-red); font-family: var(--font-mono); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; display: block; }
+        .highlight-box { background: rgba(255, 59, 48, 0.05); border-left: 3px solid var(--accent-red); padding: 24px; margin: 24px 0; border-radius: 0 8px 8px 0;}
+    </style>
+</head>
+<body>
+
+    <!-- Mega-Menu Navigation -->
+    <nav class="navbar border-bottom">
+        <div class="container nav-content">
+            <a href="index.html" class="logo font-mono">
+                <i class='bx bx-code-alt text-cyan'></i> TRANSFORM.IO
+            </a>
+            <ul class="nav-links font-mono text-sm">
+                <li><a href="index.html">PLATFORM OVERVIEW</a></li>
+                <li><a href="app-dev.html">APP DEV</a></li>
+                <li><a href="cybersec.html" class="active">CYBERSEC <i class="bx bx-chevron-down"></i></a></li>
+                <li><a href="automation.html">AUTOMATION</a></li>
+                <li><a href="portfolio.html">PORTFOLIO</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <header class="container pt-xl pb-lg border-bottom">
+        <span class="sub-tag">[ VECTOR_02 / THREAT_INTELLIGENCE ]</span>
+        <h1 class="huge-title">Impenetrable Zero-Trust Operations</h1>
+        <p class="font-mono text-gray" style="font-size:1.1rem; max-width:800px; line-height: 1.6;">
+            Hackers do not break into environments; they log in using compromised credentials. We assume breach. Transform.io implements military-grade isolation boundaries dictating that no user or machine is trusted by default, regardless of corporate location.
+        </p>
+    </header>
+
+    <section class="container mt-xl mb-xl">
+        <div class="grid-2 align-center mb-lg">
+            <div class="border-glow" style="border-radius:12px; overflow:hidden;">
+               <img src="assets/cybersec_mockup_1776112528216.png" alt="Threat Matrix Grid" style="width:100%; display:block; object-fit: cover;">
+            </div>
+            <div>
+                <h3 class="text-white text-xl mb-md">Endpoint Detection & Remediation (EDR)</h3>
+                <p class="text-gray mb-md line-height-relaxed">
+                    By installing our proprietary lightweight agents onto your fleet of AWS instances, Macbooks, and Windows hardware, we gain absolute real-time visibility into process execution. 
+                    If a piece of ransomware attempts to encrypt a sector, our EDR sandbox intercepts the memory call, kills the thread, and quarantines the device from the primary network before the second file is hit.
+                </p>
+                <div class="highlight-box">
+                    <p class="font-mono text-white text-sm">"Our threat feeds are synchronized live with national CVE databases. Vulnerability scanning isn't a quarterly audit—it is continuous, aggressive, and automated."</p>
+                </div>
+                <ul class="feature-list mt-md border-glow" style="padding: 24px; background: var(--bg-surface);">
+                    <li><i class='bx bx-check'></i> <div><strong class="text-white block font-mono mb-sm">Air-Gapped Cold Storage Backups</strong> Protecting data from remote wipe execution.</div></li>
+                    <li><i class='bx bx-check'></i> <div><strong class="text-white block font-mono mb-sm">Next-Gen Penetration Testing (PenTesting)</strong> Automated red-team exploits run weekly against API endpoints.</div></li>
+                    <li><i class='bx bx-check'></i> <div><strong class="text-white block font-mono mb-sm">Identity Access Management (IAM)</strong> Hardened Multi-Factor Authentication tied to biometric FIDO protocols.</div></li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Massive Footer -->
+    <footer class="footer font-mono mt-xl">
+        <div class="container footer-mega-grid">
+            <div class="footer-brand footer-col">
+                <a href="index.html" class="logo text-xl mb-md"><i class='bx bx-code-alt text-cyan'></i> TRANSFORM.IO</a>
+                <p class="text-gray text-xs mb-md" style="line-height:1.6;">Unified Enterprise Engine. From writing bleeding-edge React architectures to securing thousands of global endpoints via Zero-Trust.</p>
+            </div>
+            <div class="footer-col">
+                <h4 class="font-mono text-white">ENGINEERING</h4>
+                <a href="app-dev.html">Full-Stack Development</a>
+                <a href="#">Headless API & Microservices</a>
+                <a href="#">Serverless Cloud Hosting</a>
+            </div>
+            <div class="footer-col">
+                <h4 class="font-mono text-white">COMPANY</h4>
+                <a href="#">About Us</a>
+                <a href="#">Leadership</a>
+                <a href="#">Careers</a>
+            </div>
+             <div class="footer-col">
+                <h4 class="font-mono text-white">COMPLIANCE</h4>
+                <a href="#">SOC 2 Type II Certified</a>
+                <a href="#">FedRAMP Defense Grade</a>
+            </div>
+        </div>
+        <div class="container footer-bottom mt-lg" style="border-top: 1px solid #1a1a1a; padding-top: 24px; color: #555;">
+            <p>&copy; 2026 Transform.io Technical Solutions.</p>
+        </div>
+    </footer>
+</body>
+</html>

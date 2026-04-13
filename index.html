@@ -3,64 +3,125 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Transform.io | Engineering Engine</title>
-    <!-- Fonts for Technical Aesthetic -->
+    <title>Transform.io | The Ultimate IT & Engineering Ecosystem</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;600&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* Additional utility classes for the expanded content */
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
-        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
-        .align-center { align-items: center; }
-        .text-justify { text-align: justify; }
-        .feature-list { list-style: none; margin-top: 16px; }
-        .feature-list li { display: flex; gap: 12px; margin-bottom: 12px; font-size: 0.9rem; color: var(--text-gray); }
-        .feature-list li i { color: var(--primary); font-size: 1.2rem; }
-        .badge-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
-        .badge-item { background: rgba(255,255,255,0.05); border: 1px solid var(--secondary); padding: 4px 12px; border-radius: 4px; font-size: 0.75rem; color: var(--text-white); }
-        .highlight-box { background: rgba(0, 229, 255, 0.03); border-left: 3px solid var(--primary); padding: 16px; margin: 16px 0; }
-        @media (max-width: 968px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+        .service-row { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; margin: 120px 0; }
+        .service-row.reverse { grid-template-columns: 1fr 1fr; }
+        .service-row.reverse .text-col { order: 2; }
+        .service-row.reverse .img-col { order: 1; }
+        .feature-list { list-style: none; margin-top: 16px; padding:0; }
+        .feature-list li { display: flex; gap: 12px; margin-bottom: 16px; font-size: 0.95rem; color: var(--text-gray); align-items:flex-start; line-height: 1.6;}
+        .feature-list li i { color: var(--primary); font-size: 1.4rem; margin-top: 2px;}
+        .feature-list strong { color: var(--text-white); font-weight: 600; display: block; margin-bottom: 4px; font-family: var(--font-mono); font-size: 0.85rem;}
+        
+        .huge-title { font-size: 2.5rem; letter-spacing: -0.03em; color: white; margin-bottom: 24px; line-height: 1.1; }
+        .sub-tag { color: var(--primary); font-family: var(--font-mono); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; display: block; }
+        .highlight-box { background: rgba(0, 229, 255, 0.03); border-left: 3px solid var(--primary); padding: 24px; margin: 24px 0; border-radius: 0 8px 8px 0; }
+        
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+        .data-card { background: var(--bg-surface); border: 1px solid var(--secondary); padding: 24px; border-radius: 8px; }
+        .data-card i { font-size: 2rem; color: var(--primary); margin-bottom: 16px; }
+        .data-card h4 { color: white; font-family: var(--font-mono); font-size: 0.9rem; margin-bottom: 8px; }
+        .data-card p { color: var(--text-gray); font-size: 0.85rem; line-height: 1.5; }
+
+        @media (max-width: 1024px) {
+            .service-row, .service-row.reverse { grid-template-columns: 1fr; gap: 32px; }
+            .service-row.reverse .text-col { order: 1; } .service-row.reverse .img-col { order: 2; }
+            .grid-4 { grid-template-columns: repeat(2, 1fr); }
+        }
     </style>
 </head>
 <body>
 
-    <!-- Sticky Header -->
+    <!-- Mega-Menu Navigation -->
     <nav class="navbar border-bottom">
         <div class="container nav-content">
             <a href="index.html" class="logo font-mono">
                 <i class='bx bx-code-alt text-cyan'></i> TRANSFORM.IO
             </a>
-            <div class="nav-links font-mono text-sm">
-                <a href="#platform" class="active">PLATFORM OVERVIEW</a>
-                <a href="#app-dev">APP DEV</a>
-                <a href="#security">CYBERSEC</a>
-                <a href="#automation">AUTOMATION</a>
-                <a href="portfolio.html">PORTFOLIO</a>
-            </div>
-            <a href="#contact" class="btn btn-outline font-mono">/GET_STARTED</a>
+            
+            <ul class="nav-links font-mono text-sm">
+                <li>
+                    <a href="#">PLATFORM <i class='bx bx-chevron-down'></i></a>
+                    <div class="mega-menu">
+                        <div class="mega-col">
+                            <span class="mega-header">CORE SERVICES</span>
+                            <a href="app-dev.html">App & Web Development</a>
+                            <a href="cybersec.html">Cyber Security Operations</a>
+                            <a href="automation.html">Hyper-Automation Systems</a>
+                            <a href="#">Data Telemetry & Dashboards</a>
+                            <a href="#">Managed IT Services</a>
+                        </div>
+                        <div class="mega-col">
+                            <span class="mega-header">INFRASTRUCTURE MODULES</span>
+                            <a href="#">Unified Endpoint Management (UEM)</a>
+                            <a href="#">Zero-Trust Network Access (ZTNA)</a>
+                            <a href="#">Automated Patch Management</a>
+                            <a href="#">Cloud Migration & AWS Hosting</a>
+                            <a href="#">Bare-Metal Server Backups</a>
+                        </div>
+                    </div>
+                </li>
+
+                <li>
+                    <a href="#">SOLUTIONS <i class='bx bx-chevron-down'></i></a>
+                    <div class="mega-menu" style="min-width: 400px;">
+                        <div class="mega-col">
+                            <span class="mega-header">BY INDUSTRY</span>
+                            <a href="#">Financial Services / FinTech</a>
+                            <a href="#">Healthcare & HIPAA Logistics</a>
+                            <a href="#">Defense & Government (FedRAMP)</a>
+                        </div>
+                        <div class="mega-col">
+                            <span class="mega-header">BY ROLE</span>
+                            <a href="#">For IT Operations Teams</a>
+                            <a href="#">For Software Engineering</a>
+                            <a href="#">For Security Operations (SOC)</a>
+                        </div>
+                    </div>
+                </li>
+
+                <li>
+                    <a href="#">RESOURCES <i class='bx bx-chevron-down'></i></a>
+                    <div class="mega-menu" style="min-width: 400px;">
+                        <div class="mega-col">
+                            <span class="mega-header">KNOWLEDGE</span>
+                            <a href="portfolio.html">Global Case Studies</a>
+                            <a href="#">Engineering Blog</a>
+                            <a href="#">Security Bulletins</a>
+                            <a href="#">API Documentation</a>
+                            <a href="#">Script Hub (Bash/Powershell/Python)</a>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+
+            <a href="#contact" class="btn btn-outline font-mono">/DEPLOY_NOW</a>
         </div>
     </nav>
 
     <!-- Technical Hero Section -->
     <header class="hero container">
         <div class="hero-left">
-            <div class="tag font-mono text-cyan mb-md">[ v4.0.0-RELEASE ]</div>
+            <div class="tag font-mono text-cyan mb-md">[ SYSTEM_INIT v4.5.2 ]</div>
             <h1 class="hero-title tracking-tight">
-                Architectural Dominance.<br>
-                <span class="text-white">Engineering Speed.</span>
+                Complete Domination of<br>
+                <span class="text-white">Your IT Stack.</span>
             </h1>
-            <p class="hero-subtitle text-gray mt-md text-justify">
-                We design, automate, and secure the modern technology stack. From Full-Stack Application Engineering to Military-Grade Cybersecurity and IT Automation, Transform.io serves as an elite agency combining raw computational power with strategic workflow execution. Stop wrestling with disjointed tools.
+            <p class="hero-subtitle text-gray mt-md" style="font-size: 1.15rem; max-width: 600px;">
+                We don't just patch servers. Transform.io is a military-grade architectural ecosystem. We unify custom Full-Stack Web App Development, impenetrable Cybersecurity perimeters, Hyper-Automation orchestration, and real-time Data Telemetry into a single sovereign infrastructure.
             </p>
-            <div class="hero-actions mt-lg">
-                <a href="#platform" class="btn btn-cyan font-mono">init --services</a>
-                <a href="portfolio.html" class="btn btn-dark font-mono">cd /projects</a>
+            <div class="hero-actions">
+                <a href="#deep-div" class="btn btn-cyan font-mono">Explore Architecture</a>
+                <a href="#" class="btn btn-outline font-mono">Run Environment Simulation</a>
             </div>
             <div class="tech-stack mt-lg font-mono text-xs text-dark-gray">
-                SUPPORTED ENVIRONMENTS: <span class="text-gray">AWS, AZURE, GCP, VERCEL, DOCKER, KUBERNETES</span>
+                CERTIFIED & COMPLIANT ENVIRONMENTS: <span class="text-gray">AWS, KUBERNETES, SOC2, ISO 27001, FEDRAMP</span>
             </div>
         </div>
 
@@ -71,178 +132,304 @@
                     <div class="dots flex gap-sm">
                         <span class="dot bg-red"></span><span class="dot bg-yellow"></span><span class="dot bg-green"></span>
                     </div>
-                    <div class="terminal-title font-mono text-xs">tx_core_engine_init.sh</div>
+                    <div class="terminal-title font-mono text-xs">root@transform-io:~# ./deploy_master.sh</div>
                 </div>
-                <div class="terminal-body font-mono text-sm" id="typewriter-log">
-                    <!-- Logs injected via JS -->
+                <div class="terminal-body font-mono text-sm" id="typewriter-log" style="color:var(--text-gray);">
+                    <span class="text-white">[INFO]</span> Initializing system parameters...<br>
+                    <span class="text-white">[INFO]</span> Connecting to remote endpoints [45,021 nodes found]<br>
+                    <span class="text-cyan">[OK]</span> Zero-Trust handshake guaranteed.<br>
+                    <span class="text-white">[INFO]</span> Deploying React/Next.js frontend assets to Vercel Edge...<br>
+                    <span class="text-cyan">[OK]</span> CDN propagation complete (12ms latency).<br>
+                    <span class="text-white">[WARN]</span> Attempted breach packet detected on port 443.<br>
+                    <span class="text-accent-red" style="color:var(--accent-red)">[BLOCK]</span> Malicious payload isolated and quarantined.<br>
+                    <span class="text-white">[INFO]</span> Starting PostgreSQL automated shard balancing...<br>
+                    <span class="text-cyan">[OK]</span> System fully operational. Awaiting command.
                 </div>
             </div>
         </div>
     </header>
 
-    <!-- Unified Services Grid (High Level) -->
-    <section id="platform" class="container mt-xl">
-        <div class="section-header mb-lg">
-            <h2 class="tracking-tight text-white pb-sm border-bottom">Core Operational Vectors</h2>
-            <p class="font-mono text-gray text-sm mt-sm">// HIGH-LEVEL STRUCTURAL OVERVIEW OF CAPABILITIES</p>
+    <!-- Social Proof Marquee (NinjaOne Style) -->
+    <div class="marquee-wrapper mt-lg" style="margin-top: 0; padding: 16px 0;">
+        <div class="marquee-content font-mono text-xl">
+            <span class="marquee-item"><i class='bx bxl-amazon'></i> ALOVI CORP</span>
+            <span class="marquee-item"><i class='bx bxl-mastercard'></i> SECURE FINTECH</span>
+            <span class="marquee-item"><i class='bx bx-cube'></i> SIEMENS</span>
+            <span class="marquee-item"><i class='bx bx-hive'></i> DELOITTE</span>
+            <span class="marquee-item"><i class='bx bxl-aws'></i> AWS SELECT</span>
+            <span class="marquee-item"><i class='bx bx-globe'></i> THERMO FISHER</span>
+            <span class="marquee-item"><i class='bx bxl-amazon'></i> ALOVI CORP</span>
+            <span class="marquee-item"><i class='bx bxl-mastercard'></i> SECURE FINTECH</span>
+            <span class="marquee-item"><i class='bx bx-cube'></i> SIEMENS</span>
+        </div>
+    </div>
+
+    <!-- The IT Consolidation Problem -->
+    <section class="container mt-xl pb-lg border-bottom" id="deep-div">
+        <div class="text-center" style="max-width: 800px; margin: 0 auto; margin-bottom: 64px;">
+            <span class="sub-tag">THE FRAGMENTATION CRISIS</span>
+            <h2 class="huge-title">Tool Sprawl is Killing Engineering Velocity.</h2>
+            <p class="text-gray" style="font-size: 1.1rem; line-height: 1.6;">
+                The average enterprise utilizes 42 different SaaS tools for engineering, IT monitoring, security, and data analytics. This creates massive visibility gaps, data silos, and friction. Transform.io collapses the stack. We provide Custom Software Engineering, Centralized Endpoint Management, and Automated Security under one unified umbrella. 
+            </p>
         </div>
 
-        <div class="bento-grid">
-            <div class="bento-box bento-large border-glow">
-                <div class="bento-content">
-                    <div class="flex justify-between items-center mb-md">
-                        <div class="tag font-mono text-cyan">01 / SOFTWARE_ENGINEERING</div>
-                        <i class='bx bx-layer text-xl text-cyan'></i>
-                    </div>
-                    <h3 class="text-white mb-sm">Custom Full-Stack Development</h3>
-                    <p class="text-gray text-sm mb-md">We architect massively scalable web applications, mobile interfaces, and headless backend APIs. Utilizing a mix of React, Node.js, Next.js, and Golang, we guarantee sub-second latency and absolute reliability.</p>
-                    <div class="bento-image-wrapper">
-                        <img src="assets/dev_mockup_1776112553607.png" alt="Development Mockup">
-                    </div>
+        <div class="grid-4 mt-lg">
+            <div class="data-card border-glow">
+                <i class='bx bx-server'></i>
+                <h4>Infrastructure Collapse</h4>
+                <p>We replace disjointed legacy servers with highly available, auto-scaling Kubernetes clusters operating across multi-cloud regions, ensuring 99.999% uptime.</p>
+            </div>
+            <div class="data-card border-glow">
+                <i class='bx bx-shield-alt-2'></i>
+                <h4>Fragmented Security</h4>
+                <p>Instead of 14 different vulnerability scanners, we deploy a unified Zero-Trust architecture that audits every endpoint and packet in real-time natively.</p>
+            </div>
+            <div class="data-card border-glow">
+                <i class='bx bx-time-five'></i>
+                <h4>Wasted Developer Hours</h4>
+                <p>Manual server provisioning and CI/CD maintenance is dead. We inject Python and Bash orchestration that provisions secure staging environments in seconds.</p>
+            </div>
+            <div class="data-card border-glow">
+                <i class='bx bx-bar-chart-alt-2'></i>
+                <h4>Blind Data Ops</h4>
+                <p>End the spreadsheet chaos. We build native data warehouses feeding ultra-fast GraphQL APIs to power live React dashboards for executives.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Massive Block 1: App Development -->
+    <section class="container">
+        <div class="service-row border-bottom" style="padding-bottom: 120px;">
+            <div class="text-col">
+                <span class="sub-tag">01 // ENGINEERING_CORE</span>
+                <h3 class="huge-title">Extreme Full-Stack Application Development</h3>
+                <p class="text-gray" style="font-size: 1.05rem; margin-bottom: 24px;">
+                    We do not build brochure sites. We engineer massive, distributed, state-heavy SaaS platforms, B2B portals, and headless APIs designed to handle millions of simultaneous concurrent connections. Our code is deeply optimized at the system level.
+                </p>
+                
+                <div class="highlight-box">
+                    <p class="font-mono text-smoke">"Our engineers rewrote their monolith into Go microservices. CPU utilization dropped by 70%, and pageloads went from 4 seconds to 120 milliseconds."</p>
+                </div>
+
+                <ul class="feature-list">
+                    <li>
+                        <i class='bx bxl-react'></i>
+                        <div>
+                            <strong>Modern Frontend Architectures</strong>
+                            We leverage React, Next.js, and SvelteKit rendered on serverless Edge networks. We utilize complex state management (Redux, Zustand) and Framer Motion for 60fps cinematic micro-interactions.
+                        </div>
+                    </li>
+                    <li>
+                        <i class='bx bx-data'></i>
+                        <div>
+                            <strong>Database Sharding & Caching</strong>
+                            Writing to PostgreSQL or MongoDB isn't enough. We implement Redis sub-second caching layers, connection pooling, and read-replica routing to ensure queries never block the main thread.
+                        </div>
+                    </li>
+                    <li>
+                        <i class='bx bx-network-chart'></i>
+                        <div>
+                            <strong>Headless API & Microservices</strong>
+                            Whether its REST, GraphQL, or gRPC, we decouple your backend into scalable microservices written in Node.js or Golang, containerized in Docker, and managed by Kubernetes.
+                        </div>
+                    </li>
+                    <li>
+                        <i class='bx bx-mobile-alt'></i>
+                        <div>
+                            <strong>Cross-Platform Mobile Apps</strong>
+                            React Native deployments ensuring code reusability across iOS and Android without sacrificing native module performance or hardware API access.
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <div class="img-col">
+                <div class="border-glow" style="padding:4px; max-height:800px;">
+                    <img src="assets/app_dev_hero_1776115211825.png" alt="Full Stack Dev Architecture" style="width:100%; border-radius: 8px; display:block;">
                 </div>
             </div>
+        </div>
+    </section>
 
-            <div class="bento-box bento-medium border-glow">
-                <div class="bento-content">
-                    <div class="flex justify-between items-center mb-md">
-                        <div class="tag font-mono text-cyan">02 / CYBERSEC</div>
-                        <i class='bx bx-shield-quarter text-xl text-cyan'></i>
-                    </div>
-                    <h3 class="text-white mb-sm">Security Infrastructure</h3>
-                    <p class="text-gray text-sm mb-md">Automated endpoint scanning, realtime vulnerability mapping, and strict zero-trust implementations.</p>
-                    <div class="bento-image-wrapper h-half">
-                        <img src="assets/cybersec_mockup_1776112528216.png" alt="Cybersecurity Image">
-                    </div>
+    <!-- Massive Block 2: Cybersecurity -->
+    <section class="container">
+        <div class="service-row reverse border-bottom" style="padding-bottom: 120px;">
+            <div class="text-col">
+                <span class="sub-tag">02 // DEFENSE_MATRIX</span>
+                <h3 class="huge-title">Military-Grade Cybersecurity & Endpoint Management</h3>
+                <p class="text-gray" style="font-size: 1.05rem; margin-bottom: 24px;">
+                    Assume breach. That is our philosophy. We implement Zero-Trust Architectures that verify every single packet moving laterally through your network. We take complete control over your IT hardware fleet via unified endpoint management (UEM).
+                </p>
+                
+                <ul class="feature-list">
+                    <li>
+                        <i class='bx bx-scan'></i>
+                        <div>
+                            <strong>Continuous Vulnerability Sweeps (CVE)</strong>
+                            Our engines map your entire software inventory against national threat databases daily. If an unpatched server exists, our systems automatically isolate the node and deploy the hotfix silently.
+                        </div>
+                    </li>
+                    <li>
+                        <i class='bx bx-laptop'></i>
+                        <div>
+                            <strong>Unified Endpoint Management (MDM)</strong>
+                            We push policies, software, and encryption keys to Windows, Mac, and Linux hardware completely over the air. A laptop is stolen? We remote-wipe the storage array via AES-256 destruction before it powers on.
+                        </div>
+                    </li>
+                    <li>
+                        <i class='bx bx-lock-alt'></i>
+                        <div>
+                            <strong>Immutable Bare-Metal Backups</strong>
+                            Ransomware encrypts standard backups. We deploy airgapped, read-only "immutable" data archives. If your primary cluster is nuked, we can restore the entirety of your organization within 14 minutes.
+                        </div>
+                    </li>
+                    <li>
+                        <i class='bx bx-radar'></i>
+                        <div>
+                            <strong>Active Intrusion Prevention (IDS/IPS)</strong>
+                            Heuristic AI packet inspection. We drop DDoS attacks at the Cloudflare perimeter, and we sandbox internal malware execution in real-time, preventing lateral infection movement.
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <div class="img-col">
+                <div class="border-glow" style="padding:4px;">
+                    <img src="assets/cybersec_mockup_1776112528216.png" alt="Cyber Security Threat Map" style="width:100%; border-radius: 8px; display:block;">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Massive Block 3: Automation & Dashboards -->
+    <section class="container">
+        <div class="service-row border-bottom" style="padding-bottom: 120px;">
+            <div class="text-col">
+                <span class="sub-tag">03 // AUTONOMOUS_OPS</span>
+                <h3 class="huge-title">Hyper-Automation & Live Data Telemetry</h3>
+                <p class="text-gray" style="font-size: 1.05rem; margin-bottom: 24px;">
+                    Human error is the enemy of scale. We utilize node-based orchestration networks and raw script execution to automate millions of repetitive IT and Engineering tasks. We then pipe that heartbeat data directly to beautiful, real-time command center dashboards.
+                </p>
+
+                <ul class="feature-list">
+                    <li>
+                        <i class='bx bx-git-pull-request'></i>
+                        <div>
+                            <strong>Cross-SaaS Workflow Building</strong>
+                            We connect independent SaaS applications. Example: A Jira ticket is closed -> An AWS server powers down -> A billing invoice is automatically generated in Stripe -> A Slack webhook fires to your ops channel.
+                        </div>
+                    </li>
+                    <li>
+                        <i class='bx bx-terminal'></i>
+                        <div>
+                            <strong>Unattended Patching & CRON Logic</strong>
+                            Zero-touch IT. We write custom bash/PowerShell scripts that deploy OS updates to 10,000 machines at exactly 3:00 AM on Sunday, rebooting and error-checking the fleet automatically without human intervention.
+                        </div>
+                    </li>
+                    <li>
+                        <i class='bx bx-chart'></i>
+                        <div>
+                            <strong>Executive Data & Telemetry Dashboards</strong>
+                            We deploy Prometheus and Grafana instances collecting metrics on everything: Server CPU temperature, global active app users, financial transaction latency. Visualized elegantly in a dark-mode command center.
+                        </div>
+                    </li>
+                    <li>
+                        <i class='bx bx-bot'></i>
+                        <div>
+                            <strong>Auto-remediation AI</strong>
+                            The system detects if a critical API endpoint goes down. BeforePagerDuty even alerts an engineer, the orchestrator has already attempted a Kubernetes pod restart and flushed the Redis cache.
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <div class="img-col">
+                <div class="border-glow" style="padding:4px;">
+                    <img src="assets/automation_mockup_1776112570610.png" alt="Node Automation Topology" style="width:100%; border-radius: 8px; display:block;">
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- Stats & Testimonials -->
+    <section class="container pt-xl pb-lg">
+        <div class="section-header text-center mb-lg" style="max-width: 800px; margin: 0 auto 64px auto;">
+            <span class="sub-tag">PERFORMANCE METRICS</span>
+            <h2 class="text-white text-xl tracking-tight mb-md">Raw Speed Meets Unbreakable Security</h2>
+        </div>
+
+        <div class="stats-grid font-mono">
+            <div class="stat-card">
+                <div class="stat-num text-cyan">85<span style="font-size: 1.5rem">%</span></div>
+                <div class="stat-desc">Reduction in MTTR (Mean Time To Resolution) for critical CVEs.</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-num text-cyan">10<span style="font-size: 1.5rem">ms</span></div>
+                <div class="stat-desc">Sub-10 millisecond latency on globally distributed SaaS edge applications.</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-num text-cyan">Zero</div>
+                <div class="stat-desc">Touch patching and employee IT onboarding workflows globally.</div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- Exhaustive NinjaOne Style Footer -->
+    <footer class="footer font-mono mt-xl">
+        <div class="container footer-mega-grid">
+            <div class="footer-brand footer-col">
+                <a href="#" class="logo text-xl mb-md"><i class='bx bx-code-alt text-cyan'></i> TRANSFORM.IO</a>
+                <p class="text-gray text-xs mb-md" style="line-height:1.6;">Unified Enterprise Engine. From writing bleeding-edge React architectures to securing thousands of global endpoints via Zero-Trust.</p>
+                <div class="social-icons flex gap-sm text-gray text-xl">
+                    <i class='bx bxl-linkedin-square'></i>
+                    <i class='bx bxl-twitter'></i>
+                    <i class='bx bxl-github' ></i>
                 </div>
             </div>
             
-            <div class="bento-box bento-medium border-glow">
-                <div class="bento-content">
-                    <div class="flex justify-between items-center mb-md">
-                        <div class="tag font-mono text-cyan">03 / DATA_OPS</div>
-                    </div>
-                    <h3 class="text-white mb-sm">Telemetry Dashboards</h3>
-                    <p class="text-gray text-sm mb-md">Ingest terabytes of unstructured log data to build unified, actionable executive intelligence panels.</p>
-                    <div class="bento-image-wrapper h-half">
-                        <img src="assets/dashboard_mockup_1776111945145.png" alt="Data Dashboard">
-                    </div>
-                </div>
+            <div class="footer-col">
+                <h4 class="font-mono text-white">ENGINEERING</h4>
+                <a href="app-dev.html">Full-Stack Development</a>
+                <a href="#">Headless API & Microservices</a>
+                <a href="#">Serverless Cloud Hosting</a>
+                <a href="#">DevOps CI/CD Pipelines</a>
+                <a href="#">Mobile Application Dev</a>
+            </div>
+
+            <div class="footer-col">
+                <h4 class="font-mono text-white">SECURITY & IT</h4>
+                <a href="cybersec.html">Unified Endpoint Mgt (UEM)</a>
+                <a href="#">Zero-Trust Networking</a>
+                <a href="#">Intrusion Prevention Systems</a>
+                <a href="#">Automated CVE Patching</a>
+                <a href="#">Airgapped Immutable Backups</a>
+            </div>
+
+            <div class="footer-col">
+                <h4 class="font-mono text-white">AUTOMATION & DATA</h4>
+                <a href="automation.html">Visual Workflow Builders</a>
+                <a href="#">SaaS API Webhooks</a>
+                <a href="#">CRON Script Deployments</a>
+                <a href="#">Realtime Telemetry Dashboards</a>
+                <a href="#">Log Aggregation (ELK)</a>
+            </div>
+
+            <div class="footer-col">
+                <h4 class="font-mono text-white">COMPLIANCE</h4>
+                <a href="#">SOC 2 Type II Certified</a>
+                <a href="#">ISO 27001 Security Standard</a>
+                <a href="#">HIPAA Medical Compliance</a>
+                <a href="#">GDPR & Data Privacy</a>
+                <a href="#">FedRAMP Defense Grade</a>
             </div>
         </div>
-    </section>
 
-    <!-- Deep Dive 1: App Development -->
-    <section id="app-dev" class="container mt-xl">
-        <h2 class="text-white tracking-tight mb-md">I. Application & Web Development</h2>
-        <div class="grid-2 align-center mb-lg">
-            <div>
-                <p class="text-gray text-justify mb-md">
-                    Transform.io deploys elite engineering squads to build your product from the ground up. We do not rely on slow CMS platforms; we write pure, high-performance code tailored to extreme loads.
-                </p>
-                <div class="highlight-box">
-                    <p class="font-mono text-white text-sm">"Our architecture scales horizontally without breaking internal logic state. We handle state management, caching layers, and database sharding as standard practices."</p>
-                </div>
-                <div class="badge-grid mt-md font-mono">
-                    <span class="badge-item">REACT / NEXT.JS</span>
-                    <span class="badge-item">VUE.JS / NUXT</span>
-                    <span class="badge-item">NODE.JS / EXPRESS</span>
-                    <span class="badge-item">GOLANG</span>
-                    <span class="badge-item">POSTGRESQL</span>
-                    <span class="badge-item">REDIS CACHING</span>
-                    <span class="badge-item">GRAPHQL</span>
-                </div>
-            </div>
-            <div class="border-glow p-lg" style="padding: 24px; background: var(--bg-elevated);">
-                <h4 class="text-white mb-sm font-mono">> DEVELOPMENT METHODOLOGY</h4>
-                <ul class="feature-list">
-                    <li><i class='bx bx-check'></i> <strong>Microservices Architecture:</strong> Decoupled logic ensuring robust fault tolerance.</li>
-                    <li><i class='bx bx-check'></i> <strong>Serverless Edge Deployment:</strong> Pushing UI code globally to CDN edges for 10ms loading times.</li>
-                    <li><i class='bx bx-check'></i> <strong>CI/CD Pipelines:</strong> Automated testing arrays preventing bad merges from hitting production.</li>
-                    <li><i class='bx bx-check'></i> <strong>Headless CMS Integrations:</strong> Allowing non-technical teams to edit data via secure APIs.</li>
-                </ul>
-            </div>
-        </div>
-    </section>
-
-    <!-- Deep Dive 2: Cybersecurity -->
-    <section id="security" class="container mt-xl pb-md border-bottom">
-        <h2 class="text-white tracking-tight mb-md">II. Enterprise Cybersecurity & ITSM</h2>
-        <div class="grid-2">
-            <div class="border-glow p-lg" style="padding: 24px; background: var(--bg-elevated);">
-                 <div class="tag font-mono text-red mb-sm" style="border-color: var(--accent-red); color: var(--accent-red);">[CRITICAL_INFRASTRUCTURE]</div>
-                 <p class="text-gray text-sm mt-md text-justify">
-                    Operating in a digital space requires military defense parameters. We build secure boundaries, enforce policies across thousands of workstations remotely.
-                 </p>
-                 <ul class="feature-list mt-md">
-                    <li><i class='bx bx-lock'></i> <strong>Zero-Trust Architecture:</strong> Micro-segmentation of networks.</li>
-                    <li><i class='bx bx-radar'></i> <strong>Vulnerability Scanning (CVE):</strong> Automated sweeps checking against global threat DBs.</li>
-                    <li><i class='bx bx-hdd'></i> <strong>Encrypted Offsite Backup:</strong> Bare-metal recovery protocols.</li>
-                 </ul>
-            </div>
-            <div>
-                <p class="text-gray text-justify mb-md">
-                    Alongside defensive coding, we provide complete **IT Service Management (ITSM)** and **Remote Monitoring & Management (RMM)**. We can track, patch, and deploy software to hundreds of employee laptops globally without ever stepping inside an office. Our endpoint agents run invisibly in the background, consuming less than 1% CPU.
-                </p>
-                <div class="terminal-mock border-glow" style="height: 200px;">
-                    <div class="terminal-header"><span class="font-mono text-xs text-gray">threat_intel.py</span></div>
-                    <div class="terminal-body font-mono text-xs">
-                        > Initializing OSINT threat feed... OK<br>
-                        > Scanning subnet 10.0.x.x for vulnerable OpenSSL binaries...<br>
-                        > <span style="color:var(--accent-red)">[ALERT] Found OpenSSL 1.1.1u on Host 10.0.5.122</span><br>
-                        > Executing forced silent patch via RPC module...<br>
-                        > <span style="color:var(--accent-green)">[SUCCESS] Host 10.0.5.122 secured.</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Deep Dive 3: Workflow Automation -->
-    <section id="automation" class="container mt-xl pb-lg">
-        <h2 class="text-white tracking-tight mb-md">III. Complex Process Automation</h2>
-        <div class="grid-2 align-center">
-            <div>
-                <div class="bento-image-wrapper border-glow" style="border-radius:12px;">
-                    <img src="assets/automation_mockup_1776112570610.png" alt="Automation Map">
-                </div>
-            </div>
-            <div style="padding-left: 24px;">
-                <p class="text-gray text-justify mb-md">
-                   Manual labor in software or IT operations is a dead end. We implement intelligent Orchestration Networks using visual node builders or direct code (Python/Bash). 
-                </p>
-                <p class="text-gray text-justify mb-md">
-                   From onboarding new employees (creating Google Workspace accounts, assigning JIRA access, pushing configuration profiles to Macbooks) to automatically restarting crashed services on production servers.
-                </p>
-                <ul class="feature-list mt-md">
-                    <li><i class='bx bx-shuffle'></i> <strong>Conditional Logic Gates:</strong> If/Else branching based on live data feeds.</li>
-                    <li><i class='bx bx-cloud-upload'></i> <strong>Webhook Web-hooks:</strong> Tie together disparate SaaS tools (Slack, Datadog, Salesforce).</li>
-                    <li><i class='bx bx-task'></i> <strong>Scheduled Cron Jobs:</strong> Precision execution at scale.</li>
-                </ul>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="footer border-top mt-xl" style="background:#020202;">
-        <div class="container footer-grid">
-            <div class="footer-brand" style="max-width:300px;">
-                <a href="#" class="logo font-mono text-xl"><i class='bx bx-code-alt text-cyan'></i> TRANSFORM.IO</a>
-                <p class="text-gray text-sm mt-md font-mono">Executing logic at the speed of thought. Advanced engineering, intelligence, and zero-trust.</p>
-            </div>
-            <div class="footer-links font-mono text-sm">
-                <div class="link-col">
-                    <span class="text-white mb-sm block">CAPABILITIES</span>
-                    <a href="#app-dev">App Engineering</a>
-                    <a href="#security">Cyber Security</a>
-                    <a href="#automation">Automation</a>
-                    <a href="#platform">Data Ops</a>
-                </div>
-                <div class="link-col">
-                    <span class="text-white mb-sm block">SYSTEM</span>
-                    <a href="portfolio.html">Portfolio</a>
-                    <a href="#">Status</a>
-                    <a href="#">API Docs</a>
-                </div>
+        <div class="container footer-bottom mt-lg" style="border-top: 1px solid #1a1a1a; padding-top: 24px; color: #555;">
+            <p>&copy; 2026 Transform.io Technical Solutions. All systems operational.</p>
+            <div class="footer-legal">
+                <a href="#" style="color:#555;">Privacy Policy</a>
+                <a href="#" style="color:#555;">Terms of Service</a>
+                <a href="#" style="color:#555;">Vulnerability Disclosure Program</a>
             </div>
         </div>
     </footer>
