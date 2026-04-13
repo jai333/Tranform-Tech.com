@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transform.io | Engineering Engine</title>
+    <!-- Fonts for Technical Aesthetic -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;600&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Additional utility classes for the expanded content */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+        .align-center { align-items: center; }
+        .text-justify { text-align: justify; }
+        .feature-list { list-style: none; margin-top: 16px; }
+        .feature-list li { display: flex; gap: 12px; margin-bottom: 12px; font-size: 0.9rem; color: var(--text-gray); }
+        .feature-list li i { color: var(--primary); font-size: 1.2rem; }
+        .badge-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+        .badge-item { background: rgba(255,255,255,0.05); border: 1px solid var(--secondary); padding: 4px 12px; border-radius: 4px; font-size: 0.75rem; color: var(--text-white); }
+        .highlight-box { background: rgba(0, 229, 255, 0.03); border-left: 3px solid var(--primary); padding: 16px; margin: 16px 0; }
+        @media (max-width: 968px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+    <!-- Sticky Header -->
+    <nav class="navbar border-bottom">
+        <div class="container nav-content">
+            <a href="index.html" class="logo font-mono">
+                <i class='bx bx-code-alt text-cyan'></i> TRANSFORM.IO
+            </a>
+            <div class="nav-links font-mono text-sm">
+                <a href="#platform" class="active">PLATFORM OVERVIEW</a>
+                <a href="#app-dev">APP DEV</a>
+                <a href="#security">CYBERSEC</a>
+                <a href="#automation">AUTOMATION</a>
+                <a href="portfolio.html">PORTFOLIO</a>
+            </div>
+            <a href="#contact" class="btn btn-outline font-mono">/GET_STARTED</a>
+        </div>
+    </nav>
+
+    <!-- Technical Hero Section -->
+    <header class="hero container">
+        <div class="hero-left">
+            <div class="tag font-mono text-cyan mb-md">[ v4.0.0-RELEASE ]</div>
+            <h1 class="hero-title tracking-tight">
+                Architectural Dominance.<br>
+                <span class="text-white">Engineering Speed.</span>
+            </h1>
+            <p class="hero-subtitle text-gray mt-md text-justify">
+                We design, automate, and secure the modern technology stack. From Full-Stack Application Engineering to Military-Grade Cybersecurity and IT Automation, Transform.io serves as an elite agency combining raw computational power with strategic workflow execution. Stop wrestling with disjointed tools.
+            </p>
+            <div class="hero-actions mt-lg">
+                <a href="#platform" class="btn btn-cyan font-mono">init --services</a>
+                <a href="portfolio.html" class="btn btn-dark font-mono">cd /projects</a>
+            </div>
+            <div class="tech-stack mt-lg font-mono text-xs text-dark-gray">
+                SUPPORTED ENVIRONMENTS: <span class="text-gray">AWS, AZURE, GCP, VERCEL, DOCKER, KUBERNETES</span>
+            </div>
+        </div>
+
+        <div class="hero-right">
+            <!-- Simulated Terminal -->
+            <div class="terminal-mock border-glow">
+                <div class="terminal-header border-bottom">
+                    <div class="dots flex gap-sm">
+                        <span class="dot bg-red"></span><span class="dot bg-yellow"></span><span class="dot bg-green"></span>
+                    </div>
+                    <div class="terminal-title font-mono text-xs">tx_core_engine_init.sh</div>
+                </div>
+                <div class="terminal-body font-mono text-sm" id="typewriter-log">
+                    <!-- Logs injected via JS -->
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Unified Services Grid (High Level) -->
+    <section id="platform" class="container mt-xl">
+        <div class="section-header mb-lg">
+            <h2 class="tracking-tight text-white pb-sm border-bottom">Core Operational Vectors</h2>
+            <p class="font-mono text-gray text-sm mt-sm">// HIGH-LEVEL STRUCTURAL OVERVIEW OF CAPABILITIES</p>
+        </div>
+
+        <div class="bento-grid">
+            <div class="bento-box bento-large border-glow">
+                <div class="bento-content">
+                    <div class="flex justify-between items-center mb-md">
+                        <div class="tag font-mono text-cyan">01 / SOFTWARE_ENGINEERING</div>
+                        <i class='bx bx-layer text-xl text-cyan'></i>
+                    </div>
+                    <h3 class="text-white mb-sm">Custom Full-Stack Development</h3>
+                    <p class="text-gray text-sm mb-md">We architect massively scalable web applications, mobile interfaces, and headless backend APIs. Utilizing a mix of React, Node.js, Next.js, and Golang, we guarantee sub-second latency and absolute reliability.</p>
+                    <div class="bento-image-wrapper">
+                        <img src="assets/dev_mockup_1776112553607.png" alt="Development Mockup">
+                    </div>
+                </div>
+            </div>
+
+            <div class="bento-box bento-medium border-glow">
+                <div class="bento-content">
+                    <div class="flex justify-between items-center mb-md">
+                        <div class="tag font-mono text-cyan">02 / CYBERSEC</div>
+                        <i class='bx bx-shield-quarter text-xl text-cyan'></i>
+                    </div>
+                    <h3 class="text-white mb-sm">Security Infrastructure</h3>
+                    <p class="text-gray text-sm mb-md">Automated endpoint scanning, realtime vulnerability mapping, and strict zero-trust implementations.</p>
+                    <div class="bento-image-wrapper h-half">
+                        <img src="assets/cybersec_mockup_1776112528216.png" alt="Cybersecurity Image">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bento-box bento-medium border-glow">
+                <div class="bento-content">
+                    <div class="flex justify-between items-center mb-md">
+                        <div class="tag font-mono text-cyan">03 / DATA_OPS</div>
+                    </div>
+                    <h3 class="text-white mb-sm">Telemetry Dashboards</h3>
+                    <p class="text-gray text-sm mb-md">Ingest terabytes of unstructured log data to build unified, actionable executive intelligence panels.</p>
+                    <div class="bento-image-wrapper h-half">
+                        <img src="assets/dashboard_mockup_1776111945145.png" alt="Data Dashboard">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Deep Dive 1: App Development -->
+    <section id="app-dev" class="container mt-xl">
+        <h2 class="text-white tracking-tight mb-md">I. Application & Web Development</h2>
+        <div class="grid-2 align-center mb-lg">
+            <div>
+                <p class="text-gray text-justify mb-md">
+                    Transform.io deploys elite engineering squads to build your product from the ground up. We do not rely on slow CMS platforms; we write pure, high-performance code tailored to extreme loads.
+                </p>
+                <div class="highlight-box">
+                    <p class="font-mono text-white text-sm">"Our architecture scales horizontally without breaking internal logic state. We handle state management, caching layers, and database sharding as standard practices."</p>
+                </div>
+                <div class="badge-grid mt-md font-mono">
+                    <span class="badge-item">REACT / NEXT.JS</span>
+                    <span class="badge-item">VUE.JS / NUXT</span>
+                    <span class="badge-item">NODE.JS / EXPRESS</span>
+                    <span class="badge-item">GOLANG</span>
+                    <span class="badge-item">POSTGRESQL</span>
+                    <span class="badge-item">REDIS CACHING</span>
+                    <span class="badge-item">GRAPHQL</span>
+                </div>
+            </div>
+            <div class="border-glow p-lg" style="padding: 24px; background: var(--bg-elevated);">
+                <h4 class="text-white mb-sm font-mono">> DEVELOPMENT METHODOLOGY</h4>
+                <ul class="feature-list">
+                    <li><i class='bx bx-check'></i> <strong>Microservices Architecture:</strong> Decoupled logic ensuring robust fault tolerance.</li>
+                    <li><i class='bx bx-check'></i> <strong>Serverless Edge Deployment:</strong> Pushing UI code globally to CDN edges for 10ms loading times.</li>
+                    <li><i class='bx bx-check'></i> <strong>CI/CD Pipelines:</strong> Automated testing arrays preventing bad merges from hitting production.</li>
+                    <li><i class='bx bx-check'></i> <strong>Headless CMS Integrations:</strong> Allowing non-technical teams to edit data via secure APIs.</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Deep Dive 2: Cybersecurity -->
+    <section id="security" class="container mt-xl pb-md border-bottom">
+        <h2 class="text-white tracking-tight mb-md">II. Enterprise Cybersecurity & ITSM</h2>
+        <div class="grid-2">
+            <div class="border-glow p-lg" style="padding: 24px; background: var(--bg-elevated);">
+                 <div class="tag font-mono text-red mb-sm" style="border-color: var(--accent-red); color: var(--accent-red);">[CRITICAL_INFRASTRUCTURE]</div>
+                 <p class="text-gray text-sm mt-md text-justify">
+                    Operating in a digital space requires military defense parameters. We build secure boundaries, enforce policies across thousands of workstations remotely.
+                 </p>
+                 <ul class="feature-list mt-md">
+                    <li><i class='bx bx-lock'></i> <strong>Zero-Trust Architecture:</strong> Micro-segmentation of networks.</li>
+                    <li><i class='bx bx-radar'></i> <strong>Vulnerability Scanning (CVE):</strong> Automated sweeps checking against global threat DBs.</li>
+                    <li><i class='bx bx-hdd'></i> <strong>Encrypted Offsite Backup:</strong> Bare-metal recovery protocols.</li>
+                 </ul>
+            </div>
+            <div>
+                <p class="text-gray text-justify mb-md">
+                    Alongside defensive coding, we provide complete **IT Service Management (ITSM)** and **Remote Monitoring & Management (RMM)**. We can track, patch, and deploy software to hundreds of employee laptops globally without ever stepping inside an office. Our endpoint agents run invisibly in the background, consuming less than 1% CPU.
+                </p>
+                <div class="terminal-mock border-glow" style="height: 200px;">
+                    <div class="terminal-header"><span class="font-mono text-xs text-gray">threat_intel.py</span></div>
+                    <div class="terminal-body font-mono text-xs">
+                        > Initializing OSINT threat feed... OK<br>
+                        > Scanning subnet 10.0.x.x for vulnerable OpenSSL binaries...<br>
+                        > <span style="color:var(--accent-red)">[ALERT] Found OpenSSL 1.1.1u on Host 10.0.5.122</span><br>
+                        > Executing forced silent patch via RPC module...<br>
+                        > <span style="color:var(--accent-green)">[SUCCESS] Host 10.0.5.122 secured.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Deep Dive 3: Workflow Automation -->
+    <section id="automation" class="container mt-xl pb-lg">
+        <h2 class="text-white tracking-tight mb-md">III. Complex Process Automation</h2>
+        <div class="grid-2 align-center">
+            <div>
+                <div class="bento-image-wrapper border-glow" style="border-radius:12px;">
+                    <img src="assets/automation_mockup_1776112570610.png" alt="Automation Map">
+                </div>
+            </div>
+            <div style="padding-left: 24px;">
+                <p class="text-gray text-justify mb-md">
+                   Manual labor in software or IT operations is a dead end. We implement intelligent Orchestration Networks using visual node builders or direct code (Python/Bash). 
+                </p>
+                <p class="text-gray text-justify mb-md">
+                   From onboarding new employees (creating Google Workspace accounts, assigning JIRA access, pushing configuration profiles to Macbooks) to automatically restarting crashed services on production servers.
+                </p>
+                <ul class="feature-list mt-md">
+                    <li><i class='bx bx-shuffle'></i> <strong>Conditional Logic Gates:</strong> If/Else branching based on live data feeds.</li>
+                    <li><i class='bx bx-cloud-upload'></i> <strong>Webhook Web-hooks:</strong> Tie together disparate SaaS tools (Slack, Datadog, Salesforce).</li>
+                    <li><i class='bx bx-task'></i> <strong>Scheduled Cron Jobs:</strong> Precision execution at scale.</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer border-top mt-xl" style="background:#020202;">
+        <div class="container footer-grid">
+            <div class="footer-brand" style="max-width:300px;">
+                <a href="#" class="logo font-mono text-xl"><i class='bx bx-code-alt text-cyan'></i> TRANSFORM.IO</a>
+                <p class="text-gray text-sm mt-md font-mono">Executing logic at the speed of thought. Advanced engineering, intelligence, and zero-trust.</p>
+            </div>
+            <div class="footer-links font-mono text-sm">
+                <div class="link-col">
+                    <span class="text-white mb-sm block">CAPABILITIES</span>
+                    <a href="#app-dev">App Engineering</a>
+                    <a href="#security">Cyber Security</a>
+                    <a href="#automation">Automation</a>
+                    <a href="#platform">Data Ops</a>
+                </div>
+                <div class="link-col">
+                    <span class="text-white mb-sm block">SYSTEM</span>
+                    <a href="portfolio.html">Portfolio</a>
+                    <a href="#">Status</a>
+                    <a href="#">API Docs</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

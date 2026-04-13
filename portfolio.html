@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio | Transform.io</title>
+    <!-- Fonts for Technical Aesthetic -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;600&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Sticky Minimalist Header -->
+    <nav class="navbar border-bottom scrolled">
+        <div class="container nav-content">
+            <a href="index.html" class="logo font-mono">
+                <i class='bx bx-code-alt text-cyan'></i> TRANSFORM.IO
+            </a>
+            <div class="nav-links font-mono text-sm">
+                <a href="index.html#platform">PLATFORM</a>
+                <a href="portfolio.html" class="active">PORTFOLIO & WORK</a>
+            </div>
+            <a href="index.html#contact" class="btn btn-outline font-mono">/GET_STARTED</a>
+        </div>
+    </nav>
+
+    <!-- Header Section -->
+    <header class="container pt-xl pb-lg">
+        <div class="tag font-mono text-cyan mb-md">[ SYSTEM_ARCHIVE ]</div>
+        <h1 class="text-white tracking-tight mb-md" style="font-size: 3rem;">Engineering Portfolio</h1>
+        <p class="font-mono text-gray">An archive of Full-Stack Apps, Data Dashboards, and Automated Environments we've successfully deployed into production.</p>
+    </header>
+
+    <!-- Portfolio Grid -->
+    <section class="container mb-xl">
+        <div class="bento-grid">
+            
+            <div class="bento-box border-glow bento-large">
+                <div class="bento-content">
+                    <div class="flex justify-between items-center mb-md">
+                        <div class="tag font-mono text-cyan">PROJECT / 001</div>
+                        <span class="font-mono text-dark-gray text-xs">STATUS: ONLINE</span>
+                    </div>
+                    <h3 class="text-white mb-sm">Global Defense Dashboard</h3>
+                    <p class="text-gray text-sm mb-md font-mono">Industry: Cyber Intelligence | Role: Full Stack Engineering</p>
+                    <p class="text-gray text-sm mb-md">Engineered a robust React telemetry frontend attached to a highly optimized Golang backend stream, processing over 10TB of security events daily. Replaced legacy systems to drop latency by 85%.</p>
+                    <div class="bento-image-wrapper h-half">
+                        <img src="assets/dashboard_mockup_1776111945145.png" alt="Global Defense Dash">
+                    </div>
+                </div>
+            </div>
+
+            <div class="bento-box border-glow bento-medium">
+                <div class="bento-content">
+                    <div class="flex justify-between items-center mb-md">
+                        <div class="tag font-mono text-cyan">PROJECT / 002</div>
+                    </div>
+                    <h3 class="text-white mb-sm">Zero-Touch Automation Suite</h3>
+                    <p class="text-gray text-sm mb-md">Custom orchestrator built to handle patching, deploying, and migrating over 5,000 servers simultaneously with dynamic node-based visual routing.</p>
+                    <div class="bento-image-wrapper h-half">
+                        <img src="assets/automation_mockup_1776112570610.png" alt="Nodes">
+                    </div>
+                </div>
+            </div>
+
+            <div class="bento-box border-glow bento-medium">
+                <div class="bento-content">
+                    <div class="flex justify-between items-center mb-md">
+                        <div class="tag font-mono text-cyan">PROJECT / 003</div>
+                    </div>
+                    <h3 class="text-white mb-sm">FinTech SaaS Platform</h3>
+                    <p class="text-gray text-sm mb-md">Architected a microservices-based full stack application handling secure transactions, featuring dynamic code-editor styled rule engines for financial logic.</p>
+                    <div class="bento-image-wrapper h-half">
+                        <img src="assets/dev_mockup_1776112553607.png" alt="Code UI">
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+</body>
+</html>
