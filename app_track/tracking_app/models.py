@@ -38,7 +38,7 @@ class Job(models.Model):
     ]
     
     title = models.CharField(max_length=255)
-    company = models.CharField(max_length=255, default='Protingent India')
+    company = models.CharField(max_length=255, default='Transform.io')
     department = models.CharField(max_length=255, blank=True, null=True)
     description = models.TextField()
     requirements = models.TextField(blank=True, null=True, help_text="List job requirements and qualifications")

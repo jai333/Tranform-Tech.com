@@ -1,10 +1,10 @@
-# Protingent ATS & CRM System
+# Transform.io ATS & CRM System
 
 An advanced Applicant Tracking System (ATS) and Customer Relationship Management (CRM) platform built with Django, featuring job management, candidate tracking, interviews, video conferencing, and real-time notifications.
 
 ## Project Overview
 
-**Protingent ATS & CRM** is a comprehensive recruitment and client management system designed for staffing agencies and recruitment firms. It streamlines the entire hiring process from job posting to candidate placement.
+**Transform.io ATS & CRM** is a comprehensive recruitment and client management system designed for staffing agencies and recruitment firms. It streamlines the entire hiring process from job posting to candidate placement.
 
 ### Key Features
 
@@ -37,8 +37,8 @@ An advanced Applicant Tracking System (ATS) and Customer Relationship Management
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/jai333/ATS-CRM-Protingent.git
-   cd ATS-CRM-Protingent/app_track
+   git clone https://github.com/jai333/ATS-CRM-Transform.io.git
+   cd ATS-CRM-Transform.io/app_track
    ```
 
 2. **Create and activate virtual environment**
@@ -84,18 +84,18 @@ See `PROPRIETARY_LICENSE.txt` for details.
 **This software is proprietary and confidential.**
 - Restricted to authorized use only
 - No distribution, sublicensing, or commercial use
-- For inquiries: it@protingentindia.com
+- For inquiries: it@transform.io
 
 ### 📜 Secondary License: APACHE 2.0 (Optional)
 See `LICENSE` file for details.
 
-**Available only if explicitly granted by Protingent India LLP.**
+**Available only if explicitly granted by Transform.io LLP.**
 - Permissive with patent protection
 - Allows modification and distribution under specific conditions
 
 ## Copyright
 
-**Copyright © 2026 Protingent India LLP. All rights reserved.**
+**Copyright © 2026 Transform.io LLP. All rights reserved.**
 
 This software is protected under:
 - Indian Copyright Law
@@ -106,13 +106,13 @@ For complete legal terms, see `COPYRIGHT.md`
 
 ## Contact & Support
 
-- **Email**: it@protingentindia.com
+- **Email**: it@transform.io
 - **Phone**: 9664131355
 - **Address**: 4th floor, Jaipur Centre, 420, Tonk Rd, Durgapura, Jaipur, Rajasthan 302018
 
 ## Security
 
-If you discover a security vulnerability, please email it@protingentindia.com instead of using the issue tracker.
+If you discover a security vulnerability, please email it@transform.io instead of using the issue tracker.
 
 ## Roadmap
 
@@ -158,7 +158,7 @@ python manage.py migrate
 
 ## Contributing
 
-This is a proprietary project. Contributions are by invitation only. Contact it@protingentindia.com for collaboration inquiries.
+This is a proprietary project. Contributions are by invitation only. Contact it@transform.io for collaboration inquiries.
 
 ## Changelog
 
@@ -171,4 +171,4 @@ This is a proprietary project. Contributions are by invitation only. Contact it@
 
 ---
 
-**Made with ❤️ by Protingent India LLP**
+**Made with ❤️ by Transform.io LLP**

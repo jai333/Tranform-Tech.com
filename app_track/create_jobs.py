@@ -101,7 +101,7 @@ def create_job_seekers(num_accounts=10):
 job_listings = [
     {
         "title": "Senior Software Engineer - Python",
-        "company": "Protingent India",
+        "company": "Transform.io",
         "department": "Engineering",
         "description": (
             "We're looking for an experienced Senior Software Engineer with strong Python skills to join our "
@@ -139,7 +139,7 @@ job_listings = [
     },
     {
         "title": "Data Scientist",
-        "company": "Protingent India",
+        "company": "Transform.io",
         "department": "Data Science",
         "description": (
             "Join our data science team to build machine learning models and analyze large datasets "
@@ -176,7 +176,7 @@ job_listings = [
     },
     {
         "title": "DevOps Engineer",
-        "company": "Protingent India",
+        "company": "Transform.io",
         "department": "Infrastructure",
         "description": (
             "We're seeking a talented DevOps Engineer to help automate our infrastructure and improve "
@@ -213,7 +213,7 @@ job_listings = [
     },
     {
         "title": "UI/UX Designer",
-        "company": "Protingent India",
+        "company": "Transform.io",
         "department": "Design",
         "description": (
             "We're looking for a creative UI/UX Designer to craft beautiful and functional user experiences. "
@@ -249,7 +249,7 @@ job_listings = [
     },
     {
         "title": "Frontend Developer Intern",
-        "company": "Protingent India",
+        "company": "Transform.io",
         "department": "Engineering",
         "description": (
             "We're offering an exciting internship opportunity for aspiring frontend developers. "

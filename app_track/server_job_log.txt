@@ -440,7 +440,7 @@ HTTP GET /notifications/count/ 200 [0.01, 127.0.0.1:52423]
 HTTP GET /notifications/count/ 200 [0.01, 127.0.0.1:52423]
 HTTP GET /notifications/count/ 200 [0.01, 127.0.0.1:52423]
 HTTP GET /notifications/count/ 200 [0.01, 127.0.0.1:52423]
-C:\Users\jaisu\Downloads\Software ATS & CRM Protingent-20251114T123406Z-1-001\Software ATS & CRM Protingent\app_track\tracking_app\views.py changed, reloading.
+C:\Users\jaisu\Downloads\Software ATS & CRM Transform.io-20251114T123406Z-1-001\Software ATS & CRM Transform.io\app_track\tracking_app\views.py changed, reloading.
 Performing system checks...
 
 System check identified no issues (0 silenced).
@@ -449,7 +449,7 @@ Django version 5.2, using settings 'ats_crm_project.settings'
 Starting ASGI/Daphne version 4.0.0 development server at http://0.0.0.0:8000/
 Quit the server with CTRL-BREAK.
 Watching for file changes with StatReloader
-C:\Users\jaisu\Downloads\Software ATS & CRM Protingent-20251114T123406Z-1-001\Software ATS & CRM Protingent\app_track\tracking_app\urls.py changed, reloading.
+C:\Users\jaisu\Downloads\Software ATS & CRM Transform.io-20251114T123406Z-1-001\Software ATS & CRM Transform.io\app_track\tracking_app\urls.py changed, reloading.
 Performing system checks...
 
 System check identified no issues (0 silenced).
@@ -458,7 +458,7 @@ Django version 5.2, using settings 'ats_crm_project.settings'
 Starting ASGI/Daphne version 4.0.0 development server at http://0.0.0.0:8000/
 Quit the server with CTRL-BREAK.
 Watching for file changes with StatReloader
-C:\Users\jaisu\Downloads\Software ATS & CRM Protingent-20251114T123406Z-1-001\Software ATS & CRM Protingent\app_track\tracking_app\views.py changed, reloading.
+C:\Users\jaisu\Downloads\Software ATS & CRM Transform.io-20251114T123406Z-1-001\Software ATS & CRM Transform.io\app_track\tracking_app\views.py changed, reloading.
 Performing system checks...
 
 System check identified no issues (0 silenced).

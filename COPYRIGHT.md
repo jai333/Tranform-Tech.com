@@ -15,16 +15,16 @@ This project is available under a **Dual License Model**:
 2. **Apache License 2.0** (Secondary) - See `LICENSE` file
    - Optional permissive license for approved distributions
    - Includes patent protection and grants
-   - Only applies if explicitly granted by Protingent India LLP
+   - Only applies if explicitly granted by Transform.io LLP
 
 ## Usage Rights
 
 **Default**: All rights reserved under Proprietary License.
 
 You are authorized to:
-- Use this software internally within Protingent India LLP
+- Use this software internally within Transform.io LLP
 - Modify code for internal business purposes
-- Deploy to production servers owned by Protingent India LLP
+- Deploy to production servers owned by Transform.io LLP
 
 You are NOT authorized to:
 - Share or distribute the software
@@ -43,7 +43,7 @@ This software is protected under both:
 
 **Jai Sukhwal** is the copyright owner and licensor of this ATS & CRM system.
 
-- **Repository**: https://github.com/jai333/ATS-CRM-Protingent
+- **Repository**: https://github.com/jai333/ATS-CRM-Transform.io
 - **Owner**: Jai Sukhwal
 - **Registration Date**: January 17, 2026
 
@@ -51,7 +51,7 @@ This software is protected under both:
 
 Under the Proprietary License, usage is restricted to:
 - Internal development and testing
-- Deployment within Protingent India LLP infrastructure
+- Deployment within Transform.io LLP infrastructure
 - Authorized team members only
 
 Any other use requires written consent from Jai Sukhwal.

@@ -1,4 +1,5 @@
 from django.urls import path
+from django.views.generic import TemplateView
 from django.contrib.auth import views as auth_views
 from . import views
 from . import ai_views
@@ -6,6 +7,20 @@ from . import ai_views
 urlpatterns = [
     path('', views.home, name='home'),
     
+    # Public Marketing Pages
+    path('platform/ats/', TemplateView.as_view(template_name='tracking_app/public_ats.html'), name='public-ats'),
+    path('platform/crm/', TemplateView.as_view(template_name='tracking_app/public_crm.html'), name='public-crm'),
+    path('platform/ai/', TemplateView.as_view(template_name='tracking_app/public_ai.html'), name='public-ai'),
+    path('platform/workflow/', TemplateView.as_view(template_name='tracking_app/public_workflow.html'), name='public-workflow'),
+    path('platform/telemetry/', TemplateView.as_view(template_name='tracking_app/public_telemetry.html'), name='public-telemetry'),
+    path('solutions/tech/', TemplateView.as_view(template_name='tracking_app/industry_tech.html'), name='industry-tech'),
+    path('solutions/healthcare/', TemplateView.as_view(template_name='tracking_app/industry_health.html'), name='industry-health'),
+    path('solutions/executive/', TemplateView.as_view(template_name='tracking_app/industry_exec.html'), name='industry-exec'),
+    path('roles/agency/', TemplateView.as_view(template_name='tracking_app/role_agency.html'), name='role-agency'),
+    path('roles/internal/', TemplateView.as_view(template_name='tracking_app/role_internal.html'), name='role-internal'),
+    path('roles/manager/', TemplateView.as_view(template_name='tracking_app/role_manager.html'), name='role-manager'),
+    path('resources/blog/', TemplateView.as_view(template_name='tracking_app/public_blog.html'), name='public-blog'),
+
     # Authentication URLs
     path('register/', views.register, name='register'),
     path('login/', auth_views.LoginView.as_view(template_name='tracking_app/login.html'), name='login'),

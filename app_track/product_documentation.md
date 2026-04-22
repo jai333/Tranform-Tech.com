@@ -1,4 +1,4 @@
-# Protingent: Reinventing Technical Interviews
+# Transform.io: Reinventing Technical Interviews
 
 ## The Problem
 
@@ -15,7 +15,7 @@ As a technical recruiter, I watched companies:
 
 ## Our Solution
 
-**Protingent is the first purpose-built video interview platform specifically designed for technical recruitment.**
+**Transform.io is the first purpose-built video interview platform specifically designed for technical recruitment.**
 
 Unlike generic video conferencing tools retrofitted for interviews, we've built a comprehensive platform that:
 
@@ -26,7 +26,7 @@ Unlike generic video conferencing tools retrofitted for interviews, we've built 
 
 ## How It Works
 
-![Protingent Platform Demo](https://protingent.com/demo-image.png)
+![Transform.io Platform Demo](https://transform.io/demo-image.png)
 
 Our platform enables:
 
@@ -54,7 +54,7 @@ The technical hiring market is massive:
 
 ## Competitive Advantage
 
-Unlike generic video platforms, Protingent offers:
+Unlike generic video platforms, Transform.io offers:
 1. **Deep ATS Integration**: Automated scheduling, unified candidate records
 2. **Technical Assessment Tools**: Code editors, whiteboarding, system design
 3. **Intelligent Analytics**: Bias detection, interview quality metrics
@@ -80,7 +80,7 @@ We've built a robust, scalable platform using cutting-edge technologies:
 
 ## Why Now?
 
-Three critical factors make this the perfect time for Protingent:
+Three critical factors make this the perfect time for Transform.io:
 
 1. **The remote work revolution** has permanently changed hiring practices
 2. **The technical talent shortage** continues to intensify globally
@@ -90,6 +90,6 @@ Companies are desperately seeking solutions that can help them compete for talen
 
 ## The Vision
 
-Protingent is transforming how companies hire technical talent and how candidates experience the interview process. We're building the new standard for technical interviews — where companies can confidently evaluate skills, candidates can authentically demonstrate their abilities, and everyone saves time and resources.
+Transform.io is transforming how companies hire technical talent and how candidates experience the interview process. We're building the new standard for technical interviews — where companies can confidently evaluate skills, candidates can authentically demonstrate their abilities, and everyone saves time and resources.
 
-**Protingent: Because your next great hire shouldn't be limited by your interview tools.** 
+**Transform.io: Because your next great hire shouldn't be limited by your interview tools.** 

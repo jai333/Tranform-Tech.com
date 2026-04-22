@@ -97,7 +97,7 @@ class JobForm(forms.ModelForm):
             }),
             'company': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'e.g., Protingent India'
+                'placeholder': 'e.g., Transform.io'
             }),
             'department': forms.TextInput(attrs={
                 'class': 'form-control',

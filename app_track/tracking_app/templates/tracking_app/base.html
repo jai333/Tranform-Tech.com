@@ -1,39 +1,43 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Protingent India{% endblock %}</title>
+    <title>{% block title %}Transform.io{% endblock %}</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700&display=swap">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;600&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* Protingent Brand Color Palette */
-            --brand-primary: #0891B2;
-            --brand-primary-dark: #066b86;
-            --brand-primary-light: #06d6d6;
-            --brand-secondary: #1f2937;
-            --brand-accent: #06d6d6;
+            /* Transform.io Brand Color Palette */
+            --brand-primary: #00E5FF;
+            --brand-primary-dark: #00b3cc;
+            --brand-primary-light: #66efff;
+            --brand-secondary: #0a0a0a;
+            --brand-accent: #00E5FF;
             --brand-success: #10b981;
             --brand-error: #ef4444;
             --brand-warning: #f59e0b;
-            
-            /* Apple-inspired color palette - Dark theme (default) */
+
+            /* Dark theme (forced) */
             --apple-bg: #000000;
-            --apple-card-bg: rgba(30, 30, 32, 0.7);
-            --apple-border: rgba(140, 140, 140, 0.15);
-            --apple-text: rgba(255, 255, 255, 0.9);
+            --apple-card-bg: rgba(10, 10, 12, 0.85);
+            --apple-border: rgba(0, 229, 255, 0.15);
+            --apple-text: rgba(255, 255, 255, 0.95);
             --apple-text-secondary: rgba(255, 255, 255, 0.6);
             --apple-accent: var(--brand-primary);
             --apple-accent-dark: var(--brand-primary-dark);
-            --apple-accent-glow: rgba(8, 145, 178, 0.4);
+            --apple-accent-glow: rgba(0, 229, 255, 0.4);
             --apple-error: var(--brand-error);
             --apple-success: var(--brand-success);
             --apple-warning: var(--brand-warning);
-            --apple-input-bg: rgba(40, 40, 42, 0.5);
+            --apple-input-bg: rgba(20, 20, 22, 0.6);
             --apple-blur: 20px;
         }
-        
+
         /* Light theme */
         body.light-theme {
             --apple-bg: #f5f5f7;
@@ -44,15 +48,20 @@
             --apple-input-bg: rgba(0, 0, 0, 0.05);
             --apple-accent-glow: rgba(8, 145, 178, 0.2);
         }
-        
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
+        html {
+            scroll-behavior: smooth;
+            scroll-padding-top: 90px;
+        }
+
         body {
-            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: 'Inter', sans-serif;
             line-height: 1.6;
             background-color: var(--apple-bg);
             color: var(--apple-text);
@@ -62,7 +71,7 @@
             letter-spacing: -0.01em;
             transition: background-color 0.3s ease, color 0.3s ease;
         }
-        
+
         /* Background effects */
         .bg-gradient {
             position: fixed;
@@ -75,12 +84,12 @@
             z-index: -2;
             transition: background 0.3s ease, opacity 0.3s ease;
         }
-        
+
         body.light-theme .bg-gradient {
             background: radial-gradient(circle at bottom right, #e5e7eb 0%, #f5f5f7 50%);
             opacity: 1;
         }
-        
+
         .bg-glow-1 {
             position: fixed;
             top: -150px;
@@ -93,7 +102,7 @@
             z-index: -1;
             animation: glow-pulse 10s infinite alternate ease-in-out;
         }
-        
+
         .bg-glow-2 {
             position: fixed;
             bottom: -200px;
@@ -106,18 +115,19 @@
             z-index: -1;
             animation: glow-pulse 12s infinite alternate-reverse ease-in-out;
         }
-        
+
         @keyframes glow-pulse {
             0% {
                 opacity: 0.4;
                 transform: scale(1);
             }
+
             100% {
                 opacity: 0.7;
                 transform: scale(1.2);
             }
         }
-        
+
         .container {
             width: 90%;
             max-width: 1200px;
@@ -126,9 +136,9 @@
             position: relative;
             z-index: 1;
         }
-        
+
         header {
-            background-color: rgba(15, 23, 42, 0.6);
+            background-color: rgba(0, 0, 0, 0.95);
             backdrop-filter: blur(var(--apple-blur));
             -webkit-backdrop-filter: blur(var(--apple-blur));
             position: fixed;
@@ -136,19 +146,18 @@
             left: 0;
             right: 0;
             z-index: 1000;
-            border-bottom: 2px solid var(--brand-primary);
-            padding: 0.75rem 0;
-            box-shadow: 0 5px 30px rgba(8, 145, 178, 0.15);
+            border-bottom: 1px solid var(--apple-border);
+            padding: 0;
             transition: all 0.3s ease;
             will-change: transform;
-            height: 70px;
+            height: 75px;
         }
 
         body.light-theme header {
             background-color: rgba(255, 255, 255, 0.7);
             box-shadow: 0 5px 30px rgba(0, 0, 0, 0.1);
         }
-        
+
         .header-content {
             display: flex;
             justify-content: space-between;
@@ -158,7 +167,7 @@
             margin: 0 auto;
             height: 100%;
         }
-        
+
         .logo {
             display: flex;
             align-items: center;
@@ -172,37 +181,37 @@
             padding: 0.25rem 0;
             flex-shrink: 0;
         }
-        
+
         .logo:hover {
             opacity: 0.85;
         }
-        
+
         .logo img {
             height: 40px;
             width: auto;
             max-width: 150px;
             object-fit: contain;
         }
-        
+
         nav {
             display: flex;
             justify-content: center;
             position: relative;
             flex-grow: 1;
         }
-        
+
         nav ul {
             list-style: none;
             display: flex;
-            gap: 0.5rem;
+            gap: 1.5rem;
             margin: 0;
-            background-color: rgba(15, 23, 42, 0.2);
-            padding: 0.5rem;
-            border-radius: 16px;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            background-color: transparent;
+            padding: 0;
+            border-radius: 0;
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+            border: none;
+            box-shadow: none;
             flex-wrap: nowrap;
             justify-content: center;
             overflow-x: auto;
@@ -213,48 +222,51 @@
             border: 1px solid rgba(0, 0, 0, 0.08);
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
         }
-        
+
         nav li {
             margin: 0;
         }
-        
+
         nav a {
             text-decoration: none;
             color: var(--apple-text-secondary);
-            font-weight: 500;
+            font-weight: 600;
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            padding: 0.75rem 1rem;
-            border-radius: 12px;
+            padding: 0.5rem 0;
+            border-radius: 0;
             transition: all 0.2s ease;
-            letter-spacing: -0.01em;
-            font-size: 0.95rem;
+            letter-spacing: 0.05em;
+            font-size: 0.85rem;
+            font-family: 'Fira Code', monospace;
+            text-transform: uppercase;
         }
 
         body.light-theme nav a {
             color: rgba(0, 0, 0, 0.7);
         }
-        
+
         nav a i {
             font-size: 1.1rem;
         }
-        
+
         nav a:hover {
-            color: var(--apple-text);
-            background-color: rgba(255, 255, 255, 0.1);
-            transform: translateY(-1px);
+            color: var(--brand-primary);
+            background-color: transparent;
+            transform: none;
         }
 
         body.light-theme nav a:hover {
             background-color: rgba(0, 0, 0, 0.08);
             color: rgba(0, 0, 0, 0.9);
         }
-        
+
         nav a.active {
             color: var(--apple-text);
-            background-color: rgba(8, 145, 178, 0.2);
-            box-shadow: 0 0 15px rgba(8, 145, 178, 0.2);
+            background-color: transparent;
+            box-shadow: none;
+            border-bottom: 2px solid var(--brand-primary);
         }
 
         body.light-theme nav a.active {
@@ -262,32 +274,34 @@
             color: rgba(0, 0, 0, 0.95);
             box-shadow: 0 0 15px rgba(8, 145, 178, 0.15);
         }
-        
+
         .auth-links {
             display: flex;
             gap: 1rem;
             align-items: center;
             flex-shrink: 0;
         }
-        
+
         /* Cards and content styling */
         .main-content {
-            padding-top: 100px;
+            padding-top: 150px;
+            min-height: calc(100vh - 75px);
             transition: padding-top 0.3s ease;
             animation: fade-in 0.6s ease-out;
         }
-        
+
         @keyframes fade-in {
             0% {
                 opacity: 0;
                 transform: translateY(10px);
             }
+
             100% {
                 opacity: 1;
                 transform: translateY(0);
             }
         }
-        
+
         .page-header {
             display: flex;
             justify-content: space-between;
@@ -296,7 +310,7 @@
             flex-wrap: wrap;
             gap: 1rem;
         }
-        
+
         .page-title {
             font-size: 2rem;
             font-weight: 600;
@@ -308,7 +322,7 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
-        
+
         .card {
             background: var(--apple-card-bg);
             backdrop-filter: blur(var(--apple-blur));
@@ -323,65 +337,71 @@
             transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
             animation: card-fade-in 0.5s ease-out;
         }
-        
+
         @keyframes card-fade-in {
             0% {
                 transform: translateY(20px);
                 opacity: 0;
             }
+
             100% {
                 transform: translateY(0);
                 opacity: 1;
             }
         }
-        
+
         .card:hover {
             transform: translateY(-5px);
             box-shadow: 0 25px 60px rgba(8, 145, 178, 0.2);
             border-top-color: var(--brand-accent);
         }
-        
+
         .card-header {
             padding: 1.5rem;
             border-bottom: 1px solid var(--apple-border);
         }
-        
+
         .card-body {
             padding: 1.5rem;
         }
-        
-        h1, h2, h3 {
+
+        h1,
+        h2,
+        h3 {
             font-weight: 600;
             color: var(--apple-text);
             margin-bottom: 1rem;
             letter-spacing: -0.02em;
         }
-        
+
         /* Button styling */
         .btn {
             display: inline-block;
             padding: 0.75rem 1.25rem;
-            background: linear-gradient(135deg, var(--brand-primary), var(--brand-primary-dark));
-            color: white;
+            background: rgba(0, 229, 255, 0.05);
+            color: var(--brand-primary);
             text-decoration: none;
-            border: none;
-            border-radius: 12px;
+            border: 1px solid var(--brand-primary);
+            border-radius: 4px;
             cursor: pointer;
+            font-family: 'Fira Code', monospace;
             font-size: 0.95rem;
             font-weight: 600;
             letter-spacing: -0.01em;
             transition: all 0.3s ease;
-            box-shadow: 0 8px 20px rgba(8, 145, 178, 0.3);
+            box-shadow: 0 0 10px rgba(0, 229, 255, 0.1);
             position: relative;
             overflow: hidden;
+            text-transform: uppercase;
         }
-        
+
         .btn:hover {
-            background: linear-gradient(135deg, var(--brand-primary-dark), var(--brand-primary));
+            background: rgba(0, 229, 255, 0.15);
             transform: translateY(-2px);
-            box-shadow: 0 12px 30px rgba(8, 145, 178, 0.4);
+            box-shadow: 0 0 20px rgba(0, 229, 255, 0.3);
+            color: #ffffff;
         }
-        
+
         .btn-secondary {
             background-color: rgba(255, 255, 255, 0.05);
             color: var(--apple-text);
@@ -389,25 +409,25 @@
             backdrop-filter: blur(5px);
             -webkit-backdrop-filter: blur(5px);
         }
-        
+
         .btn-secondary:hover {
             background-color: rgba(255, 255, 255, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.15);
         }
-        
+
         .btn-danger {
             background: var(--apple-error);
         }
-        
+
         .btn-danger:hover {
             background: rgba(255, 69, 58, 0.85);
         }
-        
+
         .btn-sm {
             padding: 0.5rem 1rem;
             font-size: 0.85rem;
         }
-        
+
         .btn-icon {
             display: inline-flex;
             align-items: center;
@@ -421,22 +441,22 @@
             transition: all 0.2s ease;
             margin-right: 0.5rem;
         }
-        
+
         .btn-icon:hover {
             background: rgba(255, 255, 255, 0.15);
             color: var(--apple-text);
             transform: translateY(-2px);
         }
-        
+
         .btn-icon.btn-danger {
             background: rgba(255, 69, 58, 0.15);
             color: var(--apple-error);
         }
-        
+
         .btn-icon.btn-danger:hover {
             background: rgba(255, 69, 58, 0.25);
         }
-        
+
         .btn-ripple {
             position: absolute;
             border-radius: 50%;
@@ -445,14 +465,14 @@
             animation: ripple 0.6s ease-out;
             pointer-events: none;
         }
-        
+
         @keyframes ripple {
             to {
                 transform: scale(2.5);
                 opacity: 0;
             }
         }
-        
+
         /* Form styling */
         .form-control {
             background: var(--apple-input-bg);
@@ -460,37 +480,37 @@
             height: 45px;
             width: 100%;
             padding: 0 1rem;
-            border-radius: 12px;
+            border-radius: 4px;
             font-size: 1rem;
             color: var(--apple-text);
             transition: all 0.25s ease;
-            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: 'Inter', sans-serif;
         }
-        
+
         .form-control:focus {
             outline: none;
             border-color: var(--apple-accent);
             box-shadow: 0 0 0 4px var(--apple-accent-glow);
         }
-        
+
         .input-group {
             display: flex;
             gap: 0.5rem;
         }
-        
+
         /* Table styling */
         .table-responsive {
             overflow-x: auto;
             border-radius: 12px;
         }
-        
+
         .table {
             width: 100%;
             border-collapse: separate;
             border-spacing: 0;
             margin-bottom: 1rem;
         }
-        
+
         .table th {
             text-align: left;
             padding: 1rem;
@@ -499,39 +519,39 @@
             border-bottom: 1px solid var(--apple-border);
             background: rgba(255, 255, 255, 0.03);
         }
-        
+
         .table td {
             padding: 1rem;
             border-bottom: 1px solid var(--apple-border);
             color: var(--apple-text-secondary);
             transition: all 0.2s ease;
         }
-        
+
         .table tr:hover td {
             background: rgba(255, 255, 255, 0.03);
             color: var(--apple-text);
         }
-        
+
         .table tr:last-child td {
             border-bottom: none;
         }
-        
+
         /* Empty state styling */
         .empty-state {
             text-align: center;
             padding: 3rem 2rem;
         }
-        
+
         .empty-state .icon {
             margin-bottom: 1.5rem;
             display: inline-block;
         }
-        
+
         .empty-state h4 {
             font-weight: 500;
             margin-bottom: 1rem;
         }
-        
+
         .empty-state p {
             color: var(--apple-text-secondary);
             margin-bottom: 1.5rem;
@@ -539,7 +559,7 @@
             margin-left: auto;
             margin-right: auto;
         }
-        
+
         /* Pagination */
         .pagination {
             display: flex;
@@ -549,18 +569,18 @@
             flex-wrap: wrap;
             gap: 1rem;
         }
-        
+
         .page-stats {
             color: var(--apple-text-secondary);
             font-size: 0.9rem;
         }
-        
+
         .page-controls {
             display: flex;
             gap: 0.5rem;
             align-items: center;
         }
-        
+
         .page-control {
             width: 36px;
             height: 36px;
@@ -573,24 +593,24 @@
             text-decoration: none;
             transition: all 0.2s ease;
         }
-        
+
         .page-control:hover {
             background: rgba(255, 255, 255, 0.1);
             transform: translateY(-2px);
         }
-        
+
         .page-control.disabled {
             opacity: 0.4;
             cursor: not-allowed;
             pointer-events: none;
         }
-        
+
         .page-current {
             margin: 0 0.5rem;
             font-size: 0.9rem;
             color: var(--apple-text-secondary);
         }
-        
+
         /* Alert styling */
         .alert {
             border-radius: 12px;
@@ -598,42 +618,43 @@
             margin-bottom: 1.5rem;
             animation: alert-fade-in 0.5s ease-out;
         }
-        
+
         @keyframes alert-fade-in {
             0% {
                 transform: translateY(-10px);
                 opacity: 0;
             }
+
             100% {
                 transform: translateY(0);
                 opacity: 1;
             }
         }
-        
+
         .alert-danger {
             background: rgba(255, 69, 58, 0.15);
             border: 1px solid rgba(255, 69, 58, 0.3);
             color: var(--apple-error);
         }
-        
+
         .alert-success {
             background: rgba(48, 209, 88, 0.15);
             border: 1px solid rgba(48, 209, 88, 0.3);
             color: var(--apple-success);
         }
-        
+
         .alert-warning {
             background: rgba(255, 159, 10, 0.15);
             border: 1px solid rgba(255, 159, 10, 0.3);
             color: var(--apple-warning);
         }
-        
+
         .alert-info {
             background: rgba(8, 145, 178, 0.15);
             border: 1px solid rgba(8, 145, 178, 0.3);
             color: var(--apple-accent);
         }
-        
+
         /* Footer styling */
         footer {
             text-align: center;
@@ -647,13 +668,14 @@
             position: relative;
             z-index: 1;
         }
-        
+
         /* Header scroll effect */
         .header-scroll {
-            background-color: rgba(15, 23, 42, 0.85);
-            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.25);
+            background-color: rgba(0, 0, 0, 0.98);
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5);
+            border-bottom: 1px solid var(--brand-primary);
         }
-        
+
         /* Responsive media queries */
         @media (max-width: 992px) {
             .header-content {
@@ -662,70 +684,70 @@
                 justify-content: center;
                 gap: 1rem;
             }
-            
+
             header {
                 height: auto;
                 padding: 0.5rem 0;
             }
-            
+
             nav {
                 order: 3;
                 width: 100%;
             }
-            
+
             nav ul {
                 width: 100%;
                 justify-content: flex-start;
                 overflow-x: auto;
                 padding: 0.5rem;
             }
-            
+
             .main-content {
                 padding-top: 150px;
             }
         }
-        
+
         @media (max-width: 768px) {
             .header-content {
                 flex-direction: column;
                 gap: 1rem;
             }
-            
+
             nav ul {
                 width: 100%;
             }
-            
+
             .main-content {
                 padding-top: 140px;
             }
-            
+
             .auth-links {
                 width: 100%;
                 justify-content: center;
             }
         }
-        
+
         @media (max-width: 576px) {
             .container {
                 width: 95%;
                 padding: 1.5rem 0.5rem;
             }
-            
+
             .page-title {
                 font-size: 1.5rem;
             }
-            
+
             .card-header,
             .card-body {
                 padding: 1rem;
             }
-            
+
             .table th,
             .table td {
                 padding: 0.75rem;
             }
         }
-        
+
         /* Notification styles */
         .notification-btn {
             background: none;
@@ -738,11 +760,11 @@
             margin-right: 1rem;
             transition: all 0.3s ease;
         }
-        
+
         .notification-btn:hover {
             color: var(--apple-text);
         }
-        
+
         .notification-badge {
             position: absolute;
             top: 0;
@@ -761,7 +783,7 @@
             transform: translate(50%, -50%);
             box-shadow: 0 0 10px rgba(255, 69, 58, 0.6);
         }
-        
+
         .notification-container {
             position: absolute;
             top: 100%;
@@ -781,18 +803,19 @@
             transform-origin: top right;
             animation: notification-fade-in 0.3s ease-out;
         }
-        
+
         @keyframes notification-fade-in {
             from {
                 opacity: 0;
                 transform: scale(0.9) translateY(-10px);
             }
+
             to {
                 opacity: 1;
                 transform: scale(1) translateY(0);
             }
         }
-        
+
         .notification-header {
             display: flex;
             justify-content: space-between;
@@ -800,19 +823,19 @@
             padding: 0.75rem 1rem;
             border-bottom: 1px solid var(--apple-border);
         }
-        
+
         .notification-title {
             font-size: 1rem;
             font-weight: 600;
             color: var(--apple-text);
             margin: 0;
         }
-        
+
         .notification-actions {
             display: flex;
             gap: 0.5rem;
         }
-        
+
         .notification-action-btn {
             background: none;
             border: none;
@@ -823,33 +846,33 @@
             border-radius: 4px;
             transition: all 0.2s ease;
         }
-        
+
         .notification-action-btn:hover {
             color: var(--apple-text);
             background-color: rgba(255, 255, 255, 0.1);
         }
-        
+
         .notification-list {
             list-style: none;
             margin: 0;
             padding: 0;
         }
-        
+
         .notification-item {
             padding: 0.75rem 1rem;
             border-bottom: 1px solid var(--apple-border);
             position: relative;
             transition: all 0.2s ease;
         }
-        
+
         .notification-item:last-child {
             border-bottom: none;
         }
-        
+
         .notification-item:hover {
             background-color: rgba(255, 255, 255, 0.05);
         }
-        
+
         .notification-item.unread::before {
             content: '';
             position: absolute;
@@ -862,20 +885,20 @@
             background-color: var(--apple-accent);
             box-shadow: 0 0 5px rgba(8, 145, 178, 0.5);
         }
-        
+
         .notification-content {
             margin-left: 1rem;
             color: var(--apple-text);
             font-size: 0.9rem;
         }
-        
+
         .notification-time {
             font-size: 0.75rem;
             color: var(--apple-text-secondary);
             margin-top: 0.25rem;
             display: block;
         }
-        
+
         .notification-icon {
             width: 30px;
             height: 30px;
@@ -887,35 +910,35 @@
             background-color: rgba(8, 145, 178, 0.15);
             color: var(--apple-accent);
         }
-        
+
         .notification-icon.friend-request {
             background-color: rgba(48, 209, 88, 0.15);
             color: var(--apple-success);
         }
-        
+
         .notification-icon.message {
             background-color: rgba(8, 145, 178, 0.15);
             color: var(--apple-accent);
         }
-        
+
         .notification-icon.system {
             background-color: rgba(255, 159, 10, 0.15);
             color: var(--apple-warning);
         }
-        
+
         .notification-empty {
             padding: 2rem 1rem;
             text-align: center;
             color: var(--apple-text-secondary);
             font-size: 0.9rem;
         }
-        
+
         .notification-empty i {
             font-size: 2rem;
             margin-bottom: 0.5rem;
             opacity: 0.5;
         }
-        
+
         .notification-item-actions {
             position: absolute;
             right: 0.5rem;
@@ -926,11 +949,11 @@
             opacity: 0;
             transition: opacity 0.2s ease;
         }
-        
+
         .notification-item:hover .notification-item-actions {
             opacity: 1;
         }
-        
+
         .notification-item-btn {
             width: 24px;
             height: 24px;
@@ -945,24 +968,24 @@
             cursor: pointer;
             transition: all 0.2s ease;
         }
-        
+
         .notification-item-btn:hover {
             background-color: rgba(255, 255, 255, 0.2);
             color: var(--apple-text);
         }
-        
+
         /* User dropdown menu styling */
         .user-dropdown-wrapper {
             position: relative;
         }
-        
+
         .user-dropdown-toggle {
             display: flex;
             align-items: center;
             gap: 0.5rem;
             cursor: pointer;
         }
-        
+
         .user-dropdown-menu {
             position: absolute;
             top: calc(100% + 10px);
@@ -981,11 +1004,11 @@
             animation: notification-fade-in 0.3s ease-out;
             overflow: hidden;
         }
-        
+
         .user-dropdown-menu.show {
             display: block;
         }
-        
+
         .user-dropdown-item {
             display: flex;
             align-items: center;
@@ -1001,152 +1024,168 @@
             border: none;
             cursor: pointer;
         }
-        
+
         .user-dropdown-item:hover {
             background-color: rgba(255, 255, 255, 0.1);
         }
-        
+
         .dropdown-divider {
             height: 1px;
             background-color: var(--apple-border);
             margin: 0.5rem 0;
         }
-        
+
         .logout-form {
             display: block;
             margin: 0;
             width: 100%;
         }
-        
+
         .logout-button {
             width: 100%;
         }
-        
+
         /* Logout form styling */
         .logout-form {
             display: inline-block;
             margin: 0;
         }
-        
+
         /* Theme toggle button */
         #theme-toggle {
             transition: transform 0.3s ease, background-color 0.3s ease !important;
         }
-        
+
         #theme-toggle:hover {
             transform: rotate(20deg) scale(1.1);
         }
-        
+
         body.light-theme #theme-toggle i::before {
             content: '\f185';
         }
     </style>
     {% block extra_styles %}{% endblock %}
 </head>
+
 <body>
     <div class="bg-gradient"></div>
     <div class="bg-glow-1"></div>
     <div class="bg-glow-2"></div>
-    
+
     <header id="main-header">
         <div class="header-content">
-            <a href="/" class="logo">
-                <img src="https://www.protingent.com/wp-content/uploads/2024/09/logo-2x.png" alt="Protingent Logo">
+            <a href="/" class="logo" style="font-family: 'Fira Code', monospace; font-size: 1.1rem; gap: 8px;">
+                <img src="{% static 'tracking_app/assets/logo-333.png' %}" alt="Transform.io 333 Logo" style="height: 48px; width: auto; max-width: 250px; border-radius: 4px; box-shadow: 0 0 10px rgba(0, 229, 255, 0.5);">
             </a>
-            
+
             <nav>
                 <ul>
-                    <li><a href="{% url 'home' %}" class="{% if request.path == '/' %}active{% endif %}"><i class="fas fa-home"></i> Home</a></li>
+                    <li><a href="{% url 'home' %}" class="{% if request.path == '/' %}active{% endif %}"><i
+                                class="fas fa-home"></i> Home</a></li>
                     <!-- Only show these options if the user is not a job seeker -->
                     {% if user.is_authenticated and not user.is_jobseeker or user.is_admin_role or user.is_staff %}
-                    <li><a href="{% url 'candidate-list' %}" class="{% if '/candidates/' in request.path %}active{% endif %}"><i class="fas fa-user-tie"></i> Candidates</a></li>
-                    <li><a href="{% url 'application-list' %}" class="{% if '/applications/' in request.path %}active{% endif %}"><i class="fas fa-file-alt"></i> Applications</a></li>
-                    <li><a href="{% url 'job-applications-list' %}" class="{% if '/job-applications/' in request.path %}active{% endif %}"><i class="fas fa-clipboard-list"></i> Job Applications</a></li>
-                    <li><a href="{% url 'interview-list' %}" class="{% if '/interviews/' in request.path %}active{% endif %}"><i class="fas fa-handshake"></i> Interviews</a></li>
+                    <li><a href="{% url 'candidate-list' %}"
+                            class="{% if '/candidates/' in request.path %}active{% endif %}"><i
+                                class="fas fa-user-tie"></i> Candidates</a></li>
+                    <li><a href="{% url 'application-list' %}"
+                            class="{% if '/applications/' in request.path %}active{% endif %}"><i
+                                class="fas fa-file-alt"></i> Applications</a></li>
+                    <li><a href="{% url 'job-applications-list' %}"
+                            class="{% if '/job-applications/' in request.path %}active{% endif %}"><i
+                                class="fas fa-clipboard-list"></i> Job Applications</a></li>
+                    <li><a href="{% url 'interview-list' %}"
+                            class="{% if '/interviews/' in request.path %}active{% endif %}"><i
+                                class="fas fa-handshake"></i> Interviews</a></li>
                     {% endif %}
                     <!-- Show my interviews option for job seekers -->
                     {% if user.is_authenticated and user.is_jobseeker %}
-                    <li><a href="{% url 'my-interviews' %}" class="{% if '/my-interviews/' in request.path %}active{% endif %}"><i class="fas fa-calendar-alt"></i> My Interviews</a></li>
-                    <li><a href="{% url 'my-applications' %}" class="{% if '/my-applications/' in request.path %}active{% endif %}"><i class="fas fa-clipboard-check"></i> My Applications</a></li>
+                    <li><a href="{% url 'my-interviews' %}"
+                            class="{% if '/my-interviews/' in request.path %}active{% endif %}"><i
+                                class="fas fa-calendar-alt"></i> My Interviews</a></li>
+                    <li><a href="{% url 'my-applications' %}"
+                            class="{% if '/my-applications/' in request.path %}active{% endif %}"><i
+                                class="fas fa-clipboard-check"></i> My Applications</a></li>
                     {% endif %}
                     <!-- All users can see jobs -->
-                    <li><a href="{% url 'job-list' %}" class="{% if '/jobs/' in request.path %}active{% endif %}"><i class="fas fa-briefcase"></i> Jobs</a></li>
+                    <li><a href="{% url 'job-list' %}" class="{% if '/jobs/' in request.path %}active{% endif %}"><i
+                                class="fas fa-briefcase"></i> Jobs</a></li>
                 </ul>
             </nav>
-            
+
             <div class="auth-links">
-                <button id="theme-toggle" class="btn btn-secondary btn-sm" style="width: 40px; height: 40px; padding: 0; display: flex; align-items: center; justify-content: center; margin-right: 0.5rem;">
+                <button id="theme-toggle" class="btn btn-secondary btn-sm"
+                    style="width: 40px; height: 40px; padding: 0; display: flex; align-items: center; justify-content: center; margin-right: 0.5rem;">
                     <i class="fas fa-moon"></i>
                 </button>
                 {% if user.is_authenticated %}
-                    <div class="notification-wrapper" style="position: relative;">
-                        <button id="notification-btn" class="notification-btn">
-                            <i class="fas fa-bell"></i>
-                            <span id="notification-badge" class="notification-badge" style="display: none;">0</span>
-                        </button>
-                        <div id="notification-container" class="notification-container">
-                            <div class="notification-header">
-                                <h5 class="notification-title">Notifications</h5>
-                                <div class="notification-actions">
-                                    <button id="mark-all-read" class="notification-action-btn">Mark all as read</button>
-                                </div>
+                <div class="notification-wrapper" style="position: relative;">
+                    <button id="notification-btn" class="notification-btn">
+                        <i class="fas fa-bell"></i>
+                        <span id="notification-badge" class="notification-badge" style="display: none;">0</span>
+                    </button>
+                    <div id="notification-container" class="notification-container">
+                        <div class="notification-header">
+                            <h5 class="notification-title">Notifications</h5>
+                            <div class="notification-actions">
+                                <button id="mark-all-read" class="notification-action-btn">Mark all as read</button>
                             </div>
-                            <ul id="notification-list" class="notification-list">
-                                <!-- Notifications will be loaded here -->
-                                <li class="notification-empty">
-                                    <i class="fas fa-bell-slash"></i>
-                                    <p>No notifications</p>
-                                </li>
-                            </ul>
                         </div>
+                        <ul id="notification-list" class="notification-list">
+                            <!-- Notifications will be loaded here -->
+                            <li class="notification-empty">
+                                <i class="fas fa-bell-slash"></i>
+                                <p>No notifications</p>
+                            </li>
+                        </ul>
                     </div>
-                    <div class="user-dropdown-wrapper" style="position: relative;">
-                        <a href="javascript:void(0)" class="btn btn-secondary btn-sm user-dropdown-toggle">
-                            <i class="fas fa-user"></i> {{ user.username }} <i class="fas fa-caret-down ml-1"></i>
+                </div>
+                <div class="user-dropdown-wrapper" style="position: relative;">
+                    <a href="javascript:void(0)" class="btn btn-secondary btn-sm user-dropdown-toggle">
+                        <i class="fas fa-user"></i> {{ user.username }} <i class="fas fa-caret-down ml-1"></i>
+                    </a>
+                    <div class="user-dropdown-menu">
+                        <a href="{% url 'profile' %}" class="user-dropdown-item">
+                            <i class="fas fa-id-card"></i> Profile
                         </a>
-                        <div class="user-dropdown-menu">
-                            <a href="{% url 'profile' %}" class="user-dropdown-item">
-                                <i class="fas fa-id-card"></i> Profile
-                            </a>
-                            <a href="{% url 'friend-list' %}" class="user-dropdown-item">
-                                <i class="fas fa-user-friends"></i> Friends
-                            </a>
-                            <div class="dropdown-divider"></div>
-                            <form method="post" action="{% url 'logout' %}" class="logout-form">
-                                {% csrf_token %}
-                                <button type="submit" class="user-dropdown-item logout-button">
-                                    <i class="fas fa-sign-out-alt"></i> Logout
-                                </button>
-                            </form>
-                        </div>
+                        <a href="{% url 'friend-list' %}" class="user-dropdown-item">
+                            <i class="fas fa-user-friends"></i> Friends
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <form method="post" action="{% url 'logout' %}" class="logout-form">
+                            {% csrf_token %}
+                            <button type="submit" class="user-dropdown-item logout-button">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </button>
+                        </form>
                     </div>
+                </div>
                 {% else %}
-                    <a href="{% url 'login' %}" class="btn">Login</a>
-                    <a href="{% url 'register' %}" class="btn btn-secondary">Register</a>
+                <a href="{% url 'login' %}" class="btn">Login</a>
+                <a href="{% url 'register' %}" class="btn btn-secondary">Register</a>
                 {% endif %}
             </div>
         </div>
     </header>
-    
+
     <div class="main-content">
         <div class="container">
             {% block content %}{% endblock %}
         </div>
     </div>
-    
+
     <footer>
         <div class="container">
-            <p>&copy; {% now "Y" %} Protingent India. All rights reserved.</p>
+            <p>&copy; {% now "Y" %} Transform.io. All rights reserved.</p>
         </div>
     </footer>
-    
+
     <script>
         // Theme toggle functionality
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const themeToggle = document.getElementById('theme-toggle');
             const htmlElement = document.documentElement;
             const bodyElement = document.body;
-            
+
             // Check for saved theme preference or default to dark theme
             const currentTheme = localStorage.getItem('theme') || 'dark';
             if (currentTheme === 'light') {
@@ -1155,14 +1194,14 @@
                     themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
                 }
             }
-            
+
             // Theme toggle click handler
             if (themeToggle) {
-                themeToggle.addEventListener('click', function() {
+                themeToggle.addEventListener('click', function () {
                     bodyElement.classList.toggle('light-theme');
                     const newTheme = bodyElement.classList.contains('light-theme') ? 'light' : 'dark';
                     localStorage.setItem('theme', newTheme);
-                    
+
                     // Update icon
                     if (newTheme === 'light') {
                         themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
@@ -1172,7 +1211,7 @@
                 });
             }
         });
-        
+
         // Scroll effect for header
         const header = document.getElementById('main-header');
         window.addEventListener('scroll', () => {
@@ -1182,29 +1221,29 @@
                 header.classList.remove('header-scroll');
             }
         });
-        
+
         // Add ripple effect to buttons
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const buttons = document.querySelectorAll('.btn');
-            
+
             buttons.forEach(button => {
-                button.addEventListener('click', function(e) {
+                button.addEventListener('click', function (e) {
                     const x = e.clientX - e.target.getBoundingClientRect().left;
                     const y = e.clientY - e.target.getBoundingClientRect().top;
-                    
+
                     const ripple = document.createElement('span');
                     ripple.classList.add('btn-ripple');
                     ripple.style.left = `${x}px`;
                     ripple.style.top = `${y}px`;
-                    
+
                     this.appendChild(ripple);
-                    
+
                     setTimeout(() => {
                         ripple.remove();
                     }, 600);
                 });
             });
-            
+
             // Notification functionality
             /* {% if user.is_authenticated %} */
             const notificationBtn = document.getElementById('notification-btn');
@@ -1212,11 +1251,11 @@
             const notificationBadge = document.getElementById('notification-badge');
             const notificationList = document.getElementById('notification-list');
             const markAllReadBtn = document.getElementById('mark-all-read');
-            
+
             // Only run this code if the notification elements exist
             if (notificationBtn && notificationContainer && notificationBadge && notificationList && markAllReadBtn) {
                 // Toggle notification panel
-                notificationBtn.addEventListener('click', function() {
+                notificationBtn.addEventListener('click', function () {
                     if (notificationContainer.style.display === 'block') {
                         notificationContainer.style.display = 'none';
                     } else {
@@ -1224,16 +1263,16 @@
                         loadNotifications();
                     }
                 });
-                
+
                 // Close notification panel when clicking outside
-                document.addEventListener('click', function(event) {
+                document.addEventListener('click', function (event) {
                     if (!notificationBtn.contains(event.target) && !notificationContainer.contains(event.target)) {
                         notificationContainer.style.display = 'none';
                     }
                 });
-                
+
                 // Mark all notifications as read
-                markAllReadBtn.addEventListener('click', function() {
+                markAllReadBtn.addEventListener('click', function () {
                     fetch('{% url "mark-all-notifications-read" %}', {
                         method: 'POST',
                         headers: {
@@ -1241,15 +1280,15 @@
                             'Content-Type': 'application/json'
                         }
                     })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.status === 'success') {
-                            loadNotifications();
-                            updateNotificationBadge();
-                        }
-                    });
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.status === 'success') {
+                                loadNotifications();
+                                updateNotificationBadge();
+                            }
+                        });
                 });
-                
+
                 // Helper function to get CSRF token from cookies
                 function getCookie(name) {
                     let cookieValue = null;
@@ -1265,14 +1304,14 @@
                     }
                     return cookieValue;
                 }
-                
+
                 // Load notifications from the server
                 function loadNotifications() {
                     fetch('{% url "get-notifications" %}')
                         .then(response => response.json())
                         .then(data => {
                             notificationList.innerHTML = '';
-                            
+
                             if (data.notifications.length === 0) {
                                 notificationList.innerHTML = `
                                     <li class="notification-empty">
@@ -1282,14 +1321,14 @@
                                 `;
                                 return;
                             }
-                            
+
                             data.notifications.forEach(notification => {
                                 const li = document.createElement('li');
                                 li.className = `notification-item ${!notification.is_read ? 'unread' : ''}`;
-                                
+
                                 let iconClass = 'system';
                                 let iconName = 'fa-bell';
-                                
+
                                 if (notification.notification_type === 'friend_request') {
                                     iconClass = 'friend-request';
                                     iconName = 'fa-user-plus';
@@ -1297,14 +1336,14 @@
                                     iconClass = 'message';
                                     iconName = 'fa-comment';
                                 }
-                                
+
                                 const date = new Date(notification.created_at);
-                                const timeString = date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                                const timeString = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                                 const dateString = date.toLocaleDateString();
-                                
+
                                 const readUrl = '{% url "mark-notification-read" 0 %}'.replace('0', notification.id);
                                 const deleteUrl = '{% url "delete-notification" 0 %}'.replace('0', notification.id);
-                                
+
                                 li.innerHTML = `
                                     <a href="${readUrl}" class="notification-link">
                                         <span class="notification-icon ${iconClass}">
@@ -1321,12 +1360,12 @@
                                         </a>
                                     </div>
                                 `;
-                                
+
                                 notificationList.appendChild(li);
                             });
                         });
                 }
-                
+
                 // Update notification badge with count of unread notifications
                 function updateNotificationBadge() {
                     fetch('{% url "notifications-count" %}')
@@ -1340,36 +1379,36 @@
                             }
                         });
                 }
-                
+
                 // Initial load of notification count
                 updateNotificationBadge();
-                
+
                 // Refresh notification count every 30 seconds
                 setInterval(updateNotificationBadge, 30000);
             }
-            
+
             // User dropdown functionality
             const userDropdownToggle = document.querySelector('.user-dropdown-toggle');
             const userDropdownMenu = document.querySelector('.user-dropdown-menu');
-            
+
             if (userDropdownToggle && userDropdownMenu) {
                 // Toggle dropdown menu when clicking the user button
-                userDropdownToggle.addEventListener('click', function(e) {
+                userDropdownToggle.addEventListener('click', function (e) {
                     e.preventDefault();
                     e.stopPropagation();
                     userDropdownMenu.classList.toggle('show');
                 });
-                
+
                 // Handle clicks on dropdown items to prevent closing when clicking inside
-                userDropdownMenu.addEventListener('click', function(e) {
+                userDropdownMenu.addEventListener('click', function (e) {
                     // Only prevent propagation if it's not a form submission button
                     if (!e.target.classList.contains('logout-button')) {
                         e.stopPropagation();
                     }
                 });
-                
+
                 // Close dropdown when clicking outside
-                document.addEventListener('click', function(e) {
+                document.addEventListener('click', function (e) {
                     if (!userDropdownToggle.contains(e.target) && !userDropdownMenu.contains(e.target)) {
                         userDropdownMenu.classList.remove('show');
                     }
@@ -1378,7 +1417,8 @@
             /* {% endif %} */
         });
     </script>
-    
+
     {% block extra_scripts %}{% endblock %}
 </body>
-</html> 
+
+</html>

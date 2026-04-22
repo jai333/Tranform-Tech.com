@@ -1,4 +1,4 @@
-# AI & API Integration Roadmap for Protingent ATS & CRM
+# AI & API Integration Roadmap for Transform.io ATS & CRM
 
 ## Executive Summary
 
