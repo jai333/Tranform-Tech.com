@@ -47,14 +47,14 @@
                 </li>
 
                 <li>
-                    <a href="#">INFRASTRUCTURE <i class='bx bx-chevron-down'></i></a>
+                    <a href="#">SOLUTIONS <i class='bx bx-chevron-down'></i></a>
                     <div class="mega-menu">
                         <div class="mega-col">
-                            <span class="mega-header">IT AUTOMATION</span>
-                            <a href="#">Cybersecurity Ops</a>
-                            <a href="#">Zero Trust Network</a>
-                            <a href="#">Unified Endpoints</a>
-                            <a href="#">Server Backups</a>
+                            <span class="mega-header">FOR STAFFING AGENCIES</span>
+                            <a href="#">Workflow Audits</a>
+                            <a href="#">Custom Automations</a>
+                            <a href="#">Data Dashboards</a>
+                            <a href="#">Retainer Models</a>
                         </div>
                     </div>
                 </li>
@@ -69,7 +69,7 @@
                 <a href="{% url 'candidate-list' %}" class="btn btn-cyan font-mono">/DASHBOARD</a>
                 {% else %}
                 <a href="{% url 'login' %}" style="color:var(--text-gray); margin-right:16px; padding-top:10px;" class="font-mono text-sm">/LOGIN</a>
-                <a href="{% url 'register' %}" class="btn btn-outline font-mono">/GET_STARTED</a>
+                <a href="{% url 'register' %}" class="btn btn-outline font-mono">/FREE_AUDIT</a>
                 {% endif %}
             </div>
         </div>
@@ -78,20 +78,20 @@
     <!-- Technical Hero Section -->
     <header class="hero container">
         <div class="hero-left">
-            <div class="tag font-mono text-cyan mb-md">[ TITAN_PLATFORM_INIT v5.0 ]</div>
+            <div class="tag font-mono text-cyan mb-md">[ AUTOMATION_ENGINE v5.0 ]</div>
             <h1 class="hero-title tracking-tight">
-                The Ultimate IT & Recruitment<br>
-                <span class="text-white">Automation Engine.</span>
+                Scale Your Staffing Firm With<br>
+                <span class="text-white">Automated Recruitment Infrastructure.</span>
             </h1>
             <p class="hero-subtitle text-gray mt-md" style="font-size: 1.15rem; max-width: 600px;">
-                Transform.io is a sovereign titan ecosystem. We merge deep machine learning Applicant Tracking with military-grade IT Infrastructure Management and Cybersecurity layers, all executing from a single centralized dashboard.
+                Stop losing placements to manual workflows and fragmented data. We build custom Applicant Tracking Systems, CRM pipelines, and data dashboards specifically for US-based tech staffing agencies.
             </p>
             <div class="hero-actions">
                 <a href="#architecture" class="btn btn-cyan font-mono">Explore Architecture</a>
-                <a href="{% url 'register' %}" class="btn btn-outline font-mono">Deploy Instance</a>
+                <a href="{% url 'register' %}" class="btn btn-outline font-mono">Get Free Workflow Audit</a>
             </div>
             <div class="tech-stack mt-lg font-mono text-xs text-dark-gray">
-                BUILT FOR DOMINATION: <span class="text-gray">ATS, CRM, NLP PARSING, CYBERSEC, ZTNA</span>
+                BUILT FOR STAFFING: <span class="text-gray">CUSTOM ATS, CRM PIPELINES, DASHBOARDS</span>
             </div>
         </div>
 
@@ -108,8 +108,8 @@
                     <span class="text-white">[INFO]</span> Initializing ATS pipeline...<br>
                     <span class="text-white">[INFO]</span> Connecting to remote CRM endpoints...<br>
                     <span class="text-cyan">[OK]</span> Job Board webhook active.<br>
-                    <span class="text-white">[INFO]</span> Executing Cybersecurity Threat Scan across 5,000 resumes...<br>
-                    <span class="text-cyan">[OK]</span> Zero Trust logic authenticated.<br>
+                    <span class="text-white">[INFO]</span> Auditing manual recruitment workflows...<br>
+                    <span class="text-cyan">[OK]</span> Bottlenecks identified.<br>
                     <span class="text-white">[INFO]</span> Ingesting PDF via NLP Parsing Models (Cosine Similarity Engine)...<br>
                     <span class="text-white">[ACTION]</span> Synthesizing AI Candidate Summary profiles...<br>
                     <span class="text-white">[INFO]</span> Synchronizing state with external APIs...<br>
@@ -122,10 +122,10 @@
     <!-- The Hybrid Platform Problem -->
     <section class="container mt-xl pb-lg border-bottom" id="architecture">
         <div class="text-center" style="max-width: 800px; margin: 0 auto; margin-bottom: 64px;">
-            <span class="sub-tag">THE FRAGMENTATION CRISIS SOLVED</span>
-            <h2 class="huge-title">Stop Buying 15 SaaS Tools.</h2>
+            <span class="sub-tag">THE INEFFICIENCY CRISIS SOLVED</span>
+            <h2 class="huge-title">Stop Relying on Manual Workflows.</h2>
             <p class="text-gray" style="font-size: 1.1rem; line-height: 1.6;">
-                The average staffing firm buys separate ATS software, generic CRMs, standalone AI parsers, and external IT/Cybersecurity vendors. Transform.io collapses the stack natively.
+                The average staffing firm loses placements due to inefficient candidate tracking and disjointed systems. Transform.io builds custom, scalable infrastructure natively.
             </p>
         </div>
 
@@ -136,20 +136,20 @@
                     <h4 class="mt-md font-mono text-xl text-white">AI Parsing & Deep Matching</h4>
                     <p class="mt-md text-gray" style="font-size: 1.1rem; line-height: 1.6;">Semantic NLP parsing logic natively reads through CV fluff. Uses Cosine Similarity to calculate exact 0-100 match percentages against job descriptions, evaluating data structures like a neural network and identifying candidate skill gaps automatically.</p>
                 </div>
-                <div class="bento-image-wrapper" style="height: 300px;">
-                    <img src="https://images.unsplash.com/photo-1551434678-e076c223a692?auto=format&fit=crop&q=80&w=1200" alt="Recruitment Analytics Dashboard" style="filter: brightness(0.9);">
-                </div>
+                <div class="bento-image-wrapper border-glow" style="height: 350px;">
+                <img src="{% static 'tracking_app/assets/ats_dashboard.png' %}" alt="Custom ATS Dashboard" style="filter: brightness(0.9);">
+            </div>
             </div>
             
             <div class="bento-box bento-medium border-glow">
                 <div class="bento-content" style="padding-bottom: 24px;">
-                    <i class='bx bx-shield-quarter' style="font-size:2.5rem; color:var(--primary);"></i>
-                    <h4 class="mt-md font-mono text-xl text-white">Cybersecurity Posture</h4>
-                    <p class="mt-md text-gray">Protect your applicant data pools. We deploy active Zero Trust Network Architecture (ZTNA).</p>
+                    <i class='bx bx-line-chart' style="font-size:2.5rem; color:var(--primary);"></i>
+                    <h4 class="mt-md font-mono text-xl text-white">Data Dashboards</h4>
+                    <p class="mt-md text-gray">Gain full pipeline visibility. Real-time dashboards track placement efficiency and operational KPIs.</p>
                 </div>
-                <div class="bento-image-wrapper" style="height: 200px;">
-                    <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800" alt="Clean Server Infrastructure" style="filter: brightness(0.85);">
-                </div>
+                <div class="bento-image-wrapper border-glow" style="height: 350px;">
+                <img src="{% static 'tracking_app/assets/analytics_dashboard.png' %}" alt="Data Telemetry and Analytics" style="filter: brightness(0.9);">
+            </div>
             </div>
             
             <div class="bento-box bento-medium border-glow">
@@ -158,9 +158,9 @@
                     <h4 class="mt-md font-mono text-xl text-white">Hyper-Automation</h4>
                     <p class="mt-md text-gray">Native integrations sync cleanly with external providers like Bullhorn, Workday, and LinkedIn.</p>
                 </div>
-                <div class="bento-image-wrapper" style="height: 200px;">
-                    <img src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&q=80&w=800" alt="Professional Workflows" style="filter: brightness(0.85);">
-                </div>
+                <div class="bento-image-wrapper border-glow" style="height: 350px;">
+                <img src="{% static 'tracking_app/assets/crm_dashboard.png' %}" alt="CRM Pipeline Management" style="filter: brightness(0.9);">
+            </div>
             </div>
         </div>
 
@@ -179,15 +179,15 @@
 
     <!-- Rest of Features ... -->
     <section class="container mt-xl mb-xl text-center">
-        <h2 class="text-white text-3xl mb-md">Experience The Titan Platform.</h2>
-        <a href="{% url 'register' %}" class="btn btn-cyan font-mono" style="font-size:1.1rem; padding: 16px 32px;">Initialize Your Ecosystem</a>
+        <h2 class="text-white text-3xl mb-md">Systemize Your Agency Today.</h2>
+        <a href="{% url 'register' %}" class="btn btn-cyan font-mono" style="font-size:1.1rem; padding: 16px 32px;">Get Free Workflow Audit</a>
     </section>
 
     <footer class="footer font-mono mt-xl">
         <div class="container footer-mega-grid">
             <div class="footer-brand footer-col">
                 <a href="{% url 'home' %}" class="logo text-xl mb-md"><img src="{% static 'tracking_app/assets/logo-333.png' %}" alt="Transform.io 333 Logo" style="height: 48px; width: auto; max-width: 250px; border-radius: 4px; box-shadow: 0 0 10px rgba(0, 229, 255, 0.5);"></a>
-                <p class="text-gray text-xs mb-md" style="line-height:1.6;">The ultimate titan ecosystem unifying massive IT infrastructure, Cybersecurity Ops, and Algorithmic Recruitment.</p>
+                <p class="text-gray text-xs mb-md" style="line-height:1.6;">Automation-driven recruitment infrastructure for US-based staffing companies.</p>
             </div>
             
             <div class="footer-col">
@@ -198,10 +198,10 @@
             </div>
 
             <div class="footer-col">
-                <h4 class="font-mono text-white">INFRASTRUCTURE</h4>
-                <a href="#">Cybersecurity</a>
-                <a href="#">Unified Endpoints</a>
-                <a href="#">Data Telemetry</a>
+                <h4 class="font-mono text-white">SOLUTIONS</h4>
+                <a href="#">Workflow Automation</a>
+                <a href="#">Data Dashboards</a>
+                <a href="#">Agency Audits</a>
             </div>
         </div>
 

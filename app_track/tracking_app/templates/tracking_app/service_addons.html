@@ -1,0 +1,171 @@
+{% extends "tracking_app/base.html" %}
+{% load static %}
+
+{% block title %}Service Add-Ons - Transform.io{% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <div class="container" style="max-width: 1400px; padding-top: 2rem;">
+        
+        <div class="page-header mb-lg" style="border-bottom: 1px solid var(--apple-border); padding-bottom: 24px;">
+            <div>
+                <h1 class="page-title font-mono text-cyan" style="font-size: 24px; text-transform: uppercase; letter-spacing: 2px;">MARKETPLACE <span class="text-gray" style="font-weight: 300;">| IT INFRASTRUCTURE ADD-ONS</span></h1>
+                <p class="text-gray font-mono text-sm mt-sm">Extend your ATS/CRM capabilities with our core technical infrastructure services.</p>
+            </div>
+            <div class="header-actions">
+                <span class="btn border-glow font-mono text-xs" style="background: rgba(0, 229, 255, 0.1); color: var(--brand-primary); border-color: rgba(0, 229, 255, 0.3);">
+                    <i class="fa-solid fa-server"></i> PLATFORM EXTENSIONS
+                </span>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 280px 1fr; gap: 32px;">
+            
+            <!-- LEFT NAVIGATION -->
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                <button class="addon-tab active card border-glow" onclick="showAddon('cybersec', this)" style="padding: 16px; text-align: left; background: var(--apple-card-bg); border-left: 4px solid var(--brand-primary); cursor: pointer; transition: all 0.2s ease;">
+                    <div class="font-mono text-white text-md mb-xs"><i class="fa-solid fa-shield-halved text-cyan mr-sm"></i> Defense Matrix</div>
+                    <div class="font-mono text-xs text-gray">Cybersecurity & Endpoint</div>
+                </button>
+                
+                <button class="addon-tab card border-glow" onclick="showAddon('automation', this)" style="padding: 16px; text-align: left; background: var(--apple-card-bg); border-left: 4px solid transparent; cursor: pointer; transition: all 0.2s ease;">
+                    <div class="font-mono text-white text-md mb-xs"><i class="fa-solid fa-network-wired text-cyan mr-sm"></i> Autonomous Ops</div>
+                    <div class="font-mono text-xs text-gray">Hyper-Automation & Data</div>
+                </button>
+                
+                <button class="addon-tab card border-glow" onclick="showAddon('appdev', this)" style="padding: 16px; text-align: left; background: var(--apple-card-bg); border-left: 4px solid transparent; cursor: pointer; transition: all 0.2s ease;">
+                    <div class="font-mono text-white text-md mb-xs"><i class="fa-solid fa-code text-cyan mr-sm"></i> App Engineering</div>
+                    <div class="font-mono text-xs text-gray">Custom Software & API</div>
+                </button>
+            </div>
+
+            <!-- RIGHT CONTENT AREA -->
+            <div class="card border-glow" style="padding: 40px; min-height: 600px;">
+                
+                <!-- CYBERSEC CONTENT -->
+                <div id="addon-cybersec" class="addon-content" style="display: block; animation: fade-in 0.4s ease-out;">
+                    <span class="font-mono text-xs text-cyan mb-sm block" style="letter-spacing: 1px;">02 // DEFENSE_MATRIX</span>
+                    <h2 class="text-white text-xl mb-md" style="font-size: 2.5rem; letter-spacing: -0.03em; line-height: 1.1;">Military-Grade Cybersecurity & Endpoint Management</h2>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 32px;">
+                        <div>
+                            <p class="text-gray mb-md" style="line-height: 1.6;">
+                                Assume breach. That is our philosophy. We implement Zero-Trust Architectures that verify every single packet moving laterally through your network. We take complete control over your IT hardware fleet via unified endpoint management (UEM).
+                            </p>
+                            
+                            <ul style="list-style: none; padding: 0; margin-top: 24px; display: flex; flex-direction: column; gap: 16px;">
+                                <li>
+                                    <div class="font-mono text-white text-sm mb-xs"><i class="fa-solid fa-expand text-cyan"></i> Continuous Vulnerability Sweeps (CVE)</div>
+                                    <div class="text-gray text-sm">Our engines map your entire software inventory against national threat databases daily.</div>
+                                </li>
+                                <li>
+                                    <div class="font-mono text-white text-sm mb-xs"><i class="fa-solid fa-laptop text-cyan"></i> Unified Endpoint Management (MDM)</div>
+                                    <div class="text-gray text-sm">We push policies, software, and encryption keys to Windows, Mac, and Linux hardware completely over the air.</div>
+                                </li>
+                                <li>
+                                    <div class="font-mono text-white text-sm mb-xs"><i class="fa-solid fa-lock text-cyan"></i> Immutable Bare-Metal Backups</div>
+                                    <div class="text-gray text-sm">Ransomware encrypts standard backups. We deploy airgapped, read-only "immutable" data archives.</div>
+                                </li>
+                            </ul>
+                            
+                            <a href="#" class="btn mt-lg">REQUEST UPGRADE</a>
+                        </div>
+                        <div style="border-radius: 8px; overflow: hidden; border: 1px solid var(--apple-border);">
+                            <img src="{% static 'tracking_app/assets/cybersec_mockup_1776112528216.png' %}" alt="Threat Grid" style="width: 100%; height: auto; display: block;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AUTOMATION CONTENT -->
+                <div id="addon-automation" class="addon-content" style="display: none; animation: fade-in 0.4s ease-out;">
+                    <span class="font-mono text-xs text-cyan mb-sm block" style="letter-spacing: 1px;">03 // AUTONOMOUS_OPS</span>
+                    <h2 class="text-white text-xl mb-md" style="font-size: 2.5rem; letter-spacing: -0.03em; line-height: 1.1;">Hyper-Workflow Automated Logic</h2>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 32px;">
+                        <div>
+                            <p class="text-gray mb-md" style="line-height: 1.6;">
+                                If an employee clicks a button to perform a system action more than twice a week, it should be automated via script logic. We interconnect APIs, raw bash scripts, and Node/Python lambda functions to establish extreme speed and flawless repetition.
+                            </p>
+                            
+                            <div style="background: rgba(0, 229, 255, 0.05); border-left: 3px solid var(--brand-primary); padding: 16px; margin: 24px 0;">
+                                <p class="font-mono text-white text-xs">"Our logic nodes support heavy regex filtering, iterative loop arrays, and asynchronous multi-thread execution written entirely in Go and Python to guarantee high-velocity transaction parsing."</p>
+                            </div>
+
+                            <ul style="list-style: none; padding: 0; margin-top: 24px; display: flex; flex-direction: column; gap: 16px;">
+                                <li>
+                                    <div class="font-mono text-white text-sm mb-xs"><i class="fa-solid fa-robot text-cyan"></i> Cross-SaaS Operational Routing</div>
+                                    <div class="text-gray text-sm">We deploy custom orchestration gateways connecting your isolated platforms.</div>
+                                </li>
+                                <li>
+                                    <div class="font-mono text-white text-sm mb-xs"><i class="fa-solid fa-clock text-cyan"></i> Cron Unattended Execution</div>
+                                    <div class="text-gray text-sm">Precision scheduled jobs scaling horizontally without PagerDuty intervention.</div>
+                                </li>
+                            </ul>
+                            
+                            <a href="#" class="btn mt-lg">REQUEST UPGRADE</a>
+                        </div>
+                        <div style="border-radius: 8px; overflow: hidden; border: 1px solid var(--apple-border);">
+                            <img src="{% static 'tracking_app/assets/automation_mockup_1776112570610.png' %}" alt="Node Logic Builder" style="width: 100%; height: auto; display: block;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- APP DEV CONTENT -->
+                <div id="addon-appdev" class="addon-content" style="display: none; animation: fade-in 0.4s ease-out;">
+                    <span class="font-mono text-xs text-cyan mb-sm block" style="letter-spacing: 1px;">01 // ENGINEERED_SYSTEMS</span>
+                    <h2 class="text-white text-xl mb-md" style="font-size: 2.5rem; letter-spacing: -0.03em; line-height: 1.1;">Custom Software Engineering & APIs</h2>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 32px;">
+                        <div>
+                            <p class="text-gray mb-md" style="line-height: 1.6;">
+                                We build native data warehouses feeding ultra-fast APIs to power live React dashboards for executives. Our custom engineering collapses the stack under one unified umbrella.
+                            </p>
+                            
+                            <ul style="list-style: none; padding: 0; margin-top: 24px; display: flex; flex-direction: column; gap: 16px;">
+                                <li>
+                                    <div class="font-mono text-white text-sm mb-xs"><i class="fa-solid fa-layer-group text-cyan"></i> Full-Stack Architecture</div>
+                                    <div class="text-gray text-sm">Scalable Node.js, Python/Django, and Go backend services with React/Vue frontends.</div>
+                                </li>
+                                <li>
+                                    <div class="font-mono text-white text-sm mb-xs"><i class="fa-solid fa-database text-cyan"></i> Database Optimization</div>
+                                    <div class="text-gray text-sm">PostgreSQL and MongoDB sharding and indexing for zero-latency queries.</div>
+                                </li>
+                                <li>
+                                    <div class="font-mono text-white text-sm mb-xs"><i class="fa-solid fa-cloud text-cyan"></i> Cloud Deployment (AWS/GCP)</div>
+                                    <div class="text-gray text-sm">Auto-scaling Kubernetes clusters operating across multi-cloud regions ensuring 99.999% uptime.</div>
+                                </li>
+                            </ul>
+                            
+                            <a href="#" class="btn mt-lg">REQUEST UPGRADE</a>
+                        </div>
+                        <div style="border-radius: 8px; overflow: hidden; border: 1px solid var(--apple-border);">
+                            <img src="{% static 'tracking_app/assets/app_dev_hero_1776115211825.png' %}" alt="App Dev Architecture" style="width: 100%; height: auto; display: block;">
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function showAddon(addonId, element) {
+        // Hide all contents
+        document.querySelectorAll('.addon-content').forEach(el => {
+            el.style.display = 'none';
+        });
+        
+        // Remove active class from all tabs
+        document.querySelectorAll('.addon-tab').forEach(el => {
+            el.style.borderLeftColor = 'transparent';
+        });
+        
+        // Show target content
+        document.getElementById('addon-' + addonId).style.display = 'block';
+        
+        // Set active tab styling
+        element.style.borderLeftColor = 'var(--brand-primary)';
+    }
+</script>
+{% endblock %}

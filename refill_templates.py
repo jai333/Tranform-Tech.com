@@ -8,23 +8,32 @@ content_map = {
     <section class="container mt-xl mb-xl">
         <h3 class="text-white text-2xl mb-lg text-center">Latest Intelligence</h3>
         <div class="grid-3">
-            <div class="data-card border-glow" style="padding: 24px;">
-                <p class="font-mono text-xs text-primary mb-sm">April 12, 2026</p>
-                <h4 class="text-white text-lg mb-sm">State of AI in Recruitment</h4>
-                <p class="text-gray mb-md" style="font-size:0.9rem;">How large language models and cosine similarity engines are replacing boolean searches entirely.</p>
-                <a href="#" class="text-primary font-mono text-sm">Read Article -></a>
+            <div class="data-card border-glow" style="padding: 0; overflow: hidden;">
+                <img src="https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?auto=format&fit=crop&q=80&w=800" alt="Tech Recruitment" style="width: 100%; height: 180px; object-fit: cover; filter: brightness(0.85);">
+                <div style="padding: 24px;">
+                    <p class="font-mono text-xs text-primary mb-sm">April 12, 2026</p>
+                    <h4 class="text-white text-lg mb-sm">State of AI in Recruitment</h4>
+                    <p class="text-gray mb-md" style="font-size:0.9rem;">Stop losing placements to manual workflows. How automation bridges the gap between sourcing and submission.</p>
+                    <a href="#" class="text-primary font-mono text-sm">Read Article -></a>
+                </div>
             </div>
-            <div class="data-card border-glow" style="padding: 24px;">
-                <p class="font-mono text-xs text-primary mb-sm">March 28, 2026</p>
-                <h4 class="text-white text-lg mb-sm">Zero Trust Talent Pipelines</h4>
-                <p class="text-gray mb-md" style="font-size:0.9rem;">Protecting candidate data records with ZTNA while maintaining speed-to-market.</p>
-                <a href="#" class="text-primary font-mono text-sm">Read Article -></a>
+            <div class="data-card border-glow" style="padding: 0; overflow: hidden;">
+                <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=800" alt="Data Analytics" style="width: 100%; height: 180px; object-fit: cover; filter: brightness(0.85);">
+                <div style="padding: 24px;">
+                    <p class="font-mono text-xs text-primary mb-sm">March 28, 2026</p>
+                    <h4 class="text-white text-lg mb-sm">Zero Trust Talent Pipelines</h4>
+                    <p class="text-gray mb-md" style="font-size:0.9rem;">Transforming your service agency into a scalable system with built-in data dashboards.</p>
+                    <a href="#" class="text-primary font-mono text-sm">Read Article -></a>
+                </div>
             </div>
-            <div class="data-card border-glow" style="padding: 24px;">
-                <p class="font-mono text-xs text-primary mb-sm">March 15, 2026</p>
-                <h4 class="text-white text-lg mb-sm">ATS vs CRM Convergence</h4>
-                <p class="text-gray mb-md" style="font-size:0.9rem;">Why buying separate software for client relationships and candidate tracking is obsolete.</p>
-                <a href="#" class="text-primary font-mono text-sm">Read Article -></a>
+            <div class="data-card border-glow" style="padding: 0; overflow: hidden;">
+                <img src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&q=80&w=800" alt="Business Meeting" style="width: 100%; height: 180px; object-fit: cover; filter: brightness(0.85);">
+                <div style="padding: 24px;">
+                    <p class="font-mono text-xs text-primary mb-sm">March 15, 2026</p>
+                    <h4 class="text-white text-lg mb-sm">ATS vs CRM Convergence</h4>
+                    <p class="text-gray mb-md" style="font-size:0.9rem;">Why buying separate software for client relationships and candidate tracking is obsolete.</p>
+                    <a href="#" class="text-primary font-mono text-sm">Read Article -></a>
+                </div>
             </div>
         </div>
     </section>
@@ -35,7 +44,7 @@ content_map = {
             <div>
                 <h3 class="text-white text-2xl mb-md">Never Lose a Great Candidate</h3>
                 <p class="text-gray mb-md line-height-relaxed" style="font-size: 1.1rem;">
-                    Stop manually shifting resumes across local folders. Our unified ATS pipeline provides real-time visibility into your talent pool, automatically sequencing emails and tracking interviews.
+                    Stop losing placements to manual workflows. Our Custom ATS infrastructure provides real-time pipeline visibility for US-based staffing firms, connecting sourcing directly to client submissions.
                 </p>
                 <ul class="feature-list mt-md">
                     <li><i class='bx bx-check-circle text-primary'></i> Drag-and-drop Kanban hiring boards.</li>
@@ -44,7 +53,7 @@ content_map = {
                 </ul>
             </div>
             <div class="bento-image-wrapper border-glow" style="height: 350px;">
-                <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=800" alt="ATS Dashboard" style="filter: brightness(0.9);">
+                <img src="{% static 'tracking_app/assets/ats_dashboard.png' %}" alt="ATS Dashboard" style="filter: brightness(0.9);">
             </div>
         </div>
     </section>
@@ -53,18 +62,18 @@ content_map = {
     <section class="container mt-xl mb-xl">
         <div class="grid-2 align-center mb-lg">
             <div>
-                <h3 class="text-white text-2xl mb-md">Manage Client Requisitions</h3>
+                <h3 class="text-white text-2xl mb-md">Manage Client Pipelines</h3>
                 <p class="text-gray mb-md line-height-relaxed" style="font-size: 1.1rem;">
-                    Your business runs on closed deals. Natively track client fees, job orders, and split placements without ever leaving the candidate network. Syncs natively with billing ledgers.
+                    Your business runs on closed deals. We build custom CRM pipelines for recruiters, allowing you to track job orders and client requirements without disjointed spreadsheets.
                 </p>
                 <ul class="feature-list mt-md">
-                    <li><i class='bx bx-check-circle text-primary'></i> Real-time pipeline forecasting.</li>
-                    <li><i class='bx bx-check-circle text-primary'></i> Automated outreach to cold corporate contacts.</li>
-                    <li><i class='bx bx-check-circle text-primary'></i> Client-specific portal access for live review.</li>
+                    <li><i class='bx bx-check-circle text-primary'></i> Automated workflow triggers for recruiting processes.</li>
+                    <li><i class='bx bx-check-circle text-primary'></i> High switching-cost system design.</li>
+                    <li><i class='bx bx-check-circle text-primary'></i> Free workflow audit to identify process bottlenecks.</li>
                 </ul>
             </div>
             <div class="bento-image-wrapper border-glow" style="height: 350px;">
-                <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80&w=800" alt="CRM Deals" style="filter: brightness(0.9);">
+                <img src="{% static 'tracking_app/assets/crm_dashboard.png' %}" alt="CRM Deals" style="filter: brightness(0.9);">
             </div>
         </div>
     </section>
@@ -100,16 +109,16 @@ fallback_html = """
     <section class="container mt-xl mb-xl">
         <div class="grid-2 align-center mb-lg">
             <div>
-                <h3 class="text-white text-2xl mb-md">Enterprise-Grade Infrastructure</h3>
+                <h3 class="text-white text-2xl mb-md">Automation-Driven Recruitment</h3>
                 <p class="text-gray mb-md line-height-relaxed" style="font-size: 1.1rem;">
-                    Deployed securely on sovereign clouds. Transform.io connects high-speed recruitment operations directly with reliable, automated IT workflows, eliminating middleware bottlenecks.
+                    Built exclusively for US tech staffing firms. We don't just sell software; we provide custom systems, SOP-driven execution, and retainers to optimize your recruitment workflow.
                 </p>
                 <div class="highlight-box">
-                    <p class="font-mono text-white text-sm">Trusted by top agencies to reduce operational drag by up to 60% within the first quarter of deployment.</p>
+                    <p class="font-mono text-white text-sm">Increase placement efficiency and reduce inefficiencies by systemizing your entire recruitment infrastructure.</p>
                 </div>
             </div>
             <div class="bento-image-wrapper border-glow" style="height: 350px;">
-                <img src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&q=80&w=800" alt="Enterprise Software" style="filter: brightness(0.9);">
+                <img src="{% static 'tracking_app/assets/analytics_dashboard.png' %}" alt="Enterprise Software" style="filter: brightness(0.9);">
             </div>
         </div>
     </section>

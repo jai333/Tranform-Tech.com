@@ -99,4 +99,6 @@ urlpatterns = [
     path('api/save-search/', ai_views.save_advanced_search, name='save-advanced-search'),
     path('api/candidate/<int:candidate_id>/ai-summary/', ai_views.get_candidate_ai_summary, name='get-candidate-ai-summary'),
     path('candidate/<int:candidate_id>/ai-profile/', ai_views.candidate_detail_with_ai, name='candidate-ai-profile'),
+    path('ai-pipeline/', ai_views.ai_pipeline_dashboard, name='ai-pipeline-dashboard'),
+    path('add-ons/', views.service_addons_view, name='service-addons'),
 ]

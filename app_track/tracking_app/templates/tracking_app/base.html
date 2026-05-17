@@ -12,7 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;600&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* Transform.io Brand Color Palette */
+            /* Transform.io Brand Color Palette - Deep Dark Mode */
             --brand-primary: #00E5FF;
             --brand-primary-dark: #00b3cc;
             --brand-primary-light: #66efff;
@@ -22,10 +22,10 @@
             --brand-error: #ef4444;
             --brand-warning: #f59e0b;
 
-            /* Dark theme (forced) */
-            --apple-bg: #000000;
-            --apple-card-bg: rgba(10, 10, 12, 0.85);
-            --apple-border: rgba(0, 229, 255, 0.15);
+            /* Dark theme (Forced) */
+            --apple-bg: #0a0a0a;
+            --apple-card-bg: #111111;
+            --apple-border: #333333;
             --apple-text: rgba(255, 255, 255, 0.95);
             --apple-text-secondary: rgba(255, 255, 255, 0.6);
             --apple-accent: var(--brand-primary);
@@ -38,16 +38,21 @@
             --apple-blur: 20px;
         }
 
-        /* Light theme */
-        body.light-theme {
-            --apple-bg: #f5f5f7;
-            --apple-card-bg: rgba(255, 255, 255, 0.8);
-            --apple-border: rgba(0, 0, 0, 0.1);
-            --apple-text: rgba(0, 0, 0, 0.9);
-            --apple-text-secondary: rgba(0, 0, 0, 0.6);
-            --apple-input-bg: rgba(0, 0, 0, 0.05);
-            --apple-accent-glow: rgba(8, 145, 178, 0.2);
+        /* Border Glow Utility */
+        .border-glow {
+            position: relative; border-radius: 12px; background: var(--apple-card-bg);
+            border: 1px solid var(--apple-border); transition: 0.4s ease;
         }
+        .border-glow::before {
+            content: ""; position: absolute; inset: -1px; border-radius: inherit; padding: 1px;
+            background: linear-gradient(135deg, var(--brand-primary) 0%, transparent 50%, var(--brand-primary) 100%);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor; mask-composite: exclude;
+            opacity: 0; transition: opacity 0.4s ease; pointer-events: none;
+        }
+        .border-glow:hover { transform: translateY(-2px); box-shadow: 0 10px 40px rgba(0, 229, 255, 0.05); }
+        .border-glow:hover::before { opacity: 1; }
 
         * {
             margin: 0;
@@ -215,12 +220,6 @@
             flex-wrap: nowrap;
             justify-content: center;
             overflow-x: auto;
-        }
-
-        body.light-theme nav ul {
-            background-color: rgba(255, 255, 255, 0.3);
-            border: 1px solid rgba(0, 0, 0, 0.08);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
         }
 
         nav li {
@@ -1099,13 +1098,10 @@
                     {% endif %}
                     <!-- Show my interviews option for job seekers -->
                     {% if user.is_authenticated and user.is_jobseeker %}
-                    <li><a href="{% url 'my-interviews' %}"
-                            class="{% if '/my-interviews/' in request.path %}active{% endif %}"><i
-                                class="fas fa-calendar-alt"></i> My Interviews</a></li>
-                    <li><a href="{% url 'my-applications' %}"
-                            class="{% if '/my-applications/' in request.path %}active{% endif %}"><i
-                                class="fas fa-clipboard-check"></i> My Applications</a></li>
-                    {% endif %}
+                    <li><a href="{% url 'interview-list' %}" class="{% if '/interviews/' in request.path %}active{% endif %}"><i class="fa-solid fa-calendar-check"></i> Interviews</a></li>
+                    <li><a href="{% url 'ai-pipeline-dashboard' %}" class="{% if '/ai-pipeline/' in request.path %}active{% endif %}"><i class="fa-solid fa-chart-network"></i> AI Pipeline</a></li>
+                    <li><a href="{% url 'service-addons' %}" class="{% if '/add-ons/' in request.path %}active{% endif %}"><i class="fa-solid fa-server"></i> Add-ons</a></li>
+                {% endif %}
                     <!-- All users can see jobs -->
                     <li><a href="{% url 'job-list' %}" class="{% if '/jobs/' in request.path %}active{% endif %}"><i
                                 class="fas fa-briefcase"></i> Jobs</a></li>

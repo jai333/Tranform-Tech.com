@@ -165,6 +165,39 @@ def reject_friend_request(request, request_id):
     messages.info(request, f'Friend request from {friendship.sender.username} rejected')
     return redirect('friend-list')
 
+def service_addons_view(request):
+    # Get user's friends (accepted friendships)
+    friends_as_sender = Friendship.objects.filter(
+        sender=request.user, 
+        status='accepted'
+    ).select_related('receiver')
+    
+    friends_as_receiver = Friendship.objects.filter(
+        receiver=request.user, 
+        status='accepted'
+    ).select_related('sender')
+    
+    # Create a list of friend users
+    friends = []
+    for friendship in friends_as_sender:
+        friends.append(friendship.receiver)
+    
+    for friendship in friends_as_receiver:
+        friends.append(friendship.sender)
+    
+    # Get pending friend requests sent to the user
+    pending_requests = Friendship.objects.filter(
+        receiver=request.user, 
+        status='pending'
+    ).select_related('sender')
+    
+    context = {
+        'friends': friends,
+        'pending_requests': pending_requests,
+    }
+    
+    return render(request, 'tracking_app/friend_list.html', context)
+
 @login_required
 def friend_list(request):
     # Get user's friends (accepted friendships)
@@ -975,3 +1008,9 @@ class NoteDeleteView(LoginRequiredMixin, DeleteView):
     
     def get_success_url(self):
         return reverse('candidate-detail', kwargs={'pk': self.object.candidate.id})
+
+def service_addons_view(request):
+    """
+    Renders the IT Service Add-ons marketplace.
+    """
+    return render(request, 'tracking_app/service_addons.html')

@@ -98,11 +98,10 @@ def parse_resume_api(request):
             resume_defaults = _build_resume_defaults(parsed_data, resume_file)
             
             # Create or update ResumeData record
-            ResumeData.objects.update_or_create(
+            resume_data, created = ResumeData.objects.update_or_create(
                 candidate=candidate,
                 defaults=resume_defaults
             )
-            
             return JsonResponse({
                 'success': True,
                 'message': 'Resume parsed successfully',
@@ -457,3 +456,22 @@ def get_jobs_api(request):
             'success': False,
             'error': str(e)
         }, status=500)
+
+
+@login_required
+def ai_pipeline_dashboard(request):
+    """
+    Renders the AI Pipeline / Data Telemetry Command Center dashboard.
+    """
+    # Only recruiters and admins should access this
+    from django.shortcuts import redirect
+    if not (request.user.is_recruiter or request.user.is_admin_role or request.user.is_staff):
+        return redirect('home')
+        
+    context = {
+        # Dummy data parameters
+        'active_reqs': 142,
+        'new_applicants': 841,
+        'pending_offers': 23,
+    }
+    return render(request, 'tracking_app/ai_pipeline.html', context)

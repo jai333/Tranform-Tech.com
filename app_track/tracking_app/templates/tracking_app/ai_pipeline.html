@@ -1,0 +1,288 @@
+{% extends "tracking_app/base.html" %}
+
+{% block title %}AI Pipeline - Transform.io{% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <div class="container" style="max-width: 1400px; padding-top: 2rem;">
+        
+        <div class="page-header mb-lg" style="border-bottom: 1px solid var(--apple-border); padding-bottom: 24px;">
+            <div>
+                <h1 class="page-title font-mono text-cyan" style="font-size: 24px; text-transform: uppercase; letter-spacing: 2px;">RECRUITMENT DATA TELEMETRY <span class="text-gray" style="font-weight: 300;">| COMMAND CENTER v3.1</span></h1>
+                <p class="text-gray font-mono text-sm mt-sm">Live algorithmic pipeline tracking and predictive candidate matching insights.</p>
+            </div>
+            <div class="header-actions">
+                <span class="btn border-glow font-mono text-xs" style="background: rgba(16, 185, 129, 0.1); color: var(--brand-success); border-color: rgba(16, 185, 129, 0.3);">
+                    <i class="fa-solid fa-circle-dot fa-fade"></i> SYSTEM ONLINE
+                </span>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 300px 1fr; gap: 24px;">
+            
+            <!-- LEFT SIDEBAR: METRICS & NOTIFICATIONS -->
+            <div style="display: flex; flex-direction: column; gap: 24px;">
+                <div class="card border-glow" style="padding: 24px;">
+                    <h3 class="font-mono text-sm text-gray mb-md" style="letter-spacing: 1px; text-transform: uppercase;">KEY METRICS</h3>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <div style="font-size: 2rem; font-weight: 800; color: var(--apple-text); line-height: 1;">{{ active_reqs }}</div>
+                        <div class="font-mono text-xs text-gray mt-sm">ACTIVE REQUISITIONS</div>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <div style="font-size: 2rem; font-weight: 800; color: var(--brand-primary); line-height: 1;">{{ new_applicants }}</div>
+                        <div class="font-mono text-xs text-gray mt-sm">NEW APPLICANTS (24H)</div>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <div style="font-size: 2rem; font-weight: 800; color: var(--brand-success); line-height: 1;">{{ pending_offers }}</div>
+                        <div class="font-mono text-xs text-gray mt-sm">PENDING OFFERS</div>
+                    </div>
+                </div>
+
+                <div class="card border-glow" style="padding: 24px; flex-grow: 1;">
+                    <h3 class="font-mono text-sm text-gray mb-md" style="letter-spacing: 1px; text-transform: uppercase;">LIVE RECRUITMENT FEED</h3>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 16px;">
+                        <div style="border-left: 2px solid var(--brand-primary); padding-left: 12px;">
+                            <div class="font-mono text-xs text-gray mb-sm">10:42 AM - ALGORITHM</div>
+                            <div class="text-sm">High-Match Candidate Found: <span class="text-cyan">Sr. Go Developer</span>. Predictive match score: 94%.</div>
+                        </div>
+                        <div style="border-left: 2px solid var(--brand-warning); padding-left: 12px;">
+                            <div class="font-mono text-xs text-gray mb-sm">10:15 AM - SYSTEM</div>
+                            <div class="text-sm">Time-to-fill alert triggered on <span class="text-white">DevOps Engineer</span>. Increased sourcing priority.</div>
+                        </div>
+                        <div style="border-left: 2px solid var(--brand-success); padding-left: 12px;">
+                            <div class="font-mono text-xs text-gray mb-sm">09:55 AM - WORKFLOW</div>
+                            <div class="text-sm">Offer automatically dispatched to <span class="text-white">J. Smith</span> via DocuSign webhook.</div>
+                        </div>
+                        <div style="border-left: 2px solid var(--apple-border); padding-left: 12px;">
+                            <div class="font-mono text-xs text-gray mb-sm">09:12 AM - INGESTION</div>
+                            <div class="text-sm">Parsed 42 resumes from LinkedIn sync. Added to global talent pool.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MAIN DASHBOARD -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; grid-auto-rows: minmax(300px, auto);">
+                
+                <!-- Time to Fill Velocity -->
+                <div class="card border-glow" style="padding: 24px; grid-column: span 2;">
+                    <h3 class="font-mono text-sm text-gray mb-md" style="letter-spacing: 1px; text-transform: uppercase;">TIME-TO-FILL VELOCITY (DAYS)</h3>
+                    <div style="position: relative; height: 250px; width: 100%;">
+                        <canvas id="timeToFillChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Recruiter Performance -->
+                <div class="card border-glow" style="padding: 24px;">
+                    <h3 class="font-mono text-sm text-gray mb-md" style="letter-spacing: 1px; text-transform: uppercase;">RECRUITER PERFORMANCE (PLACEMENTS)</h3>
+                    <div style="position: relative; height: 200px; width: 100%;">
+                        <canvas id="performanceChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Diversity Index -->
+                <div class="card border-glow" style="padding: 24px;">
+                    <h3 class="font-mono text-sm text-gray mb-md" style="letter-spacing: 1px; text-transform: uppercase;">DIVERSITY & INCLUSION INDEX</h3>
+                    <div style="position: relative; height: 200px; width: 100%; display: flex; justify-content: center;">
+                        <canvas id="diversityChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Pipeline Throughput Sourcing Heatmap-->
+                <div class="card border-glow" style="padding: 24px; grid-column: span 2; display: flex; gap: 24px; background: linear-gradient(180deg, var(--apple-card-bg) 0%, rgba(0,0,0,0.5) 100%);">
+                    <div style="flex: 1;">
+                        <h3 class="font-mono text-sm text-gray mb-md" style="letter-spacing: 1px; text-transform: uppercase;">PIPELINE THROUGHPUT | HIRE STAGE</h3>
+                        <div style="margin-top: 32px; display: flex; flex-direction: column; gap: 16px;">
+                            <div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                    <span class="font-mono text-xs">SOURCED</span>
+                                    <span class="font-mono text-xs text-cyan">3,492</span>
+                                </div>
+                                <div style="width: 100%; background: var(--apple-border); height: 8px; border-radius: 4px; overflow: hidden;">
+                                    <div style="width: 100%; background: var(--brand-primary); height: 100%;"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                    <span class="font-mono text-xs">SCREENED</span>
+                                    <span class="font-mono text-xs text-cyan">1,204</span>
+                                </div>
+                                <div style="width: 100%; background: var(--apple-border); height: 8px; border-radius: 4px; overflow: hidden;">
+                                    <div style="width: 35%; background: var(--brand-primary); height: 100%;"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                    <span class="font-mono text-xs">INTERVIEWING</span>
+                                    <span class="font-mono text-xs text-cyan">412</span>
+                                </div>
+                                <div style="width: 100%; background: var(--apple-border); height: 8px; border-radius: 4px; overflow: hidden;">
+                                    <div style="width: 15%; background: var(--brand-primary); height: 100%;"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                    <span class="font-mono text-xs">OFFERED</span>
+                                    <span class="font-mono text-xs text-success" style="color: var(--brand-success);">86</span>
+                                </div>
+                                <div style="width: 100%; background: var(--apple-border); height: 8px; border-radius: 4px; overflow: hidden;">
+                                    <div style="width: 5%; background: var(--brand-success); height: 100%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="flex: 1;">
+                        <h3 class="font-mono text-sm text-gray mb-md" style="letter-spacing: 1px; text-transform: uppercase;">PREDICTIVE HIRING ACCURACY</h3>
+                        <div style="display: flex; align-items: center; justify-content: center; height: 80%; position: relative;">
+                            <div style="width: 150px; height: 150px; border-radius: 50%; border: 8px solid var(--apple-border); border-top-color: var(--brand-primary); border-right-color: var(--brand-primary); transform: rotate(45deg);"></div>
+                            <div style="position: absolute; text-align: center;">
+                                <div class="font-mono text-white" style="font-size: 2.5rem; font-weight: 800;">94<span class="text-gray" style="font-size: 1rem;">%</span></div>
+                                <div class="font-mono text-xs text-primary mt-sm" style="color: var(--brand-primary);">+2.4% vs Q3</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Common Chart Defaults for Dark Theme
+        Chart.defaults.color = 'rgba(255, 255, 255, 0.6)';
+        Chart.defaults.font.family = "'Fira Code', monospace";
+        
+        // Time to Fill Velocity Chart
+        const ctxTime = document.getElementById('timeToFillChart').getContext('2d');
+        
+        // Gradient for line
+        let gradientCyan = ctxTime.createLinearGradient(0, 0, 0, 400);
+        gradientCyan.addColorStop(0, 'rgba(0, 229, 255, 0.5)');
+        gradientCyan.addColorStop(1, 'rgba(0, 229, 255, 0.0)');
+        
+        let gradientPurple = ctxTime.createLinearGradient(0, 0, 0, 400);
+        gradientPurple.addColorStop(0, 'rgba(139, 92, 246, 0.5)');
+        gradientPurple.addColorStop(1, 'rgba(139, 92, 246, 0.0)');
+
+        new Chart(ctxTime, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [
+                    {
+                        label: 'Engineering Roles',
+                        data: [45, 42, 38, 30, 28, 25],
+                        borderColor: '#00E5FF',
+                        backgroundColor: gradientCyan,
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: true
+                    },
+                    {
+                        label: 'Sales Roles',
+                        data: [30, 28, 35, 25, 22, 18],
+                        borderColor: '#8b5cf6',
+                        backgroundColor: gradientPurple,
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: true
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        align: 'end',
+                        labels: { boxWidth: 10, usePointStyle: true }
+                    }
+                },
+                scales: {
+                    y: {
+                        grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                        beginAtZero: true,
+                        max: 60
+                    },
+                    x: {
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+
+        // Recruiter Performance Chart
+        const ctxPerf = document.getElementById('performanceChart').getContext('2d');
+        new Chart(ctxPerf, {
+            type: 'bar',
+            data: {
+                labels: ['Sarah M.', 'David L.', 'Alex K.', 'Elena R.'],
+                datasets: [{
+                    label: 'Placements',
+                    data: [24, 18, 15, 28],
+                    backgroundColor: [
+                        'rgba(0, 229, 255, 0.8)',
+                        'rgba(0, 229, 255, 0.5)',
+                        'rgba(0, 229, 255, 0.3)',
+                        '#00E5FF'
+                    ],
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                        beginAtZero: true
+                    },
+                    x: {
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+
+        // Diversity Index Doughnut
+        const ctxDiv = document.getElementById('diversityChart').getContext('2d');
+        new Chart(ctxDiv, {
+            type: 'doughnut',
+            data: {
+                labels: ['Target Met', 'In Progress', 'Action Needed'],
+                datasets: [{
+                    data: [65, 25, 10],
+                    backgroundColor: [
+                        '#10b981', // Success Green
+                        '#00E5FF', // Cyan
+                        '#333333'  // Dark Gray
+                    ],
+                    borderWidth: 0,
+                    cutout: '80%'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: { padding: 20, boxWidth: 10, usePointStyle: true }
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}
