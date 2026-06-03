@@ -1,0 +1,204 @@
+{% extends 'tracking_app/base.html' %}
+{% load static %}
+
+{% block title %}Talent Pipeline - ATS & CRM System{% endblock %}
+
+{% block content %}
+<div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+    <div>
+        <h2 class="page-title font-mono text-cyan" style="font-size: 24px; text-transform: uppercase; letter-spacing: 2px;">
+            <i class="fas fa-columns mr-2"></i> Talent Pipeline
+        </h2>
+        <p class="text-gray font-mono text-sm mt-sm">Drag and drop candidates across stages.</p>
+    </div>
+    
+    <div class="job-filter">
+        <form method="GET" class="animate-fade-in" id="jobFilterForm">
+            <select name="job_id" class="form-control glass-input" style="width: 300px; font-family: var(--font-mono); font-size: 0.9rem;" onchange="document.getElementById('jobFilterForm').submit()">
+                <option value="">-- All Active Jobs --</option>
+                {% for job in jobs %}
+                    <option value="{{ job.id }}" {% if selected_job and selected_job.id == job.id %}selected{% endif %}>
+                        {{ job.title }}
+                    </option>
+                {% endfor %}
+            </select>
+        </form>
+    </div>
+</div>
+
+<!-- CSRF Token for JS fetch -->
+{% csrf_token %}
+
+<div class="kanban-board animate-slide-up" style="display: flex; gap: 20px; overflow-x: auto; padding-bottom: 20px; min-height: 70vh;">
+    
+    <!-- Stage: Pending -->
+    <div class="kanban-column border-glow" data-status="pending" style="flex: 1; min-width: 300px; background: rgba(0,0,0,0.4); border-radius: 8px; padding: 16px; display: flex; flex-direction: column;">
+        <h3 class="font-mono text-sm text-warning mb-md" style="letter-spacing: 1px; border-bottom: 1px solid var(--apple-border); padding-bottom: 8px;">
+            PENDING REVIEW <span class="badge badge-secondary float-right">{{ pipeline_data.pending|length }}</span>
+        </h3>
+        <div class="kanban-cards" style="flex-grow: 1; min-height: 100px; display: flex; flex-direction: column; gap: 12px;">
+            {% for app in pipeline_data.pending %}
+                {% include "tracking_app/partials/kanban_card.html" with app=app %}
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Stage: Reviewed -->
+    <div class="kanban-column border-glow" data-status="reviewed" style="flex: 1; min-width: 300px; background: rgba(0,0,0,0.4); border-radius: 8px; padding: 16px; display: flex; flex-direction: column;">
+        <h3 class="font-mono text-sm text-info mb-md" style="letter-spacing: 1px; border-bottom: 1px solid var(--apple-border); padding-bottom: 8px;">
+            REVIEWED / SCREENING <span class="badge badge-secondary float-right">{{ pipeline_data.reviewed|length }}</span>
+        </h3>
+        <div class="kanban-cards" style="flex-grow: 1; min-height: 100px; display: flex; flex-direction: column; gap: 12px;">
+            {% for app in pipeline_data.reviewed %}
+                {% include "tracking_app/partials/kanban_card.html" with app=app %}
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Stage: Accepted / Offer -->
+    <div class="kanban-column border-glow" data-status="accepted" style="flex: 1; min-width: 300px; background: rgba(0,0,0,0.4); border-radius: 8px; padding: 16px; display: flex; flex-direction: column;">
+        <h3 class="font-mono text-sm text-success mb-md" style="letter-spacing: 1px; border-bottom: 1px solid var(--apple-border); padding-bottom: 8px;">
+            ACCEPTED / INTERVIEW <span class="badge badge-secondary float-right">{{ pipeline_data.accepted|length }}</span>
+        </h3>
+        <div class="kanban-cards" style="flex-grow: 1; min-height: 100px; display: flex; flex-direction: column; gap: 12px;">
+            {% for app in pipeline_data.accepted %}
+                {% include "tracking_app/partials/kanban_card.html" with app=app %}
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Stage: Rejected -->
+    <div class="kanban-column border-glow" data-status="rejected" style="flex: 1; min-width: 300px; background: rgba(0,0,0,0.4); border-radius: 8px; padding: 16px; display: flex; flex-direction: column; opacity: 0.8;">
+        <h3 class="font-mono text-sm text-danger mb-md" style="letter-spacing: 1px; border-bottom: 1px solid var(--apple-border); padding-bottom: 8px;">
+            REJECTED <span class="badge badge-secondary float-right">{{ pipeline_data.rejected|length }}</span>
+        </h3>
+        <div class="kanban-cards" style="flex-grow: 1; min-height: 100px; display: flex; flex-direction: column; gap: 12px;">
+            {% for app in pipeline_data.rejected %}
+                {% include "tracking_app/partials/kanban_card.html" with app=app %}
+            {% endfor %}
+        </div>
+    </div>
+
+</div>
+
+<style>
+    .kanban-card {
+        background: var(--apple-card-bg);
+        border: 1px solid var(--apple-border);
+        border-radius: 8px;
+        padding: 12px;
+        cursor: grab;
+        transition: transform 0.2s, box-shadow 0.2s;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .kanban-card:active {
+        cursor: grabbing;
+        transform: scale(0.98);
+    }
+    .kanban-card:hover {
+        border-color: var(--primary);
+        box-shadow: 0 0 10px rgba(0, 229, 255, 0.2);
+    }
+    .kanban-column.drag-over {
+        background: rgba(0, 229, 255, 0.05) !important;
+        border: 1px dashed var(--primary);
+    }
+    .kanban-card.dragging {
+        opacity: 0.5;
+    }
+    .kanban-board {
+        scrollbar-width: thin;
+        scrollbar-color: var(--primary) var(--bg-surface);
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const cards = document.querySelectorAll('.kanban-card');
+        const columns = document.querySelectorAll('.kanban-column .kanban-cards');
+        
+        cards.forEach(card => {
+            card.addEventListener('dragstart', dragStart);
+            card.addEventListener('dragend', dragEnd);
+        });
+        
+        columns.forEach(column => {
+            column.addEventListener('dragover', dragOver);
+            column.addEventListener('dragenter', dragEnter);
+            column.addEventListener('dragleave', dragLeave);
+            column.addEventListener('drop', dragDrop);
+        });
+        
+        let draggedCard = null;
+        
+        function dragStart() {
+            draggedCard = this;
+            setTimeout(() => this.classList.add('dragging'), 0);
+        }
+        
+        function dragEnd() {
+            this.classList.remove('dragging');
+            draggedCard = null;
+            columns.forEach(column => column.parentElement.classList.remove('drag-over'));
+        }
+        
+        function dragOver(e) {
+            e.preventDefault();
+        }
+        
+        function dragEnter(e) {
+            e.preventDefault();
+            this.parentElement.classList.add('drag-over');
+        }
+        
+        function dragLeave() {
+            this.parentElement.classList.remove('drag-over');
+        }
+        
+        function dragDrop() {
+            this.parentElement.classList.remove('drag-over');
+            
+            // Append card visually
+            this.appendChild(draggedCard);
+            
+            // Get data for API request
+            const appId = draggedCard.getAttribute('data-app-id');
+            const newStatus = this.parentElement.getAttribute('data-status');
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            
+            // Update counts
+            updateCounts();
+            
+            // Fire API call
+            fetch("{% url 'api-update-pipeline-status' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({
+                    application_id: appId,
+                    status: newStatus
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.status !== 'success') {
+                    alert('Error updating status: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Connection error while updating pipeline status.');
+            });
+        }
+        
+        function updateCounts() {
+            document.querySelectorAll('.kanban-column').forEach(col => {
+                const count = col.querySelectorAll('.kanban-card').length;
+                col.querySelector('.badge').textContent = count;
+            });
+        }
+    });
+</script>
+{% endblock %}

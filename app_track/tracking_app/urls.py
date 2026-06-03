@@ -84,6 +84,8 @@ urlpatterns = [
     # Job Applications URLs for Recruiters
     path('job-applications/', views.JobApplicationsListView.as_view(), name='job-applications-list'),
     path('update-application-status/<int:application_id>/', views.update_application_status, name='update-application-status'),
+    path('talent-pipeline/', views.talent_pipeline, name='talent-pipeline'),
+    path('api/update-pipeline-status/', views.api_update_pipeline_status, name='api-update-pipeline-status'),
 
     # Note URLs
     path('notes/create/', views.NoteCreateView.as_view(), name='note-create'),

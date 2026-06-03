@@ -1014,3 +1014,58 @@ def service_addons_view(request):
     Renders the IT Service Add-ons marketplace.
     """
     return render(request, 'tracking_app/service_addons.html')
+
+@login_required
+def talent_pipeline(request):
+    if request.user.is_jobseeker and not (request.user.is_admin_role or request.user.is_staff):
+        messages.error(request, "Only recruiters can access the talent pipeline.")
+        return redirect('home')
+        
+    jobs = Job.objects.filter(user=request.user)
+    selected_job_id = request.GET.get('job_id')
+    
+    if selected_job_id:
+        applications = JobSeekerApplication.objects.filter(job__id=selected_job_id, job__user=request.user)
+        selected_job = jobs.filter(id=selected_job_id).first()
+    else:
+        applications = JobSeekerApplication.objects.filter(job__user=request.user)
+        selected_job = None
+        
+    pipeline_data = {
+        JobSeekerApplication.STATUS_PENDING: [],
+        JobSeekerApplication.STATUS_REVIEWED: [],
+        JobSeekerApplication.STATUS_ACCEPTED: [],
+        JobSeekerApplication.STATUS_REJECTED: [],
+        JobSeekerApplication.STATUS_WITHDRAWN: [],
+    }
+    
+    for app in applications:
+        if app.status in pipeline_data:
+            pipeline_data[app.status].append(app)
+            
+    context = {
+        'jobs': jobs,
+        'selected_job': selected_job,
+        'pipeline_data': pipeline_data,
+        'status_choices': JobSeekerApplication.STATUS_CHOICES
+    }
+    
+    return render(request, 'tracking_app/talent_pipeline.html', context)
+
+@login_required
+def api_update_pipeline_status(request):
+    if request.method == 'POST':
+        import json
+        try:
+            data = json.loads(request.body)
+            app_id = data.get('application_id')
+            new_status = data.get('status')
+            
+            application = JobSeekerApplication.objects.get(id=app_id, job__user=request.user)
+            if new_status in dict(JobSeekerApplication.STATUS_CHOICES):
+                application.status = new_status
+                application.save()
+                return JsonResponse({'status': 'success'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+    return JsonResponse({'status': 'error'}, status=400)

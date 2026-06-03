@@ -1,0 +1,28 @@
+<div class="kanban-card" draggable="true" data-app-id="{{ app.id }}">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+        <strong style="color: var(--apple-text); font-size: 1rem;">
+            {{ app.applicant.get_full_name|default:app.applicant.username }}
+        </strong>
+        <span class="font-mono text-xs" style="color: var(--text-gray);">#{{ app.id }}</span>
+    </div>
+    <div class="font-mono text-xs" style="color: var(--primary); margin-bottom: 8px;">
+        <i class="fas fa-briefcase"></i> {{ app.job.title|truncatechars:25 }}
+    </div>
+    
+    <div style="display: flex; gap: 8px; font-size: 0.8rem; color: var(--apple-text-secondary); margin-bottom: 12px;">
+        {% if app.applicant.email %}
+            <span title="{{ app.applicant.email }}"><i class="fas fa-envelope"></i></span>
+        {% endif %}
+        {% if app.resume %}
+            <a href="{{ app.resume.url }}" target="_blank" style="color: var(--apple-text-secondary);"><i class="fas fa-file-pdf"></i></a>
+        {% endif %}
+        <span><i class="far fa-clock"></i> {{ app.applied_date|timesince }} ago</span>
+    </div>
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--apple-border); padding-top: 8px;">
+        <a href="{% url 'application-detail' app.id %}" style="font-size: 0.8rem; color: var(--cyan); text-decoration: none;">View Detail <i class="fas fa-arrow-right"></i></a>
+        <div class="profile-initials" style="width: 24px; height: 24px; font-size: 10px;">
+            {{ app.applicant.get_initials }}
+        </div>
+    </div>
+</div>

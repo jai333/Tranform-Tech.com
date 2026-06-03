@@ -433,7 +433,7 @@ def candidate_detail_with_ai(request, candidate_id):
         'top_matches': top_matches,
     }
     
-    return render(request, 'tracking_app/candidate_detail_with_ai.html', context)
+    return render(request, 'tracking_app/candidate_detail_with_ai_new.html', context)
 
 
 @login_required
@@ -460,18 +460,22 @@ def get_jobs_api(request):
 
 @login_required
 def ai_pipeline_dashboard(request):
-    """
-    Renders the AI Pipeline / Data Telemetry Command Center dashboard.
-    """
-    # Only recruiters and admins should access this
-    from django.shortcuts import redirect
-    if not (request.user.is_recruiter or request.user.is_admin_role or request.user.is_staff):
-        return redirect('home')
-        
+    # If the user is a job seeker, fetch their candidate and AI summary
+    candidate = None
+    ai_summary = None
+    if getattr(request.user, 'is_jobseeker', False):
+        from tracking_app.models import Candidate, CandidateAISummary
+        try:
+            candidate = Candidate.objects.get(user=request.user)
+            ai_summary = CandidateAISummary.objects.filter(candidate=candidate).first()
+        except Candidate.DoesNotExist:
+            candidate = None
+    # Build context for the template
     context = {
-        # Dummy data parameters
         'active_reqs': 142,
         'new_applicants': 841,
         'pending_offers': 23,
+        'candidate': candidate,
+        'ai_summary': ai_summary,
     }
     return render(request, 'tracking_app/ai_pipeline.html', context)

@@ -140,7 +140,7 @@ LOGIN_REDIRECT_URL = 'home'
 LOGIN_URL = 'login'
 
 # CSRF Trusted Origins for ngrok
-CSRF_TRUSTED_ORIGINS = ['https://26464c660ea8.ngrok-free.app', 'https://preview-jaisu-8000.loca.lt']
+CSRF_TRUSTED_ORIGINS = ['https://26464c660ea8.ngrok-free.app', 'https://preview-jaisu-8000.loca.lt', 'https://campsite-december-flatly.ngrok-free.dev']
 
 # Database connection pooling for better performance
 DATABASES = {
@@ -154,11 +154,8 @@ DATABASES = {
 # Channels settings
 CHANNEL_LAYERS = {
     'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-            'hosts': [('127.0.0.1', 6379)],
-        },
-    },
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    }
 }
 
 # Development convenience: allow running without Redis
