@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custom ATS | Transform.io</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;600&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .feature-list { list-style: none; margin-top: 16px; padding:0;}
+        .feature-list li { display: flex; gap: 12px; margin-bottom: 12px; font-size: 0.95rem; color: var(--text-gray); }
+        .feature-list li i { color: var(--primary); font-size: 1.4rem; margin-top: 2px;}
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; }
+        .huge-title { font-size: 3rem; letter-spacing: -0.03em; color: white; margin-bottom: 24px; line-height: 1.1; }
+        .sub-tag { color: var(--primary); font-family: var(--font-mono); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; display: block; }
+        .highlight-box { background: rgba(0, 229, 255, 0.05); border-left: 3px solid var(--primary); padding: 24px; margin: 24px 0; border-radius: 0 8px 8px 0;}
+    </style>
+</head>
+<body>
+
+    <!-- Mega-Menu Navigation -->
+    <nav class="navbar border-bottom">
+        <div class="container nav-content">
+            <a href="index.html" class="logo font-mono">
+                <i class='bx bx-code-alt text-cyan'></i> TRANSFORM.IO
+            </a>
+            
+            <ul class="nav-links font-mono text-sm">
+                <li>
+                    <a href="#">PLATFORM <i class='bx bx-chevron-down'></i></a>
+                    <div class="mega-menu">
+                        <div class="mega-col">
+                            <span class="mega-header">CORE SERVICES</span>
+                            <a href="ats.html">Applicant Tracking Systems</a>
+                            <a href="crm.html">Client CRM Matrix</a>
+                            <a href="ai-parsing.html">AI Resume Parsing</a>
+                            <a href="workflow.html">Recruitment Automation</a>
+                            <a href="dashboards.html">Data Telemetry & Dashboards</a>
+                        </div>
+                    </div>
+                </li>
+
+                <li>
+                    <a href="#">SOLUTIONS <i class='bx bx-chevron-down'></i></a>
+                    <div class="mega-menu" style="min-width: 400px;">
+                        <div class="mega-col">
+                            <span class="mega-header">BY INDUSTRY</span>
+                            <a href="industry-tech.html">US Tech Staffing</a>
+                            <a href="industry-healthcare.html">Healthcare Staffing</a>
+                            <a href="industry-exec.html">Executive Search</a>
+                        </div>
+                        <div class="mega-col">
+                            <span class="mega-header">BY ROLE</span>
+                            <a href="role-recruiter.html">For Recruiters</a>
+                            <a href="role-manager.html">For Account Managers</a>
+                            <a href="role-agency.html">For Agency Owners</a>
+                        </div>
+                    </div>
+                </li>
+
+                <li>
+                    <a href="#">RESOURCES <i class='bx bx-chevron-down'></i></a>
+                    <div class="mega-menu" style="min-width: 400px;">
+                        <div class="mega-col">
+                            <span class="mega-header">KNOWLEDGE</span>
+                            <a href="portfolio.html">Case Studies</a>
+                            <a href="blog.html">Recruitment Blog</a>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+
+            <a href="#contact" class="btn btn-outline font-mono">/FREE_WORKFLOW_AUDIT</a>
+        </div>
+    </nav>
+
+    <header class="container pt-xl pb-lg border-bottom">
+        <span class="sub-tag">[ MODULE_01 / ATS ]</span>
+        <h1 class="huge-title">Applicant Tracking Architecture</h1>
+        <p class="font-mono text-gray" style="font-size:1.1rem; max-width:800px; line-height: 1.6;">
+            Drag-and-drop Kanban hiring boards with zero friction. We build ATS platforms that recruiters actually want to use.
+        </p>
+    </header>
+
+    <section class="container mt-xl mb-xl">
+        <div class="grid-2 align-center mb-lg">
+            <div>
+                <h3 class="text-white text-xl mb-md">Pipeline Clarity</h3>
+                <p class="text-gray mb-md line-height-relaxed">
+                    Stop losing candidates in email threads. Track everything from sourcing to placement visually.
+                </p>
+                <div class="highlight-box">
+                    <p class="font-mono text-white text-sm">"Placement speeds increased by 40%."</p>
+                </div>
+            </div>
+            <div class="grid" style="gap:24px;">
+               <div class="border-glow" style="padding: 24px; background:#000;">
+                   <h4 class="text-white font-mono text-xs">> ATS_SYNC</h4>
+                   <p class="font-mono text-xs text-gray mt-sm" style="line-height:2;">
+                     [MOVE] Candidate to Interview Stage<br>[SYNC] Calendar updated automatically.<br>
+                     <span class="text-primary">[SUCCESS] Sequence completed seamlessly.</span>
+                   </p>
+               </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Exhaustive NinjaOne Style Footer -->
+    <footer class="footer font-mono mt-xl">
+        <div class="container footer-mega-grid">
+            <div class="footer-brand footer-col">
+                <a href="index.html" class="logo text-xl mb-md"><i class='bx bx-code-alt text-cyan'></i> TRANSFORM.IO</a>
+                <p class="text-gray text-xs mb-md" style="line-height:1.6;">Automation-driven recruitment infrastructure for US-based staffing companies.</p>
+                <div class="social-icons flex gap-sm text-gray text-xl">
+                    <i class='bx bxl-linkedin-square'></i>
+                    <i class='bx bxl-twitter'></i>
+                    <i class='bx bxl-github' ></i>
+                </div>
+            </div>
+            
+            <div class="footer-col">
+                <h4 class="font-mono text-white">RECRUITMENT</h4>
+                <a href="ats.html">ATS Pipelines</a>
+                <a href="crm.html">Client CRM</a>
+                <a href="ai-parsing.html">AI NLP Parsing</a>
+            </div>
+
+            <div class="footer-col">
+                <h4 class="font-mono text-white">SOLUTIONS</h4>
+                <a href="workflow.html">Workflow Automation</a>
+                <a href="dashboards.html">Data Dashboards</a>
+            </div>
+
+            <div class="footer-col">
+                <h4 class="font-mono text-white">INDUSTRIES</h4>
+                <a href="industry-tech.html">Tech Staffing</a>
+                <a href="industry-healthcare.html">Healthcare Staffing</a>
+            </div>
+        </div>
+
+        <div class="container footer-bottom mt-lg" style="border-top: 1px solid #1a1a1a; padding-top: 24px; color: #555;">
+            <p>&copy; 2026 Transform.io Technical Solutions.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

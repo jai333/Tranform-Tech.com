@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Application Engineering | Transform.io</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;600&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .feature-list { list-style: none; margin-top: 16px; padding:0;}
+        .feature-list li { display: flex; gap: 12px; margin-bottom: 12px; font-size: 0.95rem; color: var(--text-gray); }
+        .feature-list li i { color: var(--primary); font-size: 1.4rem; margin-top: 2px;}
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; }
+        .huge-title { font-size: 3rem; letter-spacing: -0.03em; color: white; margin-bottom: 24px; line-height: 1.1; }
+        .sub-tag { color: var(--primary); font-family: var(--font-mono); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; display: block; }
+        .highlight-box { background: rgba(0, 229, 255, 0.03); border-left: 3px solid var(--primary); padding: 24px; margin: 24px 0; border-radius: 0 8px 8px 0;}
+    </style>
+</head>
+<body>
+
+    <!-- Mega-Menu Navigation -->
+    <nav class="navbar border-bottom">
+        <div class="container nav-content">
+            <a href="index.html" class="logo font-mono">
+                <i class='bx bx-code-alt text-cyan'></i> TRANSFORM.IO
+            </a>
+            <ul class="nav-links font-mono text-sm">
+                <li><a href="index.html">PLATFORM OVERVIEW</a></li>
+                <li><a href="app-dev.html" class="active">APP DEV <i class="bx bx-chevron-down"></i></a></li>
+                <li><a href="cybersec.html">CYBERSEC</a></li>
+                <li><a href="automation.html">AUTOMATION</a></li>
+                <li><a href="portfolio.html">PORTFOLIO</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <header class="container pt-xl pb-lg border-bottom">
+        <span class="sub-tag">[ VECTOR_01 / SOFTWARE_ENGINEERING ]</span>
+        <h1 class="huge-title">Architecting Extreme Scale Applications</h1>
+        <p class="font-mono text-gray" style="font-size:1.1rem; max-width:800px; line-height: 1.6;">
+            The difference between a failing product and a dominant platform is system architecture. We build highly distributed, serverless Edge applications capable of extreme throughput using Next.js, Node, and Golang microservices.
+        </p>
+    </header>
+
+    <section class="container mt-xl mb-xl">
+        <div class="grid-2 align-center mb-lg">
+            <div>
+                <h3 class="text-white text-xl mb-md">Why Traditional Frameworks Fail</h3>
+                <p class="text-gray mb-md line-height-relaxed">
+                    Legacy CMS platforms like WordPress or standard PHP monolithic builds buckle under heavy user traffic. Their synchronous single-threaded rendering engines crash database instances when overloaded. 
+                    <br><br>
+                    Transform.io deploys elite engineering squads focused on asynchronous execution. Every application we architect is built cloud-native, natively horizontally scalable, and separated into front-end edge nodes and decoupled back-end APIs.
+                </p>
+                <div class="highlight-box">
+                    <p class="font-mono text-white text-sm">"Our architecture scales horizontally without breaking internal logic state. We handle complex application state management, raw algorithmic data sorting, and database sharding as standard practices."</p>
+                </div>
+            </div>
+            <div class="border-glow" style="border-radius:12px; overflow:hidden;">
+               <img src="assets/app_dev_hero_1776115211825.png" alt="App Dev Architecture Topology" style="width:100%; display:block; object-fit: cover;">
+            </div>
+        </div>
+        
+        <div class="grid-2 align-center mt-xl border-top pt-xl">
+            <div class="border-glow" style="border-radius:12px; overflow:hidden;">
+               <!-- Utilizing the Dashboard Mockup to provide more visual variance -->
+               <img src="assets/dashboard_mockup_1776111945145.png" alt="Data Flow Telemetry UI" style="width:100%; display:block; object-fit: cover;">
+            </div>
+            <div>
+                <h3 class="text-white text-xl mb-md">Front-End: Vercel Edge & React</h3>
+                <p class="text-gray mb-md">
+                    We guarantee instantaneous Time-to-Interactive (TTI) for your users by rendering application logic at the network's global edge via Next.js server-side rendering (SSR). We power complex client-side applications with heavily optimized React structures.
+                </p>
+                <ul class="feature-list mt-md border-glow" style="padding: 24px; background: var(--bg-surface);">
+                    <li><i class='bx bx-check'></i> <div><strong class="text-white block font-mono mb-sm">Zustand State Management</strong> Eliminating React re-render cascades.</div></li>
+                    <li><i class='bx bx-check'></i> <div><strong class="text-white block font-mono mb-sm">Framer Motion Graphics</strong> Fluid 60fps cinematic UX animations.</div></li>
+                    <li><i class='bx bx-check'></i> <div><strong class="text-white block font-mono mb-sm">GraphQL Fetching</strong> Only requesting exactly the data the layout needs.</div></li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Massive Footer -->
+    <footer class="footer font-mono mt-xl">
+        <div class="container footer-mega-grid">
+            <div class="footer-brand footer-col">
+                <a href="index.html" class="logo text-xl mb-md"><i class='bx bx-code-alt text-cyan'></i> TRANSFORM.IO</a>
+                <p class="text-gray text-xs mb-md" style="line-height:1.6;">Unified Enterprise Engine. From writing bleeding-edge React architectures to securing thousands of global endpoints via Zero-Trust.</p>
+            </div>
+            <div class="footer-col">
+                <h4 class="font-mono text-white">ENGINEERING</h4>
+                <a href="app-dev.html">Full-Stack Development</a>
+                <a href="#">Headless API & Microservices</a>
+                <a href="#">Serverless Cloud Hosting</a>
+            </div>
+            <div class="footer-col">
+                <h4 class="font-mono text-white">COMPANY</h4>
+                <a href="#">About Us</a>
+                <a href="#">Leadership</a>
+                <a href="#">Careers</a>
+            </div>
+             <div class="footer-col">
+                <h4 class="font-mono text-white">COMPLIANCE</h4>
+                <a href="#">SOC 2 Type II Certified</a>
+                <a href="#">FedRAMP Defense Grade</a>
+            </div>
+        </div>
+        <div class="container footer-bottom mt-lg" style="border-top: 1px solid #1a1a1a; padding-top: 24px; color: #555;">
+            <p>&copy; 2026 Transform.io Technical Solutions.</p>
+        </div>
+    </footer>
+</body>
+</html>

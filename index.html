@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transform.io | The Ultimate IT & Engineering Ecosystem</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;600&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .service-row { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; margin: 120px 0; }
+        .service-row.reverse { grid-template-columns: 1fr 1fr; }
+        .service-row.reverse .text-col { order: 2; }
+        .service-row.reverse .img-col { order: 1; }
+        .feature-list { list-style: none; margin-top: 16px; padding:0; }
+        .feature-list li { display: flex; gap: 12px; margin-bottom: 16px; font-size: 0.95rem; color: var(--text-gray); align-items:flex-start; line-height: 1.6;}
+        .feature-list li i { color: var(--primary); font-size: 1.4rem; margin-top: 2px;}
+        .feature-list strong { color: var(--text-white); font-weight: 600; display: block; margin-bottom: 4px; font-family: var(--font-mono); font-size: 0.85rem;}
+        
+        .huge-title { font-size: 2.5rem; letter-spacing: -0.03em; color: white; margin-bottom: 24px; line-height: 1.1; }
+        .sub-tag { color: var(--primary); font-family: var(--font-mono); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; display: block; }
+        .highlight-box { background: rgba(0, 229, 255, 0.03); border-left: 3px solid var(--primary); padding: 24px; margin: 24px 0; border-radius: 0 8px 8px 0; }
+        
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+        .data-card { background: var(--bg-surface); border: 1px solid var(--secondary); padding: 24px; border-radius: 8px; }
+        .data-card i { font-size: 2rem; color: var(--primary); margin-bottom: 16px; }
+        .data-card h4 { color: white; font-family: var(--font-mono); font-size: 0.9rem; margin-bottom: 8px; }
+        .data-card p { color: var(--text-gray); font-size: 0.85rem; line-height: 1.5; }
+
+        @media (max-width: 1024px) {
+            .service-row, .service-row.reverse { grid-template-columns: 1fr; gap: 32px; }
+            .service-row.reverse .text-col { order: 1; } .service-row.reverse .img-col { order: 2; }
+            .grid-4 { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+
+        <!-- Mega-Menu Navigation -->
+    <nav class="navbar border-bottom">
+        <div class="container nav-content">
+            <a href="index.html" class="logo font-mono">
+                <i class='bx bx-code-alt text-cyan'></i> TRANSFORM.IO
+            </a>
+            
+            <ul class="nav-links font-mono text-sm">
+                <li>
+                    <a href="#">PLATFORM <i class='bx bx-chevron-down'></i></a>
+                    <div class="mega-menu">
+                        <div class="mega-col">
+                            <span class="mega-header">CORE SERVICES</span>
+                            <a href="ats.html">Applicant Tracking Systems</a>
+                            <a href="crm.html">Client CRM Matrix</a>
+                            <a href="ai-parsing.html">AI Resume Parsing</a>
+                            <a href="workflow.html">Recruitment Automation</a>
+                            <a href="dashboards.html">Data Telemetry & Dashboards</a>
+                            <a href="cybersec.html" class="text-cyan">Military-Grade Security</a>
+                        </div>
+                    </div>
+                </li>
+
+                <li>
+                    <a href="#">SOLUTIONS <i class='bx bx-chevron-down'></i></a>
+                    <div class="mega-menu" style="min-width: 400px;">
+                        <div class="mega-col">
+                            <span class="mega-header">BY INDUSTRY</span>
+                            <a href="industry-tech.html">US Tech Staffing</a>
+                            <a href="industry-healthcare.html">Healthcare Staffing</a>
+                            <a href="industry-exec.html">Executive Search</a>
+                        </div>
+                        <div class="mega-col">
+                            <span class="mega-header">BY ROLE</span>
+                            <a href="role-recruiter.html">For Recruiters</a>
+                            <a href="role-manager.html">For Account Managers</a>
+                            <a href="role-agency.html">For Agency Owners</a>
+                        </div>
+                    </div>
+                </li>
+
+                <li>
+                    <a href="#">RESOURCES <i class='bx bx-chevron-down'></i></a>
+                    <div class="mega-menu" style="min-width: 400px;">
+                        <div class="mega-col">
+                            <span class="mega-header">KNOWLEDGE</span>
+                            <a href="portfolio.html">Case Studies</a>
+                            <a href="blog.html">Recruitment Blog</a>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+
+            <a href="#contact" class="btn btn-outline font-mono">/FREE_WORKFLOW_AUDIT</a>
+        </div>
+    </nav>
+
+    <!-- Technical Hero Section -->
+    <header class="hero container">
+        <div class="hero-left">
+            <div class="tag font-mono text-cyan mb-md">[ AUTOMATION_ENGINE v5.0 ]</div>
+            <h1 class="hero-title tracking-tight">
+                Scale Your Staffing Firm With<br>
+                <span class="text-white">Automated Recruitment Infrastructure.</span>
+            </h1>
+            <p class="hero-subtitle text-gray mt-md" style="font-size: 1.15rem; max-width: 600px;">
+                Stop losing placements to manual workflows and fragmented data. We build custom Applicant Tracking Systems, CRM pipelines, and data dashboards specifically for US-based tech staffing agencies.
+            </p>
+            <div class="hero-actions">
+                <a href="#deep-div" class="btn btn-cyan font-mono">Explore Architecture</a>
+                <a href="#" class="btn btn-outline font-mono">Get Free Workflow Audit</a>
+            </div>
+            <div class="tech-stack mt-lg font-mono text-xs text-dark-gray">
+                BUILT FOR STAFFING: <span class="text-gray">CUSTOM ATS, CRM PIPELINES, DASHBOARDS</span>
+            </div>
+        </div>
+
+        <div class="hero-right">
+            <!-- Simulated Terminal -->
+            <div class="terminal-mock border-glow">
+                <div class="terminal-header border-bottom">
+                    <div class="dots flex gap-sm">
+                        <span class="dot bg-red"></span><span class="dot bg-yellow"></span><span class="dot bg-green"></span>
+                    </div>
+                    <div class="terminal-title font-mono text-xs">root@transform-io:~# ./hybrid_engine.sh</div>
+                </div>
+                <div class="terminal-body font-mono text-sm" id="typewriter-log" style="color:var(--text-gray);">
+                    <span class="text-white">[INFO]</span> Initializing ATS pipeline...<br>
+                    <span class="text-white">[INFO]</span> Connecting to remote CRM endpoints...<br>
+                    <span class="text-cyan">[OK]</span> Job Board webhook active.<br>
+                    <span class="text-white">[INFO]</span> Auditing manual recruitment workflows...<br>
+                    <span class="text-cyan">[OK]</span> Bottlenecks identified.<br>
+                    <span class="text-white">[INFO]</span> Ingesting PDF via NLP Parsing Models (Cosine Similarity Engine)...<br>
+                    <span class="text-white">[ACTION]</span> Synthesizing AI Candidate Summary profiles...<br>
+                    <span class="text-white">[INFO]</span> Synchronizing state with external APIs...<br>
+                    <span class="text-primary">[OK]</span> Platform operational. Awaiting command.
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Social Proof Marquee (NinjaOne Style) -->
+    <div class="marquee-wrapper mt-lg" style="margin-top: 0; padding: 16px 0;">
+        <div class="marquee-content font-mono text-xl">
+            <span class="marquee-item"><i class='bx bxl-amazon'></i> ALOVI CORP</span>
+            <span class="marquee-item"><i class='bx bxl-mastercard'></i> SECURE FINTECH</span>
+            <span class="marquee-item"><i class='bx bx-cube'></i> SIEMENS</span>
+            <span class="marquee-item"><i class='bx bx-hive'></i> DELOITTE</span>
+            <span class="marquee-item"><i class='bx bxl-aws'></i> AWS SELECT</span>
+            <span class="marquee-item"><i class='bx bx-globe'></i> THERMO FISHER</span>
+            <span class="marquee-item"><i class='bx bxl-amazon'></i> ALOVI CORP</span>
+            <span class="marquee-item"><i class='bx bxl-mastercard'></i> SECURE FINTECH</span>
+            <span class="marquee-item"><i class='bx bx-cube'></i> SIEMENS</span>
+        </div>
+    </div>
+
+    <!-- The IT Consolidation Problem -->
+    <section class="container mt-xl pb-lg border-bottom" id="deep-div">
+        <div class="text-center" style="max-width: 800px; margin: 0 auto; margin-bottom: 64px;">
+            <span class="sub-tag">THE INEFFICIENCY CRISIS SOLVED</span>
+            <h2 class="huge-title">Stop Relying on Manual Workflows.</h2>
+            <p class="text-gray" style="font-size: 1.1rem; line-height: 1.6;">
+                The average staffing firm loses placements due to inefficient candidate tracking and disjointed systems. Transform.io builds custom, scalable infrastructure natively. We collapse the stack, unifying ATS, CRM, and Telemetry into a single sovereign dashboard.
+            </p>
+        </div>
+
+        <div class="grid-4 mt-lg">
+            <div class="data-card border-glow">
+                <i class='bx bx-brain'></i>
+                <h4>AI Parsing & Deep Matching</h4>
+                <p>Semantic NLP parsing logic natively reads through CV fluff. Uses Cosine Similarity to calculate exact 0-100 match percentages against job descriptions.</p>
+            </div>
+            <div class="data-card border-glow">
+                <i class='bx bx-line-chart'></i>
+                <h4>Data Dashboards</h4>
+                <p>Gain full pipeline visibility. Real-time dashboards track placement efficiency and operational KPIs.</p>
+            </div>
+            <div class="data-card border-glow">
+                <i class='bx bx-git-branch'></i>
+                <h4>Hyper-Automation</h4>
+                <p>Native integrations sync cleanly with external providers like Bullhorn, Workday, and LinkedIn.</p>
+            </div>
+            <div class="data-card border-glow">
+                <i class='bx bx-server'></i>
+                <h4>High Availability</h4>
+                <p>End the spreadsheet chaos. We build native data warehouses feeding ultra-fast GraphQL APIs to power live React dashboards for executives.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Massive Block 1: ATS -->
+    <section class="container">
+        <div class="service-row border-bottom" style="padding-bottom: 120px;">
+            <div class="text-col">
+                <span class="sub-tag">01 // TRACKING_CORE</span>
+                <h3 class="huge-title">Custom Applicant Tracking Systems</h3>
+                <p class="text-gray" style="font-size: 1.05rem; margin-bottom: 24px;">
+                    We build lightning-fast, intuitive applicant tracking systems that recruiters actually want to use. No more clunky, 15-click processes to move a candidate forward. We implement drag-and-drop Kanban boards natively.
+                </p>
+                
+                <div class="highlight-box">
+                    <p class="font-mono text-smoke">"Our recruiters placed 30% more candidates in their first quarter on the Transform.io ATS. The friction is completely gone."</p>
+                </div>
+
+                <ul class="feature-list">
+                    <li>
+                        <i class='bx bx-git-pull-request'></i>
+                        <div>
+                            <strong>Automated Pipeline Sync</strong>
+                            Our engines map your entire candidate database against open job orders daily. If a matching candidate enters the system, our orchestrator immediately pushes their profile into the "Sourcing" Kanban lane.
+                        </div>
+                    </li>
+                    <li>
+                        <i class='bx bxl-react'></i>
+                        <div>
+                            <strong>React-Powered Visual Kanban</strong>
+                            We leverage React and Next.js for blazing fast load times. Recruiters can view 5,000+ candidate profiles in a single infinite scroll without browser lag, moving cards via zero-latency drag-and-drop.
+                        </div>
+                    </li>
+                    <li>
+                        <i class='bx bx-data'></i>
+                        <div>
+                            <strong>Unified Candidate Timeline</strong>
+                            Every email, SMS, interview note, and resume version is consolidated into a single chronological timeline. If a recruiter leaves, the institutional knowledge stays permanently locked in the ATS.
+                        </div>
+                    </li>
+                    <li>
+                        <i class='bx bx-radar'></i>
+                        <div>
+                            <strong>Active Job Board Integrations</strong>
+                            Heuristic API packet inspection handles bi-directional syncing. We publish your jobs to LinkedIn and Indeed instantly, and we sandbox incoming applications, automatically parsing the PDFs into structured JSON profiles.
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <div class="img-col">
+                <div class="border-glow" style="padding:4px; max-height:800px;">
+                    <img src="assets/ats_dashboard.png" alt="ATS Custom UI Dashboard" style="width:100%; border-radius: 8px; display:block;">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Massive Block 2: CRM & Workflow -->
+    <section class="container">
+        <div class="service-row reverse border-bottom" style="padding-bottom: 120px;">
+            <div class="text-col">
+                <span class="sub-tag">02 // CLIENT_MATRIX</span>
+                <h3 class="huge-title">Client CRM & Recruitment Automation</h3>
+                <p class="text-gray" style="font-size: 1.05rem; margin-bottom: 24px;">
+                    Track job orders, client communications, and margins automatically. We build workflows that automate the busywork so your team can focus on relationship building.
+                </p>
+                
+                <ul class="feature-list">
+                    <li>
+                        <i class='bx bx-git-pull-request'></i>
+                        <div>
+                            <strong>Cross-SaaS Workflow Triggers</strong>
+                            We connect independent SaaS applications. Example: A candidate is moved to "Offer Accepted" -> An AWS server triggers a background check -> An invoice is generated in QuickBooks -> A Slack webhook fires to the Account Manager.
+                        </div>
+                    </li>
+                    <li>
+                        <i class='bx bx-line-chart'></i>
+                        <div>
+                            <strong>Real-Time Probability Forecasting</strong>
+                            Predict your agency's revenue with real-time margin tracking and probability weighted pipelines. The system calculates exactly how much billing is expected to clear in Q4 based on historical interview-to-placement ratios.
+                        </div>
+                    </li>
+                    <li>
+                        <i class='bx bx-terminal'></i>
+                        <div>
+                            <strong>Unattended Follow-Up Logic</strong>
+                            Zero-touch client management. We write custom node orchestration that deploys follow-up emails to hiring managers at exactly 9:00 AM on Monday, requesting interview feedback automatically without human intervention.
+                        </div>
+                    </li>
+                    <li>
+                        <i class='bx bx-lock-alt'></i>
+                        <div>
+                            <strong>Immutable Client Data Silos</strong>
+                            Ensure your client list never leaves the building. We deploy role-based access control (RBAC) so junior recruiters only see the jobs they are assigned, preventing database exfiltration.
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <div class="img-col">
+                <div class="border-glow" style="padding:4px;">
+                    <img src="assets/crm_dashboard.png" alt="CRM Sales Pipeline Dashboard" style="width:100%; border-radius: 8px; display:block;">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Massive Block 3: Analytics -->
+    <section class="container">
+        <div class="service-row border-bottom" style="padding-bottom: 120px;">
+            <div class="text-col">
+                <span class="sub-tag">03 // AUTONOMOUS_OPS</span>
+                <h3 class="huge-title">Live Data Telemetry & Analytics</h3>
+                <p class="text-gray" style="font-size: 1.05rem; margin-bottom: 24px;">
+                    Stop running your agency on spreadsheets. We build native data warehouses feeding ultra-fast GraphQL APIs to power live React dashboards for executives.
+                </p>
+
+                <ul class="feature-list">
+                    <li>
+                        <i class='bx bx-chart'></i>
+                        <div>
+                            <strong>Executive Telemetry Command Centers</strong>
+                            We deploy advanced Grafana-style instances collecting metrics on everything: Median Time-to-Fill (TTF), Recruiter Submittals per week, and Client Retention Rates. Visualized elegantly in a dark-mode command center.
+                        </div>
+                    </li>
+                    <li>
+                        <i class='bx bx-brain'></i>
+                        <div>
+                            <strong>Semantic NLP AI Resume Matching</strong>
+                            Cosine Similarity models calculate exact 0-100 match percentages against complex job descriptions. The AI natively reads through CV fluff and extracts structured data regarding years of experience and specific frameworks.
+                        </div>
+                    </li>
+                    <li>
+                        <i class='bx bx-map-alt'></i>
+                        <div>
+                            <strong>Live Candidate Sourcing Heatmaps</strong>
+                            Geospatial tracking of where your best engineering talent is located. Visualize sourcing pipelines on a global map, allowing agency owners to target their LinkedIn advertising spend perfectly.
+                        </div>
+                    </li>
+                    <li>
+                        <i class='bx bx-bot'></i>
+                        <div>
+                            <strong>Auto-remediation AI for Job Orders</strong>
+                            The system detects if a critical Job Order goes cold (no submissions in 7 days). Before the client complains, the orchestrator automatically boosts the job on external boards and re-engages past silver-medalist candidates.
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <div class="img-col">
+                <div class="border-glow" style="padding:4px;">
+                    <img src="assets/analytics_dashboard.png" alt="Analytics Data Telemetry Dashboard" style="width:100%; border-radius: 8px; display:block;">
+                </div>
+            </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Massive Block 4: Cybersecurity -->
+    <section class="container">
+        <div class="service-row reverse border-bottom" style="padding-bottom: 120px;">
+            <div class="text-col">
+                <span class="sub-tag">04 // ZERO_TRUST</span>
+                <h3 class="huge-title">Military-Grade Cybersecurity</h3>
+                <p class="text-gray" style="font-size: 1.05rem; margin-bottom: 24px;">
+                    Protecting PII (Personally Identifiable Information) and proprietary client lists is our highest priority. Our architecture is built on strict military-grade Zero-Trust principles.
+                </p>
+
+                <ul class="feature-list">
+                    <li>
+                        <i class='bx bx-shield-quarter'></i>
+                        <div>
+                            <strong>SOC2 & HIPAA Compliant Infrastructure</strong>
+                            End-to-end AES-256 encryption at rest and TLS 1.3 in transit guarantees your candidate resumes and client contracts remain impenetrable.
+                        </div>
+                    </li>
+                    <li>
+                        <i class='bx bx-fingerprint'></i>
+                        <div>
+                            <strong>Zero-Trust Architecture & MFA</strong>
+                            Adaptive Multi-Factor Authentication prevents credential stuffing. The system continuously verifies recruiter identity before granting access to sensitive databases.
+                        </div>
+                    </li>
+                    <li>
+                        <i class='bx bx-lock-alt'></i>
+                        <div>
+                            <strong>Immutable Data & Audit Logging</strong>
+                            Every single database read/write is immutably logged. Detect rogue exfiltration attempts instantly if an employee attempts to download your entire client list.
+                        </div>
+                    </li>
+                </ul>
+                <div class="mt-md" style="margin-top: 32px;">
+                    <a href="cybersec.html" class="btn btn-outline font-mono">View Security Protocol</a>
+                </div>
+            </div>
+            <div class="img-col">
+                <div class="border-glow" style="padding:4px; height: 100%;">
+                    <img src="assets/cybersec_mockup_1776112528216.png" alt="Military-Grade Cybersecurity Dashboard" style="width:100%; border-radius: 8px; display:block;">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats & Testimonials -->
+    <section class="container pt-xl pb-lg">
+        <div class="section-header text-center mb-lg" style="max-width: 800px; margin: 0 auto 64px auto;">
+            <span class="sub-tag">PERFORMANCE METRICS</span>
+            <h2 class="text-white text-xl tracking-tight mb-md">Raw Speed Meets Unbreakable Security</h2>
+        </div>
+
+        <div class="stats-grid font-mono">
+            <div class="stat-card">
+                <div class="stat-num text-cyan">85<span style="font-size: 1.5rem">%</span></div>
+                <div class="stat-desc">Reduction in MTTR (Mean Time To Resolution) for critical CVEs.</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-num text-cyan">10<span style="font-size: 1.5rem">ms</span></div>
+                <div class="stat-desc">Sub-10 millisecond latency on globally distributed SaaS edge applications.</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-num text-cyan">Zero</div>
+                <div class="stat-desc">Touch patching and employee IT onboarding workflows globally.</div>
+            </div>
+        </div>
+    </section>
+
+
+        <!-- Exhaustive NinjaOne Style Footer -->
+    <footer class="footer font-mono mt-xl">
+        <div class="container footer-mega-grid">
+            <div class="footer-brand footer-col">
+                <a href="index.html" class="logo text-xl mb-md"><i class='bx bx-code-alt text-cyan'></i> TRANSFORM.IO</a>
+                <p class="text-gray text-xs mb-md" style="line-height:1.6;">Automation-driven recruitment infrastructure for US-based staffing companies.</p>
+                <div class="social-icons flex gap-sm text-gray text-xl">
+                    <i class='bx bxl-linkedin-square'></i>
+                    <i class='bx bxl-twitter'></i>
+                    <i class='bx bxl-github' ></i>
+                </div>
+            </div>
+            
+            <div class="footer-col">
+                <h4 class="font-mono text-white">RECRUITMENT</h4>
+                <a href="ats.html">ATS Pipelines</a>
+                <a href="crm.html">Client CRM</a>
+                <a href="ai-parsing.html">AI NLP Parsing</a>
+            </div>
+
+            <div class="footer-col">
+                <h4 class="font-mono text-white">SOLUTIONS</h4>
+                <a href="workflow.html">Workflow Automation</a>
+                <a href="dashboards.html">Data Dashboards</a>
+            </div>
+
+            <div class="footer-col">
+                <h4 class="font-mono text-white">INDUSTRIES</h4>
+                <a href="industry-tech.html">Tech Staffing</a>
+                <a href="industry-healthcare.html">Healthcare Staffing</a>
+            </div>
+        </div>
+
+        <div class="container footer-bottom mt-lg" style="border-top: 1px solid #1a1a1a; padding-top: 24px; color: #555;">
+            <p>&copy; 2026 Transform.io Technical Solutions.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
