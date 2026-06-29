@@ -1,0 +1,158 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leads — Transform.io Sales</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'tracking_app/transform.css' %}?v=334">
+    <!-- ▸ Apply saved theme before render to avoid flash of wrong theme -->
+    <script>
+        (function(){
+            var t = localStorage.getItem('theme');
+            if(t === 'light') document.documentElement.classList.add('light-theme');
+        })();
+    </script>
+    <style>
+        body { padding-top: 75px; }
+        .page-wrap { max-width: 1200px; margin: 0 auto; padding: 32px 24px; }
+        .back-link { color: var(--text-gray); text-decoration: none; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 6px; margin-bottom: 24px; }
+        .back-link:hover { color: var(--primary); }
+        .filter-bar { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; align-items: center; }
+        .filter-bar input, .filter-bar select { background: var(--bg-elevated); border: 1px solid var(--secondary); border-radius: 8px; color: white; padding: 8px 14px; font-size: 0.85rem; outline: none; }
+        .filter-bar input:focus, .filter-bar select:focus { border-color: var(--primary); }
+        .leads-table { width: 100%; border-collapse: collapse; }
+        .leads-table th { text-align: left; padding: 10px 12px; font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-dark-gray); border-bottom: 1px solid var(--secondary); }
+        .leads-table td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 0.875rem; vertical-align: middle; }
+        .leads-table tr:hover td { background: rgba(0,229,255,0.03); }
+        .score-badge { font-family: var(--font-mono); font-size: 0.8rem; padding: 3px 8px; border-radius: 4px; font-weight: 700; }
+        .score-high { background: rgba(52,199,89,0.15); color: #34C759; }
+        .score-mid { background: rgba(0,229,255,0.12); color: var(--primary); }
+        .score-low { background: rgba(136,136,136,0.12); color: var(--text-gray); }
+        .status-badge { font-size: 0.7rem; padding: 3px 8px; border-radius: 10px; font-family: var(--font-mono); }
+        .btn-sm { padding: 5px 10px; font-size: 0.75rem; border-radius: 6px; border: 1px solid var(--secondary); background: none; color: var(--text-gray); cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; transition: all 0.2s; }
+        .btn-sm:hover { border-color: var(--primary); color: var(--primary); }
+        .btn-sm.cyan { background: var(--primary); color: #000; border-color: var(--primary); font-weight: 600; }
+        .empty-state { text-align: center; padding: 64px 24px; color: var(--text-gray); }
+        .empty-state i { font-size: 3rem; display: block; margin-bottom: 16px; opacity: 0.4; }
+    </style>
+</head>
+<body>
+<nav class="navbar">
+    <div class="container nav-content">
+        <a class="logo" href="{% url 'home' %}">
+            <img src="{% static 'tracking_app/assets/logo-333.png' %}" alt="Transform.io" height="32" onerror="this.style.display='none'">
+            <span>Transform<span class="text-cyan">.io</span></span>
+        </a>
+        <div style="display:flex;align-items:center;gap:12px;">
+            <span style="font-size:0.75rem;color:var(--text-gray);"><span class="live-dot"></span>AI Sales System</span>
+            <a href="{% url 'sales-dashboard' %}" class="btn-sm" style="text-decoration:none;"><i class='bx bx-arrow-back'></i> Dashboard</a>
+            <a href="{% url 'lead-create' %}" class="btn-sm cyan"><i class='bx bx-plus'></i> Add Lead</a>
+            <a href="{% url 'import-leads' %}" class="btn-sm" style="text-decoration:none;border-color:rgba(0,229,255,.4);color:var(--primary);"><i class='bx bx-import'></i> Import CSV</a>
+
+            <button id="theme-toggle" class="btn btn-primary btn-lg" title="Toggle light/dark theme" style="width: 50px; height: 50px; padding: 0; display: flex; align-items: center; justify-content: center; border-radius: 50%;"><i id="theme-icon" class="fas fa-moon"></i></button>
+        </div>
+    </div>
+</nav>
+
+<div class="page-wrap">
+    <h1 style="font-size:1.8rem;font-weight:800;color:white;margin-bottom:4px;">🎯 Leads</h1>
+    <p style="color:var(--text-gray);margin-bottom:24px;">{{ total_count }} lead{% if total_count != 1 %}s{% endif %} · sorted by ICP score</p>
+
+    <!-- Filters -->
+    <form method="get" class="filter-bar">
+        <input type="text" name="q" placeholder="Search name, company, email..." value="{{ search }}" style="flex:1;min-width:200px;">
+        <select name="status">
+            <option value="">All Statuses</option>
+            {% for val, label in status_choices %}
+            <option value="{{ val }}" {% if status_filter == val %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+        <input type="number" name="min_score" placeholder="Min ICP score" value="{{ min_score }}" style="width:130px;">
+        <button type="submit" class="btn-sm cyan">Filter</button>
+        <a href="{% url 'lead-list' %}" class="btn-sm">Clear</a>
+    </form>
+
+    <!-- Table -->
+    <div style="background:var(--bg-elevated);border:1px solid var(--secondary);border-radius:12px;overflow:hidden;">
+        {% if leads %}
+        <table class="leads-table">
+            <thead>
+                <tr>
+                    <th>Contact</th>
+                    <th>Company</th>
+                    <th>Industry</th>
+                    <th>ICP Score</th>
+                    <th>Status</th>
+                    <th>Opens</th>
+                    <th>Source</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for lead in leads %}
+                <tr>
+                    <td>
+                        <div style="color:white;font-weight:500;">{{ lead.contact_name }} {% if lead.is_hot %}🔥{% endif %}</div>
+                        <div style="font-size:0.75rem;color:var(--text-gray);">{{ lead.email }}</div>
+                    </td>
+                    <td style="color:var(--text-gray);">{{ lead.company_name }}<br><span style="font-size:0.75rem;">{{ lead.company_size|default:"?" }} emp.</span></td>
+                    <td style="color:var(--text-gray);font-size:0.8rem;">{{ lead.industry|default:"—" }}</td>
+                    <td>
+                        <span class="score-badge {% if lead.icp_score >= 75 %}score-high{% elif lead.icp_score >= 50 %}score-mid{% else %}score-low{% endif %}">
+                            {{ lead.icp_score|floatformat:0 }}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="status-badge" style="background:rgba(0,229,255,0.1);color:var(--primary);">{{ lead.status }}</span>
+                    </td>
+                    <td style="font-family:var(--font-mono);color:var(--text-gray);">{{ lead.email_opens }}</td>
+                    <td style="font-size:0.75rem;color:var(--text-gray);">{{ lead.source }}</td>
+                    <td>
+                        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                            <a href="{% url 'lead-detail' lead.id %}" class="btn-sm">View</a>
+                            <button class="btn-sm" onclick="scoreLead({{ lead.id }}, this)">AI Score</button>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+            <i class='bx bx-user-plus'></i>
+            No leads found matching your filters.<br>
+            <a href="{% url 'lead-create' %}" class="btn-sm cyan" style="margin-top:16px;display:inline-flex;">+ Add Your First Lead</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+async function scoreLead(leadId, btn) {
+    btn.textContent = 'Scoring...';
+    btn.disabled = true;
+    const res = await fetch(`/api/sales/leads/${leadId}/score/`, {
+        method: 'POST',
+        headers: {'X-CSRFToken': getCsrf()}
+    });
+    const data = await res.json();
+    if (data.success) {
+        btn.textContent = `✓ ${data.score.toFixed(0)}/100`;
+        btn.style.color = '#34C759';
+        setTimeout(() => location.reload(), 1200);
+    } else {
+        btn.textContent = 'Error';
+    }
+}
+function getCsrf() {
+    const m = document.cookie.match(/csrftoken=([^;]+)/);
+    return m ? m[1] : '';
+}
+</script>
+<script src="{% static 'tracking_app/transform.js' %}"></script>
+</body>
+</html>

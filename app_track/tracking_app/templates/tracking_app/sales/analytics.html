@@ -1,0 +1,323 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Analytics — Transform.io</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'tracking_app/transform.css' %}?v=334">
+    <!-- ▸ Apply saved theme before render to avoid flash of wrong theme -->
+    <script>
+        (function(){
+            var t = localStorage.getItem('theme');
+            if(t === 'light') document.documentElement.classList.add('light-theme');
+        })();
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { padding-top: 75px; }
+        .page-wrap { max-width: 1200px; margin: 0 auto; padding: 32px 24px; }
+        
+        .back-link { color: var(--text-gray); text-decoration: none; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 6px; margin-bottom: 24px; }
+        .back-link:hover { color: var(--primary); }
+
+        .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+        .kpi-card { background: var(--bg-elevated); border: 1px solid var(--secondary); border-radius: 12px; padding: 20px; position: relative; }
+        .kpi-label { font-family: var(--font-mono); font-size: 0.65rem; letter-spacing: 1px; text-transform: uppercase; color: var(--text-dark-gray); }
+        .kpi-value { font-size: 2rem; font-weight: 800; color: white; margin-top: 6px; }
+
+        .analytics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px; }
+        
+        .panel { background: var(--bg-elevated); border: 1px solid var(--secondary); border-radius: 12px; overflow: hidden; margin-bottom: 24px; }
+        .panel-header { padding: 16px 20px; border-bottom: 1px solid var(--secondary); display: flex; justify-content: space-between; align-items: center; }
+        .panel-title { font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 1.5px; text-transform: uppercase; color: white; }
+        .panel-body { padding: 20px; }
+
+        /* Funnel layout */
+        .funnel-stage { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+        .funnel-label { font-size: 0.85rem; color: var(--text-gray); width: 120px; }
+        .funnel-bar-wrap { flex: 1; height: 32px; background: var(--secondary); border-radius: 6px; overflow: hidden; position: relative; }
+        .funnel-bar-fill { height: 100%; background: linear-gradient(90deg, var(--primary), rgba(0,229,255,0.4)); display: flex; align-items: center; padding-left: 12px; color: #000; font-weight: 700; font-family: var(--font-mono); font-size: 0.8rem; transition: width 0.8s ease; }
+        .funnel-pct { font-family: var(--font-mono); font-size: 0.8rem; color: var(--accent-green); width: 60px; text-align: right; }
+
+        .table-responsive { overflow-x: auto; }
+        .analytics-table { width: 100%; border-collapse: collapse; text-align: left; }
+        .analytics-table th { padding: 12px; font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-dark-gray); text-transform: uppercase; border-bottom: 1px solid var(--secondary); }
+        .analytics-table td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 0.85rem; color: var(--text-gray); }
+        .analytics-table tr:hover td { background: rgba(0,229,255,0.02); color: white; }
+
+        .btn-sm { padding: 6px 12px; font-size: 0.8rem; border-radius: 6px; border: 1px solid var(--secondary); background: none; color: var(--text-gray); cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; }
+        .btn-sm:hover { border-color: var(--primary); color: var(--primary); }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="container nav-content">
+        <a class="logo" href="{% url 'home' %}">
+            <img src="{% static 'tracking_app/assets/logo-333.png' %}" alt="Transform.io" height="32" onerror="this.style.display='none'">
+            <span>Transform<span class="text-cyan">.io</span></span>
+        </a>
+        <div style="display:flex;align-items:center;gap:12px;">
+            <span style="font-size:0.75rem;color:var(--text-gray);"><span class="live-dot"></span>AI Sales System</span>
+            <a href="{% url 'sales-dashboard' %}" class="btn-sm" style="text-decoration:none;"><i class='bx bx-arrow-back'></i> Dashboard</a>
+            <button id="theme-toggle" class="btn btn-primary btn-lg" title="Toggle light/dark theme" style="width: 50px; height: 50px; padding: 0; display: flex; align-items: center; justify-content: center; border-radius: 50%;"><i id="theme-icon" class="fas fa-moon"></i></button>
+        </div>
+    </div>
+</nav>
+
+<div class="page-wrap">
+    <a href="{% url 'sales-dashboard' %}" class="back-link"><i class='bx bx-left-arrow-alt'></i> Back to Dashboard</a>
+
+    <div style="display:flex;justify-content:between;align-items:center;margin-bottom:32px;flex-wrap:wrap;gap:16px;">
+        <div>
+            <h1 style="font-size:1.8rem;font-weight:800;color:white;margin-bottom:4px;">📈 Sales Analytics</h1>
+            <p style="color:var(--text-gray);font-size:0.875rem;">Deep dive into email performance, pipeline metrics, and conversion rates</p>
+        </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpi-grid">
+        <div class="kpi-card">
+            <div class="kpi-label">Active MRR</div>
+            <div class="kpi-value" style="color:var(--accent-green);">${{ mrr|floatformat:0 }}</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-label">Total Leads Sourced</div>
+            <div class="kpi-value">{{ funnel.leads }}</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-label">Demo Conversion Rate</div>
+            <div class="kpi-value" id="demo-conv-val">0%</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-label">Trial to Paid Rate</div>
+            <div class="kpi-value" id="trial-conv-val">0%</div>
+        </div>
+    </div>
+
+    <div class="analytics-grid">
+        <!-- Funnel visualizer -->
+        <div class="panel">
+            <div class="panel-header">
+                <span class="panel-title"><i class='bx bx-filter'></i> Sales Conversion Funnel</span>
+            </div>
+            <div class="panel-body">
+                <div class="funnel-stage">
+                    <span class="funnel-label">Total Leads</span>
+                    <div class="funnel-bar-wrap">
+                        <div class="funnel-bar-fill" style="width:100%;">{{ funnel.leads }}</div>
+                    </div>
+                    <span class="funnel-pct">100%</span>
+                </div>
+                <div class="funnel-stage">
+                    <span class="funnel-label">ICP Qualified</span>
+                    <div class="funnel-bar-wrap">
+                        <div class="funnel-bar-fill" id="qualified-bar" style="width:0%;">{{ funnel.qualified }}</div>
+                    </div>
+                    <span class="funnel-pct" id="qualified-pct">0%</span>
+                </div>
+                <div class="funnel-stage">
+                    <span class="funnel-label">In Sequence</span>
+                    <div class="funnel-bar-wrap">
+                        <div class="funnel-bar-fill" id="seq-bar" style="width:0%;">{{ funnel.in_sequence }}</div>
+                    </div>
+                    <span class="funnel-pct" id="seq-pct">0%</span>
+                </div>
+                <div class="funnel-stage">
+                    <span class="funnel-label">Replied</span>
+                    <div class="funnel-bar-wrap">
+                        <div class="funnel-bar-fill" id="replied-bar" style="width:0%;">{{ funnel.replied }}</div>
+                    </div>
+                    <span class="funnel-pct" id="replied-pct">0%</span>
+                </div>
+                <div class="funnel-stage">
+                    <span class="funnel-label">Demo Booked</span>
+                    <div class="funnel-bar-wrap">
+                        <div class="funnel-bar-fill" id="demo-bar" style="width:0%;">{{ funnel.demo_booked }}</div>
+                    </div>
+                    <span class="funnel-pct" id="demo-pct">0%</span>
+                </div>
+                <div class="funnel-stage">
+                    <span class="funnel-label">Converted</span>
+                    <div class="funnel-bar-wrap">
+                        <div class="funnel-bar-fill" id="conv-bar" style="width:0%;background:linear-gradient(90deg, var(--accent-green), rgba(52,199,89,0.4));">{{ funnel.converted }}</div>
+                    </div>
+                    <span class="funnel-pct" id="conv-pct">0%</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart Container -->
+        <div class="panel">
+            <div class="panel-header">
+                <span class="panel-title"><i class='bx bx-mail-send'></i> Email Outreach Performance (30 Days)</span>
+            </div>
+            <div class="panel-body">
+                <canvas id="emailChart" height="220"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Daily Performance Table -->
+    <div class="panel">
+        <div class="panel-header">
+            <span class="panel-title"><i class='bx bx-table'></i> Daily Outreach Data</span>
+        </div>
+        <div class="panel-body" style="padding:0;">
+            <div class="table-responsive">
+                <table class="analytics-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Emails Sent</th>
+                            <th>Emails Opened</th>
+                            <th>Open Rate</th>
+                            <th>Emails Replied</th>
+                            <th>Reply Rate</th>
+                        </tr>
+                    </thead>
+                    <tbody id="daily-table-body">
+                        {% if daily_emails %}
+                            {% for day in daily_emails %}
+                            <tr class="data-row" data-date="{{ day.date|date:'Y-m-d' }}" data-sent="{{ day.sent }}" data-opened="{{ day.opened }}" data-replied="{{ day.replied }}">
+                                <td>{{ day.date|date:"M d, Y" }}</td>
+                                <td style="font-family:var(--font-mono);font-weight:600;color:white;">{{ day.sent }}</td>
+                                <td style="font-family:var(--font-mono);">{{ day.opened }}</td>
+                                <td style="font-family:var(--font-mono);color:var(--primary);" class="open-rate-cell">0%</td>
+                                <td style="font-family:var(--font-mono);">{{ day.replied }}</td>
+                                <td style="font-family:var(--font-mono);color:var(--accent-green);" class="reply-rate-cell">0%</td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="6" style="text-align:center;padding:32px;color:var(--text-dark-gray);">No outreach activity logged in the last 30 days.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // ── Funnel calculations ──────────────────────────────────────────
+    const leads = {{ funnel.leads|default:0 }};
+    const qualified = {{ funnel.qualified|default:0 }};
+    const seq = {{ funnel.in_sequence|default:0 }};
+    const replied = {{ funnel.replied|default:0 }};
+    const demo = {{ funnel.demo_booked|default:0 }};
+    const converted = {{ funnel.converted|default:0 }};
+
+    const pct = (val, base) => base > 0 ? Math.round((val / base) * 100) : 0;
+
+    if (leads > 0) {
+        document.getElementById('qualified-bar').style.width = pct(qualified, leads) + '%';
+        document.getElementById('qualified-pct').textContent = pct(qualified, leads) + '%';
+
+        document.getElementById('seq-bar').style.width = pct(seq, leads) + '%';
+        document.getElementById('seq-pct').textContent = pct(seq, leads) + '%';
+
+        document.getElementById('replied-bar').style.width = pct(replied, leads) + '%';
+        document.getElementById('replied-pct').textContent = pct(replied, leads) + '%';
+
+        document.getElementById('demo-bar').style.width = pct(demo, leads) + '%';
+        document.getElementById('demo-pct').textContent = pct(demo, leads) + '%';
+
+        document.getElementById('conv-bar').style.width = pct(converted, leads) + '%';
+        document.getElementById('conv-pct').textContent = pct(converted, leads) + '%';
+    }
+
+    document.getElementById('demo-conv-val').textContent = pct(demo, leads) + '%';
+    document.getElementById('trial-conv-val').textContent = pct(converted, demo) + '%';
+
+    // ── Table Rate Calculations ─────────────────────────────────────
+    const rows = document.querySelectorAll('.data-row');
+    const chartLabels = [];
+    const chartSent = [];
+    const chartOpened = [];
+    const chartReplied = [];
+
+    rows.forEach(row => {
+        const dateStr = row.getAttribute('data-date');
+        const sent = parseInt(row.getAttribute('data-sent')) || 0;
+        const opened = parseInt(row.getAttribute('data-opened')) || 0;
+        const replied = parseInt(row.getAttribute('data-replied')) || 0;
+
+        const openRate = sent > 0 ? Math.round((opened / sent) * 100) : 0;
+        const replyRate = sent > 0 ? Math.round((replied / sent) * 100) : 0;
+
+        row.querySelector('.open-rate-cell').textContent = openRate + '%';
+        row.querySelector('.reply-rate-cell').textContent = replyRate + '%';
+
+        // Collect for chart
+        chartLabels.push(dateStr);
+        chartSent.push(sent);
+        chartOpened.push(opened);
+        chartReplied.push(replied);
+    });
+
+    // ── Chart.js initialization ─────────────────────────────────────
+    const ctx = document.getElementById('emailChart');
+    if (ctx && chartLabels.length > 0) {
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: chartLabels,
+                datasets: [
+                    {
+                        label: 'Emails Sent',
+                        data: chartSent,
+                        borderColor: '#3a7bd5',
+                        backgroundColor: 'rgba(58, 123, 213, 0.05)',
+                        tension: 0.3,
+                        borderWidth: 2
+                    },
+                    {
+                        label: 'Opened',
+                        data: chartOpened,
+                        borderColor: '#00E5FF',
+                        backgroundColor: 'rgba(0, 229, 255, 0.05)',
+                        tension: 0.3,
+                        borderWidth: 2
+                    },
+                    {
+                        label: 'Replied',
+                        data: chartReplied,
+                        borderColor: '#34C759',
+                        backgroundColor: 'rgba(52, 199, 89, 0.05)',
+                        tension: 0.3,
+                        borderWidth: 2
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        labels: { color: '#888', font: { family: 'Inter' } }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { color: 'rgba(255, 255, 255, 0.03)' },
+                        ticks: { color: '#888' }
+                    },
+                    y: {
+                        grid: { color: 'rgba(255, 255, 255, 0.03)' },
+                        ticks: { color: '#888', precision: 0 }
+                    }
+                }
+            }
+        });
+    }
+});
+</script>
+<script src="{% static 'tracking_app/transform.js' %}"></script>
+</body>
+</html>

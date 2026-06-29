@@ -1,0 +1,322 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Import Leads — AI Sales Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'tracking_app/transform.css' %}?v=334">
+    <script>
+        (function(){
+            var t = localStorage.getItem('theme');
+            if(t === 'light') document.documentElement.classList.add('light-theme');
+        })();
+    </script>
+    <style>
+        body { padding-top: 75px; background: var(--bg-base); }
+        .page-wrap { max-width: 960px; margin: 0 auto; padding: 40px 24px 80px; }
+
+        /* ── Back link ── */
+        .back-link { color: var(--text-gray); text-decoration: none; font-size: 0.85rem;
+            display: inline-flex; align-items: center; gap: 6px; margin-bottom: 28px;
+            transition: color .2s; }
+        .back-link:hover { color: var(--primary); }
+
+        /* ── Page header ── */
+        .page-header { margin-bottom: 36px; }
+        .page-header h1 { font-size: 2rem; font-weight: 800; color: white; margin: 0 0 6px; }
+        .page-header p  { color: var(--text-gray); font-size: 0.9rem; margin: 0; }
+
+        /* ── Alert messages ── */
+        .msg-list { list-style: none; padding: 0; margin: 0 0 24px; display: flex; flex-direction: column; gap: 10px; }
+        .msg-item { border-radius: 10px; padding: 12px 18px; font-size: 0.875rem; font-weight: 500; }
+        .msg-success { background: rgba(52,199,89,.15); color: #34C759; border: 1px solid rgba(52,199,89,.3); }
+        .msg-warning { background: rgba(255,159,10,.12); color: #FF9F0A; border: 1px solid rgba(255,159,10,.25); }
+        .msg-error   { background: rgba(255,69,58,.12);  color: #FF453A; border: 1px solid rgba(255,69,58,.25); }
+
+        /* ── Cards ── */
+        .card { background: var(--bg-elevated); border: 1px solid var(--secondary);
+            border-radius: 16px; padding: 32px; margin-bottom: 24px; }
+        .card-title { font-size: 0.75rem; font-family: var(--font-mono); letter-spacing: 2px;
+            text-transform: uppercase; color: var(--primary); margin-bottom: 20px; display: flex;
+            align-items: center; gap: 8px; }
+
+        /* ── Drop zone ── */
+        .drop-zone { border: 2px dashed var(--secondary); border-radius: 12px; padding: 48px 24px;
+            text-align: center; cursor: pointer; transition: all .25s; position: relative; }
+        .drop-zone:hover, .drop-zone.drag-over { border-color: var(--primary);
+            background: rgba(0,229,255,.04); }
+        .drop-zone i { font-size: 2.5rem; color: var(--text-dark-gray); display: block; margin-bottom: 14px; }
+        .drop-zone p { color: var(--text-gray); font-size: 0.9rem; margin: 0 0 16px; }
+        .drop-zone small { color: var(--text-dark-gray); font-size: 0.75rem; display: block; margin-top: 8px; }
+        #csv_file { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+        #file-name { font-family: var(--font-mono); font-size: 0.8rem; color: var(--primary);
+            margin-top: 12px; display: none; }
+
+        /* ── Divider ── */
+        .or-divider { display: flex; align-items: center; gap: 16px; color: var(--text-dark-gray);
+            font-size: 0.75rem; font-family: var(--font-mono); margin: 24px 0; }
+        .or-divider::before, .or-divider::after { content: ''; flex: 1;
+            height: 1px; background: var(--secondary); }
+
+        /* ── Textarea ── */
+        .csv-textarea { width: 100%; min-height: 220px; background: rgba(0,0,0,.3);
+            border: 1px solid var(--secondary); border-radius: 10px; color: #e0e0e0;
+            font-family: var(--font-mono); font-size: 0.8rem; padding: 16px;
+            resize: vertical; outline: none; box-sizing: border-box; transition: border-color .2s; }
+        .csv-textarea:focus { border-color: var(--primary); }
+        .csv-textarea::placeholder { color: var(--text-dark-gray); }
+
+        /* ── Template hint ── */
+        .template-hint { background: rgba(0,0,0,.3); border: 1px solid rgba(0,229,255,.12);
+            border-radius: 10px; padding: 16px 20px; font-family: var(--font-mono); font-size: 0.75rem;
+            color: var(--text-gray); white-space: pre; overflow-x: auto; line-height: 1.7; }
+        .template-hint .header-row { color: var(--primary); }
+
+        /* ── Column badge grid ── */
+        .col-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+        .col-badge { font-family: var(--font-mono); font-size: 0.72rem; padding: 4px 10px;
+            border-radius: 6px; border: 1px solid var(--secondary); color: var(--text-gray); }
+        .col-badge.required { border-color: rgba(0,229,255,.4); color: var(--primary); }
+
+        /* ── Action buttons ── */
+        .action-bar { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 28px; align-items: center; }
+        .btn-import { background: var(--primary); color: #000; font-weight: 700; font-size: 0.9rem;
+            padding: 12px 28px; border: none; border-radius: 10px; cursor: pointer;
+            display: inline-flex; align-items: center; gap: 8px; transition: opacity .2s; }
+        .btn-import:hover { opacity: .85; }
+        .btn-import:disabled { opacity: .5; cursor: not-allowed; }
+        .btn-tpl { background: none; border: 1px solid var(--secondary); color: var(--text-gray);
+            font-size: 0.85rem; padding: 11px 20px; border-radius: 10px; cursor: pointer;
+            display: inline-flex; align-items: center; gap: 8px; transition: all .2s; text-decoration: none; }
+        .btn-tpl:hover { border-color: var(--primary); color: var(--primary); }
+
+        /* ── Progress bar ── */
+        .progress-wrap { display: none; margin-top: 20px; }
+        .progress-bar { height: 4px; background: rgba(255,255,255,.06); border-radius: 4px; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--primary); width: 0%;
+            border-radius: 4px; transition: width .4s ease; }
+        .progress-label { font-size: 0.75rem; color: var(--text-gray); margin-top: 8px;
+            font-family: var(--font-mono); }
+
+        /* ── Quick-paste example ── */
+        .paste-example-btn { font-size: 0.75rem; font-family: var(--font-mono); color: var(--text-dark-gray);
+            background: none; border: none; cursor: pointer; padding: 0; transition: color .2s;
+            display: inline-flex; align-items: center; gap: 4px; margin-left: auto; }
+        .paste-example-btn:hover { color: var(--primary); }
+    </style>
+</head>
+<body>
+
+<!-- ── Navbar ── -->
+<nav class="navbar">
+    <div class="container nav-content">
+        <a class="logo" href="{% url 'home' %}">
+            <img src="{% static 'tracking_app/assets/logo-333.png' %}" alt="Transform.io" height="32"
+                 onerror="this.style.display='none'">
+            <span>Transform<span class="text-cyan">.io</span></span>
+        </a>
+        <div style="display:flex;align-items:center;gap:12px;">
+            <span style="font-size:0.75rem;color:var(--text-gray);"><span class="live-dot"></span>AI Sales System</span>
+            <a href="{% url 'sales-dashboard' %}" class="btn-sm" style="text-decoration:none;">
+                <i class='bx bx-arrow-back'></i> Dashboard
+            </a>
+            <a href="{% url 'lead-list' %}" class="btn-sm" style="text-decoration:none;">
+                <i class='bx bx-list-ul'></i> Leads
+            </a>
+            <button id="theme-toggle" class="btn btn-primary btn-lg" title="Toggle light/dark theme"
+                style="width:50px;height:50px;padding:0;display:flex;align-items:center;justify-content:center;border-radius:50%;">
+                <i id="theme-icon" class="fas fa-moon"></i>
+            </button>
+        </div>
+    </div>
+</nav>
+
+<div class="page-wrap">
+
+    <a href="{% url 'lead-list' %}" class="back-link">
+        <i class='bx bx-arrow-back'></i> Back to Leads
+    </a>
+
+    <div class="page-header">
+        <h1>📥 Import Leads</h1>
+        <p>Upload a CSV file or paste CSV text to bulk-import leads into the AI Sales Dashboard.</p>
+    </div>
+
+    <!-- ── Messages ── -->
+    {% if messages %}
+    <ul class="msg-list">
+        {% for msg in messages %}
+        <li class="msg-item msg-{% if msg.tags == 'error' %}error{% elif msg.tags == 'warning' %}warning{% else %}success{% endif %}">
+            {{ msg }}
+        </li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    <!-- ── Import Form ── -->
+    <form method="post" enctype="multipart/form-data" id="import-form">
+        {% csrf_token %}
+
+        <!-- Upload card -->
+        <div class="card">
+            <div class="card-title"><i class='bx bx-upload'></i> Step 1 — Upload CSV File</div>
+
+            <div class="drop-zone" id="drop-zone">
+                <input type="file" name="csv_file" id="csv_file" accept=".csv,text/csv">
+                <i class='bx bx-cloud-upload'></i>
+                <p>Drag &amp; drop your CSV file here, or <strong style="color:var(--primary)">click to browse</strong></p>
+                <small>Accepted: .csv — max 10 MB</small>
+                <div id="file-name"></div>
+            </div>
+        </div>
+
+        <!-- Paste card -->
+        <div class="card">
+            <div class="card-title" style="justify-content:space-between;">
+                <span><i class='bx bx-code-alt'></i> Step 2 — Or Paste CSV Text</span>
+                <button type="button" class="paste-example-btn" id="paste-example-btn">
+                    <i class='bx bx-paste'></i> Load Example
+                </button>
+            </div>
+
+            <textarea class="csv-textarea" name="csv_text" id="csv_text"
+                placeholder="name,email,company,phone,linkedin,industry,location,status&#10;John Smith,john@acme.com,Acme Corp,+1-555-0100,https://linkedin.com/in/jsmith,SaaS,New York,new&#10;Sarah Lee,sarah@beta.io,Beta Inc,,,,San Francisco,new"></textarea>
+        </div>
+
+        <!-- Column guide -->
+        <div class="card">
+            <div class="card-title"><i class='bx bx-info-circle'></i> Accepted Columns</div>
+            <div class="col-grid">
+                <span class="col-badge required">email ✱</span>
+                <span class="col-badge required">name / contact_name ✱</span>
+                <span class="col-badge">company / company_name</span>
+                <span class="col-badge">phone</span>
+                <span class="col-badge">linkedin / linkedin_url</span>
+                <span class="col-badge">industry</span>
+                <span class="col-badge">location / company_location</span>
+                <span class="col-badge">status</span>
+                <span class="col-badge">source</span>
+            </div>
+            <p style="font-size:0.75rem;color:var(--text-dark-gray);margin:16px 0 10px;">
+                ✱ Required &nbsp;|&nbsp; Column order doesn't matter &nbsp;|&nbsp;
+                Duplicates (same email) are skipped automatically
+            </p>
+
+            <div class="template-hint"><span class="header-row">name,email,company,phone,linkedin,industry,location,status,source</span>
+John Smith,john@acme.com,Acme Corp,+1-555-0100,https://linkedin.com/in/jsmith,SaaS,New York,new,manual
+Sarah Lee,sarah@beta.io,Beta Inc,,,,San Francisco,new,inbound
+Ahmed Khan,ahmed@startup.io,Startup Inc,+44-20-7946,,,London,qualified,linkedin</div>
+        </div>
+
+        <!-- Actions -->
+        <div class="action-bar">
+            <button type="submit" class="btn-import" id="submit-btn">
+                <i class='bx bx-import'></i> Import Leads
+            </button>
+            <button type="button" class="btn-tpl" id="download-tpl-btn">
+                <i class='bx bx-download'></i> Download Template
+            </button>
+            <a href="{% url 'lead-list' %}" class="btn-tpl" style="text-decoration:none;">
+                Cancel
+            </a>
+        </div>
+
+        <!-- Progress -->
+        <div class="progress-wrap" id="progress-wrap">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+            <div class="progress-label" id="progress-label">Processing…</div>
+        </div>
+    </form>
+</div>
+
+<!-- Also add an "Import" button to the leads list navbar -->
+
+<script>
+/* ── Theme toggle ── */
+const themeBtn  = document.getElementById('theme-toggle');
+const themeIcon = document.getElementById('theme-icon');
+function applyTheme(t){
+    document.documentElement.classList.toggle('light-theme', t === 'light');
+    themeIcon.className = t === 'light' ? 'fas fa-sun' : 'fas fa-moon';
+}
+applyTheme(localStorage.getItem('theme') || 'dark');
+themeBtn.addEventListener('click', () => {
+    const next = document.documentElement.classList.contains('light-theme') ? 'dark' : 'light';
+    localStorage.setItem('theme', next);
+    applyTheme(next);
+});
+
+/* ── Drag-and-drop ── */
+const dropZone  = document.getElementById('drop-zone');
+const fileInput = document.getElementById('csv_file');
+const fileNameEl = document.getElementById('file-name');
+
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('drag-over');
+    if (e.dataTransfer.files.length) {
+        fileInput.files = e.dataTransfer.files;
+        showFileName(e.dataTransfer.files[0].name);
+    }
+});
+fileInput.addEventListener('change', () => {
+    if (fileInput.files.length) showFileName(fileInput.files[0].name);
+});
+function showFileName(name) {
+    fileNameEl.textContent = '📄 ' + name;
+    fileNameEl.style.display = 'block';
+}
+
+/* ── Load example text ── */
+const EXAMPLE = `name,email,company,phone,linkedin,industry,location,status,source
+John Smith,john@acme.com,Acme Corp,+1-555-0100,https://linkedin.com/in/jsmith,SaaS,New York,new,manual
+Sarah Lee,sarah@beta.io,Beta Inc,,,,San Francisco,new,inbound
+Ahmed Khan,ahmed@startup.io,Startup Inc,+44-20-7946,,,London,qualified,linkedin
+Priya Sharma,priya@techco.com,TechCo,,,FinTech,Mumbai,new,referral
+Carlos Ruiz,carlos@agency.io,Agency IO,+1-213-555-0199,,Marketing,Los Angeles,enriched,apollo`;
+
+document.getElementById('paste-example-btn').addEventListener('click', () => {
+    document.getElementById('csv_text').value = EXAMPLE;
+});
+
+/* ── Download template CSV ── */
+document.getElementById('download-tpl-btn').addEventListener('click', () => {
+    const header = 'name,email,company,phone,linkedin,industry,location,status,source\n';
+    const sample = 'John Smith,john@acme.com,Acme Corp,+1-555-0100,https://linkedin.com/in/jsmith,SaaS,New York,new,manual\n';
+    const blob = new Blob([header + sample], { type: 'text/csv' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'leads_import_template.csv';
+    a.click();
+});
+
+/* ── Submission progress animation ── */
+document.getElementById('import-form').addEventListener('submit', () => {
+    const btn = document.getElementById('submit-btn');
+    const wrap = document.getElementById('progress-wrap');
+    const fill = document.getElementById('progress-fill');
+    const label = document.getElementById('progress-label');
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i> Importing…';
+    wrap.style.display = 'block';
+
+    let pct = 0;
+    const iv = setInterval(() => {
+        pct = Math.min(pct + Math.random() * 12, 90);
+        fill.style.width = pct + '%';
+        label.textContent = `Processing… ${Math.round(pct)}%`;
+    }, 250);
+    window._importInterval = iv;
+});
+</script>
+</body>
+</html>

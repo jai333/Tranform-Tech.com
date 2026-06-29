@@ -1,0 +1,219 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deal Pipeline — Transform.io Sales</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'tracking_app/transform.css' %}?v=334">
+    <!-- ▸ Apply saved theme before render to avoid flash of wrong theme -->
+    <script>
+        (function(){
+            var t = localStorage.getItem('theme');
+            if(t === 'light') document.documentElement.classList.add('light-theme');
+        })();
+    </script>
+    <style>
+        body { padding-top: 75px; overflow-x: hidden; }
+        .page-wrap { max-width: 1600px; margin: 0 auto; padding: 32px 24px; display: flex; flex-direction: column; height: calc(100vh - 75px); }
+        
+        .header-stats { display: flex; gap: 24px; margin-bottom: 24px; flex-wrap: wrap; }
+        .stat-bubble { background: var(--bg-elevated); border: 1px solid var(--secondary); border-radius: 8px; padding: 12px 20px; min-width: 150px; }
+        .stat-bubble .lbl { font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-dark-gray); text-transform: uppercase; letter-spacing: 1.5px; }
+        .stat-bubble .val { font-size: 1.5rem; font-weight: 800; color: white; margin-top: 4px; }
+        .stat-bubble .val.green { color: var(--accent-green); }
+
+        .pipeline-container { display: flex; gap: 16px; overflow-x: auto; flex: 1; padding-bottom: 16px; align-items: stretch; }
+        .pipeline-column { background: rgba(20,24,35,0.4); border: 1px solid var(--secondary); border-radius: 12px; width: 320px; flex-shrink: 0; display: flex; flex-direction: column; max-height: 100%; transition: border-color 0.2s; }
+        .pipeline-column:hover { border-color: rgba(0,229,255,0.2); }
+        
+        .column-header { padding: 16px; border-bottom: 1px solid var(--secondary); display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); border-radius: 12px 12px 0 0; }
+        .column-title { font-size: 0.85rem; font-weight: 600; color: white; display: flex; align-items: center; gap: 8px; }
+        .column-dot { width: 8px; height: 8px; border-radius: 50%; }
+        
+        /* Column themes */
+        .stage-lead .column-dot { background: #555; }
+        .stage-outreach .column-dot { background: #3a7bd5; }
+        .stage-replied .column-dot { background: #00a6fb; }
+        .stage-demo_booked .column-dot { background: #00E5FF; }
+        .stage-demo_done .column-dot { background: #00c9a7; }
+        .stage-proposal .column-dot { background: #FFCC00; }
+        .stage-negotiation .column-dot { background: #FF9500; }
+        .stage-won .column-dot { background: #34C759; }
+        .stage-lost .column-dot { background: #FF3B30; }
+
+        .column-badge { background: var(--secondary); color: var(--text-gray); font-family: var(--font-mono); font-size: 0.7rem; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
+        
+        .column-body { padding: 12px; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; flex: 1; }
+        
+        /* Kanban Card */
+        .kanban-card { background: var(--bg-elevated); border: 1px solid var(--secondary); border-radius: 10px; padding: 16px; position: relative; transition: all 0.2s ease; cursor: grab; }
+        .kanban-card:hover { border-color: var(--primary); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,229,255,0.08); }
+        .kanban-card:active { cursor: grabbing; }
+        .kanban-card::before { content: ''; position: absolute; top: 0; left: 0; bottom: 0; width: 3px; border-radius: 3px 0 0 3px; }
+        
+        .stage-lead .kanban-card::before { background: #555; }
+        .stage-outreach .kanban-card::before { background: #3a7bd5; }
+        .stage-replied .kanban-card::before { background: #00a6fb; }
+        .stage-demo_booked .kanban-card::before { background: #00E5FF; }
+        .stage-demo_done .kanban-card::before { background: #00c9a7; }
+        .stage-proposal .kanban-card::before { background: #FFCC00; }
+        .stage-negotiation .kanban-card::before { background: #FF9500; }
+        .stage-won .kanban-card::before { background: #34C759; }
+        .stage-lost .kanban-card::before { background: #FF3B30; }
+
+        .card-company { font-size: 0.9rem; font-weight: 700; color: white; margin-bottom: 4px; }
+        .card-contact { font-size: 0.75rem; color: var(--text-gray); margin-bottom: 12px; }
+        
+        .card-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.04); padding-top: 10px; margin-top: 8px; }
+        .card-value { font-family: var(--font-mono); font-size: 0.8rem; color: var(--accent-green); font-weight: 600; }
+        .card-prob { font-family: var(--font-mono); font-size: 0.75rem; color: var(--primary); font-weight: 600; background: rgba(0,229,255,0.08); padding: 1px 6px; border-radius: 4px; }
+        
+        .card-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; }
+        .card-select { background: var(--bg-surface); border: 1px solid var(--secondary); color: var(--text-gray); font-size: 0.7rem; border-radius: 4px; padding: 2px 4px; outline: none; max-width: 140px; }
+        .card-select:focus { border-color: var(--primary); }
+
+        .btn-link { font-size: 0.75rem; color: var(--text-gray); text-decoration: none; display: inline-flex; align-items: center; gap: 4px; }
+        .btn-link:hover { color: var(--primary); }
+
+        .btn-sm { padding: 6px 12px; font-size: 0.8rem; border-radius: 6px; border: 1px solid var(--secondary); background: none; color: var(--text-gray); cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; }
+        .btn-sm:hover { border-color: var(--primary); color: var(--primary); }
+        .btn-sm.cyan { background: var(--primary); color: #000; border-color: var(--primary); font-weight: 600; }
+
+        .empty-col { text-align: center; padding: 32px 12px; color: var(--text-dark-gray); font-size: 0.75rem; font-style: italic; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="container nav-content">
+        <a class="logo" href="{% url 'home' %}">
+            <img src="{% static 'tracking_app/assets/logo-333.png' %}" alt="Transform.io" height="32" onerror="this.style.display='none'">
+            <span>Transform<span class="text-cyan">.io</span></span>
+        </a>
+        <div style="display:flex;align-items:center;gap:12px;">
+            <span style="font-size:0.75rem;color:var(--text-gray);"><span class="live-dot"></span>AI Sales System</span>
+            <a href="{% url 'sales-dashboard' %}" class="btn-sm" style="text-decoration:none;"><i class='bx bx-arrow-back'></i> Dashboard</a>
+            <a href="{% url 'lead-create' %}" class="btn-sm cyan"><i class='bx bx-plus'></i> Add Lead</a>
+            <button id="theme-toggle" class="btn btn-primary btn-lg" title="Toggle light/dark theme" style="width: 50px; height: 50px; padding: 0; display: flex; align-items: center; justify-content: center; border-radius: 50%;"><i id="theme-icon" class="fas fa-moon"></i></button>
+        </div>
+    </div>
+</nav>
+
+<div class="page-wrap">
+    <div style="display:flex;justify-content:between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:16px;">
+        <div>
+            <h1 style="font-size:1.8rem;font-weight:800;color:white;margin-bottom:4px;">🎯 Deal Pipeline</h1>
+            <p style="color:var(--text-gray);font-size:0.875rem;">Manage and move opportunities through your sales cycle</p>
+        </div>
+        
+        <div class="header-stats" style="margin-left:auto;">
+            <div class="stat-bubble">
+                <div class="lbl">Pipeline Value</div>
+                <div class="val">${{ total_pipeline_value|floatformat:2 }}</div>
+            </div>
+            <div class="stat-bubble">
+                <div class="lbl">MRR Closed (Won)</div>
+                <div class="val green">${{ mrr_won|floatformat:2 }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Kanban Pipeline -->
+    <div class="pipeline-container">
+        {% for stage, label in stage_labels.items %}
+        {% with pipeline|dictsort:stage|first as deal_list %}
+        <div class="pipeline-column stage-{{ stage }}">
+            <div class="column-header">
+                <div class="column-title">
+                    <span class="column-dot"></span>
+                    {{ label }}
+                </div>
+                <!-- Calculate length manually via filter count -->
+                <span class="column-badge">
+                    {% for key, d_list in pipeline.items %}
+                        {% if key == stage %}{{ d_list|length }}{% endif %}
+                    {% endfor %}
+                </span>
+            </div>
+            
+            <div class="column-body">
+                {% for key, d_list in pipeline.items %}
+                    {% if key == stage %}
+                        {% if d_list %}
+                            {% for deal in d_list %}
+                            <div class="kanban-card" id="deal-card-{{ deal.id }}">
+                                <div class="card-company">
+                                    <a href="{% url 'deal-detail' deal.id %}" style="color:white;text-decoration:none;display:flex;align-items:center;justify-content:between;">
+                                        {{ deal.lead.company_name }}
+                                        <i class='bx bx-chevron-right' style="font-size:1rem;color:var(--text-dark-gray);"></i>
+                                    </a>
+                                </div>
+                                <div class="card-contact">{{ deal.lead.contact_name }}</div>
+                                
+                                <div class="card-footer">
+                                    <div class="card-value">${{ deal.deal_value_monthly|floatformat:0 }}/mo</div>
+                                    <div class="card-prob">{{ deal.close_probability|floatformat:0 }}% close</div>
+                                </div>
+                                
+                                <div class="card-actions">
+                                    <a href="{% url 'deal-detail' deal.id %}" class="btn-link"><i class='bx bx-brain'></i> AI Actions</a>
+                                    <select class="card-select" onchange="changeStage({{ deal.id }}, this.value)">
+                                        {% for st, lbl in stage_labels.items %}
+                                        <option value="{{ st }}" {% if deal.stage == st %}selected{% endif %}>{{ lbl }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="empty-col">No deals in this stage</div>
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+        {% endwith %}
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+async function changeStage(dealId, newStage) {
+    const card = document.getElementById(`deal-card-${dealId}`);
+    card.style.opacity = '0.5';
+    
+    try {
+        const res = await fetch(`/api/sales/deals/${dealId}/stage/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCsrf()
+            },
+            body: JSON.stringify({ stage: newStage })
+        });
+        const data = await res.json();
+        if (data.success) {
+            // Reload to reposition the card under its new column cleanly
+            location.reload();
+        } else {
+            alert('Error updating deal stage: ' + (data.error || 'Unknown error'));
+            card.style.opacity = '1';
+        }
+    } catch (e) {
+        alert('Network error updating stage');
+        card.style.opacity = '1';
+    }
+}
+
+function getCsrf() {
+    const m = document.cookie.match(/csrftoken=([^;]+)/);
+    return m ? m[1] : '';
+}
+</script>
+<script src="{% static 'tracking_app/transform.js' %}"></script>
+</body>
+</html>

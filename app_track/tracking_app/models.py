@@ -580,3 +580,11 @@ class FieldMappingConfig(models.Model):
     
     def __str__(self):
         return f"{self.integration} - {self.internal_field} -> {self.external_field}"
+
+
+# ─── Import AI Sales System models so Django migrations pick them up ───
+from .sales_models import (  # noqa: F401, E402
+    Lead, EmailSequence, EmailSequenceStep, LeadSequenceEnrollment,
+    OutreachEmail, EmailReply, DemoBooking, Deal, DealActivity,
+    SalesDailySnapshot, SalesAlert, OnboardingFunnel,
+)

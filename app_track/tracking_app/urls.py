@@ -3,6 +3,7 @@ from django.views.generic import TemplateView
 from django.contrib.auth import views as auth_views
 from . import views
 from . import ai_views
+from .sales_urls import sales_urlpatterns
 
 urlpatterns = [
     path('', views.home, name='home'),
@@ -103,4 +104,7 @@ urlpatterns = [
     path('candidate/<int:candidate_id>/ai-profile/', ai_views.candidate_detail_with_ai, name='candidate-ai-profile'),
     path('ai-pipeline/', ai_views.ai_pipeline_dashboard, name='ai-pipeline-dashboard'),
     path('add-ons/', views.service_addons_view, name='service-addons'),
+
+    # ── AI Sales System (auto-appended) ─────────────────────────
+    *sales_urlpatterns,
 ]

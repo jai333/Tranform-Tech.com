@@ -1069,3 +1069,4 @@ def api_update_pipeline_status(request):
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
     return JsonResponse({'status': 'error'}, status=400)
+

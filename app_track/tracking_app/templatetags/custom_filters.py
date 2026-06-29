@@ -20,4 +20,18 @@ def multiply(value, arg):
     try:
         return int(value) * int(arg)
     except (ValueError, TypeError):
-        return 0 
+        return 0
+
+@register.filter
+def replace(value, arg):
+    """
+    Replace occurrences of string in value.
+    Syntax: value|replace:"target,replacement" or value|replace:"target" (replaces with empty string)
+    """
+    if not isinstance(value, str):
+        return value
+    if ',' in arg:
+        target, replacement = arg.split(',', 1)
+    else:
+        target, replacement = arg, ''
+    return value.replace(target, replacement) 

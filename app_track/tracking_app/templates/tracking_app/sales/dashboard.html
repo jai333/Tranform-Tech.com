@@ -1,0 +1,645 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Sales Dashboard — Transform.io</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;600&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'tracking_app/transform.css' %}?v=401">
+    <!-- ▸ Apply saved theme before render to avoid flash of wrong theme -->
+    <script>
+        (function(){
+            var t = localStorage.getItem('theme');
+            if(t === 'light') document.documentElement.classList.add('light-theme');
+        })();
+    </script>
+    <style>
+        /* ─── Layout ─────────────────────────────────────────── */
+        body { padding-top: 75px; background: var(--bg-dark); }
+        .page-wrap { max-width: 1240px; margin: 0 auto; padding: 32px 24px; }
+
+        /* ─── Top Tab Bar ────────────────────────────────────── */
+        .dash-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--secondary);
+            border-radius: 12px;
+            padding: 6px;
+            margin-bottom: 32px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .dash-tabs::-webkit-scrollbar { display: none; }
+        .dash-tab {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 9px 16px;
+            border-radius: 8px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            font-family: var(--font-mono);
+            color: var(--text-gray);
+            text-decoration: none;
+            white-space: nowrap;
+            border: 1px solid transparent;
+            transition: all 0.18s ease;
+            cursor: pointer;
+            background: transparent;
+        }
+        .dash-tab:hover {
+            color: var(--primary);
+            background: rgba(0, 229, 255, 0.06);
+            border-color: rgba(0, 229, 255, 0.2);
+        }
+        .dash-tab.active {
+            color: #000;
+            background: var(--primary);
+            border-color: var(--primary);
+            box-shadow: 0 0 16px rgba(0, 229, 255, 0.35);
+        }
+        .dash-tab i { font-size: 1rem; }
+        .tab-sep {
+            width: 1px;
+            align-self: stretch;
+            background: var(--secondary);
+            margin: 4px 2px;
+            flex-shrink: 0;
+        }
+
+        /* ─── Action Buttons (brand-aligned) ─────────────────── */
+        .btn-brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border-radius: 7px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.18s ease;
+            white-space: nowrap;
+        }
+        .btn-brand.primary {
+            background: var(--primary);
+            color: #000;
+            border: 1px solid var(--primary);
+        }
+        .btn-brand.primary:hover { background: #00c4d8; border-color: #00c4d8; }
+        .btn-brand.ghost {
+            background: transparent;
+            color: var(--text-gray);
+            border: 1px solid var(--secondary);
+        }
+        .btn-brand.ghost:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: rgba(0,229,255,0.05);
+        }
+        .btn-brand.subtle {
+            background: var(--bg-elevated);
+            color: var(--text-gray);
+            border: 1px solid var(--secondary);
+            font-size: 0.75rem;
+            padding: 6px 12px;
+        }
+        .btn-brand.subtle:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* ─── KPI Cards ──────────────────────────────────────── */
+        .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+        .kpi-card {
+            background: var(--bg-elevated);
+            border: 1px solid var(--secondary);
+            border-radius: 12px;
+            padding: 22px 20px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.25s ease;
+        }
+        .kpi-card:hover { border-color: var(--primary); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,229,255,0.08); }
+        .kpi-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--primary); opacity: 0.4; }
+        .kpi-card.hot::before { background: #FF3B30; opacity: 1; }
+        .kpi-card.green::before { background: var(--accent-green); opacity: 1; }
+        .kpi-label { font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-dark-gray); margin-bottom: 8px; }
+        .kpi-value { font-size: 2.2rem; font-weight: 800; color: white; line-height: 1; margin-bottom: 4px; }
+        .kpi-sub { font-size: 0.74rem; color: var(--text-gray); }
+        .kpi-icon { position: absolute; top: 16px; right: 16px; font-size: 1.5rem; color: var(--primary); opacity: 0.25; }
+
+        /* ─── Pipeline Bar ───────────────────────────────────── */
+        .pipeline-bar { display: flex; height: 6px; border-radius: 3px; overflow: hidden; margin-bottom: 20px; background: var(--secondary); }
+        .pipeline-segment { height: 100%; transition: width 0.6s ease; }
+        .seg-lead { background: #555; }
+        .seg-outreach { background: #3a7bd5; }
+        .seg-replied { background: #00a6fb; }
+        .seg-demo_booked { background: #00E5FF; }
+        .seg-demo_done { background: #00c9a7; }
+        .seg-proposal { background: #FFCC00; }
+        .seg-negotiation { background: #FF9500; }
+        .seg-won { background: #34C759; }
+        .seg-lost { background: #FF3B30; }
+
+        /* Stage pills */
+        .pipeline-stages { display: flex; gap: 6px; flex-wrap: wrap; }
+        .stage-pill {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.72rem;
+            font-family: var(--font-mono);
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            border: 1px solid var(--secondary);
+            color: var(--text-gray);
+        }
+        .stage-pill .count { background: rgba(0,229,255,0.15); color: var(--primary); border-radius: 10px; padding: 1px 6px; font-weight: 700; }
+
+        /* ─── Panels ─────────────────────────────────────────── */
+        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
+        .panel { background: var(--bg-elevated); border: 1px solid var(--secondary); border-radius: 12px; overflow: hidden; }
+        .panel-header { padding: 14px 18px; border-bottom: 1px solid var(--secondary); display: flex; justify-content: space-between; align-items: center; }
+        .panel-title { font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 1.5px; text-transform: uppercase; color: white; }
+        .panel-body { padding: 16px 18px; }
+
+        /* Lead rows */
+        .lead-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+        .lead-row:last-child { border-bottom: none; }
+        .lead-name { font-size: 0.875rem; color: white; font-weight: 500; }
+        .lead-company { font-size: 0.72rem; color: var(--text-gray); }
+        .lead-score { font-family: var(--font-mono); font-size: 0.85rem; color: var(--primary); font-weight: 700; min-width: 50px; text-align: right; }
+        .fire-badge { color: #FF3B30; font-size: 0.8rem; margin-left: 4px; }
+
+        /* Deal rows */
+        .deal-row { display: grid; grid-template-columns: 1fr auto auto; gap: 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+        .deal-row:last-child { border-bottom: none; }
+        .deal-stage-badge { font-family: var(--font-mono); font-size: 0.65rem; padding: 3px 8px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px; background: var(--primary-dim); color: var(--primary); }
+        .deal-value { font-family: var(--font-mono); font-size: 0.8rem; color: var(--accent-green); }
+
+        /* Alert items */
+        .alert-item { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+        .alert-item:last-child { border-bottom: none; }
+        .alert-icon { font-size: 1.2rem; margin-top: 2px; flex-shrink: 0; }
+        .alert-title { font-size: 0.85rem; color: white; font-weight: 500; margin-bottom: 2px; }
+        .alert-body { font-size: 0.72rem; color: var(--text-gray); }
+        .dismiss-btn { margin-left: auto; background: none; border: none; color: var(--text-dark-gray); cursor: pointer; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem; flex-shrink: 0; transition: color 0.2s; }
+        .dismiss-btn:hover { color: var(--accent-red); }
+
+        /* Stat bars */
+        .stat-bar-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+        .stat-bar-label { font-size: 0.72rem; color: var(--text-gray); min-width: 80px; }
+        .stat-bar-track { flex: 1; height: 4px; background: var(--secondary); border-radius: 2px; overflow: hidden; }
+        .stat-bar-fill { height: 100%; border-radius: 2px; background: var(--primary); transition: width 0.8s ease; }
+        .stat-bar-val { font-family: var(--font-mono); font-size: 0.72rem; color: var(--primary); min-width: 38px; text-align: right; }
+
+        /* Email stats */
+        .email-stats-row { display: flex; }
+        .email-stat { flex: 1; text-align: center; padding: 18px; border-right: 1px solid var(--secondary); }
+        .email-stat:last-child { border-right: none; }
+        .email-stat .num { font-size: 1.8rem; font-weight: 800; color: white; }
+        .email-stat .lbl { font-size: 0.68rem; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 1px; color: var(--text-dark-gray); }
+        .email-stat .rate { font-size: 0.85rem; color: var(--accent-green); font-weight: 600; }
+
+        /* Funnel */
+        .funnel-row { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+        .funnel-label { font-size: 0.78rem; color: var(--text-gray); min-width: 90px; }
+        .funnel-bar { height: 24px; border-radius: 4px; background: linear-gradient(90deg, var(--primary), rgba(0,229,255,0.3)); display: flex; align-items: center; padding: 0 10px; font-size: 0.72rem; color: var(--bg-dark); font-weight: 700; font-family: var(--font-mono); min-width: 36px; transition: width 0.8s ease; }
+
+        /* Quick actions */
+        .quick-actions { display: flex; flex-direction: column; gap: 8px; }
+
+        /* Live dot */
+        .live-dot { width: 7px; height: 7px; background: var(--accent-green); border-radius: 50%; animation: pulse-dot 2s ease infinite; display: inline-block; margin-right: 6px; }
+        @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.3)} }
+
+        /* Section spacing */
+        .mb-section { margin-bottom: 24px; }
+
+        @media (max-width: 1024px) {
+            .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+            .two-col { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 640px) {
+            .kpi-grid { grid-template-columns: 1fr 1fr; }
+            .dash-tabs { border-radius: 10px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ── Navbar ───────────────────────────────────────────────── -->
+<nav class="navbar">
+    <div class="container nav-content">
+        <a class="logo" href="{% url 'home' %}">
+            <img src="{% static 'tracking_app/assets/logo-333.png' %}" alt="Transform.io" height="32" onerror="this.style.display='none'">
+            <span>Transform<span class="text-cyan">.io</span></span>
+        </a>
+        <div style="display:flex;align-items:center;gap:16px;">
+            <span style="font-size:0.75rem;color:var(--text-gray);"><span class="live-dot"></span>AI Sales Dashboard</span>
+            <a href="{% url 'home' %}" class="btn-brand ghost"><i class='bx bx-arrow-back'></i> Back to App</a>
+            <button id="theme-toggle" class="btn btn-primary btn-lg" title="Toggle light/dark theme" style="width: 50px; height: 50px; padding: 0; display: flex; align-items: center; justify-content: center; border-radius: 50%;"><i id="theme-icon" class="fas fa-moon"></i></button>
+        </div>
+</nav>
+
+<!-- ── Page ─────────────────────────────────────────────────── -->
+<div class="page-wrap">
+
+    <!-- Page header -->
+    <div class="flex justify-between items-center mb-lg">
+        <div>
+            <h1 style="font-size:1.9rem;font-weight:800;color:white;margin-bottom:4px;letter-spacing:-0.03em;">
+                🤖 AI Sales Dashboard
+            </h1>
+            <p style="color:var(--text-gray);font-size:0.875rem;"><span class="live-dot"></span>Live pipeline — automated by AI</p>
+        </div>
+        <div style="display:flex;gap:10px;">
+            <a href="{% url 'lead-create' %}" class="btn-brand primary"><i class='bx bx-plus'></i> Add Lead</a>
+            <a href="{% url 'demo-booking' %}" class="btn-brand ghost"><i class='bx bx-calendar'></i> Demo Page</a>
+        </div>
+    </div>
+
+    <!-- ── Horizontal Tab Navigation ─────────────────────── -->
+    <div class="dash-tabs" role="tablist">
+        <a href="{% url 'sales-dashboard' %}" class="dash-tab active" role="tab">
+            <i class='bx bx-bar-chart-alt-2'></i> Dashboard
+        </a>
+        <a href="{% url 'sales-analytics' %}" class="dash-tab" role="tab">
+            <i class='bx bx-trending-up'></i> Analytics
+        </a>
+        <div class="tab-sep"></div>
+        <a href="{% url 'deal-pipeline' %}" class="dash-tab" role="tab">
+            <i class='bx bx-git-pull-request'></i> Deal Pipeline
+        </a>
+        <a href="{% url 'lead-list' %}" class="dash-tab" role="tab">
+            <i class='bx bx-user-plus'></i> Leads
+        </a>
+        <a href="{% url 'lead-create' %}" class="dash-tab" role="tab">
+            <i class='bx bx-plus-circle'></i> Add Lead
+        </a>
+        <div class="tab-sep"></div>
+        <a href="{% url 'demo-booking' %}" class="dash-tab" role="tab" target="_blank">
+            <i class='bx bx-calendar-check'></i> Demo Booking
+        </a>
+        <a href="/admin/" class="dash-tab" role="tab" target="_blank">
+            <i class='bx bx-cog'></i> Admin
+        </a>
+        <div class="tab-sep"></div>
+        <a href="{% url 'job-list' %}" class="dash-tab" role="tab">
+            <i class='bx bx-briefcase'></i> Jobs
+        </a>
+        <a href="{% url 'candidate-list' %}" class="dash-tab" role="tab">
+            <i class='bx bx-group'></i> Candidates
+        </a>
+        <a href="{% url 'interview-list' %}" class="dash-tab" role="tab">
+            <i class='bx bx-video'></i> Interviews
+        </a>
+    </div>
+
+    <!-- ── KPI Cards ─────────────────────────────────────── -->
+    <div class="kpi-grid mb-section">
+        <div class="kpi-card">
+            <i class='bx bx-user-plus kpi-icon'></i>
+            <div class="kpi-label">Total Leads</div>
+            <div class="kpi-value">{{ total_leads }}</div>
+            <div class="kpi-sub">{{ qualified_leads }} qualified (ICP ≥65)</div>
+        </div>
+        <div class="kpi-card">
+            <i class='bx bx-mail-send kpi-icon'></i>
+            <div class="kpi-label">Emails Sent (30d)</div>
+            <div class="kpi-value">{{ emails_sent }}</div>
+            <div class="kpi-sub">{{ open_rate }}% open · {{ reply_rate }}% reply</div>
+        </div>
+        <div class="kpi-card">
+            <i class='bx bx-calendar-check kpi-icon'></i>
+            <div class="kpi-label">Demos This Month</div>
+            <div class="kpi-value">{{ demos_this_month }}</div>
+            <div class="kpi-sub">{{ active_sequences }} active sequences</div>
+        </div>
+        <div class="kpi-card green">
+            <i class='bx bx-dollar-circle kpi-icon'></i>
+            <div class="kpi-label">MRR Won</div>
+            <div class="kpi-value">${{ mrr_won }}</div>
+            <div class="kpi-sub">${{ pipeline_value }} in pipeline</div>
+        </div>
+    </div>
+
+    <!-- ── Pipeline Stages ───────────────────────────────── -->
+    <div class="panel mb-section">
+        <div class="panel-header">
+            <span class="panel-title">Pipeline Stages</span>
+            <a href="{% url 'deal-pipeline' %}" class="btn-brand subtle">View Kanban →</a>
+        </div>
+        <div class="panel-body">
+            <div class="pipeline-bar">
+                {% for stage in pipeline_stages %}
+                {% if stage.count > 0 %}
+                <div class="pipeline-segment seg-{{ stage.key }}" style="width: {{ stage.pct }}%;" title="{{ stage.label }}: {{ stage.count }} deals ({{ stage.pct|floatformat:0 }}%)"></div>
+                {% endif %}
+                {% endfor %}
+            </div>
+            <div class="pipeline-stages">
+                {% for stage in pipeline_stages %}
+                <div class="stage-pill">
+                    <span style="display:inline-block;width:7px;height:7px;border-radius:50%;
+                        {% if stage.key == 'lead' %}background:#555;
+                        {% elif stage.key == 'outreach' %}background:#3a7bd5;
+                        {% elif stage.key == 'replied' %}background:#00a6fb;
+                        {% elif stage.key == 'demo_booked' %}background:#00E5FF;
+                        {% elif stage.key == 'demo_done' %}background:#00c9a7;
+                        {% elif stage.key == 'proposal' %}background:#FFCC00;
+                        {% elif stage.key == 'negotiation' %}background:#FF9500;
+                        {% elif stage.key == 'won' %}background:#34C759;
+                        {% elif stage.key == 'lost' %}background:#FF3B30;
+                        {% endif %}"></span>
+                    {{ stage.label }} <span class="count">{{ stage.count }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Hot Leads + AI Alerts ─────────────────────────── -->
+    <div class="two-col">
+
+        <!-- Hot Leads -->
+        <div class="panel">
+            <div class="panel-header">
+                <span class="panel-title">🔥 Hot Leads</span>
+                <a href="{% url 'lead-list' %}?min_score=65" class="btn-brand subtle">All leads →</a>
+            </div>
+            <div class="panel-body">
+                {% if hot_leads %}
+                    {% for lead in hot_leads %}
+                    <div class="lead-row">
+                        <div style="flex:1;">
+                            <div class="lead-name">
+                                <a href="{% url 'lead-detail' lead.id %}" style="color:white;text-decoration:none;">
+                                    {{ lead.contact_name }}
+                                    {% if lead.is_hot %}<span class="fire-badge">🔥</span>{% endif %}
+                                </a>
+                            </div>
+                            <div class="lead-company">{{ lead.company_name }} · {{ lead.status }}</div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div class="lead-score">{{ lead.icp_score|floatformat:0 }}/100</div>
+                            <div style="font-size:0.68rem;color:var(--text-dark-gray);">{{ lead.email_opens }} opens</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div style="text-align:center;padding:32px;color:var(--text-gray);">
+                        <i class='bx bx-search-alt' style="font-size:2rem;display:block;margin-bottom:8px;"></i>
+                        No hot leads yet.<br>
+                        <a href="{% url 'lead-create' %}" class="btn-brand primary" style="margin-top:14px;display:inline-flex;">+ Add First Lead</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- AI Alerts -->
+        <div class="panel">
+            <div class="panel-header">
+                <span class="panel-title">⚡ AI Alerts</span>
+                <span style="font-size:0.72rem;color:var(--text-dark-gray);">{{ alerts|length }} unread</span>
+            </div>
+            <div class="panel-body" id="alerts-container">
+                {% if alerts %}
+                    {% for alert in alerts %}
+                    <div class="alert-item" id="alert-{{ alert.id }}">
+                        <div class="alert-icon">
+                            {% if alert.alert_type == 'hot_lead' %}🔥
+                            {% elif alert.alert_type == 'cold_deal' %}⚠️
+                            {% elif alert.alert_type == 'demo_reminder' %}📅
+                            {% elif alert.alert_type == 'reply_received' %}💬
+                            {% else %}✅{% endif %}
+                        </div>
+                        <div style="flex:1;">
+                            <div class="alert-title">{{ alert.title }}</div>
+                            <div class="alert-body">{{ alert.body }}</div>
+                        </div>
+                        <button class="dismiss-btn" onclick="dismissAlert({{ alert.id }})" title="Dismiss">✕</button>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div style="text-align:center;padding:32px;color:var(--text-gray);">
+                        <i class='bx bx-check-shield' style="font-size:2rem;display:block;margin-bottom:8px;color:var(--accent-green);"></i>
+                        All caught up — no alerts!
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Email Performance + Active Deals ──────────────── -->
+    <div class="two-col">
+
+        <!-- Email Performance -->
+        <div class="panel">
+            <div class="panel-header">
+                <span class="panel-title">📧 Email Performance (30 days)</span>
+            </div>
+            <div class="email-stats-row">
+                <div class="email-stat">
+                    <div class="num">{{ emails_sent }}</div>
+                    <div class="lbl">Sent</div>
+                </div>
+                <div class="email-stat">
+                    <div class="num">{{ emails_opened }}</div>
+                    <div class="lbl">Opened</div>
+                    <div class="rate">{{ open_rate }}%</div>
+                </div>
+                <div class="email-stat">
+                    <div class="num">{{ emails_replied }}</div>
+                    <div class="lbl">Replied</div>
+                    <div class="rate">{{ reply_rate }}%</div>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="stat-bar-row">
+                    <div class="stat-bar-label">Open rate</div>
+                    <div class="stat-bar-track"><div class="stat-bar-fill" style="width:{{ open_rate }}%;"></div></div>
+                    <div class="stat-bar-val">{{ open_rate }}%</div>
+                </div>
+                <div class="stat-bar-row">
+                    <div class="stat-bar-label">Reply rate</div>
+                    <div class="stat-bar-track"><div class="stat-bar-fill" style="width:{{ reply_rate }}%;background:#34C759;"></div></div>
+                    <div class="stat-bar-val">{{ reply_rate }}%</div>
+                </div>
+                <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--secondary);">
+                    <p style="font-size:0.72rem;color:var(--text-gray);">Industry avg open rate is 22%. Reply rate &gt; 5% is excellent for cold outreach.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Deals -->
+        <div class="panel">
+            <div class="panel-header">
+                <span class="panel-title">💼 Active Deals</span>
+                <a href="{% url 'deal-pipeline' %}" class="btn-brand subtle">Full pipeline →</a>
+            </div>
+            <div class="panel-body">
+                {% if recent_deals %}
+                    {% for deal in recent_deals %}
+                    <div class="deal-row">
+                        <div>
+                            <div style="font-size:0.875rem;color:white;">
+                                <a href="{% url 'deal-detail' deal.id %}" style="color:white;text-decoration:none;">{{ deal.lead.company_name }}</a>
+                            </div>
+                            <div style="font-size:0.72rem;color:var(--text-gray);">{{ deal.lead.contact_name }}</div>
+                        </div>
+                        <span class="deal-stage-badge">{{ deal.stage }}</span>
+                        <div style="text-align:right;">
+                            <div class="deal-value">${{ deal.deal_value_monthly }}/mo</div>
+                            <div style="font-size:0.68rem;color:var(--text-dark-gray);">{{ deal.close_probability|floatformat:0 }}% close</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div style="text-align:center;padding:32px;color:var(--text-gray);">
+                        <i class='bx bx-git-pull-request' style="font-size:2rem;display:block;margin-bottom:8px;"></i>
+                        No active deals yet.<br>Score a lead to create one.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Sales Funnel + Quick Actions ──────────────────── -->
+    <div class="panel" style="margin-bottom:40px;">
+        <div class="panel-header">
+            <span class="panel-title">📊 Sales Funnel</span>
+        </div>
+        <div class="panel-body">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px;">
+                <div>
+                    {% with total_leads as base %}
+                    <div class="funnel-row">
+                        <div class="funnel-label">All Leads</div>
+                        <div class="funnel-bar" style="width:100%;">{{ total_leads }}</div>
+                    </div>
+                    <div class="funnel-row">
+                        <div class="funnel-label">Qualified</div>
+                        <div class="funnel-bar" style="width:{% if total_leads %}{{ qualified_leads|floatformat:0 }}%{% else %}0%{% endif %};background:linear-gradient(90deg,#3a7bd5,rgba(58,123,213,0.3));">{{ qualified_leads }}</div>
+                    </div>
+                    <div class="funnel-row">
+                        <div class="funnel-label">In Sequence</div>
+                        <div class="funnel-bar" style="width:{% if total_leads %}{{ active_sequences|floatformat:0 }}%{% else %}0%{% endif %};background:linear-gradient(90deg,#00a6fb,rgba(0,166,251,0.3));">{{ active_sequences }}</div>
+                    </div>
+                    <div class="funnel-row">
+                        <div class="funnel-label">Demos</div>
+                        <div class="funnel-bar" style="width:{% if total_leads %}{{ demos_this_month|floatformat:0 }}%{% else %}0%{% endif %};">{{ demos_this_month }}</div>
+                    </div>
+                    {% endwith %}
+                </div>
+                <div style="border-left:1px solid var(--secondary);padding-left:32px;">
+                    <div style="font-family:var(--font-mono);font-size:0.68rem;color:var(--text-dark-gray);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:14px;">Quick Actions</div>
+                    <div class="quick-actions">
+                        <a href="{% url 'lead-create' %}" class="btn-brand ghost"><i class='bx bx-plus'></i> Add Lead Manually</a>
+                        <a href="{% url 'lead-list' %}" class="btn-brand ghost"><i class='bx bx-list-ul'></i> View All Leads</a>
+                        <a href="{% url 'deal-pipeline' %}" class="btn-brand ghost"><i class='bx bx-git-pull-request'></i> Deal Pipeline</a>
+                        <a href="{% url 'demo-booking' %}" class="btn-brand ghost" target="_blank"><i class='bx bx-calendar-check'></i> Open Demo Page</a>
+                        <a href="{% url 'sales-analytics' %}" class="btn-brand ghost"><i class='bx bx-bar-chart'></i> Analytics</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div><!-- /page-wrap -->
+
+<!-- ── AI Chat Widget ────────────────────────────────────────── -->
+<div id="chat-widget" style="position:fixed;bottom:24px;right:24px;z-index:200;">
+    <div id="chat-bubble" onclick="toggleChat()" style="width:52px;height:52px;background:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 8px 24px rgba(0,229,255,0.3);transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'">
+        <i class='bx bx-bot' style="font-size:1.6rem;color:#000;"></i>
+    </div>
+    <div id="chat-panel" style="display:none;position:absolute;bottom:64px;right:0;width:320px;background:var(--bg-elevated);border:1px solid var(--primary);border-radius:16px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.5);">
+        <div style="background:var(--primary);padding:12px 16px;display:flex;align-items:center;gap:8px;">
+            <i class='bx bx-bot' style="font-size:1.2rem;color:#000;"></i>
+            <span style="font-weight:700;color:#000;font-size:0.9rem;">Alex — AI Sales Assistant</span>
+        </div>
+        <div id="chat-messages" style="height:260px;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;">
+            <div style="background:var(--bg-surface);border-radius:12px;padding:10px 12px;font-size:0.8rem;color:var(--text-gray);max-width:90%;">
+                Hi! I'm Alex. How can I help you today? Are you looking to learn more about Transform.io?
+            </div>
+        </div>
+        <div style="padding:12px;border-top:1px solid var(--secondary);display:flex;gap:8px;">
+            <input id="chat-input" type="text" placeholder="Type a message..." style="flex:1;background:var(--bg-surface);border:1px solid var(--secondary);border-radius:8px;padding:8px 12px;color:white;font-size:0.8rem;outline:none;" onkeydown="if(event.key==='Enter')sendChat()">
+            <button onclick="sendChat()" style="background:var(--primary);border:none;border-radius:8px;padding:8px 14px;cursor:pointer;color:#000;font-weight:700;font-size:0.85rem;transition:background 0.2s;" onmouseover="this.style.background='#00c4d8'" onmouseout="this.style.background='var(--primary)'">→</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ── Alert dismissal ──────────────────────────────────────────────
+async function dismissAlert(alertId) {
+    await fetch(`/api/sales/alerts/${alertId}/dismiss/`, {
+        method: 'POST',
+        headers: {'X-CSRFToken': getCookie('csrftoken')}
+    });
+    const el = document.getElementById(`alert-${alertId}`);
+    el.style.opacity = '0';
+    el.style.transition = 'opacity 0.3s';
+    setTimeout(() => el.remove(), 300);
+}
+
+// ── Chat widget ──────────────────────────────────────────────────
+let chatHistory = [];
+function toggleChat() {
+    const panel = document.getElementById('chat-panel');
+    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+}
+async function sendChat() {
+    const input = document.getElementById('chat-input');
+    const msg = input.value.trim();
+    if (!msg) return;
+    input.value = '';
+    appendChatMsg('user', msg);
+    chatHistory.push({role:'user', content: msg});
+    appendChatMsg('assistant', '...');
+    const res = await fetch('/api/sales-chat/', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({message: msg, history: chatHistory})
+    });
+    const data = await res.json();
+    const msgs = document.getElementById('chat-messages');
+    msgs.removeChild(msgs.lastChild);
+    const reply = data.reply || "Let me connect you with our team!";
+    appendChatMsg('assistant', reply);
+    chatHistory.push({role:'assistant', content: reply});
+}
+function appendChatMsg(role, text) {
+    const msgs = document.getElementById('chat-messages');
+    const div = document.createElement('div');
+    div.style.cssText = role === 'user'
+        ? 'background:var(--primary-dim);border-radius:12px;padding:10px 12px;font-size:0.8rem;color:white;max-width:90%;align-self:flex-end;margin-left:auto;'
+        : 'background:var(--bg-surface);border-radius:12px;padding:10px 12px;font-size:0.8rem;color:var(--text-gray);max-width:90%;';
+    div.textContent = text;
+    msgs.appendChild(div);
+    msgs.scrollTop = msgs.scrollHeight;
+}
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        document.cookie.split(';').forEach(c => {
+            const cookie = c.trim();
+            if (cookie.startsWith(name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            }
+        });
+    }
+    return cookieValue;
+}
+</script>
+<script src="{% static 'tracking_app/transform.js' %}"></script>
+</body>
+</html>

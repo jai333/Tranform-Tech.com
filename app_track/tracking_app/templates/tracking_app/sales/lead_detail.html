@@ -1,0 +1,588 @@
+{% load static %}
+{% load custom_filters %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title }} — Transform.io</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'tracking_app/transform.css' %}?v=334">
+    <!-- ▸ Apply saved theme before render to avoid flash of wrong theme -->
+    <script>
+        (function(){
+            var t = localStorage.getItem('theme');
+            if(t === 'light') document.documentElement.classList.add('light-theme');
+        })();
+    </script>
+    <style>
+        body { padding-top: 75px; }
+        .page-wrap { max-width: 1200px; margin: 0 auto; padding: 32px 24px; }
+        
+        .back-link { color: var(--text-gray); text-decoration: none; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 6px; margin-bottom: 24px; }
+        .back-link:hover { color: var(--primary); }
+
+        .lead-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; margin-top: 20px; }
+        
+        .panel { background: var(--bg-elevated); border: 1px solid var(--secondary); border-radius: 12px; overflow: hidden; margin-bottom: 24px; }
+        .panel-header { padding: 16px 20px; border-bottom: 1px solid var(--secondary); display: flex; justify-content: space-between; align-items: center; }
+        .panel-title { font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 1.5px; text-transform: uppercase; color: white; display: flex; align-items: center; gap: 8px; }
+        .panel-body { padding: 20px; }
+
+        /* Score & Badges */
+        .large-score { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; }
+        .score-circle { width: 70px; height: 70px; border-radius: 50%; border: 3px solid var(--primary); display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: var(--font-mono); font-weight: 800; color: white; background: rgba(0,229,255,0.06); box-shadow: 0 0 16px rgba(0,229,255,0.15); }
+        .score-circle .num { font-size: 1.5rem; line-height: 1; }
+        .score-circle .lbl { font-size: 0.55rem; color: var(--text-dark-gray); text-transform: uppercase; margin-top: 2px; }
+
+        .badge-status { padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-family: var(--font-mono); text-transform: uppercase; background: rgba(0,229,255,0.1); color: var(--primary); }
+        .badge-status.converted { background: rgba(52,199,89,0.15); color: #34C759; }
+        .badge-status.lost { background: rgba(255,59,48,0.15); color: #FF3B30; }
+
+        /* Tag lists */
+        .tag-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+        .tag-pill { font-size: 0.75rem; padding: 4px 10px; border-radius: 6px; background: var(--secondary); color: var(--text-gray); border: 1px solid rgba(255,255,255,0.03); }
+        
+        /* ── AI Cold Outreach Generator ── */
+        .email-composer { background: rgba(0,0,0,.25); border: 1px solid rgba(0,229,255,.15);
+            border-radius: 12px; padding: 20px; margin-top: 16px; }
+        .composer-controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+        .composer-select { background: var(--bg-surface); border: 1px solid var(--secondary);
+            border-radius: 8px; color: white; padding: 7px 12px; font-size: 0.8rem;
+            outline: none; cursor: pointer; transition: border-color .2s; }
+        .composer-select:focus, .composer-select:hover { border-color: var(--primary); }
+        .btn-draft { background: var(--primary); color: #000; font-weight: 700; font-size: 0.82rem;
+            padding: 8px 18px; border: none; border-radius: 8px; cursor: pointer;
+            display: inline-flex; align-items: center; gap: 6px; transition: opacity .2s;
+            white-space: nowrap; }
+        .btn-draft:disabled { opacity: .5; cursor: not-allowed; }
+        .btn-draft:hover:not(:disabled) { opacity: .85; }
+
+        /* Preview box */
+        .composer-preview { background: var(--bg-surface); border: 1px solid rgba(0,229,255,.2);
+            border-radius: 10px; padding: 20px; margin-top: 16px; display: none;
+            animation: slideDown .25s ease; }
+        @keyframes slideDown { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
+        .preview-subject { font-weight: 700; color: white; margin-bottom: 12px;
+            border-bottom: 1px solid var(--secondary); padding-bottom: 10px;
+            font-size: 0.92rem; display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+        .preview-subj-text { flex: 1; }
+        .preview-body { font-size: 0.855rem; color: #d0d0d0; white-space: pre-wrap;
+            line-height: 1.7; min-height: 80px; }
+        .preview-body .cursor { display: inline-block; width: 2px; height: 1em;
+            background: var(--primary); margin-left: 1px;
+            animation: blink .7s step-end infinite; vertical-align: text-bottom; }
+        @keyframes blink { 50% { opacity: 0; } }
+        .preview-actions { display: flex; justify-content: space-between; align-items: center;
+            margin-top: 16px; gap: 8px; flex-wrap: wrap; }
+        .char-count { font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-dark-gray); }
+        .btn-copy { background: none; border: 1px solid var(--secondary); color: var(--text-gray);
+            font-size: 0.78rem; padding: 6px 12px; border-radius: 7px; cursor: pointer;
+            display: inline-flex; align-items: center; gap: 5px; transition: all .2s; }
+        .btn-copy:hover { border-color: var(--primary); color: var(--primary); }
+        .btn-copy.copied { border-color: #34C759; color: #34C759; }
+        .step-badge { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-mono);
+            font-size: 0.7rem; padding: 3px 8px; border-radius: 5px;
+            background: rgba(0,229,255,.1); color: var(--primary); margin-right: auto; }
+
+        /* Timeline list */
+        .email-list-item { border-bottom: 1px solid rgba(255,255,255,0.04); padding: 12px 0; }
+        .email-list-item:last-child { border-bottom: none; }
+        .email-meta { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-dark-gray); font-family: var(--font-mono); margin-bottom: 4px; }
+        .email-subj { font-weight: 600; color: white; font-size: 0.85rem; }
+        .email-status { font-size: 0.7rem; text-transform: uppercase; font-family: var(--font-mono); padding: 1px 6px; border-radius: 4px; background: rgba(255,255,255,0.08); color: var(--text-gray); }
+        .email-status.sent { background: rgba(58,123,213,0.15); color: #3a7bd5; }
+        .email-status.opened { background: rgba(0,229,255,0.12); color: var(--primary); }
+        .email-status.replied { background: rgba(52,199,89,0.15); color: #34C759; }
+
+        /* Info rows */
+        .info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 0.85rem; }
+        .info-row:last-child { border-bottom: none; }
+        .info-lbl { color: var(--text-gray); }
+        .info-val { color: white; font-weight: 500; text-align: right; }
+
+        .btn-sm { padding: 6px 12px; font-size: 0.8rem; border-radius: 6px; border: 1px solid var(--secondary); background: none; color: var(--text-gray); cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; transition: all 0.2s; }
+        .btn-sm:hover { border-color: var(--primary); color: var(--primary); }
+        .btn-sm.cyan { background: var(--primary); color: #000; border-color: var(--primary); font-weight: 600; }
+        .btn-sm.cyan:hover { background: #00c4d8; }
+        
+        .btn-block { display: flex; width: 100%; justify-content: center; margin-top: 12px; }
+
+        /* Chart bar */
+        .chart-row { margin-bottom: 8px; }
+        .chart-header { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-gray); margin-bottom: 4px; }
+        .chart-track { height: 6px; background: var(--secondary); border-radius: 3px; overflow: hidden; }
+        .chart-fill { height: 100%; background: var(--primary); border-radius: 3px; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="container nav-content">
+        <a class="logo" href="{% url 'home' %}">
+            <img src="{% static 'tracking_app/assets/logo-333.png' %}" alt="Transform.io" height="32" onerror="this.style.display='none'">
+            <span>Transform<span class="text-cyan">.io</span></span>
+        </a>
+        <div style="display:flex;align-items:center;gap:12px;">
+            <span style="font-size:0.75rem;color:var(--text-gray);"><span class="live-dot"></span>AI Sales System</span>
+            <a href="{% url 'lead-list' %}" class="btn-sm" style="text-decoration:none;"><i class='bx bx-arrow-back'></i> Leads</a>
+            <button id="theme-toggle" class="btn btn-primary btn-lg" title="Toggle light/dark theme" style="width: 50px; height: 50px; padding: 0; display: flex; align-items: center; justify-content: center; border-radius: 50%;"><i id="theme-icon" class="fas fa-moon"></i></button>
+        </div>
+    </div>
+</nav>
+
+<div class="page-wrap">
+    <a href="{% url 'lead-list' %}" class="back-link"><i class='bx bx-left-arrow-alt'></i> Back to Leads</a>
+
+    <div class="large-score">
+        <div class="score-circle">
+            <span class="num" id="lead-score-text">{{ lead.icp_score|floatformat:0 }}</span>
+            <span class="lbl">ICP Score</span>
+        </div>
+        <div>
+            <h1 style="font-size:1.8rem;font-weight:800;color:white;margin-bottom:6px;">
+                {{ lead.contact_name }}
+                {% if lead.is_hot %}🔥{% endif %}
+            </h1>
+            <div style="display:flex;align-items:center;gap:8px;">
+                <span class="badge-status {{ lead.status }}" id="lead-status-text">{{ lead.get_status_display }}</span>
+                <span style="color:var(--text-gray);font-size:0.85rem;">at <strong>{{ lead.company_name }}</strong></span>
+            </div>
+        </div>
+        
+        <div style="margin-left:auto;">
+            <button class="btn-sm cyan" id="btn-score-lead" onclick="scoreLead({{ lead.id }})">
+                <i class='bx bx-brain'></i> AI ICP Score
+            </button>
+        </div>
+    </div>
+
+    <div class="lead-grid">
+        <!-- Main Column -->
+        <div>
+            <!-- AI Sourcing Overview -->
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-title"><i class='bx bx-dna'></i> Lead Sourcing Intelligence</span>
+                </div>
+                <div class="panel-body">
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+                        <div>
+                            <h3 style="font-size:0.85rem;color:white;margin-bottom:8px;">🎯 Detected Pain Points</h3>
+                            {% if lead.pain_points %}
+                                <div class="tag-list">
+                                    {% for pain in lead.pain_points %}
+                                    <div class="tag-pill">{{ pain }}</div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <p style="font-size:0.8rem;color:var(--text-dark-gray);font-style:italic;">No paint points detected yet. Click AI ICP Score to enrich.</p>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <h3 style="font-size:0.85rem;color:white;margin-bottom:8px;">💻 Technology Stack</h3>
+                            {% if lead.tech_stack %}
+                                <div class="tag-list">
+                                    {% for tech in lead.tech_stack %}
+                                    <div class="tag-pill">{{ tech }}</div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <p style="font-size:0.8rem;color:var(--text-dark-gray);font-style:italic;">No tech stack info detected.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {% if lead.icp_score_breakdown %}
+                    <div style="margin-top:24px;border-top:1px solid var(--secondary);padding-top:20px;">
+                        <h3 style="font-size:0.85rem;color:white;margin-bottom:12px;font-family:var(--font-mono);letter-spacing:1px;text-transform:uppercase;">ICP Scoring Factors Breakdown</h3>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                            {% for factor, score in lead.icp_score_breakdown.items %}
+                            <div class="chart-row">
+                                <div class="chart-header">
+                                    <span>{{ factor|replace:"_, "|title }}</span>
+                                    <span>{{ score }}/20</span>
+                                </div>
+                                <div class="chart-track">
+                                    <div class="chart-fill" style="width:{% widthratio score 20 100 %}%;"></div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Outreach Drip Email Sequence -->
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-title"><i class='bx bx-mail-send'></i> Automated Outreach Sequence</span>
+                </div>
+                <div class="panel-body">
+                    <!-- AI Cold Outreach Generator widget -->
+                    <div class="email-composer">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+                            <div style="font-size:0.9rem;color:white;font-weight:700;display:flex;align-items:center;gap:8px;">
+                                🤖 AI Cold Outreach Generator
+                            </div>
+                            <span style="font-size:0.7rem;color:var(--text-dark-gray);font-family:var(--font-mono);">personalised · 5-step · A/B variants</span>
+                        </div>
+
+                        <div class="composer-controls">
+                            <select id="sequence-step" class="composer-select" title="Email step">
+                                <option value="1">📬 Step 1 — First Touch (Intro)</option>
+                                <option value="2">📊 Step 2 — Stat / Case Study</option>
+                                <option value="3">💡 Step 3 — Pain Point Focus</option>
+                                <option value="4">⭐ Step 4 — Social Proof</option>
+                                <option value="5">👋 Step 5 — Break-up Email</option>
+                            </select>
+                            <select id="ab-variant" class="composer-select" title="Tone variant">
+                                <option value="A">🎩 Variant A — Formal</option>
+                                <option value="B">✌️ Variant B — Casual</option>
+                            </select>
+                            <button class="btn-draft" id="btn-draft-email" onclick="draftEmail({{ lead.id }})">
+                                <i class='bx bx-pencil'></i> Generate Email
+                            </button>
+                        </div>
+
+                        <!-- Draft Preview -->
+                        <div class="composer-preview" id="email-preview-box">
+                            <div class="preview-subject">
+                                <div class="preview-subj-text">
+                                    <span style="color:var(--text-dark-gray);font-size:0.72rem;font-family:var(--font-mono);display:block;margin-bottom:4px;">SUBJECT LINE</span>
+                                    <span id="preview-subj-text"></span>
+                                </div>
+                                <button class="btn-copy" id="btn-copy-subj" onclick="copyText('subj')" title="Copy subject">
+                                    <i class='bx bx-copy'></i> Copy
+                                </button>
+                            </div>
+                            <div style="margin-bottom:8px;">
+                                <span style="color:var(--text-dark-gray);font-size:0.72rem;font-family:var(--font-mono);">EMAIL BODY</span>
+                            </div>
+                            <div class="preview-body" id="preview-body"></div>
+                            <div class="preview-actions">
+                                <div style="display:flex;align-items:center;gap:10px;">
+                                    <span class="step-badge" id="step-badge"><i class='bx bx-bot'></i> Step 1 · Variant A</span>
+                                    <span class="char-count" id="char-count">0 chars</span>
+                                </div>
+                                <div style="display:flex;gap:8px;">
+                                    <button class="btn-copy" id="btn-copy-body" onclick="copyText('body')">
+                                        <i class='bx bx-copy'></i> Copy Body
+                                    </button>
+                                    <button class="btn-sm" onclick="draftEmail({{ lead.id }})" title="Regenerate">
+                                        <i class='bx bx-refresh'></i> Regenerate
+                                    </button>
+                                    <button class="btn-sm" onclick="cancelDraft()">Discard</button>
+                                    <button class="btn-sm cyan" id="btn-send-draft" onclick="sendDraft()">
+                                        <i class='bx bx-send'></i> Send Outreach
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sent Emails List -->
+                    <div style="margin-top:24px;">
+                        <h3 style="font-size:0.85rem;color:white;margin-bottom:12px;">Email Timeline</h3>
+                        {% if emails %}
+                            {% for email in emails %}
+                            <div class="email-list-item">
+                                <div class="email-meta">
+                                    <span>Step {{ email.step.step_number|default:1 }} ({{ email.get_variant_display }})</span>
+                                    <span style="display:flex;gap:8px;align-items:center;">
+                                        <span class="email-status {{ email.status }}">{{ email.get_status_display }}</span>
+                                        <span>{{ email.created_at|date:"M d, Y H:i" }}</span>
+                                    </span>
+                                </div>
+                                <div class="email-subj">{{ email.subject }}</div>
+                                <div style="font-size:0.8rem;color:var(--text-dark-gray);margin-top:4px;white-space:pre-wrap;">{{ email.body|truncatewords:25 }}</div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <p style="color:var(--text-dark-gray);font-style:italic;font-size:0.8rem;text-align:center;padding:16px 0;">No outreach emails drafted or sent yet.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar Column -->
+        <div>
+            <!-- Contact info -->
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-title"><i class='bx bx-user-circle'></i> Contact Details</span>
+                </div>
+                <div class="panel-body" style="padding: 12px 20px;">
+                    <div class="info-row">
+                        <span class="info-lbl">Email</span>
+                        <span class="info-val" style="font-size:0.75rem;word-break:break-all;">{{ lead.email }}</span>
+                    </div>
+                    {% if lead.phone %}
+                    <div class="info-row">
+                        <span class="info-lbl">Phone</span>
+                        <span class="info-val">{{ lead.phone }}</span>
+                    </div>
+                    {% endif %}
+                    {% if lead.linkedin_url %}
+                    <div class="info-row">
+                        <span class="info-lbl">LinkedIn</span>
+                        <span class="info-val">
+                            <a href="{{ lead.linkedin_url }}" target="_blank" style="color:var(--primary);text-decoration:none;">Profile <i class='bx bx-link-external'></i></a>
+                        </span>
+                    </div>
+                    {% endif %}
+                    {% if lead.company_website %}
+                    <div class="info-row">
+                        <span class="info-lbl">Website</span>
+                        <span class="info-val">
+                            <a href="{{ lead.company_website }}" target="_blank" style="color:var(--primary);text-decoration:none;">Visit site <i class='bx bx-link-external'></i></a>
+                        </span>
+                    </div>
+                    {% endif %}
+                    <div class="info-row">
+                        <span class="info-lbl">Source</span>
+                        <span class="info-val" style="text-transform:capitalize;">{{ lead.get_source_display }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-lbl">Opens Count</span>
+                        <span class="info-val" style="font-family:var(--font-mono);">{{ lead.email_opens }} opens</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Deal details -->
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-title"><i class='bx bx-briefcase'></i> Associated Deal</span>
+                </div>
+                <div class="panel-body">
+                    {% if deal %}
+                        <div style="font-size:0.85rem;color:white;margin-bottom:8px;">
+                            <strong>Stage:</strong> {{ deal.get_stage_display }}<br>
+                            <strong>Value:</strong> ${{ deal.deal_value_monthly }}/mo<br>
+                            <strong>AI Win Prob:</strong> {{ deal.close_probability|floatformat:0 }}%
+                        </div>
+                        <a href="{% url 'deal-detail' deal.id %}" class="btn-sm cyan btn-block">Go to Deal View</a>
+                    {% else %}
+                        <p style="font-size:0.8rem;color:var(--text-gray);text-align:center;margin-bottom:12px;">No deal associated yet. Qualify lead (ICP score ≥65) to create one.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Demo Booking -->
+            {% if demo_bookings %}
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-title"><i class='bx bx-calendar-check'></i> Demo Booking</span>
+                </div>
+                <div class="panel-body">
+                    {% for db in demo_bookings %}
+                    <div style="font-size:0.8rem;color:white;border-bottom:1px solid rgba(255,255,255,0.04);padding-bottom:10px;margin-bottom:10px;">
+                        <strong>Date:</strong> {{ db.scheduled_at|date:"M d, Y H:i" }}<br>
+                        <strong>Status:</strong> <span style="color:var(--primary);">{{ db.get_status_display }}</span>
+                        {% if db.main_pain_point %}
+                        <br><strong>Pain:</strong> <span style="font-size:0.75rem;color:var(--text-gray);">{{ db.main_pain_point }}</span>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+let draftEmailId = null;
+
+async function scoreLead(leadId) {
+    const btn = document.getElementById('btn-score-lead');
+    btn.disabled = true;
+    btn.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> Scoring...";
+    
+    try {
+        const res = await fetch(`/api/sales/leads/${leadId}/score/`, {
+            method: 'POST',
+            headers: {'X-CSRFToken': getCsrf()}
+        });
+        const data = await res.json();
+        if (data.success) {
+            document.getElementById('lead-score-text').textContent = Math.round(data.score);
+            document.getElementById('lead-status-text').textContent = data.status.toUpperCase();
+            // Refresh in 1s to reload full page and show breakdowns
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            alert('Scoring failed: ' + data.error);
+        }
+    } catch (e) {
+        alert('Network error during scoring.');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = "<i class='bx bx-brain'></i> AI ICP Score";
+    }
+}
+
+/* ── Cold Outreach Generator ── */
+let _currentSubject = '';
+let _currentBody    = '';
+
+async function draftEmail(leadId) {
+    const step    = document.getElementById('sequence-step').value;
+    const variant = document.getElementById('ab-variant').value;
+    const btn     = document.getElementById('btn-draft-email');
+
+    btn.disabled = true;
+    btn.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> Thinking…";
+
+    // Hide old preview while loading
+    const box = document.getElementById('email-preview-box');
+    box.style.display = 'none';
+
+    try {
+        const res = await fetch(`/api/sales/leads/${leadId}/email/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCsrf()
+            },
+            body: JSON.stringify({ step: parseInt(step), variant: variant })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            draftEmailId    = data.email_id;
+            _currentSubject = data.subject;
+            _currentBody    = data.body;
+
+            // Populate subject
+            document.getElementById('preview-subj-text').textContent = data.subject;
+
+            // Typing animation for body
+            const bodyEl = document.getElementById('preview-body');
+            bodyEl.innerHTML = '<span class="cursor"></span>';
+            box.style.display = 'block';
+
+            // Step badge
+            const stepLabels = {1:'First Touch',2:'Stat/Case',3:'Pain Point',4:'Social Proof',5:'Break-up'};
+            document.getElementById('step-badge').innerHTML =
+                `<i class='bx bx-bot'></i> Step ${step} · ${stepLabels[step]} · Variant ${variant}`;
+
+            // Reset copy buttons
+            ['btn-copy-subj','btn-copy-body'].forEach(id => {
+                const b = document.getElementById(id);
+                b.classList.remove('copied');
+                b.innerHTML = id.includes('subj') ? "<i class='bx bx-copy'></i> Copy" : "<i class='bx bx-copy'></i> Copy Body";
+            });
+
+            // Animate typing
+            await typeText(bodyEl, data.body);
+
+            // Char count
+            document.getElementById('char-count').textContent = data.body.length + ' chars';
+
+        } else {
+            showToast('❌ Generation failed: ' + (data.error || 'unknown error'), 'error');
+        }
+    } catch(e) {
+        showToast('❌ Network error. Please try again.', 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = "<i class='bx bx-pencil'></i> Generate Email";
+    }
+}
+
+function typeText(el, text) {
+    return new Promise(resolve => {
+        let i = 0;
+        const speed = Math.max(8, Math.min(18, Math.floor(2000 / text.length)));
+        function tick() {
+            if (i <= text.length) {
+                el.innerHTML = escHtml(text.slice(0, i)) + '<span class="cursor"></span>';
+                i++;
+                setTimeout(tick, speed);
+            } else {
+                el.innerHTML = escHtml(text); // final — no cursor
+                resolve();
+            }
+        }
+        tick();
+    });
+}
+
+function escHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+}
+
+function copyText(which) {
+    const text  = which === 'subj' ? _currentSubject : _currentBody;
+    const btnId = which === 'subj' ? 'btn-copy-subj' : 'btn-copy-body';
+    const btn   = document.getElementById(btnId);
+    navigator.clipboard.writeText(text).then(() => {
+        btn.classList.add('copied');
+        btn.innerHTML = "<i class='bx bx-check'></i> Copied!";
+        setTimeout(() => {
+            btn.classList.remove('copied');
+            btn.innerHTML = which === 'subj' ? "<i class='bx bx-copy'></i> Copy" : "<i class='bx bx-copy'></i> Copy Body";
+        }, 2000);
+    });
+}
+
+function cancelDraft() {
+    draftEmailId = null;
+    document.getElementById('email-preview-box').style.display = 'none';
+}
+
+async function sendDraft() {
+    if (!draftEmailId) return;
+    const btn = document.getElementById('btn-send-draft');
+    btn.disabled = true;
+    btn.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> Sending…";
+
+    try {
+        const res = await fetch(`/api/sales/emails/${draftEmailId}/send/`, {
+            method: 'POST',
+            headers: {'X-CSRFToken': getCsrf()}
+        });
+        const data = await res.json();
+        if (data.success) {
+            showToast('✅ Email sent successfully!', 'success');
+            setTimeout(() => location.reload(), 1200);
+        } else {
+            showToast('❌ Send failed: ' + data.error, 'error');
+            btn.disabled = false;
+            btn.innerHTML = "<i class='bx bx-send'></i> Send Outreach";
+        }
+    } catch (e) {
+        showToast('❌ Network error sending email.', 'error');
+        btn.disabled = false;
+        btn.innerHTML = "<i class='bx bx-send'></i> Send Outreach";
+    }
+}
+
+function showToast(msg, type) {
+    const existing = document.getElementById('toast-msg');
+    if (existing) existing.remove();
+    const t = document.createElement('div');
+    t.id = 'toast-msg';
+    t.style.cssText = `position:fixed;bottom:28px;right:28px;z-index:9999;padding:13px 22px;
+        border-radius:10px;font-size:0.875rem;font-weight:600;
+        background:${ type==='success' ? 'rgba(52,199,89,.9)' : 'rgba(255,69,58,.9)' };
+        color:white;box-shadow:0 4px 20px rgba(0,0,0,.3);
+        animation:slideDown .25s ease;`;
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 3500);
+}
+
+function getCsrf() {
+    const m = document.cookie.match(/csrftoken=([^;]+)/);
+    return m ? m[1] : '';
+}
+</script>
+<script src="{% static 'tracking_app/transform.js' %}"></script>
+</body>
+</html>

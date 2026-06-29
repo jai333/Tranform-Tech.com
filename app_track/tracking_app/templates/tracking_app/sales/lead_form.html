@@ -1,0 +1,102 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Lead — Transform.io Sales</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="{% static 'tracking_app/transform.css' %}?v=334">
+    <style>
+        body { padding-top: 75px; }
+        .form-wrap { max-width: 700px; margin: 48px auto; padding: 0 24px; }
+        .form-panel { background: var(--bg-elevated); border: 1px solid var(--secondary); border-radius: 16px; padding: 40px; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+        .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+        .form-group label { font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-dark-gray); }
+        .form-group input, .form-group select, .form-group textarea { background: var(--bg-surface); border: 1px solid var(--secondary); border-radius: 8px; color: white; padding: 10px 14px; font-size: 0.875rem; outline: none; transition: border-color 0.2s; font-family: inherit; }
+        .form-group input:focus, .form-group select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0,229,255,0.08); }
+        .submit-btn { width: 100%; padding: 14px; background: var(--primary); color: #000; border: none; border-radius: 10px; font-size: 0.95rem; font-weight: 700; cursor: pointer; margin-top: 8px; transition: all 0.2s; }
+        .submit-btn:hover { background: #00c4d8; transform: translateY(-1px); }
+    </style>
+</head>
+<body>
+<nav class="navbar">
+    <div class="container nav-content">
+        <a class="logo" href="{% url 'home' %}">Transform<span class="text-cyan">.io</span></a>
+        <a href="{% url 'lead-list' %}" style="color:var(--text-gray);text-decoration:none;font-size:0.85rem;">← All Leads</a>
+    </div>
+</nav>
+
+<div class="form-wrap">
+    <h1 style="font-size:1.8rem;font-weight:800;color:white;margin-bottom:8px;">➕ Add New Lead</h1>
+    <p style="color:var(--text-gray);margin-bottom:32px;">After saving, click "AI Score" to get an ICP fit score powered by GPT-4o.</p>
+
+    <div class="form-panel">
+        <form method="post">
+            {% csrf_token %}
+            <div style="font-family:var(--font-mono);font-size:0.7rem;color:var(--primary);text-transform:uppercase;letter-spacing:2px;margin-bottom:20px;">Contact Info</div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Full Name *</label>
+                    <input type="text" name="contact_name" required placeholder="Jane Smith">
+                </div>
+                <div class="form-group">
+                    <label>Email *</label>
+                    <input type="email" name="email" required placeholder="jane@company.com">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>LinkedIn URL</label>
+                    <input type="url" name="linkedin_url" placeholder="https://linkedin.com/in/...">
+                </div>
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input type="tel" name="phone" placeholder="+1 555 000 0000">
+                </div>
+            </div>
+
+            <div style="font-family:var(--font-mono);font-size:0.7rem;color:var(--primary);text-transform:uppercase;letter-spacing:2px;margin:24px 0 20px;">Company Info</div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Company Name *</label>
+                    <input type="text" name="company_name" required placeholder="Acme Corp">
+                </div>
+                <div class="form-group">
+                    <label>Company Size (employees)</label>
+                    <input type="number" name="company_size" placeholder="50">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Industry</label>
+                    <select name="industry">
+                        <option value="">— Select —</option>
+                        <option>Staffing & Recruiting</option>
+                        <option>Technology</option>
+                        <option>Healthcare</option>
+                        <option>Financial Services</option>
+                        <option>Retail & E-commerce</option>
+                        <option>Manufacturing</option>
+                        <option>Professional Services</option>
+                        <option>Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Current ATS Tool</label>
+                    <input type="text" name="current_ats_tool" placeholder="e.g. Greenhouse, none, spreadsheet">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Company Website</label>
+                <input type="url" name="company_website" placeholder="https://acme.com">
+            </div>
+
+            <button type="submit" class="submit-btn">Save Lead & Get AI Score →</button>
+        </form>
+    </div>
+</div>
+</body>
+</html>

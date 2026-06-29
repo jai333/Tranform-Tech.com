@@ -9,18 +9,26 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;600&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="{% static 'tracking_app/transform.css' %}?v=334">
     <style>
-        .huge-title { font-size: 2.5rem; letter-spacing: -0.03em; color: white; margin-bottom: 24px; line-height: 1.1; }
-        .sub-tag { color: var(--primary); font-family: var(--font-mono); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; display: block; }
-        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
-        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
-        .data-card { background: var(--bg-surface); border: 1px solid var(--secondary); padding: 24px; border-radius: 8px; }
-        .data-card i { font-size: 2rem; color: var(--primary); margin-bottom: 16px; }
-        .data-card h4 { color: white; font-family: var(--font-mono); font-size: 0.95rem; margin-bottom: 8px; }
-        .data-card p { color: var(--text-gray); font-size: 0.85rem; line-height: 1.5; }
-        .system-highlight { background: rgba(0, 229, 255, 0.05); border-left: 3px solid var(--primary); padding: 24px; margin-top: 24px; }
-    </style>
+    .huge-title { font-size: 2.5rem; letter-spacing: -0.03em; color: white; margin-bottom: 24px; line-height: 1.1; }
+    .sub-tag { color: var(--primary); font-family: var(--font-mono); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; display: block; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+    .data-card { background: var(--bg-surface); border: 1px solid var(--secondary); padding: 24px; border-radius: 8px; }
+    .data-card i { font-size: 2rem; color: var(--primary); margin-bottom: 16px; }
+    .data-card h4 { color: white; font-family: var(--font-mono); font-size: 0.95rem; margin-bottom: 8px; }
+    .data-card p { color: var(--text-gray); font-size: 0.85rem; line-height: 1.5; }
+    .system-highlight { background: rgba(0, 229, 255, 0.05); border-left: 3px solid var(--primary); padding: 24px; margin-top: 24px; }
+</style>
+<script>
+    // Apply saved theme before render to avoid flash
+    (function(){
+        const saved = localStorage.getItem('theme') || 'dark';
+        if (saved === 'light') document.documentElement.classList.add('light-theme');
+    })();
+</script>
 </head>
 <body>
 
@@ -60,11 +68,28 @@
                 </li>
 
                 <li>
+                    <a href="#">SALES MACHINE <i class='bx bx-chevron-down'></i></a>
+                    <div class="mega-menu">
+                        <div class="mega-col">
+                            <span class="mega-header">AI SALES SYSTEM</span>
+                            <a href="{% url 'demo-booking' %}">Book A Demo (Public)</a>
+                            {% if user.is_authenticated %}
+                            <a href="{% url 'sales-dashboard' %}">Sales Dashboard</a>
+                            <a href="{% url 'deal-pipeline' %}">Deal Pipeline</a>
+                            <a href="{% url 'lead-list' %}">Leads Manager</a>
+                            <a href="{% url 'sales-analytics' %}">Sales Analytics</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </li>
+
+                <li>
                     <a href="{% url 'public-blog' %}">RESOURCES</a>
                 </li>
             </ul>
 
             <div class="flex gap-sm">
+                <button id="theme-toggle" class="btn btn-primary btn-sm" title="Toggle light/dark theme" style="width: 50px; height: 50px; padding: 0; display: flex; align-items: center; justify-content: center; margin-right: 0.5rem; border-radius: 50%;"><i id="theme-icon" class="fas fa-moon"></i></button>
                 {% if user.is_authenticated %}
                 <a href="{% url 'candidate-list' %}" class="btn btn-cyan font-mono">/DASHBOARD</a>
                 {% else %}
@@ -249,6 +274,91 @@
                     <!-- Fallback if image doesn't exist -->
                     <div style="background: linear-gradient(135deg, #0a0a0a, #111); border-radius: 8px; padding: 40px; min-height: 300px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 16px;">
                         <i class="fa-solid fa-chart-line" style="font-size: 4rem; color: #00E5FF; opacity: 0.6;"></i>
+                        <div style="font-family: 'Fira Code', monospace; color: #888; font-size: 0.85rem; text-align: center;">
+                            RECRUITMENT DATA TELEMETRY<br>
+                            <span style="color: #00E5FF;">COMMAND CENTER v3.1</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Military-Grade Cybersecurity -->
+    <section class="container mt-xl pb-lg border-bottom" id="cybersecurity">
+        <div style="display: flex; flex-wrap: wrap; gap: 64px; align-items: center;">
+            <div style="flex: 1; min-width: 300px;">
+                <span class="sub-tag">SECURITY_OPS LAYER</span>
+                <h2 class="huge-title">Military-Grade<br>Cybersecurity.</h2>
+                <p class="text-gray" style="font-size: 1.1rem; line-height: 1.6; margin-bottom: 24px;">
+                    Every byte of candidate and client data is protected by enterprise-grade encryption, zero-trust architecture, and real-time threat monitoring. Built for industries where compliance isn't optional.
+                </p>
+
+                <div style="margin-bottom: 16px;">
+                    <h4 style="color: white; font-family: var(--font-mono); font-size: 0.95rem; margin-bottom: 4px;"><i class='bx bx-shield-quarter text-primary'></i> Zero-Trust Compliance</h4>
+                    <p class="text-gray" style="font-size: 0.85rem; line-height: 1.5;">SOC 2 Type II, GDPR, and HIPAA-ready architecture. Every API call is authenticated, authorized, and audited.</p>
+                </div>
+                <div style="margin-bottom: 16px;">
+                    <h4 style="color: white; font-family: var(--font-mono); font-size: 0.95rem; margin-bottom: 4px;"><i class='bx bx-data text-primary'></i> Encrypted PII Vault</h4>
+                    <p class="text-gray" style="font-size: 0.85rem; line-height: 1.5;">Candidate PII (SSN, DOB, salary data) is stored in AES-256 encrypted vaults with role-based decryption keys.</p>
+                </div>
+                <div style="margin-bottom: 16px;">
+                    <h4 style="color: white; font-family: var(--font-mono); font-size: 0.95rem; margin-bottom: 4px;"><i class='bx bx-radar text-primary'></i> Real-Time Threat Monitoring</h4>
+                    <p class="text-gray" style="font-size: 0.85rem; line-height: 1.5;">Continuous monitoring detects anomalous access patterns. Automated lockdowns trigger if brute-force or injection attacks are detected.</p>
+                </div>
+                <div style="margin-bottom: 16px;">
+                    <h4 style="color: white; font-family: var(--font-mono); font-size: 0.95rem; margin-bottom: 4px;"><i class='bx bx-lock-alt text-primary'></i> Immutable Audit Logging</h4>
+                    <p class="text-gray" style="font-size: 0.85rem; line-height: 1.5;">Every single database read/write is immutably logged. Detect rogue exfiltration attempts instantly if an employee attempts a mass export.</p>
+                </div>
+            </div>
+            
+            <div style="flex: 1; min-width: 300px;">
+                <div class="border-glow" style="padding:4px; height: 100%;">
+                    <img src="{% static 'tracking_app/assets/cybersec_mockup_1776112528216.png' %}" alt="Military-Grade Cybersecurity Dashboard" style="width:100%; border-radius: 8px; display:block;">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- AI Pipeline Showcase -->
+    <section class="container mt-xl pb-lg border-bottom" id="ai-pipeline-showcase">
+        <div style="display: flex; flex-wrap: wrap; gap: 64px; align-items: center; margin-bottom: 64px;">
+            <div style="flex: 1; min-width: 300px;">
+                <span class="sub-tag">AI_PIPELINE ENGINE</span>
+                <h2 class="huge-title">Intelligent Recruitment<br>Data Telemetry.</h2>
+                <p class="text-gray" style="font-size: 1.1rem; line-height: 1.6; margin-bottom: 24px;">
+                    Real-time algorithmic pipeline tracking with predictive candidate matching. Our AI engine processes thousands of applications, identifies top talent, and provides actionable insights — all in one command center.
+                </p>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 32px;">
+                    <div class="border-glow" style="padding: 20px; text-align: center; background: rgba(0, 229, 255, 0.05);">
+                        <div class="stat-num" style="font-size: 2rem; font-weight: 800; color: #00E5FF; font-family: 'Fira Code', monospace;">142</div>
+                        <div style="font-size: 0.75rem; color: #888; font-family: 'Fira Code', monospace; margin-top: 4px;">ACTIVE REQS</div>
+                    </div>
+                    <div class="border-glow" style="padding: 20px; text-align: center; background: rgba(0, 229, 255, 0.05);">
+                        <div class="stat-num" style="font-size: 2rem; font-weight: 800; color: #00E5FF; font-family: 'Fira Code', monospace;">841</div>
+                        <div style="font-size: 0.75rem; color: #888; font-family: 'Fira Code', monospace; margin-top: 4px;">NEW APPLICANTS</div>
+                    </div>
+                    <div class="border-glow" style="padding: 20px; text-align: center; background: rgba(16, 185, 129, 0.05);">
+                        <div class="stat-num" style="font-size: 2rem; font-weight: 800; color: #10b981; font-family: 'Fira Code', monospace;">94%</div>
+                        <div style="font-size: 0.75rem; color: #888; font-family: 'Fira Code', monospace; margin-top: 4px;">MATCH ACCURACY</div>
+                    </div>
+                </div>
+
+                {% if user.is_authenticated %}
+                <a href="{% url 'ai-pipeline-dashboard' %}" class="btn btn-cyan font-mono">Explore AI Pipeline</a>
+                {% else %}
+                <a href="{% url 'register' %}" class="btn btn-cyan font-mono">Get Started</a>
+                {% endif %}
+            </div>
+            
+            <div style="flex: 1; min-width: 300px;">
+                <div class="border-glow" style="padding: 4px; position: relative; overflow: hidden;">
+                    <div style="position: absolute; inset: 0; background: linear-gradient(135deg, rgba(0, 229, 255, 0.15), transparent 60%); pointer-events: none; z-index: 1;"></div>
+                    <img src="{% static 'tracking_app/assets/ai_pipeline_preview.png' %}" alt="AI Pipeline Dashboard" style="width: 100%; border-radius: 8px; display: block; position: relative;" onerror="this.style.display='none'">
+                    <!-- Fallback if image doesn't exist -->
+                    <div style="background: linear-gradient(135deg, #0a0a0a, #111); border-radius: 8px; padding: 40px; min-height: 300px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 16px;">
+                        <i class="bx bx-line-chart" style="font-size: 4rem; color: #00E5FF; opacity: 0.6;"></i>
                         <div style="font-family: 'Fira Code', monospace; color: #888; font-size: 0.85rem; text-align: center;">
                             RECRUITMENT DATA TELEMETRY<br>
                             <span style="color: #00E5FF;">COMMAND CENTER v3.1</span>

@@ -1,0 +1,333 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title }} — Transform.io</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'tracking_app/transform.css' %}?v=334">
+    <!-- ▸ Apply saved theme before render to avoid flash of wrong theme -->
+    <script>
+        (function(){
+            var t = localStorage.getItem('theme');
+            if(t === 'light') document.documentElement.classList.add('light-theme');
+        })();
+    </script>
+    <style>
+        body { padding-top: 75px; }
+        .page-wrap { max-width: 1200px; margin: 0 auto; padding: 32px 24px; }
+        
+        .back-link { color: var(--text-gray); text-decoration: none; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 6px; margin-bottom: 24px; }
+        .back-link:hover { color: var(--primary); }
+
+        .deal-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; margin-top: 20px; }
+        
+        .panel { background: var(--bg-elevated); border: 1px solid var(--secondary); border-radius: 12px; overflow: hidden; margin-bottom: 24px; }
+        .panel-header { padding: 16px 20px; border-bottom: 1px solid var(--secondary); display: flex; justify-content: space-between; align-items: center; }
+        .panel-title { font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 1.5px; text-transform: uppercase; color: white; display: flex; align-items: center; gap: 8px; }
+        .panel-body { padding: 20px; }
+
+        /* KPI / Stats */
+        .deal-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+        .stat-card { background: rgba(255,255,255,0.02); border: 1px solid var(--secondary); border-radius: 8px; padding: 16px; text-align: center; }
+        .stat-lbl { font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-dark-gray); text-transform: uppercase; letter-spacing: 1px; }
+        .stat-val { font-size: 1.4rem; font-weight: 800; color: white; margin-top: 6px; }
+        
+        /* AI recommendation box */
+        .ai-action-box { background: rgba(0,229,255,0.04); border: 1px solid var(--primary); border-radius: 8px; padding: 16px; margin-bottom: 20px; position: relative; }
+        .ai-action-box::before { content: '🤖 AI RECOMMENDATION'; font-family: var(--font-mono); font-size: 0.65rem; color: var(--primary); font-weight: 700; letter-spacing: 1.5px; display: block; margin-bottom: 8px; }
+
+        /* Timeline */
+        .timeline { position: relative; padding-left: 24px; border-left: 1px solid var(--secondary); margin-left: 12px; display: flex; flex-direction: column; gap: 20px; }
+        .timeline-item { position: relative; }
+        .timeline-marker { position: absolute; left: -30px; top: 2px; width: 11px; height: 11px; border-radius: 50%; border: 2px solid var(--bg-dark); background: var(--text-gray); }
+        .timeline-marker.ai { background: var(--primary); box-shadow: 0 0 8px var(--primary); }
+        .timeline-marker.sent { background: #3a7bd5; }
+        .timeline-marker.opened { background: #00a6fb; }
+        .timeline-marker.replied { background: #FF9500; }
+        .timeline-marker.won { background: #34C759; }
+        
+        .timeline-header { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-dark-gray); margin-bottom: 4px; font-family: var(--font-mono); }
+        .timeline-desc { font-size: 0.875rem; color: white; line-height: 1.4; }
+        .timeline-ai-tag { font-family: var(--font-mono); font-size: 0.6rem; color: var(--primary); background: rgba(0,229,255,0.08); padding: 1px 4px; border-radius: 3px; font-weight: 600; margin-left: 6px; }
+
+        /* Details list */
+        .detail-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 0.85rem; }
+        .detail-item:last-child { border-bottom: none; }
+        .detail-lbl { color: var(--text-gray); }
+        .detail-val { color: white; font-weight: 500; text-align: right; }
+
+        .btn-sm { padding: 6px 12px; font-size: 0.8rem; border-radius: 6px; border: 1px solid var(--secondary); background: none; color: var(--text-gray); cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; transition: all 0.2s; }
+        .btn-sm:hover { border-color: var(--primary); color: var(--primary); }
+        .btn-sm.cyan { background: var(--primary); color: #000; border-color: var(--primary); font-weight: 600; }
+        .btn-sm.cyan:hover { background: #00c4d8; }
+
+        .btn-block { display: flex; width: 100%; justify-content: center; }
+
+        .progress-bar-wrap { height: 8px; background: var(--secondary); border-radius: 4px; overflow: hidden; margin-top: 8px; }
+        .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--accent-green)); transition: width 0.5s ease; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="container nav-content">
+        <a class="logo" href="{% url 'home' %}">
+            <img src="{% static 'tracking_app/assets/logo-333.png' %}" alt="Transform.io" height="32" onerror="this.style.display='none'">
+            <span>Transform<span class="text-cyan">.io</span></span>
+        </a>
+        <div style="display:flex;align-items:center;gap:12px;">
+            <span style="font-size:0.75rem;color:var(--text-gray);"><span class="live-dot"></span>AI Sales System</span>
+            <a href="{% url 'deal-pipeline' %}" class="btn-sm" style="text-decoration:none;"><i class='bx bx-arrow-back'></i> Pipeline</a>
+            <button id="theme-toggle" class="btn btn-primary btn-lg" title="Toggle light/dark theme" style="width: 50px; height: 50px; padding: 0; display: flex; align-items: center; justify-content: center; border-radius: 50%;"><i id="theme-icon" class="fas fa-moon"></i></button>
+        </div>
+    </div>
+</nav>
+
+<div class="page-wrap">
+    <a href="{% url 'deal-pipeline' %}" class="back-link"><i class='bx bx-left-arrow-alt'></i> Back to Pipeline</a>
+
+    <div style="display:flex;justify-content:between;align-items:center;flex-wrap:wrap;gap:16px;">
+        <div>
+            <h1 style="font-size:1.8rem;font-weight:800;color:white;margin-bottom:4px;">💼 Deal: {{ deal.lead.company_name }}</h1>
+            <p style="color:var(--text-gray);font-size:0.875rem;">Created on {{ deal.created_at|date:"M d, Y" }}</p>
+        </div>
+        
+        <div style="display:flex;gap:8px;margin-left:auto;">
+            <select class="btn-sm" style="background:var(--bg-elevated);color:white;outline:none;" onchange="updateStage({{ deal.id }}, this.value)">
+                {% for val, label in deal.STAGE_CHOICES %}
+                <option value="{{ val }}" {% if deal.stage == val %}selected{% endif %}>Stage: {{ label }}</option>
+                {% endfor %}
+            </select>
+            <a href="{% url 'lead-detail' deal.lead.id %}" class="btn-sm"><i class='bx bx-user'></i> View Contact Info</a>
+        </div>
+    </div>
+
+    <div class="deal-grid">
+        <!-- Main Panel -->
+        <div>
+            <!-- Stats -->
+            <div class="deal-stats">
+                <div class="stat-card">
+                    <div class="stat-lbl">Monthly Value</div>
+                    <div class="stat-val" style="color:var(--accent-green);">${{ deal.deal_value_monthly|floatformat:0 }}/mo</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-lbl">AI Probability</div>
+                    <div class="stat-val" style="color:var(--primary);">
+                        <span id="prob-val">{{ deal.close_probability|floatformat:0 }}</span>%
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-lbl">Stage</div>
+                    <div class="stat-val" style="font-size:1rem;padding-top:6px;text-transform:uppercase;font-family:var(--font-mono);">
+                        <span id="stage-val">{{ deal.get_stage_display }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Close Probability Meter -->
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-title"><i class='bx bx-line-chart'></i> AI Win Probability Prediction</span>
+                </div>
+                <div class="panel-body">
+                    <div style="display:flex;justify-content:between;font-size:0.8rem;color:var(--text-gray);">
+                        <span>Close Probability</span>
+                        <span style="font-family:var(--font-mono);font-weight:700;color:white;"><span id="meter-val">{{ deal.close_probability|floatformat:0 }}</span>%</span>
+                    </div>
+                    <div class="progress-bar-wrap">
+                        <div class="progress-bar-fill" id="prob-bar" style="width:{{ deal.close_probability|floatformat:0 }}%;"></div>
+                    </div>
+                    <p style="font-size:0.75rem;color:var(--text-gray);margin-top:12px;">
+                        Note: This probability is calculated by an AI model evaluating lead score, interaction frequency, and pipeline state.
+                    </p>
+                </div>
+            </div>
+
+            <!-- AI Next Action Recommend -->
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-title"><i class='bx bx-bot'></i> AI SDR Sales Coach</span>
+                    <button class="btn-sm" id="btn-next-action" onclick="refreshNextAction({{ deal.id }})"><i class='bx bx-refresh'></i> Get Recommendation</button>
+                </div>
+                <div class="panel-body">
+                    <div class="ai-action-box" id="next-action-content">
+                        {% if deal.ai_next_action %}
+                            {{ deal.ai_next_action }}
+                        {% else %}
+                            No AI recommendations generated yet. Click the button to calculate.
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Activity Log -->
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-title"><i class='bx bx-time'></i> Deal Activity Log</span>
+                </div>
+                <div class="panel-body">
+                    {% if activities %}
+                        <div class="timeline">
+                            {% for act in activities %}
+                            <div class="timeline-item">
+                                <div class="timeline-marker 
+                                    {% if act.is_ai_generated %}ai
+                                    {% elif act.activity_type == 'email_sent' %}sent
+                                    {% elif act.activity_type == 'email_opened' %}opened
+                                    {% elif act.activity_type == 'email_replied' %}replied
+                                    {% elif act.activity_type == 'stage_changed' and deal.stage == 'won' %}won
+                                    {% endif %}">
+                                </div>
+                                <div class="timeline-header">
+                                    <span>{{ act.get_activity_type_display }}{% if act.is_ai_generated %}<span class="timeline-ai-tag">AI Generated</span>{% endif %}</span>
+                                    <span>{{ act.created_at|date:"M d, Y H:i" }}</span>
+                                </div>
+                                <div class="timeline-desc">{{ act.description }}</div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p style="color:var(--text-gray);text-align:center;padding:24px;">No activities logged for this deal yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar Panel -->
+        <div>
+            <!-- Lead Information -->
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-title"><i class='bx bx-info-circle'></i> Lead Context</span>
+                </div>
+                <div class="panel-body" style="padding: 12px 20px;">
+                    <div class="detail-item">
+                        <span class="detail-lbl">Contact Name</span>
+                        <span class="detail-val">{{ deal.lead.contact_name }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-lbl">Email Address</span>
+                        <span class="detail-val" style="font-size:0.75rem;word-break:break-all;">{{ deal.lead.email }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-lbl">Company Size</span>
+                        <span class="detail-val">{{ deal.lead.company_size|default:"Unknown" }} emp.</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-lbl">Industry</span>
+                        <span class="detail-val">{{ deal.lead.industry|default:"Unknown" }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-lbl">Current ATS</span>
+                        <span class="detail-val">{{ deal.lead.current_ats_tool|default:"None/Unknown" }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-lbl">ICP Score</span>
+                        <span class="detail-val" style="color:var(--primary);font-weight:700;">{{ deal.lead.icp_score|floatformat:0 }}/100</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Risk Signals -->
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-title"><i class='bx bx-shield-quarter'></i> AI Risk Monitor</span>
+                </div>
+                <div class="panel-body">
+                    {% if deal.is_cold %}
+                        <div style="background:rgba(255,59,48,0.08);border:1px solid #FF3B30;border-radius:8px;padding:12px;display:flex;gap:10px;color:white;">
+                            <i class='bx bx-error' style="font-size:1.5rem;color:#FF3B30;margin-top:2px;"></i>
+                            <div style="font-size:0.8rem;">
+                                <strong style="color:#FF3B30;display:block;margin-bottom:2px;">Deal going cold</strong>
+                                No activity has been registered in the last {{ deal.days_since_activity }} days.
+                            </div>
+                        </div>
+                    {% else %}
+                        <div style="background:rgba(52,199,89,0.08);border:1px solid #34C759;border-radius:8px;padding:12px;display:flex;gap:10px;color:white;">
+                            <i class='bx bx-check-circle' style="font-size:1.5rem;color:#34C759;margin-top:2px;"></i>
+                            <div style="font-size:0.8rem;">
+                                <strong style="color:#34C759;display:block;margin-bottom:2px;">Healthy deal</strong>
+                                The opportunity shows positive email open signals and recent touchpoints.
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+async function updateStage(dealId, newStage) {
+    try {
+        const res = await fetch(`/api/sales/deals/${dealId}/stage/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCsrf()
+            },
+            body: JSON.stringify({ stage: newStage })
+        });
+        const data = await res.json();
+        if (data.success) {
+            // Update UI elements dynamically
+            const probInt = Math.round(data.close_probability * 100);
+            document.getElementById('prob-val').textContent = probInt;
+            document.getElementById('meter-val').textContent = probInt;
+            document.getElementById('prob-bar').style.width = probInt + '%';
+            
+            // Map stage key to friendly label
+            const selectEl = document.querySelector('select');
+            const selectedLabel = selectEl.options[selectEl.selectedIndex].text.replace('Stage: ', '');
+            document.getElementById('stage-val').textContent = selectedLabel;
+            
+            // Reload page to update the timeline logs
+            setTimeout(() => location.reload(), 800);
+        } else {
+            alert('Error: ' + data.error);
+        }
+    } catch (e) {
+        alert('Network error updating stage');
+    }
+}
+
+async function refreshNextAction(dealId) {
+    const btn = document.getElementById('btn-next-action');
+    const box = document.getElementById('next-action-content');
+    btn.disabled = true;
+    btn.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> Thinking...";
+    
+    try {
+        const res = await fetch(`/api/sales/deals/${dealId}/next-action/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCsrf()
+            }
+        });
+        const data = await res.json();
+        if (data.success) {
+            box.textContent = data.next_action;
+        } else {
+            box.textContent = "Error: " + data.error;
+        }
+    } catch (e) {
+        box.textContent = "Network error getting next action.";
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = "<i class='bx bx-refresh'></i> Get Recommendation";
+    }
+}
+
+function getCsrf() {
+    const m = document.cookie.match(/csrftoken=([^;]+)/);
+    return m ? m[1] : '';
+}
+</script>
+<script src="{% static 'tracking_app/transform.js' %}"></script>
+</body>
+</html>
