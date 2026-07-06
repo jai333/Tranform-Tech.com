@@ -55,15 +55,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const termBody = document.getElementById('typewriter-log');
     if (termBody) {
         const logs = [
-            "> INIT tx_core_engine v4.0.0",
-            "> loading modules... [OK]",
-            "> connecting to cluster [us-east-1]... [OK]",
-            "> [INFO] Securing endpoint auth via zero-trust policy",
-            "> [WARN] 3 CVEs detected on host 10.0.0.42",
-            "> [ACTION] Deploying auto-remediation script...",
-            "> [SUCCESS] Patch applied. Vulnerability mitigated.",
-            "> [INFO] Fetching frontend build status (Next.js)... [OK]",
-            "> [SYS] All systems optimized and running at 100% capacity."
+            "> INITIALIZING TRANSFORM.IO UNIFIED PLATFORM v6.0.0...",
+            "> [OK] 7 system layers mapped: AI_Sales, Cybersecurity, Recruiting, ATS_CRM, Dev, BI_Dashboards, ITaaS",
+            "> [AI_SDR] Syncing lead pipeline endpoints...",
+            "> [AI_SDR] SMTP handshake verified (zgih pkfv twli ixrg) - status: connected",
+            "> [AI_SDR] Found 26 active outreach targets. Win probability optimized.",
+            "> [CYBER] Audit trace: Zero-Trust policies loaded. SOC2 audit grid active.",
+            "> [CYBER] Threat scanning: 0 vulnerabilities found. SSL TLS 1.3 verified.",
+            "> [ATS_CRM] Parsing CV pipeline... Ingesting resume profiles...",
+            "> [ATS_CRM] NLP similarity index: Candidate #841 matches Job description at 94% accuracy.",
+            "> [ATS_CRM] Interview scheduler daemon: active. 2 video rounds pending.",
+            "> [APP_DEV] Checking Next.js/Django endpoints. DB replica pools synced.",
+            "> [ITaaS] Fleet scale checks: AWS k8s cluster online. CPU: 12%, Mem: 22%.",
+            "> [SYSTEM] 7 verticals online. Awaiting operator command."
         ];
 
         let i = 0;
@@ -82,9 +86,15 @@ document.addEventListener('DOMContentLoaded', () => {
             const lineData = logs[l];
             let p = document.createElement('p');
             p.style.marginBottom = "4px";
-            if (lineData.includes('WARN')) p.style.color = 'var(--accent-yellow)';
-            if (lineData.includes('ACTION')) p.style.color = 'var(--accent-red)';
-            if (lineData.includes('SUCCESS')) p.style.color = 'var(--accent-green)';
+            if (lineData.includes('[OK]') || lineData.includes('verified') || lineData.includes('online')) {
+                p.style.color = '#34C759'; // accent-green
+            } else if (lineData.includes('v6.0.0') || lineData.includes('layers mapped')) {
+                p.style.color = '#00E5FF'; // primary cyan
+            } else if (lineData.includes('Candidate #841') || lineData.includes('AI_SDR') || lineData.includes('CYBER')) {
+                p.style.color = '#a78bfa'; // purple/lavender
+            } else {
+                p.style.color = '#e2e8f0'; // slate white
+            }
 
             termBody.appendChild(p);
 
@@ -93,11 +103,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     p.innerHTML += lineData.charAt(i);
                     i++;
                     termBody.scrollTop = termBody.scrollHeight;
-                    setTimeout(typeChar, Math.random() * 30 + 10);
+                    setTimeout(typeChar, Math.random() * 20 + 5);
                 } else {
                     i = 0;
                     l++;
-                    setTimeout(typeLine, Math.random() * 600 + 200);
+                    setTimeout(typeLine, Math.random() * 400 + 100);
                 }
             }
             typeChar();
