@@ -1137,8 +1137,10 @@
                     {% if user.is_authenticated and user.is_jobseeker %}
                     <li><a href="{% url 'interview-list' %}" class="{% if '/interviews/' in request.path %}active{% endif %}"><i class="fa-solid fa-calendar-check"></i> Interviews</a></li>
                     <li><a href="{% url 'ai-pipeline-dashboard' %}" class="{% if '/ai-pipeline/' in request.path %}active{% endif %}"><i class="fa-solid fa-chart-network"></i> AI Pipeline</a></li>
-                    <li><a href="{% url 'service-addons' %}" class="{% if '/add-ons/' in request.path %}active{% endif %}"><i class="fa-solid fa-server"></i> Add-ons</a></li>
-                {% endif %}
+                    {% endif %}
+                    {% if user.is_authenticated %}
+                    <li><a href="{% url 'service-addons' %}" class="{% if '/add-ons/' in request.path %}active{% endif %}"><i class="fa-solid fa-server"></i> Services</a></li>
+                    {% endif %}
                     <!-- All users can see jobs -->
                     <li><a href="{% url 'job-list' %}" class="{% if '/jobs/' in request.path %}active{% endif %}"><i
                                 class="fas fa-briefcase"></i> Jobs</a></li>

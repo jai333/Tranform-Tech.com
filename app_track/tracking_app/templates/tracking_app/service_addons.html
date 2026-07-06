@@ -37,6 +37,11 @@
                     <div style="font-family: 'Fira Code', monospace; color: #FFFFFF; font-size: 1.1rem; margin-bottom: 4px;"><i class="fa-solid fa-code" style="color: #00E5FF; margin-right: 8px;"></i> App Engineering</div>
                     <div style="font-family: 'Fira Code', monospace; font-size: 0.75rem; color: #888888;">Custom Software & API</div>
                 </button>
+
+                <button class="addon-tab card border-glow" onclick="showAddon('itops', this)" style="padding: 16px; text-align: left; background: rgba(255, 255, 255, 0.04); border-left: 4px solid transparent; cursor: pointer; transition: all 0.3s ease; color: #FFFFFF; font-family: inherit; font-size: inherit; outline: none; backdrop-filter: blur(8px);">
+                    <div style="font-family: 'Fira Code', monospace; color: #FFFFFF; font-size: 1.1rem; margin-bottom: 4px;"><i class="fa-solid fa-server" style="color: #00E5FF; margin-right: 8px;"></i> IT Ops Fleet</div>
+                    <div style="font-family: 'Fira Code', monospace; font-size: 0.75rem; color: #888888;">IT Management & DevOps</div>
+                </button>
             </div>
 
             <!-- RIGHT CONTENT AREA -->
@@ -140,6 +145,57 @@
                         </div>
                         <div style="border-radius: 8px; overflow: hidden; border: 1px solid var(--apple-border);">
                             <img src="{% static 'tracking_app/assets/app_dev_hero_1776115211825.png' %}" alt="App Dev Architecture" style="width: 100%; height: auto; display: block;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- IT OPS CONTENT -->
+                <div id="addon-itops" class="addon-content" style="display: none; animation: fade-in 0.4s ease-out;">
+                    <span class="font-mono text-xs text-cyan mb-sm block" style="letter-spacing: 1px;">04 // ITOPS_FLEET</span>
+                    <h2 class="text-white text-xl mb-md" style="font-size: 2.5rem; letter-spacing: -0.03em; line-height: 1.1;">IT Management & DevOps as a Service (ITaaS)</h2>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 32px;">
+                        <div>
+                            <p class="text-gray mb-md" style="line-height: 1.6;">
+                                Stop hiring expensive full-time DevOps engineers for routine tasks. We provide complete 24/7 IT management, cloud architecture, CI/CD pipeline automation, database administration, and server monitoring under a single subscription.
+                            </p>
+                            
+                            <ul style="list-style: none; padding: 0; margin-top: 24px; display: flex; flex-direction: column; gap: 16px;">
+                                <li>
+                                    <div class="font-mono text-white text-sm mb-xs"><i class="fa-solid fa-cloud-arrow-up text-cyan"></i> Cloud Infrastructure & Migration</div>
+                                    <div class="text-gray text-sm">We migrate, optimize, and manage your cloud deployments on AWS, Google Cloud, and Azure.</div>
+                                </li>
+                                <li>
+                                    <div class="font-mono text-white text-sm mb-xs"><i class="fa-solid fa-rotate text-cyan"></i> CI/CD Pipeline Automation</div>
+                                    <div class="text-gray text-sm">Automated build, test, and deployment workflows using GitHub Actions, GitLab CI, or Jenkins.</div>
+                                </li>
+                                <li>
+                                    <div class="font-mono text-white text-sm mb-xs"><i class="fa-solid fa-heart-pulse text-cyan"></i> 24/7 System Health & Uptime Monitoring</div>
+                                    <div class="text-gray text-sm">Continuous monitoring of server loads, response times, and database metrics with instant pager alerts.</div>
+                                </li>
+                            </ul>
+                            
+                            <a href="#" class="btn mt-lg">REQUEST UPGRADE</a>
+                        </div>
+                        <div style="border-radius: 8px; overflow: hidden; border: 1px solid var(--apple-border); background: #0c0d12; display: flex; align-items: center; justify-content: center; padding: 20px;">
+                            <div style="font-family: 'Fira Code', monospace; font-size: 0.8rem; color: #888; width: 100%;">
+                                <div style="color: #00E5FF; border-bottom: 1px solid #222; padding-bottom: 8px; margin-bottom: 12px; font-weight: bold;">[SYS_MONITOR — ACTIVE NODES]</div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                                    <span>node-us-east-1 (AWS)</span> <span style="color: #34d399;">● ONLINE (99.99%)</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                                    <span>node-eu-west-3 (GCP)</span> <span style="color: #34d399;">● ONLINE (99.98%)</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                                    <span>db-primary-replica</span> <span style="color: #34d399;">● SYNCED (0ms lag)</span>
+                                </div>
+                                <div style="color: #888; font-size: 0.75rem; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 4px; border: 1px solid #1e1e1e;">
+                                    <span style="color: #FFF;">root@sysops:~$</span> status --fleet<br>
+                                    <span style="color: #a78bfa;">[INFO]</span> Container orchestration scale: OK<br>
+                                    <span style="color: #a78bfa;">[INFO]</span> Traffic threshold: 14.2k req/sec<br>
+                                    <span style="color: #34d399;">[OK]</span> Backup snapshot created successfully.
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

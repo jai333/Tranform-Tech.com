@@ -67,15 +67,21 @@ def _call_openai_json(system_prompt: str, user_prompt: str) -> dict:
 # ─────────────────────────────────────────────────────────────────
 
 ICP_SYSTEM_PROMPT = """
-You are a B2B sales qualification AI for Transform.io — an AI-powered ATS and CRM
-for recruiting agencies and in-house talent teams.
+You are a B2B sales qualification AI for Transform.io — a full-service IT solutions
+company offering 6 verticals:
+1. ATS & CRM with built-in interview scheduling
+2. Data Dashboards & Business Intelligence
+3. Cybersecurity (SOC2, Zero-Trust, PII vaults)
+4. Web & App Development (custom builds)
+5. Automation & Workflow Orchestration
+6. IT Operations & Infrastructure Management
 
 Our Ideal Customer Profile (ICP):
-- Company size: 10–500 employees
-- Industry: Staffing, Recruiting, HR Tech, Fast-growing Tech startups
-- Pain: Manual tracking of candidates, no ATS, or outgrown basic tools
-- Role of contact: Recruiter, HR Manager, Talent Director, Founder
-- Budget signal: They are actively hiring or have a dedicated HR function
+- Company size: 10–1000 employees
+- Industry: Staffing, Recruiting, HR Tech, SaaS, Healthcare, Finance, E-commerce, any growing tech company
+- Pain: Manual processes, security gaps, no custom software, outgrown basic tools, scattered data
+- Role of contact: CTO, VP Engineering, IT Director, HR Director, Founder, COO, Operations Manager
+- Budget signal: Actively hiring, scaling, recently funded, or undergoing digital transformation
 
 Score the lead 0–100 on ICP fit. Be strict — only give 80+ to near-perfect fits.
 Return JSON only.
@@ -136,17 +142,22 @@ Return ONLY valid JSON in this exact format:
 
 EMAIL_SDR_SYSTEM_PROMPT = """
 You are an expert B2B SDR (Sales Development Representative) writing cold outreach
-for Transform.io — an AI-powered ATS and CRM built for recruiting teams.
+for Transform.io — a full-service IT solutions company.
 
-Transform.io key value props:
-- Candidate tracking + interview scheduling in one place
-- AI resume parsing and job-match scoring
-- Automated follow-ups and outreach sequences
-- Modern dashboard with real-time analytics
+Transform.io services:
+1. ATS & CRM — candidate tracking, AI resume parsing, job-match scoring, built-in interview scheduling
+2. Data Dashboards — real-time KPI dashboards, business intelligence, executive reporting
+3. Cybersecurity — SOC2/HIPAA compliance, zero-trust architecture, encrypted PII vaults, threat monitoring
+4. Web & App Development — custom web apps, mobile apps, SaaS platforms, landing pages
+5. Automation — workflow orchestration, email sequences, API integrations, process automation
+6. IT Operations — infrastructure management, cloud migration, DevOps, monitoring
+
+We place expert resources across all verticals — the client just tells us the problem.
 
 Writing rules:
 - Max 3 short paragraphs (under 120 words total body)
-- First sentence must reference something specific about them
+- First sentence must reference something specific about their company
+- Mention 1-2 relevant services based on their industry and pain points
 - Zero buzzwords or corporate speak
 - ONE soft CTA at the end (e.g., "Worth a quick 15-min chat?")
 - Tone: confident, human, peer-to-peer
@@ -161,10 +172,10 @@ def generate_cold_email(lead, step_number: int = 1, variant: str = "A") -> dict:
     Returns {'subject': str, 'body': str}
     """
     step_context = {
-        1: "First touch — introduce, reference their situation, soft ask",
-        2: "Follow-up — share a relevant stat or mini case study",
-        3: "Pain-focused — address a specific recruiting pain point they likely have",
-        4: "Social proof — mention a success story or feature highlight",
+        1: "First touch — introduce Transform.io's full IT services, reference their situation, soft ask",
+        2: "Follow-up — share a relevant stat or mini case study about one of our 6 service verticals",
+        3: "Pain-focused — address a specific operational or technical pain point they likely have",
+        4: "Social proof — mention a success story across any of our verticals (ATS, dashboards, cybersec, dev, automation, IT ops)",
         5: "Break-up email — last attempt, create gentle urgency",
     }
     tone_variant = "slightly formal" if variant == "A" else "casual and conversational"
@@ -200,6 +211,7 @@ def _fallback_email(lead, step_number: int, variant: str) -> dict:
     """
     Returns a realistic, ready-to-send cold email when OpenAI is unavailable.
     Covers all 5 sequence steps × 2 tone variants (A = formal, B = casual).
+    Pitches the full Transform.io service portfolio.
     """
     name    = lead.contact_name.split()[0] if lead.contact_name else "there"
     company = lead.company_name or "your company"
@@ -208,63 +220,65 @@ def _fallback_email(lead, step_number: int, variant: str) -> dict:
 
     templates = {
         (1, "A"): {
-            "subject": f"Modernise {company}'s hiring workflow — quick question",
+            "subject": f"How {company} can modernize operations — quick intro",
             "body": (
                 f"Hi {name},\n\n"
-                f"I came across {company} while researching {industry} teams that are scaling their hiring.\n\n"
-                f"We've built Transform.io — an AI-powered ATS that replaces spreadsheets and clunky legacy tools "
-                f"with automated candidate tracking, smart job-match scoring, and one-click interview scheduling. "
-                f"Teams typically cut time-to-hire by 40% within the first month.\n\n"
-                f"Would a quick 15-minute walk-through make sense this week?\n\n"
+                f"I came across {company} while researching {industry} companies that are scaling fast.\n\n"
+                f"We're Transform.io — a full-service IT solutions company. We help teams like yours with "
+                f"custom ATS & CRM platforms with built-in interview scheduling, real-time data dashboards, "
+                f"cybersecurity audits, web & app development, workflow automation, and full IT operations. "
+                f"Essentially, you tell us the problem — we place the right resources and build the solution.\n\n"
+                f"Would a quick 15-minute intro call make sense this week?\n\n"
                 f"Best,\nThe Transform.io Team"
             ),
         },
         (1, "B"): {
-            "subject": f"Hey {name} — quick hiring question for {company}",
+            "subject": f"Hey {name} — {company} + Transform.io could be a great fit",
             "body": (
                 f"Hey {name},\n\n"
-                f"Spotted {company} and had to reach out — you're exactly the kind of team we built Transform.io for.\n\n"
-                f"It's an AI ATS that kills the spreadsheet chaos: auto-scores resumes, schedules interviews, "
-                f"and tracks every candidate in one place. Setup takes about 20 minutes.\n\n"
-                f"Worth a 15-min chat to see if it fits? No sales deck, just a live demo.\n\n"
+                f"Spotted {company} and had to reach out — you're exactly the kind of team we love working with.\n\n"
+                f"We handle everything from ATS/CRM builds to cybersecurity, data dashboards, web/app dev, "
+                f"automation, and IT ops. Just tell us what's slowing you down and we'll put the right "
+                f"people on it — fast.\n\n"
+                f"Worth a 15-min chat? No sales deck, just a real conversation.\n\n"
                 f"Cheers,\nTransform.io"
             ),
         },
         (2, "A"): {
-            "subject": f"How {company} could cut time-to-hire by 40%",
+            "subject": f"Teams like {company} save 40%+ on operational overhead",
             "body": (
                 f"Hi {name},\n\n"
-                f"Following up on my last note — wanted to share a quick data point: "
-                f"recruiting teams using Transform.io reduce their average time-to-hire from 28 days to 17 days, "
-                f"and see a 3× increase in qualified pipeline within 60 days.\n\n"
-                f"One of our clients, a {industry} firm similar in size to {company}, saved 12 hours per week "
-                f"on candidate coordination alone in their first month.\n\n"
-                f"Happy to share the full case study — shall I send it over?\n\n"
+                f"Following up on my last note — wanted to share some quick results from clients in {industry}:\n\n"
+                f"• A staffing firm cut time-to-hire by 40% with our ATS & CRM\n"
+                f"• A fintech company reduced security incidents by 85% with our cybersecurity audit\n"
+                f"• An e-commerce brand shipped a custom dashboard in 3 weeks with our dev team\n\n"
+                f"We place expert resources across all 6 verticals — no agency middlemen. "
+                f"Happy to share a relevant case study for {company}?\n\n"
                 f"Best,\nThe Transform.io Team"
             ),
         },
         (2, "B"): {
-            "subject": f"Real numbers from teams like {company}",
+            "subject": f"Real results from teams like {company}",
             "body": (
                 f"Hey {name},\n\n"
-                f"Just a quick follow-up — thought this might be useful:\n\n"
-                f"Teams that switch to Transform.io typically save 10–15 hrs/week on admin, "
-                f"and close open roles ~40% faster. One {industry} team went from 4-week to 2.5-week hiring cycles.\n\n"
-                f"Would love to show you what that could look like for {company} specifically. "
-                f"15 minutes — you pick the time?\n\n"
+                f"Quick follow-up with some numbers:\n\n"
+                f"Companies we work with typically save 10–20 hrs/week on manual processes — whether that's "
+                f"hiring workflows, security monitoring, data reporting, or app maintenance. "
+                f"One {industry} team automated their entire onboarding pipeline in under 2 weeks.\n\n"
+                f"Want to see what that could look like for {company}? 15 minutes, you pick the time.\n\n"
                 f"Cheers,\nTransform.io"
             ),
         },
         (3, "A"): {
-            "subject": f"The hidden cost of manual candidate tracking at {company}",
+            "subject": f"The hidden cost of scattered IT systems at {company}",
             "body": (
                 f"Hi {name},\n\n"
-                f"A common challenge we hear from {industry} teams: candidates falling through the cracks "
-                f"because follow-ups are tracked in spreadsheets or email threads — especially when hiring "
-                f"volume spikes.\n\n"
-                f"Transform.io was specifically built to solve this: every candidate gets an automated touchpoint "
-                f"at the right moment, every recruiter has full visibility, and nothing slips.\n\n"
-                f"Does this sound familiar at {company}? I'd love to show you how we'd address it.\n\n"
+                f"A pattern we see across {industry} teams: data lives in 5 different tools, security is an afterthought, "
+                f"internal apps are outdated, and nobody has a real-time view of what's happening.\n\n"
+                f"Transform.io was built to solve exactly this. We offer a unified approach — custom dashboards "
+                f"for visibility, ATS/CRM for hiring, cybersecurity for compliance, and automation to eliminate "
+                f"manual bottlenecks. All under one roof.\n\n"
+                f"Does this sound familiar at {company}? I'd love to discuss how we'd tackle it.\n\n"
                 f"Best,\nThe Transform.io Team"
             ),
         },
@@ -272,24 +286,27 @@ def _fallback_email(lead, step_number: int, variant: str) -> dict:
             "subject": f"Does this sound familiar, {name}?",
             "body": (
                 f"Hey {name},\n\n"
-                f"Honest question — how much time does your team lose each week just tracking where candidates are "
-                f"in the process?\n\n"
-                f"Most {industry} teams we talk to say it's 5–10 hours. Usually it's spreadsheets, sticky notes, "
-                f"or digging through email threads.\n\n"
-                f"Transform.io fixes that with a live pipeline view and automated follow-ups. "
-                f"Could save {company} a lot of time.\n\n"
-                f"Up for a quick look?\n\n"
+                f"Quick honest question — how many separate tools does {company} use for hiring, analytics, "
+                f"security, and internal operations?\n\n"
+                f"Most {industry} teams we talk to say 6–10, with zero integration between them. "
+                f"We consolidate that chaos: one partner for your ATS, dashboards, cybersec, dev work, "
+                f"and automation.\n\n"
+                f"Up for a quick look at how it works?\n\n"
                 f"Cheers,\nTransform.io"
             ),
         },
         (4, "A"): {
-            "subject": f"How DataHire scaled from 3 to 30 hires/month using Transform.io",
+            "subject": f"How a {industry} company transformed operations with Transform.io",
             "body": (
                 f"Hi {name},\n\n"
-                f"Wanted to share a short success story: DataHire, a {industry} firm, went from manually tracking "
-                f"candidates in Google Sheets to running a fully automated pipeline with Transform.io in under a week.\n\n"
-                f"Result: 3× more placements, 50% fewer recruiter hours spent on admin, and zero dropped candidates.\n\n"
-                f"I think {company} could see similar results. Would you be open to a 15-minute call to explore?\n\n"
+                f"Quick success story: a {industry} company came to us with fragmented hiring, zero data visibility, "
+                f"and growing security concerns. Within 6 weeks we delivered:\n\n"
+                f"• Custom ATS with built-in video interviews\n"
+                f"• Real-time KPI dashboard for their exec team\n"
+                f"• Full SOC2 cybersecurity audit and remediation\n"
+                f"• Automated email outreach sequences\n\n"
+                f"Result: 3× faster placements, 85% fewer security gaps, and their CEO finally had a single source of truth.\n\n"
+                f"I think {company} could see similar results. Open to a 15-minute call?\n\n"
                 f"Best,\nThe Transform.io Team"
             ),
         },
@@ -297,11 +314,12 @@ def _fallback_email(lead, step_number: int, variant: str) -> dict:
             "subject": f"A story you might relate to, {name}",
             "body": (
                 f"Hey {name},\n\n"
-                f"Quick story: a {industry} team came to us overwhelmed — job boards, spreadsheets, Slack messages, "
-                f"zero visibility. Three weeks after switching to Transform.io, they tripled their placement rate.\n\n"
-                f"Not magic — just the right tool. Our AI scores every resume automatically and keeps every "
-                f"recruiter on the same page.\n\n"
-                f"Think {company} might benefit? Happy to do a live walk-through, no commitment.\n\n"
+                f"Quick story: a {industry} team came to us overwhelmed — scattered tools, no dashboards, "
+                f"compliance deadlines looming, and their web app was from 2019.\n\n"
+                f"Three weeks later: new custom platform, real-time analytics, automated workflows, "
+                f"and a cybersecurity setup that their auditors loved.\n\n"
+                f"Think {company} might benefit from having one IT partner handle everything? "
+                f"Happy to do a walk-through, zero commitment.\n\n"
                 f"Cheers,\nTransform.io"
             ),
         },
@@ -309,11 +327,13 @@ def _fallback_email(lead, step_number: int, variant: str) -> dict:
             "subject": f"Last note from Transform.io, {name}",
             "body": (
                 f"Hi {name},\n\n"
-                f"I've reached out a few times about how Transform.io could help {company} streamline "
-                f"its hiring process — I don't want to keep filling your inbox if the timing isn't right.\n\n"
-                f"If you're open to revisiting this in the future, I'm happy to reconnect whenever it makes sense. "
-                f"Just reply with 'later' and I'll follow up in 90 days.\n\n"
-                f"Either way, best of luck with your hiring goals — hope the right tool finds you soon.\n\n"
+                f"I've reached out a few times about how Transform.io could help {company} across hiring, "
+                f"dashboards, security, and IT operations — I don't want to keep filling your inbox "
+                f"if the timing isn't right.\n\n"
+                f"If you're open to revisiting this in the future, just reply 'later' and I'll follow up in 90 days. "
+                f"If any single service interests you (ATS, dashboards, cybersec, dev, automation, or IT ops), "
+                f"happy to focus on just that.\n\n"
+                f"Either way, wishing {company} all the best.\n\n"
                 f"Best,\nThe Transform.io Team"
             ),
         },
@@ -322,10 +342,9 @@ def _fallback_email(lead, step_number: int, variant: str) -> dict:
             "body": (
                 f"Hey {name},\n\n"
                 f"This is my last nudge, I promise. 😄\n\n"
-                f"If Transform.io isn't the right fit right now, totally fine — just reply with 'not now' "
-                f"and I'll check back in a few months.\n\n"
-                f"If you are curious but just haven't had time, send me a day/time and I'll make it work "
-                f"for your schedule.\n\n"
+                f"If Transform.io isn't the right fit right now, totally fine — just reply 'not now' "
+                f"and I'll check back in a few months. If even one of our 6 services "
+                f"(ATS, dashboards, cybersec, dev, automation, IT ops) sounds useful, I'd love to start there.\n\n"
                 f"Either way, thanks for your time, {name}. Rooting for {company}!\n\n"
                 f"Cheers,\nTransform.io"
             ),

@@ -4,26 +4,174 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Transform.io | Titan Platform: Recruitment & IT Automation</title>
+    <title>Transform.io — The One Platform for IT, Recruitment, Security & Development</title>
+    <meta name="description" content="Transform.io is the unified platform for AI Sales, Cybersecurity, Recruiting & Sourcing, ATS-CRM with interviews, Web & App Development, Data Dashboards, and IT Management as a Service.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;600&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;600&family=Inter:wght@300;400;600;800;900&display=swap" rel="stylesheet">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="{% static 'tracking_app/transform.css' %}?v=334">
+    <link rel="stylesheet" href="{% static 'tracking_app/transform.css' %}?v=500">
     <style>
-    .huge-title { font-size: 2.5rem; letter-spacing: -0.03em; color: white; margin-bottom: 24px; line-height: 1.1; }
-    .sub-tag { color: var(--primary); font-family: var(--font-mono); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; display: block; }
-    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
-    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
-    .data-card { background: var(--bg-surface); border: 1px solid var(--secondary); padding: 24px; border-radius: 8px; }
-    .data-card i { font-size: 2rem; color: var(--primary); margin-bottom: 16px; }
-    .data-card h4 { color: white; font-family: var(--font-mono); font-size: 0.95rem; margin-bottom: 8px; }
-    .data-card p { color: var(--text-gray); font-size: 0.85rem; line-height: 1.5; }
-    .system-highlight { background: rgba(0, 229, 255, 0.05); border-left: 3px solid var(--primary); padding: 24px; margin-top: 24px; }
-</style>
+    /* ══════════════════════════════════════════════════════════════
+       PREMIUM HOME — Exotic glassmorphic dark theme
+       ══════════════════════════════════════════════════════════════ */
+
+    /* ── Ambient glow orbs ─────────────────────────────────── */
+    .orb {
+        position: fixed; border-radius: 50%; pointer-events: none; z-index: 0;
+        filter: blur(120px); opacity: 0.12;
+    }
+    .orb-1 { width: 600px; height: 600px; background: #00E5FF; top: -10%; left: -10%; }
+    .orb-2 { width: 500px; height: 500px; background: #8b5cf6; bottom: 10%; right: -8%; }
+    .orb-3 { width: 400px; height: 400px; background: #10b981; top: 50%; left: 40%; }
+
+    /* ── Utility ────────────────────────────────────────────── */
+    .relative { position: relative; z-index: 1; }
+    .huge-title { font-size: 2.8rem; letter-spacing: -0.04em; color: white; margin-bottom: 20px; line-height: 1.08; font-weight: 900; }
+    .sub-tag { color: var(--primary); font-family: var(--font-mono); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 12px; display: block; }
+    .section-intro { max-width: 720px; margin: 0 auto 56px; text-align: center; }
+
+    /* ── Hero ───────────────────────────────────────────────── */
+    .hero-badge {
+        display: inline-flex; align-items: center; gap: 8px;
+        background: rgba(0,229,255,0.08); border: 1px solid rgba(0,229,255,0.2);
+        border-radius: 50px; padding: 6px 16px; margin-bottom: 20px;
+        font-family: var(--font-mono); font-size: 0.72rem; color: var(--primary);
+        animation: pulse-glow 3s ease infinite;
+    }
+    .hero-badge .dot { width: 6px; height: 6px; background: #34C759; border-radius: 50%; }
+
+    /* ── Service Cards (glassmorphic) ──────────────────────── */
+    .svc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .svc-card {
+        background: rgba(255,255,255,0.03); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255,255,255,0.06); border-radius: 16px;
+        padding: 28px 24px; position: relative; overflow: hidden;
+        transition: all 0.45s cubic-bezier(0.16,1,0.3,1);
+    }
+    .svc-card::before {
+        content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+        border-radius: 16px 16px 0 0; transition: opacity 0.3s ease;
+    }
+    .svc-card:hover {
+        transform: translateY(-6px);
+        border-color: rgba(0,229,255,0.25);
+        box-shadow: 0 24px 64px rgba(0,0,0,0.4), 0 0 40px rgba(0,229,255,0.06);
+    }
+    .svc-icon {
+        width: 48px; height: 48px; border-radius: 12px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.4rem; margin-bottom: 16px;
+    }
+    .svc-card h4 { color: white; font-size: 1rem; font-weight: 700; margin-bottom: 6px; }
+    .svc-card .svc-mono { font-family: var(--font-mono); font-size: 0.62rem; color: var(--text-dark-gray); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+    .svc-card p { color: var(--text-gray); font-size: 0.82rem; line-height: 1.55; }
+    .svc-card .svc-tag {
+        display: inline-block; margin-top: 14px; padding: 4px 10px;
+        border-radius: 4px; font-family: var(--font-mono); font-size: 0.62rem;
+        text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    /* Color themes per card */
+    .svc-sales::before { background: linear-gradient(90deg, #00E5FF, #3a7bd5); }
+    .svc-sales .svc-icon { background: rgba(0,229,255,0.1); color: #00E5FF; }
+    .svc-sales .svc-tag { background: rgba(0,229,255,0.08); color: #00E5FF; }
+
+    .svc-cyber::before { background: linear-gradient(90deg, #FF3B30, #FF9500); }
+    .svc-cyber .svc-icon { background: rgba(255,59,48,0.1); color: #FF3B30; }
+    .svc-cyber .svc-tag { background: rgba(255,59,48,0.08); color: #FF3B30; }
+
+    .svc-recruit::before { background: linear-gradient(90deg, #8b5cf6, #a78bfa); }
+    .svc-recruit .svc-icon { background: rgba(139,92,246,0.1); color: #8b5cf6; }
+    .svc-recruit .svc-tag { background: rgba(139,92,246,0.08); color: #8b5cf6; }
+
+    .svc-ats::before { background: linear-gradient(90deg, #00E5FF, #06b6d4); }
+    .svc-ats .svc-icon { background: rgba(0,229,255,0.1); color: #00E5FF; }
+    .svc-ats .svc-tag { background: rgba(0,229,255,0.08); color: #00E5FF; }
+
+    .svc-dev::before { background: linear-gradient(90deg, #10b981, #34d399); }
+    .svc-dev .svc-icon { background: rgba(16,185,129,0.1); color: #10b981; }
+    .svc-dev .svc-tag { background: rgba(16,185,129,0.08); color: #10b981; }
+
+    .svc-dash::before { background: linear-gradient(90deg, #FFCC00, #FF9500); }
+    .svc-dash .svc-icon { background: rgba(255,204,0,0.1); color: #FFCC00; }
+    .svc-dash .svc-tag { background: rgba(255,204,0,0.08); color: #FFCC00; }
+
+    .svc-itops::before { background: linear-gradient(90deg, #00a6fb, #3a7bd5); }
+    .svc-itops .svc-icon { background: rgba(0,166,251,0.1); color: #00a6fb; }
+    .svc-itops .svc-tag { background: rgba(0,166,251,0.08); color: #00a6fb; }
+
+    /* ── Stats row ─────────────────────────────────────────── */
+    .stats-row {
+        display: grid; grid-template-columns: repeat(4, 1fr); gap: 0;
+        background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06);
+        border-radius: 16px; overflow: hidden;
+    }
+    .stat-block {
+        text-align: center; padding: 32px 16px;
+        border-right: 1px solid rgba(255,255,255,0.04);
+        transition: background 0.3s ease;
+    }
+    .stat-block:last-child { border-right: none; }
+    .stat-block:hover { background: rgba(0,229,255,0.03); }
+    .stat-block .stat-num { font-size: 2.4rem; font-weight: 900; font-family: var(--font-mono); color: white; line-height: 1; }
+    .stat-block .stat-label { font-size: 0.68rem; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-dark-gray); margin-top: 8px; }
+
+    /* ── Showcase split ─────────────────────────────────────── */
+    .showcase-split {
+        display: flex; flex-wrap: wrap; gap: 56px; align-items: center; margin-bottom: 64px;
+    }
+    .showcase-text { flex: 1; min-width: 320px; }
+    .showcase-visual { flex: 1; min-width: 320px; }
+    .showcase-visual .img-wrap {
+        border: 1px solid rgba(0,229,255,0.12); border-radius: 12px;
+        padding: 4px; position: relative; overflow: hidden;
+    }
+    .showcase-visual .img-wrap::before {
+        content: ''; position: absolute; inset: 0;
+        background: linear-gradient(135deg, rgba(0,229,255,0.12), transparent 60%);
+        pointer-events: none; z-index: 1;
+    }
+    .showcase-visual img { width: 100%; border-radius: 8px; display: block; }
+
+    .feature-pill {
+        display: inline-flex; align-items: center; gap: 6px;
+        background: rgba(0,229,255,0.06); border: 1px solid rgba(0,229,255,0.15);
+        border-radius: 6px; padding: 6px 12px; margin: 4px 4px 4px 0;
+        font-family: var(--font-mono); font-size: 0.68rem; color: var(--primary);
+    }
+
+    /* ── Why us / Trust strip ──────────────────────────────── */
+    .trust-strip {
+        display: flex; justify-content: center; gap: 48px; flex-wrap: wrap;
+        padding: 40px 0;
+    }
+    .trust-item {
+        text-align: center; color: var(--text-dark-gray);
+        font-family: var(--font-mono); font-size: 0.72rem;
+    }
+    .trust-item i { font-size: 1.6rem; display: block; margin-bottom: 6px; color: var(--primary); opacity: 0.5; }
+
+    /* ── CTA banner ────────────────────────────────────────── */
+    .cta-banner {
+        background: linear-gradient(135deg, rgba(0,229,255,0.08), rgba(139,92,246,0.06));
+        border: 1px solid rgba(0,229,255,0.12); border-radius: 20px;
+        padding: 56px 48px; text-align: center;
+    }
+
+    /* ── Responsive ────────────────────────────────────────── */
+    @media (max-width: 900px) {
+        .svc-grid { grid-template-columns: 1fr 1fr; }
+        .stats-row { grid-template-columns: 1fr 1fr; }
+        .huge-title { font-size: 2rem; }
+    }
+    @media (max-width: 600px) {
+        .svc-grid { grid-template-columns: 1fr; }
+        .stats-row { grid-template-columns: 1fr; }
+        .stat-block { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.04); }
+    }
+    </style>
 <script>
-    // Apply saved theme before render to avoid flash
     (function(){
         const saved = localStorage.getItem('theme') || 'dark';
         if (saved === 'light') document.documentElement.classList.add('light-theme');
@@ -32,444 +180,451 @@
 </head>
 <body>
 
-    <!-- Mega-Menu Navigation -->
-    <nav class="navbar border-bottom">
-        <div class="container nav-content">
-            <a href="{% url 'home' %}" class="logo font-mono">
-                <img src="{% static 'tracking_app/assets/logo-333.png' %}" alt="Transform.io 333 Logo" style="height: 48px; width: auto; max-width: 250px; border-radius: 4px; box-shadow: 0 0 10px rgba(0, 229, 255, 0.5);">
-            </a>
-            
-            <ul class="nav-links font-mono text-sm">
-                <li>
-                    <a href="#">RECRUITMENT <i class='bx bx-chevron-down'></i></a>
-                    <div class="mega-menu">
-                        <div class="mega-col">
-                            <span class="mega-header">CORE SERVICES</span>
-                            <a href="{% url 'public-ats' %}">Applicant Tracking System</a>
-                            <a href="{% url 'public-crm' %}">Client CRM Matrix</a>
-                            <a href="{% url 'public-ai' %}">AI Resume Parsing</a>
-                            <a href="{% url 'public-workflow' %}">Recruitment Automation</a>
-                            <a href="{% url 'public-telemetry' %}">Talent Telemetry</a>
-                        </div>
+<!-- Ambient glow orbs -->
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     NAVIGATION
+     ═══════════════════════════════════════════════════════════ -->
+<nav class="navbar border-bottom relative">
+    <div class="container nav-content">
+        <a href="{% url 'home' %}" class="logo font-mono">
+            <img src="{% static 'tracking_app/assets/logo-333.png' %}" alt="Transform.io" style="height: 48px; width: auto; max-width: 250px; border-radius: 4px; box-shadow: 0 0 10px rgba(0, 229, 255, 0.5);">
+        </a>
+        
+        <ul class="nav-links font-mono text-sm">
+            <li>
+                <a href="#">PLATFORM <i class='bx bx-chevron-down'></i></a>
+                <div class="mega-menu">
+                    <div class="mega-col">
+                        <span class="mega-header">CORE MODULES</span>
+                        <a href="{% url 'public-ats' %}">ATS & Interview Suite</a>
+                        <a href="{% url 'public-crm' %}">Client CRM Matrix</a>
+                        <a href="{% url 'public-ai' %}">AI Resume Parsing</a>
+                        <a href="{% url 'public-workflow' %}">Workflow Automation</a>
+                        <a href="{% url 'public-telemetry' %}">Data Dashboards</a>
                     </div>
-                </li>
+                </div>
+            </li>
 
-                <li>
-                    <a href="#">SOLUTIONS <i class='bx bx-chevron-down'></i></a>
-                    <div class="mega-menu">
-                        <div class="mega-col">
-                            <span class="mega-header">FOR STAFFING AGENCIES</span>
-                            <a href="#">Workflow Audits</a>
-                            <a href="#">Custom Automations</a>
-                            <a href="#">Data Dashboards</a>
-                            <a href="#">Retainer Models</a>
-                        </div>
+            <li>
+                <a href="#">SERVICES <i class='bx bx-chevron-down'></i></a>
+                <div class="mega-menu">
+                    <div class="mega-col">
+                        <span class="mega-header">FULL STACK IT</span>
+                        <a href="#services">Cybersecurity & Compliance</a>
+                        <a href="#services">Web & App Development</a>
+                        <a href="#services">IT Management (ITaaS)</a>
+                        <a href="#services">Recruiting & Sourcing</a>
                     </div>
-                </li>
+                </div>
+            </li>
 
-                <li>
-                    <a href="#">SALES MACHINE <i class='bx bx-chevron-down'></i></a>
-                    <div class="mega-menu">
-                        <div class="mega-col">
-                            <span class="mega-header">AI SALES SYSTEM</span>
-                            <a href="{% url 'demo-booking' %}">Book A Demo (Public)</a>
-                            {% if user.is_authenticated %}
-                            <a href="{% url 'sales-dashboard' %}">Sales Dashboard</a>
-                            <a href="{% url 'deal-pipeline' %}">Deal Pipeline</a>
-                            <a href="{% url 'lead-list' %}">Leads Manager</a>
-                            <a href="{% url 'sales-analytics' %}">Sales Analytics</a>
-                            {% endif %}
-                        </div>
+            <li>
+                <a href="#">SALES ENGINE <i class='bx bx-chevron-down'></i></a>
+                <div class="mega-menu">
+                    <div class="mega-col">
+                        <span class="mega-header">AI SALES SYSTEM</span>
+                        <a href="{% url 'demo-booking' %}">Book A Demo</a>
+                        {% if user.is_authenticated %}
+                        <a href="{% url 'sales-dashboard' %}">Sales Dashboard</a>
+                        <a href="{% url 'deal-pipeline' %}">Deal Pipeline</a>
+                        <a href="{% url 'lead-list' %}">Leads Manager</a>
+                        <a href="{% url 'sales-analytics' %}">Sales Analytics</a>
+                        {% endif %}
                     </div>
-                </li>
+                </div>
+            </li>
 
-                <li>
-                    <a href="{% url 'public-blog' %}">RESOURCES</a>
-                </li>
-            </ul>
+            <li>
+                <a href="{% url 'public-blog' %}">RESOURCES</a>
+            </li>
+        </ul>
 
-            <div class="flex gap-sm">
-                <button id="theme-toggle" class="btn btn-primary btn-sm" title="Toggle light/dark theme" style="width: 50px; height: 50px; padding: 0; display: flex; align-items: center; justify-content: center; margin-right: 0.5rem; border-radius: 50%;"><i id="theme-icon" class="fas fa-moon"></i></button>
-                {% if user.is_authenticated %}
-                <a href="{% url 'candidate-list' %}" class="btn btn-cyan font-mono">/DASHBOARD</a>
-                {% else %}
-                <a href="{% url 'login' %}" style="color:var(--text-gray); margin-right:16px; padding-top:10px;" class="font-mono text-sm">/LOGIN</a>
-                <a href="{% url 'register' %}" class="btn btn-outline font-mono">/FREE_AUDIT</a>
-                {% endif %}
+        <div class="flex gap-sm">
+            <button id="theme-toggle" class="btn btn-primary btn-sm" title="Toggle theme" style="width: 44px; height: 44px; padding: 0; display: flex; align-items: center; justify-content: center; margin-right: 0.5rem; border-radius: 50%;"><i id="theme-icon" class="fas fa-moon"></i></button>
+            {% if user.is_authenticated %}
+            <a href="{% url 'candidate-list' %}" class="btn btn-cyan font-mono">/DASHBOARD</a>
+            {% else %}
+            <a href="{% url 'login' %}" style="color:var(--text-gray); margin-right:16px; padding-top:10px;" class="font-mono text-sm">/LOGIN</a>
+            <a href="{% url 'register' %}" class="btn btn-outline font-mono">/GET_STARTED</a>
+            {% endif %}
+        </div>
+    </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════════
+     HERO — The One Platform
+     ═══════════════════════════════════════════════════════════ -->
+<header class="hero container relative">
+    <div class="hero-left">
+        <div class="hero-badge"><span class="dot"></span> UNIFIED PLATFORM v6.0 — ALL SERVICES LIVE</div>
+        <h1 class="hero-title tracking-tight" style="font-size: 3rem;">
+            One Platform.<br>
+            <span class="text-white">Every IT Service Your Business Needs.</span>
+        </h1>
+        <p class="hero-subtitle text-gray mt-md" style="font-size: 1.15rem; max-width: 600px;">
+            Stop juggling 10 vendors for sales, hiring, security, dashboards, and dev. Transform.io is the single platform that combines AI-powered Sales, Recruiting & Sourcing, ATS-CRM with live interviews, Cybersecurity, Web & App Development, Data Dashboards, and IT Management — all under one roof.
+        </p>
+        <div class="hero-actions">
+            <a href="#services" class="btn btn-cyan font-mono">Explore All Services</a>
+            <a href="{% url 'demo-booking' %}" class="btn btn-outline font-mono">Book Free Demo</a>
+        </div>
+        <div class="tech-stack mt-lg font-mono text-xs text-dark-gray">
+            7 VERTICALS: <span class="text-gray">SALES · SECURITY · RECRUITING · ATS-CRM · DEV · DASHBOARDS · IT OPS</span>
+        </div>
+    </div>
+
+    <div class="hero-right">
+        <div class="terminal-mock border-glow">
+            <div class="terminal-header border-bottom">
+                <div class="dots flex gap-sm">
+                    <span class="dot bg-red"></span><span class="dot bg-yellow"></span><span class="dot bg-green"></span>
+                </div>
+                <div class="terminal-title font-mono text-xs">root@transform-io:~# ./unified_platform.sh</div>
+            </div>
+            <div class="terminal-body font-mono text-sm" style="color:var(--text-gray);">
+                <span class="text-cyan">[BOOT]</span> Transform.io Unified Platform v6.0<br>
+                <span class="text-white">[INIT]</span> Loading AI Sales Engine...<br>
+                <span class="text-cyan">[OK]</span> 26 active leads · ICP scoring live<br>
+                <span class="text-white">[INIT]</span> ATS-CRM + Interview Suite...<br>
+                <span class="text-cyan">[OK]</span> Candidate pipeline active<br>
+                <span class="text-white">[INIT]</span> Cybersecurity · Zero-Trust layer...<br>
+                <span class="text-cyan">[OK]</span> SOC2 compliance verified<br>
+                <span class="text-white">[INIT]</span> Data Dashboards · Real-time KPIs...<br>
+                <span class="text-cyan">[OK]</span> Executive reporting online<br>
+                <span class="text-white">[INIT]</span> Web/App Dev · IT Ops modules...<br>
+                <span class="text-primary">[READY]</span> All 7 services operational. ✓
             </div>
         </div>
-    </nav>
+    </div>
+</header>
 
-    <!-- Technical Hero Section -->
-    <header class="hero container">
-        <div class="hero-left">
-            <div class="tag font-mono text-cyan mb-md">[ AUTOMATION_ENGINE v5.0 ]</div>
-            <h1 class="hero-title tracking-tight">
-                Scale Your Staffing Firm With<br>
-                <span class="text-white">Automated Recruitment Infrastructure.</span>
-            </h1>
-            <p class="hero-subtitle text-gray mt-md" style="font-size: 1.15rem; max-width: 600px;">
-                Stop losing placements to manual workflows and fragmented data. We build custom Applicant Tracking Systems, CRM pipelines, and data dashboards specifically for US-based tech staffing agencies.
+<!-- ═══════════════════════════════════════════════════════════
+     STATS BAR — Social proof numbers
+     ═══════════════════════════════════════════════════════════ -->
+<section class="container relative" style="margin-top: -20px; margin-bottom: 80px;">
+    <div class="stats-row">
+        <div class="stat-block">
+            <div class="stat-num" data-target="7">7</div>
+            <div class="stat-label">Service Verticals</div>
+        </div>
+        <div class="stat-block">
+            <div class="stat-num" data-target="40">40%</div>
+            <div class="stat-label">Faster Operations</div>
+        </div>
+        <div class="stat-block">
+            <div class="stat-num" data-target="24">24/7</div>
+            <div class="stat-label">IT Management</div>
+        </div>
+        <div class="stat-block">
+            <div class="stat-num" data-target="1">1</div>
+            <div class="stat-label">Platform, Zero Chaos</div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     ALL 7 SERVICES — Glassmorphic card grid
+     ═══════════════════════════════════════════════════════════ -->
+<section class="container relative pb-lg" id="services">
+    <div class="section-intro">
+        <span class="sub-tag">THE COMPLETE PLATFORM</span>
+        <h2 class="huge-title">Everything You Need. Nothing You Don't.</h2>
+        <p class="text-gray" style="font-size: 1.05rem; line-height: 1.6;">
+            We don't just build tools — we place expert resources and deliver end-to-end solutions across every IT vertical. Tell us the problem, we handle the rest.
+        </p>
+    </div>
+
+    <div class="svc-grid">
+
+        <!-- 1. AI Sales & Outreach -->
+        <div class="svc-card svc-sales">
+            <div class="svc-icon"><i class='bx bx-rocket'></i></div>
+            <h4>AI Sales & Outreach</h4>
+            <div class="svc-mono">AUTOMATED REVENUE ENGINE</div>
+            <p>AI-powered lead scoring, personalized 5-step email sequences via Gmail integration, deal pipeline tracking, and real-time MRR dashboards. Close deals while you sleep.</p>
+            <span class="svc-tag">✉️ EMAIL INTEGRATION LIVE</span>
+        </div>
+
+        <!-- 2. Cybersecurity -->
+        <div class="svc-card svc-cyber">
+            <div class="svc-icon"><i class='bx bx-shield-quarter'></i></div>
+            <h4>Cybersecurity & Compliance</h4>
+            <div class="svc-mono">ZERO-TRUST · SOC2 · HIPAA</div>
+            <p>Military-grade encryption, SOC2/HIPAA compliance audits, zero-trust architecture, encrypted PII vaults, real-time threat monitoring, and immutable audit logging.</p>
+            <span class="svc-tag">🔒 AES-256 ENCRYPTION</span>
+        </div>
+
+        <!-- 3. Recruiting & Sourcing -->
+        <div class="svc-card svc-recruit">
+            <div class="svc-icon"><i class='bx bx-search-alt'></i></div>
+            <h4>Recruiting & Sourcing</h4>
+            <div class="svc-mono">AI-POWERED TALENT ACQUISITION</div>
+            <p>AI resume parsing with NLP, cosine similarity matching, automated candidate sourcing from LinkedIn and job boards, experience gap analysis, and talent pool management.</p>
+            <span class="svc-tag">🧠 NLP PARSING ENGINE</span>
+        </div>
+
+        <!-- 4. ATS-CRM + Interviews -->
+        <div class="svc-card svc-ats">
+            <div class="svc-icon"><i class='bx bx-video'></i></div>
+            <h4>ATS-CRM + Live Interviews</h4>
+            <div class="svc-mono">FULL HIRING INFRASTRUCTURE</div>
+            <p>Complete applicant tracking system with built-in CRM, automated interview scheduling, video interview integration, candidate scorecards, and pipeline analytics — all in one.</p>
+            <span class="svc-tag">📹 BUILT-IN INTERVIEWS</span>
+        </div>
+
+        <!-- 5. Web & App Development -->
+        <div class="svc-card svc-dev">
+            <div class="svc-icon"><i class='bx bx-code-block'></i></div>
+            <h4>Web & App Development</h4>
+            <div class="svc-mono">CUSTOM BUILDS · MVP TO SCALE</div>
+            <p>Custom web applications, mobile apps, SaaS platforms, landing pages, and full-stack development. From idea to production-grade infrastructure with expert developers.</p>
+            <span class="svc-tag">⚡ FULL-STACK DEV</span>
+        </div>
+
+        <!-- 6. Data Dashboards -->
+        <div class="svc-card svc-dash">
+            <div class="svc-icon"><i class='bx bx-line-chart'></i></div>
+            <h4>Data Dashboards & BI</h4>
+            <div class="svc-mono">EXECUTIVE INTELLIGENCE</div>
+            <p>Real-time KPI tracking, custom executive reporting, pipeline analytics, placement efficiency metrics, and interactive business intelligence dashboards tailored to your business.</p>
+            <span class="svc-tag">📊 REAL-TIME ANALYTICS</span>
+        </div>
+
+        <!-- 7. IT Management as a Service (full-width) -->
+        <div class="svc-card svc-itops" style="grid-column: 1 / -1;">
+            <div style="display: flex; flex-wrap: wrap; gap: 32px; align-items: center;">
+                <div style="flex: 1; min-width: 280px;">
+                    <div class="svc-icon"><i class='bx bx-server'></i></div>
+                    <h4>IT Management as a Service (ITaaS)</h4>
+                    <div class="svc-mono">INFRASTRUCTURE · DEVOPS · CLOUD · MONITORING</div>
+                    <p>End-to-end IT operations: infrastructure management, cloud migration (AWS/GCP/Azure), CI/CD pipelines, uptime monitoring, 24/7 incident response, and dedicated DevOps engineers. We become your IT department.</p>
+                    <span class="svc-tag">🖥️ 24/7 IT OPERATIONS</span>
+                </div>
+                <div style="flex: 1; min-width: 280px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <div class="feature-pill"><i class='bx bx-cloud'></i> Cloud Migration</div>
+                        <div class="feature-pill"><i class='bx bx-git-branch'></i> CI/CD Pipelines</div>
+                        <div class="feature-pill"><i class='bx bx-pulse'></i> Uptime Monitoring</div>
+                        <div class="feature-pill"><i class='bx bx-wrench'></i> Incident Response</div>
+                        <div class="feature-pill"><i class='bx bx-data'></i> Database Management</div>
+                        <div class="feature-pill"><i class='bx bx-lock-alt'></i> Security Patches</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SHOWCASE — ATS/CRM + Sales Dashboard (with images)
+     ═══════════════════════════════════════════════════════════ -->
+<section class="container relative mt-xl pb-lg border-bottom">
+    <!-- ATS + CRM Showcase -->
+    <div class="showcase-split">
+        <div class="showcase-text">
+            <span class="sub-tag">ATS-CRM + INTERVIEW SUITE</span>
+            <h2 class="huge-title" style="font-size: 2.2rem;">Hire, Track & Interview.<br>All In One System.</h2>
+            <p class="text-gray" style="font-size: 1.05rem; line-height: 1.6; margin-bottom: 20px;">
+                Our AI parses resumes using NLP, calculates exact 0-100 match scores against job descriptions, auto-generates candidate summaries, and schedules interviews — all before a recruiter even opens the file.
             </p>
-            <div class="hero-actions">
-                <a href="#architecture" class="btn btn-cyan font-mono">Explore Architecture</a>
-                <a href="{% url 'register' %}" class="btn btn-outline font-mono">Get Free Workflow Audit</a>
+            <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 24px;">
+                <span class="feature-pill"><i class='bx bx-brain'></i> AI Resume Parsing</span>
+                <span class="feature-pill"><i class='bx bx-video'></i> Video Interviews</span>
+                <span class="feature-pill"><i class='bx bx-bar-chart-alt-2'></i> Match Scoring</span>
+                <span class="feature-pill"><i class='bx bx-calendar-check'></i> Auto-Scheduling</span>
             </div>
-            <div class="tech-stack mt-lg font-mono text-xs text-dark-gray">
-                BUILT FOR STAFFING: <span class="text-gray">CUSTOM ATS, CRM PIPELINES, DASHBOARDS</span>
+            {% if user.is_authenticated %}
+            <a href="{% url 'ai-pipeline-dashboard' %}" class="btn btn-cyan font-mono">Open AI Pipeline</a>
+            {% else %}
+            <a href="{% url 'register' %}" class="btn btn-cyan font-mono">Get Started Free</a>
+            {% endif %}
+        </div>
+        <div class="showcase-visual">
+            <div class="img-wrap">
+                <img src="{% static 'tracking_app/assets/ats_dashboard.png' %}" alt="ATS Dashboard with AI Parsing">
             </div>
         </div>
+    </div>
 
-        <div class="hero-right">
-            <!-- Simulated Terminal -->
-            <div class="terminal-mock border-glow">
-                <div class="terminal-header border-bottom">
-                    <div class="dots flex gap-sm">
-                        <span class="dot bg-red"></span><span class="dot bg-yellow"></span><span class="dot bg-green"></span>
-                    </div>
-                    <div class="terminal-title font-mono text-xs">root@transform-io:~# ./hybrid_engine.sh</div>
-                </div>
-                <div class="terminal-body font-mono text-sm" id="typewriter-log" style="color:var(--text-gray);">
-                    <span class="text-white">[INFO]</span> Initializing ATS pipeline...<br>
-                    <span class="text-white">[INFO]</span> Connecting to remote CRM endpoints...<br>
-                    <span class="text-cyan">[OK]</span> Job Board webhook active.<br>
-                    <span class="text-white">[INFO]</span> Auditing manual recruitment workflows...<br>
-                    <span class="text-cyan">[OK]</span> Bottlenecks identified.<br>
-                    <span class="text-white">[INFO]</span> Ingesting PDF via NLP Parsing Models (Cosine Similarity Engine)...<br>
-                    <span class="text-white">[ACTION]</span> Synthesizing AI Candidate Summary profiles...<br>
-                    <span class="text-white">[INFO]</span> Synchronizing state with external APIs...<br>
-                    <span class="text-primary">[OK]</span> Platform operational. Awaiting command.
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <!-- The Hybrid Platform Problem -->
-    <section class="container mt-xl pb-lg border-bottom" id="architecture">
-        <div class="text-center" style="max-width: 800px; margin: 0 auto; margin-bottom: 64px;">
-            <span class="sub-tag">THE INEFFICIENCY CRISIS SOLVED</span>
-            <h2 class="huge-title">Stop Relying on Manual Workflows.</h2>
-            <p class="text-gray" style="font-size: 1.1rem; line-height: 1.6;">
-                The average staffing firm loses placements due to inefficient candidate tracking and disjointed systems. Transform.io builds custom, scalable infrastructure natively.
+    <!-- Sales Dashboard Showcase -->
+    <div class="showcase-split" style="flex-direction: row-reverse;">
+        <div class="showcase-text">
+            <span class="sub-tag">AI SALES DASHBOARD</span>
+            <h2 class="huge-title" style="font-size: 2.2rem;">Outreach, Score & Close.<br>Powered by AI.</h2>
+            <p class="text-gray" style="font-size: 1.05rem; line-height: 1.6; margin-bottom: 20px;">
+                Import leads, auto-score them against your ICP, generate personalized email sequences, and send directly through your Gmail. Track open rates, manage deals, and watch your MRR grow — all from one dashboard.
             </p>
+            <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 24px;">
+                <span class="feature-pill"><i class='bx bx-mail-send'></i> Gmail SMTP</span>
+                <span class="feature-pill"><i class='bx bx-target-lock'></i> ICP Scoring</span>
+                <span class="feature-pill"><i class='bx bx-git-pull-request'></i> Deal Pipeline</span>
+                <span class="feature-pill"><i class='bx bx-dollar-circle'></i> MRR Tracking</span>
+            </div>
+            <a href="{% url 'sales-dashboard' %}" class="btn btn-cyan font-mono">Access Sales Dashboard</a>
         </div>
-
-        <div class="bento-grid mt-lg">
-            <div class="bento-box bento-large border-glow">
-                <div class="bento-content">
-                    <i class='bx bx-brain' style="font-size:2.5rem; color:var(--primary);"></i>
-                    <h4 class="mt-md font-mono text-xl text-white">AI Parsing & Deep Matching</h4>
-                    <p class="mt-md text-gray" style="font-size: 1.1rem; line-height: 1.6;">Semantic NLP parsing logic natively reads through CV fluff. Uses Cosine Similarity to calculate exact 0-100 match percentages against job descriptions, evaluating data structures like a neural network and identifying candidate skill gaps automatically.</p>
-                </div>
-                <div class="bento-image-wrapper border-glow" style="height: 350px;">
-                <img src="{% static 'tracking_app/assets/ats_dashboard.png' %}" alt="Custom ATS Dashboard" style="filter: brightness(0.9);">
-            </div>
-            </div>
-            
-            <div class="bento-box bento-medium border-glow">
-                <div class="bento-content" style="padding-bottom: 24px;">
-                    <i class='bx bx-line-chart' style="font-size:2.5rem; color:var(--primary);"></i>
-                    <h4 class="mt-md font-mono text-xl text-white">Data Dashboards</h4>
-                    <p class="mt-md text-gray">Gain full pipeline visibility. Real-time dashboards track placement efficiency and operational KPIs.</p>
-                </div>
-                <div class="bento-image-wrapper border-glow" style="height: 350px;">
-                <img src="{% static 'tracking_app/assets/analytics_dashboard.png' %}" alt="Data Telemetry and Analytics" style="filter: brightness(0.9);">
-            </div>
-            </div>
-            
-            <div class="bento-box bento-medium border-glow">
-                <div class="bento-content" style="padding-bottom: 24px;">
-                    <i class='bx bx-git-branch' style="font-size:2.5rem; color:var(--primary);"></i>
-                    <h4 class="mt-md font-mono text-xl text-white">Hyper-Automation</h4>
-                    <p class="mt-md text-gray">Native integrations sync cleanly with external providers like Bullhorn, Workday, and LinkedIn.</p>
-                </div>
-                <div class="bento-image-wrapper border-glow" style="height: 350px;">
-                <img src="{% static 'tracking_app/assets/crm_dashboard.png' %}" alt="CRM Pipeline Management" style="filter: brightness(0.9);">
-            </div>
+        <div class="showcase-visual">
+            <div class="img-wrap">
+                <img src="{% static 'tracking_app/assets/sales_dashboard_preview.png' %}" alt="AI Sales Dashboard">
             </div>
         </div>
+    </div>
+</section>
 
-        <div class="system-highlight">
-            <h3 class="text-white font-mono text-xl mb-md">Deep Engine Analytics</h3>
-            <p class="text-gray mb-md">
-                Our JobMatch algorithmic model goes beyond simple keywords. When an application drops, the system cross-references structured `certifications`, `education`, and `skills` to generate a comprehensive <strong>Experience Gap Analysis</strong> and automatic <strong>Candidate Summary Profile</strong> before a recruiter even opens the file.
+<!-- ═══════════════════════════════════════════════════════════
+     CYBERSECURITY SHOWCASE
+     ═══════════════════════════════════════════════════════════ -->
+<section class="container relative mt-xl pb-lg border-bottom">
+    <div class="showcase-split">
+        <div class="showcase-text">
+            <span class="sub-tag">ZERO-TRUST ARCHITECTURE</span>
+            <h2 class="huge-title" style="font-size: 2.2rem;">Military-Grade Security.<br>Built Into Everything.</h2>
+            <p class="text-gray" style="font-size: 1.05rem; line-height: 1.6; margin-bottom: 20px;">
+                Every service we deliver is built on enterprise-grade security. SOC2, HIPAA-ready, AES-256 encryption, zero-trust identity verification, and real-time threat monitoring come standard — not as an add-on.
             </p>
-            <div class="flex gap-sm">
-                 <span class="border-glow font-mono text-xs text-primary" style="padding: 6px 12px; background: #000;">[RUNNING] MatchingEngine()</span>
-                 <span class="border-glow font-mono text-xs text-primary" style="padding: 6px 12px; background: #000;">[RUNNING] ThirdPartyIntegration()</span>
-                 <span class="border-glow font-mono text-xs text-primary" style="padding: 6px 12px; background: #000;">[RUNNING] SecOps_Daemon()</span>
+            <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 24px;">
+                <span class="feature-pill" style="border-color: rgba(255,59,48,0.2); color: #FF3B30;"><i class='bx bx-shield-quarter'></i> SOC2 Compliant</span>
+                <span class="feature-pill" style="border-color: rgba(255,59,48,0.2); color: #FF3B30;"><i class='bx bx-fingerprint'></i> MFA + Zero-Trust</span>
+                <span class="feature-pill" style="border-color: rgba(255,59,48,0.2); color: #FF3B30;"><i class='bx bx-lock-alt'></i> Immutable Logs</span>
+                <span class="feature-pill" style="border-color: rgba(255,59,48,0.2); color: #FF3B30;"><i class='bx bx-radar'></i> Threat Monitoring</span>
             </div>
         </div>
-        </div>
-    </section>
-
-    <!-- Military-Grade Cybersecurity -->
-    <section class="container mt-xl pb-lg border-bottom" id="cybersecurity">
-        <div style="display: flex; flex-wrap: wrap; gap: 64px; align-items: center; margin-bottom: 64px;">
-            <div style="flex: 1; min-width: 300px;">
-                <span class="sub-tag">ZERO_TRUST ARCHITECTURE</span>
-                <h2 class="huge-title">Military-Grade Cybersecurity</h2>
-                <p class="text-gray" style="font-size: 1.1rem; line-height: 1.6; margin-bottom: 24px;">
-                    Protecting PII and proprietary client lists is our highest priority. Our architecture is built on strict military-grade Zero-Trust principles.
-                </p>
-
-                <div style="margin-bottom: 16px;">
-                    <h4 style="color: white; font-family: var(--font-mono); font-size: 0.95rem; margin-bottom: 4px;"><i class='bx bx-shield-quarter text-primary'></i> SOC2 & HIPAA Compliant</h4>
-                    <p class="text-gray" style="font-size: 0.85rem; line-height: 1.5;">End-to-end AES-256 encryption at rest and TLS 1.3 in transit guarantees your candidate resumes and client contracts remain impenetrable.</p>
-                </div>
-                <div style="margin-bottom: 16px;">
-                    <h4 style="color: white; font-family: var(--font-mono); font-size: 0.95rem; margin-bottom: 4px;"><i class='bx bx-fingerprint text-primary'></i> Zero-Trust & MFA</h4>
-                    <p class="text-gray" style="font-size: 0.85rem; line-height: 1.5;">Adaptive Multi-Factor Authentication prevents credential stuffing. The system continuously verifies recruiter identity before granting access.</p>
-                </div>
-                <div style="margin-bottom: 16px;">
-                    <h4 style="color: white; font-family: var(--font-mono); font-size: 0.95rem; margin-bottom: 4px;"><i class='bx bx-lock-alt text-primary'></i> Immutable Audit Logging</h4>
-                    <p class="text-gray" style="font-size: 0.85rem; line-height: 1.5;">Every single database read/write is immutably logged. Detect rogue exfiltration attempts instantly if an employee attempts a mass export.</p>
-                </div>
-            </div>
-            
-            <div style="flex: 1; min-width: 300px;">
-                <div class="border-glow" style="padding:4px; height: 100%;">
-                    <img src="{% static 'tracking_app/assets/cybersec_mockup_1776112528216.png' %}" alt="Military-Grade Cybersecurity Dashboard" style="width:100%; border-radius: 8px; display:block;">
-                </div>
+        <div class="showcase-visual">
+            <div class="img-wrap" style="border-color: rgba(255,59,48,0.15);">
+                <img src="{% static 'tracking_app/assets/cybersec_mockup_1776112528216.png' %}" alt="Cybersecurity Dashboard">
             </div>
         </div>
-    </section>
+    </div>
+</section>
 
-    <!-- AI Pipeline Showcase -->
-    <section class="container mt-xl pb-lg border-bottom" id="ai-pipeline-showcase">
-        <div style="display: flex; flex-wrap: wrap; gap: 64px; align-items: center; margin-bottom: 64px;">
-            <div style="flex: 1; min-width: 300px;">
-                <span class="sub-tag">AI_PIPELINE ENGINE</span>
-                <h2 class="huge-title">Intelligent Recruitment<br>Data Telemetry.</h2>
-                <p class="text-gray" style="font-size: 1.1rem; line-height: 1.6; margin-bottom: 24px;">
-                    Real-time algorithmic pipeline tracking with predictive candidate matching. Our AI engine processes thousands of applications, identifies top talent, and provides actionable insights — all in one command center.
-                </p>
+<!-- ═══════════════════════════════════════════════════════════
+     TRUST STRIP
+     ═══════════════════════════════════════════════════════════ -->
+<section class="container relative">
+    <div class="trust-strip">
+        <div class="trust-item"><i class='bx bx-shield-quarter'></i>SOC2 Ready</div>
+        <div class="trust-item"><i class='bx bx-lock-alt'></i>AES-256</div>
+        <div class="trust-item"><i class='bx bx-cloud'></i>AWS / GCP / Azure</div>
+        <div class="trust-item"><i class='bx bx-code-block'></i>Full-Stack Dev</div>
+        <div class="trust-item"><i class='bx bx-bot'></i>AI-Powered</div>
+        <div class="trust-item"><i class='bx bx-support'></i>24/7 Support</div>
+    </div>
+</section>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 32px;">
-                    <div class="border-glow" style="padding: 20px; text-align: center; background: rgba(0, 229, 255, 0.05);">
-                        <div style="font-size: 2rem; font-weight: 800; color: #00E5FF; font-family: 'Fira Code', monospace;">142</div>
-                        <div style="font-size: 0.75rem; color: #888; font-family: 'Fira Code', monospace; margin-top: 4px;">ACTIVE REQS</div>
-                    </div>
-                    <div class="border-glow" style="padding: 20px; text-align: center; background: rgba(0, 229, 255, 0.05);">
-                        <div style="font-size: 2rem; font-weight: 800; color: #00E5FF; font-family: 'Fira Code', monospace;">841</div>
-                        <div style="font-size: 0.75rem; color: #888; font-family: 'Fira Code', monospace; margin-top: 4px;">NEW APPLICANTS</div>
-                    </div>
-                    <div class="border-glow" style="padding: 20px; text-align: center; background: rgba(16, 185, 129, 0.05);">
-                        <div style="font-size: 2rem; font-weight: 800; color: #10b981; font-family: 'Fira Code', monospace;">94%</div>
-                        <div style="font-size: 0.75rem; color: #888; font-family: 'Fira Code', monospace; margin-top: 4px;">MATCH ACCURACY</div>
-                    </div>
-                </div>
-
-                {% if user.is_authenticated %}
-                <a href="{% url 'ai-pipeline-dashboard' %}" class="btn btn-cyan font-mono">Explore AI Pipeline</a>
-                {% else %}
-                <a href="{% url 'register' %}" class="btn btn-cyan font-mono">Get Started</a>
-                {% endif %}
-            </div>
-            
-            <div style="flex: 1; min-width: 300px;">
-                <div class="border-glow" style="padding: 4px; position: relative; overflow: hidden;">
-                    <div style="position: absolute; inset: 0; background: linear-gradient(135deg, rgba(0, 229, 255, 0.15), transparent 60%); pointer-events: none; z-index: 1;"></div>
-                    <img src="{% static 'tracking_app/assets/ai_pipeline_preview.png' %}" alt="AI Pipeline Dashboard" style="width: 100%; border-radius: 8px; display: block; position: relative;" onerror="this.style.display='none'">
-                    <!-- Fallback if image doesn't exist -->
-                    <div style="background: linear-gradient(135deg, #0a0a0a, #111); border-radius: 8px; padding: 40px; min-height: 300px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 16px;">
-                        <i class="fa-solid fa-chart-line" style="font-size: 4rem; color: #00E5FF; opacity: 0.6;"></i>
-                        <div style="font-family: 'Fira Code', monospace; color: #888; font-size: 0.85rem; text-align: center;">
-                            RECRUITMENT DATA TELEMETRY<br>
-                            <span style="color: #00E5FF;">COMMAND CENTER v3.1</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
+<!-- ═══════════════════════════════════════════════════════════
+     CTA BANNER
+     ═══════════════════════════════════════════════════════════ -->
+<section class="container relative mt-xl mb-xl">
+    <div class="cta-banner">
+        <span class="sub-tag">READY TO TRANSFORM?</span>
+        <h2 class="huge-title" style="margin-bottom: 16px;">Stop Juggling. Start Scaling.</h2>
+        <p class="text-gray" style="font-size: 1.1rem; max-width: 600px; margin: 0 auto 28px; line-height: 1.6;">
+            One platform. Seven services. Zero vendor chaos. Tell us what's slowing you down — we'll place the right resources and build the solution.
+        </p>
+        <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+            <a href="{% url 'demo-booking' %}" class="btn btn-cyan font-mono" style="font-size:1rem; padding: 14px 32px;">Book A Free Demo</a>
+            <a href="{% url 'register' %}" class="btn btn-outline font-mono" style="font-size:1rem; padding: 14px 32px;">Get Free Audit</a>
         </div>
-    </section>
+    </div>
+</section>
 
-    <!-- Military-Grade Cybersecurity -->
-    <section class="container mt-xl pb-lg border-bottom" id="cybersecurity">
-        <div style="display: flex; flex-wrap: wrap; gap: 64px; align-items: center;">
-            <div style="flex: 1; min-width: 300px;">
-                <span class="sub-tag">SECURITY_OPS LAYER</span>
-                <h2 class="huge-title">Military-Grade<br>Cybersecurity.</h2>
-                <p class="text-gray" style="font-size: 1.1rem; line-height: 1.6; margin-bottom: 24px;">
-                    Every byte of candidate and client data is protected by enterprise-grade encryption, zero-trust architecture, and real-time threat monitoring. Built for industries where compliance isn't optional.
-                </p>
-
-                <div style="margin-bottom: 16px;">
-                    <h4 style="color: white; font-family: var(--font-mono); font-size: 0.95rem; margin-bottom: 4px;"><i class='bx bx-shield-quarter text-primary'></i> Zero-Trust Compliance</h4>
-                    <p class="text-gray" style="font-size: 0.85rem; line-height: 1.5;">SOC 2 Type II, GDPR, and HIPAA-ready architecture. Every API call is authenticated, authorized, and audited.</p>
-                </div>
-                <div style="margin-bottom: 16px;">
-                    <h4 style="color: white; font-family: var(--font-mono); font-size: 0.95rem; margin-bottom: 4px;"><i class='bx bx-data text-primary'></i> Encrypted PII Vault</h4>
-                    <p class="text-gray" style="font-size: 0.85rem; line-height: 1.5;">Candidate PII (SSN, DOB, salary data) is stored in AES-256 encrypted vaults with role-based decryption keys.</p>
-                </div>
-                <div style="margin-bottom: 16px;">
-                    <h4 style="color: white; font-family: var(--font-mono); font-size: 0.95rem; margin-bottom: 4px;"><i class='bx bx-radar text-primary'></i> Real-Time Threat Monitoring</h4>
-                    <p class="text-gray" style="font-size: 0.85rem; line-height: 1.5;">Continuous monitoring detects anomalous access patterns. Automated lockdowns trigger if brute-force or injection attacks are detected.</p>
-                </div>
-                <div style="margin-bottom: 16px;">
-                    <h4 style="color: white; font-family: var(--font-mono); font-size: 0.95rem; margin-bottom: 4px;"><i class='bx bx-lock-alt text-primary'></i> Immutable Audit Logging</h4>
-                    <p class="text-gray" style="font-size: 0.85rem; line-height: 1.5;">Every single database read/write is immutably logged. Detect rogue exfiltration attempts instantly if an employee attempts a mass export.</p>
-                </div>
-            </div>
-            
-            <div style="flex: 1; min-width: 300px;">
-                <div class="border-glow" style="padding:4px; height: 100%;">
-                    <img src="{% static 'tracking_app/assets/cybersec_mockup_1776112528216.png' %}" alt="Military-Grade Cybersecurity Dashboard" style="width:100%; border-radius: 8px; display:block;">
-                </div>
-            </div>
+<!-- ═══════════════════════════════════════════════════════════
+     FOOTER
+     ═══════════════════════════════════════════════════════════ -->
+<footer class="footer font-mono mt-xl relative">
+    <div class="container footer-mega-grid">
+        <div class="footer-brand footer-col">
+            <a href="{% url 'home' %}" class="logo text-xl mb-md"><img src="{% static 'tracking_app/assets/logo-333.png' %}" alt="Transform.io" style="height: 48px; width: auto; max-width: 250px; border-radius: 4px; box-shadow: 0 0 10px rgba(0, 229, 255, 0.5);"></a>
+            <p class="text-gray text-xs mb-md" style="line-height:1.6;">The unified platform for IT, Sales, Security, Recruiting, Development, and Operations. One partner. Every solution.</p>
         </div>
-    </section>
-
-    <!-- AI Pipeline Showcase -->
-    <section class="container mt-xl pb-lg border-bottom" id="ai-pipeline-showcase">
-        <div style="display: flex; flex-wrap: wrap; gap: 64px; align-items: center; margin-bottom: 64px;">
-            <div style="flex: 1; min-width: 300px;">
-                <span class="sub-tag">AI_PIPELINE ENGINE</span>
-                <h2 class="huge-title">Intelligent Recruitment<br>Data Telemetry.</h2>
-                <p class="text-gray" style="font-size: 1.1rem; line-height: 1.6; margin-bottom: 24px;">
-                    Real-time algorithmic pipeline tracking with predictive candidate matching. Our AI engine processes thousands of applications, identifies top talent, and provides actionable insights — all in one command center.
-                </p>
-
-                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 32px;">
-                    <div class="border-glow" style="padding: 20px; text-align: center; background: rgba(0, 229, 255, 0.05);">
-                        <div class="stat-num" style="font-size: 2rem; font-weight: 800; color: #00E5FF; font-family: 'Fira Code', monospace;">142</div>
-                        <div style="font-size: 0.75rem; color: #888; font-family: 'Fira Code', monospace; margin-top: 4px;">ACTIVE REQS</div>
-                    </div>
-                    <div class="border-glow" style="padding: 20px; text-align: center; background: rgba(0, 229, 255, 0.05);">
-                        <div class="stat-num" style="font-size: 2rem; font-weight: 800; color: #00E5FF; font-family: 'Fira Code', monospace;">841</div>
-                        <div style="font-size: 0.75rem; color: #888; font-family: 'Fira Code', monospace; margin-top: 4px;">NEW APPLICANTS</div>
-                    </div>
-                    <div class="border-glow" style="padding: 20px; text-align: center; background: rgba(16, 185, 129, 0.05);">
-                        <div class="stat-num" style="font-size: 2rem; font-weight: 800; color: #10b981; font-family: 'Fira Code', monospace;">94%</div>
-                        <div style="font-size: 0.75rem; color: #888; font-family: 'Fira Code', monospace; margin-top: 4px;">MATCH ACCURACY</div>
-                    </div>
-                </div>
-
-                {% if user.is_authenticated %}
-                <a href="{% url 'ai-pipeline-dashboard' %}" class="btn btn-cyan font-mono">Explore AI Pipeline</a>
-                {% else %}
-                <a href="{% url 'register' %}" class="btn btn-cyan font-mono">Get Started</a>
-                {% endif %}
-            </div>
-            
-            <div style="flex: 1; min-width: 300px;">
-                <div class="border-glow" style="padding: 4px; position: relative; overflow: hidden;">
-                    <div style="position: absolute; inset: 0; background: linear-gradient(135deg, rgba(0, 229, 255, 0.15), transparent 60%); pointer-events: none; z-index: 1;"></div>
-                    <img src="{% static 'tracking_app/assets/ai_pipeline_preview.png' %}" alt="AI Pipeline Dashboard" style="width: 100%; border-radius: 8px; display: block; position: relative;" onerror="this.style.display='none'">
-                    <!-- Fallback if image doesn't exist -->
-                    <div style="background: linear-gradient(135deg, #0a0a0a, #111); border-radius: 8px; padding: 40px; min-height: 300px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 16px;">
-                        <i class="bx bx-line-chart" style="font-size: 4rem; color: #00E5FF; opacity: 0.6;"></i>
-                        <div style="font-family: 'Fira Code', monospace; color: #888; font-size: 0.85rem; text-align: center;">
-                            RECRUITMENT DATA TELEMETRY<br>
-                            <span style="color: #00E5FF;">COMMAND CENTER v3.1</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Rest of Features ... -->
-    <section class="container mt-xl mb-xl text-center">
-        <h2 class="text-white text-3xl mb-md">Systemize Your Agency Today.</h2>
-        <a href="{% url 'register' %}" class="btn btn-cyan font-mono" style="font-size:1.1rem; padding: 16px 32px;">Get Free Workflow Audit</a>
-    </section>
-
-    <footer class="footer font-mono mt-xl">
-        <div class="container footer-mega-grid">
-            <div class="footer-brand footer-col">
-                <a href="{% url 'home' %}" class="logo text-xl mb-md"><img src="{% static 'tracking_app/assets/logo-333.png' %}" alt="Transform.io 333 Logo" style="height: 48px; width: auto; max-width: 250px; border-radius: 4px; box-shadow: 0 0 10px rgba(0, 229, 255, 0.5);"></a>
-                <p class="text-gray text-xs mb-md" style="line-height:1.6;">Automation-driven recruitment infrastructure for US-based staffing companies.</p>
-            </div>
-            
-            <div class="footer-col">
-                <h4 class="font-mono text-white">RECRUITMENT</h4>
-                <a href="{% url 'public-ats' %}">ATS Pipelines</a>
-                <a href="{% url 'public-crm' %}">Client CRM</a>
-                <a href="{% url 'public-ai' %}">AI NLP Parsing</a>
-            </div>
-
-            <div class="footer-col">
-                <h4 class="font-mono text-white">SOLUTIONS</h4>
-                <a href="#">Workflow Automation</a>
-                <a href="#">Data Dashboards</a>
-                <a href="#">Agency Audits</a>
-            </div>
+        
+        <div class="footer-col">
+            <h4 class="font-mono text-white">PLATFORM</h4>
+            <a href="{% url 'public-ats' %}">ATS & Interviews</a>
+            <a href="{% url 'public-crm' %}">Client CRM</a>
+            <a href="{% url 'public-ai' %}">AI Resume Parsing</a>
+            <a href="{% url 'public-telemetry' %}">Data Dashboards</a>
         </div>
 
-        <div class="container footer-bottom mt-lg" style="border-top: 1px solid #1a1a1a; padding-top: 24px; color: #555;">
-            <p>&copy; 2026 Transform.io Technical Solutions.</p>
+        <div class="footer-col">
+            <h4 class="font-mono text-white">SERVICES</h4>
+            <a href="#services">AI Sales & Outreach</a>
+            <a href="#services">Cybersecurity</a>
+            <a href="#services">Web & App Dev</a>
+            <a href="#services">IT Management</a>
         </div>
-    </footer>
 
-    <script src="{% static 'tracking_app/transform.js' %}"></script>
-    <script>
-        // Sitdeck-inspired scroll reveal
-        document.addEventListener('DOMContentLoaded', function() {
-            // Add reveal class to all sections
-            document.querySelectorAll('section').forEach(function(section) {
-                section.classList.add('reveal');
-            });
+        <div class="footer-col">
+            <h4 class="font-mono text-white">COMPANY</h4>
+            <a href="{% url 'demo-booking' %}">Book A Demo</a>
+            <a href="{% url 'public-blog' %}">Resources</a>
+            <a href="{% url 'register' %}">Get Started</a>
+        </div>
+    </div>
 
-            // IntersectionObserver for scroll reveal
-            const observer = new IntersectionObserver(function(entries) {
-                entries.forEach(function(entry) {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('revealed');
-                    }
-                });
-            }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+    <div class="container footer-bottom mt-lg" style="border-top: 1px solid #1a1a1a; padding-top: 24px; color: #555;">
+        <p>&copy; 2026 Transform.io — Unified IT Solutions Platform.</p>
+    </div>
+</footer>
 
-            document.querySelectorAll('.reveal, .reveal-left, .reveal-right').forEach(function(el) {
-                observer.observe(el);
-            });
+<script src="{% static 'tracking_app/transform.js' %}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Scroll-reveal for all sections and cards
+        const revealEls = document.querySelectorAll('section, .svc-card, .showcase-split, .stats-row, .cta-banner');
+        revealEls.forEach(el => el.classList.add('reveal'));
 
-            // Navbar scroll effect
-            const navbar = document.querySelector('.navbar');
-            if (navbar) {
-                window.addEventListener('scroll', function() {
-                    if (window.scrollY > 50) {
-                        navbar.classList.add('scrolled');
-                    } else {
-                        navbar.classList.remove('scrolled');
-                    }
-                });
-            }
-
-            // Animated counter for stats
-            function animateCounter(el, target, duration) {
-                let start = 0;
-                const increment = target / (duration / 16);
-                const isPercent = el.textContent.includes('%');
-                function step() {
-                    start += increment;
-                    if (start >= target) {
-                        el.textContent = target + (isPercent ? '%' : '');
-                        return;
-                    }
-                    el.textContent = Math.floor(start) + (isPercent ? '%' : '');
-                    requestAnimationFrame(step);
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('revealed');
                 }
-                step();
-            }
-
-            // Observe stat numbers and animate when visible
-            const statObserver = new IntersectionObserver(function(entries) {
-                entries.forEach(function(entry) {
-                    if (entry.isIntersecting && !entry.target.dataset.animated) {
-                        entry.target.dataset.animated = 'true';
-                        const target = parseInt(entry.target.textContent);
-                        if (!isNaN(target)) {
-                            animateCounter(entry.target, target, 1500);
-                        }
-                    }
-                });
-            }, { threshold: 0.5 });
-
-            document.querySelectorAll('.stat-num').forEach(function(el) {
-                statObserver.observe(el);
             });
+        }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+
+        document.querySelectorAll('.reveal, .reveal-left, .reveal-right').forEach(el => observer.observe(el));
+
+        // Stagger service cards
+        document.querySelectorAll('.svc-card').forEach((card, i) => {
+            card.style.transitionDelay = (i * 0.06) + 's';
         });
-    </script>
+
+        // Navbar scroll effect
+        const navbar = document.querySelector('.navbar');
+        if (navbar) {
+            window.addEventListener('scroll', () => {
+                navbar.classList.toggle('scrolled', window.scrollY > 50);
+            });
+        }
+
+        // Animated counters
+        const statObserver = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting && !entry.target.dataset.animated) {
+                    entry.target.dataset.animated = 'true';
+                    const text = entry.target.textContent;
+                    const target = parseInt(text);
+                    const suffix = text.replace(/[\d]/g, '');
+                    if (!isNaN(target) && target > 1) {
+                        let start = 0;
+                        const increment = target / 60;
+                        function step() {
+                            start += increment;
+                            if (start >= target) { entry.target.textContent = target + suffix; return; }
+                            entry.target.textContent = Math.floor(start) + suffix;
+                            requestAnimationFrame(step);
+                        }
+                        step();
+                    }
+                }
+            });
+        }, { threshold: 0.5 });
+
+        document.querySelectorAll('.stat-num').forEach(el => statObserver.observe(el));
+    });
+</script>
 </body>
 </html>
