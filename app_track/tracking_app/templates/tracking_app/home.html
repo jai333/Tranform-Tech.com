@@ -14,23 +14,84 @@
     <link rel="stylesheet" href="{% static 'tracking_app/transform.css' %}?v=500">
     <style>
     /* ══════════════════════════════════════════════════════════════
-       PREMIUM HOME — Exotic glassmorphic dark theme
+       PREMIUM HOME — Exotic glassmorphic theme variables
        ══════════════════════════════════════════════════════════════ */
+    :root {
+        --card-bg: rgba(255, 255, 255, 0.03);
+        --card-border: rgba(255, 255, 255, 0.06);
+        --transition-theme: background 0.35s ease, background-color 0.35s ease, color 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+        
+        /* Service Colors */
+        --color-sales: #00E5FF;
+        --bg-sales-tag: rgba(0, 229, 255, 0.08);
+        --color-cyber: #FF3B30;
+        --bg-cyber-tag: rgba(255, 59, 48, 0.08);
+        --color-recruit: #8b5cf6;
+        --bg-recruit-tag: rgba(139, 92, 246, 0.08);
+        --color-dev: #10b981;
+        --bg-dev-tag: rgba(16, 185, 129, 0.08);
+        --color-dash: #FFCC00;
+        --bg-dash-tag: rgba(255, 204, 0, 0.08);
+        --color-itops: #00a6fb;
+        --bg-itops-tag: rgba(0, 166, 251, 0.08);
+    }
+    body.light-theme {
+        --card-bg: rgba(0, 0, 0, 0.02);
+        --card-border: rgba(0, 0, 0, 0.08);
+        
+        /* Service Colors for light background readability */
+        --color-sales: #0891b2;
+        --bg-sales-tag: rgba(8, 145, 178, 0.1);
+        --color-cyber: #dc2626;
+        --bg-cyber-tag: rgba(220, 38, 38, 0.1);
+        --color-recruit: #6d28d9;
+        --bg-recruit-tag: rgba(109, 40, 217, 0.1);
+        --color-dev: #047857;
+        --bg-dev-tag: rgba(4, 120, 87, 0.1);
+        --color-dash: #b45309;
+        --bg-dash-tag: rgba(180, 83, 9, 0.1);
+        --color-itops: #0369a1;
+        --bg-itops-tag: rgba(3, 105, 161, 0.1);
+    }
+
+    /* ── Smooth Theme Transitions ─────────────────────────── */
+    body, html, .navbar, .svc-card, .stat-block, .bento-box, .huge-title, .hero-title, .hero-subtitle, p, h1, h2, h3, h4, span, a, .border-glow, .cta-banner, .footer {
+        transition: var(--transition-theme);
+    }
 
     /* ── Ambient glow orbs ─────────────────────────────────── */
     .orb {
-        position: fixed; border-radius: 50%; pointer-events: none; z-index: 0;
+        position: fixed; border-radius: 50%; pointer-events: none; z-index: -10;
         filter: blur(120px); opacity: 0.12;
     }
-    .orb-1 { width: 600px; height: 600px; background: #00E5FF; top: -10%; left: -10%; }
-    .orb-2 { width: 500px; height: 500px; background: #8b5cf6; bottom: 10%; right: -8%; }
-    .orb-3 { width: 400px; height: 400px; background: #10b981; top: 50%; left: 40%; }
+    @keyframes float-orb-1 {
+        0% { transform: translate(0, 0) scale(1); }
+        50% { transform: translate(50px, 30px) scale(1.05); }
+        100% { transform: translate(0, 0) scale(1); }
+    }
+    @keyframes float-orb-2 {
+        0% { transform: translate(0, 0) scale(1); }
+        50% { transform: translate(-40px, -50px) scale(0.95); }
+        100% { transform: translate(0, 0) scale(1); }
+    }
+    @keyframes float-orb-3 {
+        0% { transform: translate(0, 0) scale(1); }
+        50% { transform: translate(30px, -30px) scale(1.1); }
+        100% { transform: translate(0, 0) scale(1); }
+    }
+    .orb-1 { width: 600px; height: 600px; background: #00E5FF; top: -10%; left: -10%; animation: float-orb-1 18s ease infinite alternate; }
+    .orb-2 { width: 500px; height: 500px; background: #8b5cf6; bottom: 10%; right: -8%; animation: float-orb-2 22s ease infinite alternate; }
+    .orb-3 { width: 400px; height: 400px; background: #10b981; top: 50%; left: 40%; animation: float-orb-3 15s ease infinite alternate; }
 
     /* ── Utility ────────────────────────────────────────────── */
-    .relative { position: relative; z-index: 1; }
-    .huge-title { font-size: 2.8rem; letter-spacing: -0.04em; color: white; margin-bottom: 20px; line-height: 1.08; font-weight: 900; }
+    .relative { position: relative; }
+    .huge-title { font-size: 2.8rem; letter-spacing: -0.04em; color: var(--text-white); margin-bottom: 20px; line-height: 1.08; font-weight: 900; }
     .sub-tag { color: var(--primary); font-family: var(--font-mono); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 12px; display: block; }
     .section-intro { max-width: 720px; margin: 0 auto 56px; text-align: center; }
+
+    /* ── Z-Index Fixes to ensure navigation is always selectable ── */
+    .navbar { z-index: 1000 !important; }
+    .mega-menu { z-index: 1010 !important; }
 
     /* ── Hero ───────────────────────────────────────────────── */
     .hero-badge {
@@ -45,8 +106,8 @@
     /* ── Service Cards (glassmorphic) ──────────────────────── */
     .svc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
     .svc-card {
-        background: rgba(255,255,255,0.03); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-        border: 1px solid rgba(255,255,255,0.06); border-radius: 16px;
+        background: var(--card-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+        border: 1px solid var(--card-border); border-radius: 16px;
         padding: 28px 24px; position: relative; overflow: hidden;
         transition: all 0.45s cubic-bezier(0.16,1,0.3,1);
     }
@@ -64,7 +125,7 @@
         display: flex; align-items: center; justify-content: center;
         font-size: 1.4rem; margin-bottom: 16px;
     }
-    .svc-card h4 { color: white; font-size: 1rem; font-weight: 700; margin-bottom: 6px; }
+    .svc-card h4 { color: var(--text-white); font-size: 1rem; font-weight: 700; margin-bottom: 6px; }
     .svc-card .svc-mono { font-family: var(--font-mono); font-size: 0.62rem; color: var(--text-dark-gray); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
     .svc-card p { color: var(--text-gray); font-size: 0.82rem; line-height: 1.55; }
     .svc-card .svc-tag {
@@ -73,48 +134,57 @@
         text-transform: uppercase; letter-spacing: 0.5px;
     }
     /* Color themes per card */
-    .svc-sales::before { background: linear-gradient(90deg, #00E5FF, #3a7bd5); }
-    .svc-sales .svc-icon { background: rgba(0,229,255,0.1); color: #00E5FF; }
-    .svc-sales .svc-tag { background: rgba(0,229,255,0.08); color: #00E5FF; }
+    .svc-sales::before { background: linear-gradient(90deg, var(--color-sales), #3a7bd5); }
+    .svc-sales .svc-icon { background: var(--bg-sales-tag); color: var(--color-sales); }
+    .svc-sales .svc-tag { background: var(--bg-sales-tag); color: var(--color-sales); }
 
-    .svc-cyber::before { background: linear-gradient(90deg, #FF3B30, #FF9500); }
-    .svc-cyber .svc-icon { background: rgba(255,59,48,0.1); color: #FF3B30; }
-    .svc-cyber .svc-tag { background: rgba(255,59,48,0.08); color: #FF3B30; }
+    .svc-cyber::before { background: linear-gradient(90deg, var(--color-cyber), #FF9500); }
+    .svc-cyber .svc-icon { background: var(--bg-cyber-tag); color: var(--color-cyber); }
+    .svc-cyber .svc-tag { background: var(--bg-cyber-tag); color: var(--color-cyber); }
 
-    .svc-recruit::before { background: linear-gradient(90deg, #8b5cf6, #a78bfa); }
-    .svc-recruit .svc-icon { background: rgba(139,92,246,0.1); color: #8b5cf6; }
-    .svc-recruit .svc-tag { background: rgba(139,92,246,0.08); color: #8b5cf6; }
+    .svc-recruit::before { background: linear-gradient(90deg, var(--color-recruit), #a78bfa); }
+    .svc-recruit .svc-icon { background: var(--bg-recruit-tag); color: var(--color-recruit); }
+    .svc-recruit .svc-tag { background: var(--bg-recruit-tag); color: var(--color-recruit); }
 
-    .svc-ats::before { background: linear-gradient(90deg, #00E5FF, #06b6d4); }
-    .svc-ats .svc-icon { background: rgba(0,229,255,0.1); color: #00E5FF; }
-    .svc-ats .svc-tag { background: rgba(0,229,255,0.08); color: #00E5FF; }
+    .svc-ats::before { background: linear-gradient(90deg, var(--color-sales), #06b6d4); }
+    .svc-ats .svc-icon { background: var(--bg-sales-tag); color: var(--color-sales); }
+    .svc-ats .svc-tag { background: var(--bg-sales-tag); color: var(--color-sales); }
 
-    .svc-dev::before { background: linear-gradient(90deg, #10b981, #34d399); }
-    .svc-dev .svc-icon { background: rgba(16,185,129,0.1); color: #10b981; }
-    .svc-dev .svc-tag { background: rgba(16,185,129,0.08); color: #10b981; }
+    .svc-dev::before { background: linear-gradient(90deg, var(--color-dev), #34d399); }
+    .svc-dev .svc-icon { background: var(--bg-dev-tag); color: var(--color-dev); }
+    .svc-dev .svc-tag { background: var(--bg-dev-tag); color: var(--color-dev); }
 
-    .svc-dash::before { background: linear-gradient(90deg, #FFCC00, #FF9500); }
-    .svc-dash .svc-icon { background: rgba(255,204,0,0.1); color: #FFCC00; }
-    .svc-dash .svc-tag { background: rgba(255,204,0,0.08); color: #FFCC00; }
+    .svc-dash::before { background: linear-gradient(90deg, var(--color-dash), #FF9500); }
+    .svc-dash .svc-icon { background: var(--bg-dash-tag); color: var(--color-dash); }
+    .svc-dash .svc-tag { background: var(--bg-dash-tag); color: var(--color-dash); }
 
-    .svc-itops::before { background: linear-gradient(90deg, #00a6fb, #3a7bd5); }
-    .svc-itops .svc-icon { background: rgba(0,166,251,0.1); color: #00a6fb; }
-    .svc-itops .svc-tag { background: rgba(0,166,251,0.08); color: #00a6fb; }
+    .svc-itops::before { background: linear-gradient(90deg, var(--color-itops), #3a7bd5); }
+    .svc-itops .svc-icon { background: var(--bg-itops-tag); color: var(--color-itops); }
+    .svc-itops .svc-tag { background: var(--bg-itops-tag); color: var(--color-itops); }
+
+    /* Keep simulated terminal dark in both themes for glow readability */
+    .terminal-mock {
+        background-color: #050505 !important;
+        border-color: rgba(255, 255, 255, 0.1) !important;
+    }
+    .terminal-header {
+        background-color: #0b0b0b !important;
+        border-color: rgba(255, 255, 255, 0.1) !important;
+    }
 
     /* ── Stats row ─────────────────────────────────────────── */
     .stats-row {
         display: grid; grid-template-columns: repeat(4, 1fr); gap: 0;
-        background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06);
+        background: var(--card-bg); border: 1px solid var(--card-border);
         border-radius: 16px; overflow: hidden;
     }
     .stat-block {
         text-align: center; padding: 32px 16px;
-        border-right: 1px solid rgba(255,255,255,0.04);
-        transition: background 0.3s ease;
+        border-right: 1px solid var(--card-border);
     }
     .stat-block:last-child { border-right: none; }
     .stat-block:hover { background: rgba(0,229,255,0.03); }
-    .stat-block .stat-num { font-size: 2.4rem; font-weight: 900; font-family: var(--font-mono); color: white; line-height: 1; }
+    .stat-block .stat-num { font-size: 2.4rem; font-weight: 900; font-family: var(--font-mono); color: var(--text-white); line-height: 1; }
     .stat-block .stat-label { font-size: 0.68rem; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-dark-gray); margin-top: 8px; }
 
     /* ── Showcase split ─────────────────────────────────────── */
@@ -124,7 +194,7 @@
     .showcase-text { flex: 1; min-width: 320px; }
     .showcase-visual { flex: 1; min-width: 320px; }
     .showcase-visual .img-wrap {
-        border: 1px solid rgba(0,229,255,0.12); border-radius: 12px;
+        border: 1px solid var(--card-border); border-radius: 12px;
         padding: 4px; position: relative; overflow: hidden;
     }
     .showcase-visual .img-wrap::before {
@@ -155,7 +225,7 @@
     /* ── CTA banner ────────────────────────────────────────── */
     .cta-banner {
         background: linear-gradient(135deg, rgba(0,229,255,0.08), rgba(139,92,246,0.06));
-        border: 1px solid rgba(0,229,255,0.12); border-radius: 20px;
+        border: 1px solid var(--card-border); border-radius: 20px;
         padding: 56px 48px; text-align: center;
     }
 
@@ -168,7 +238,7 @@
     @media (max-width: 600px) {
         .svc-grid { grid-template-columns: 1fr; }
         .stats-row { grid-template-columns: 1fr; }
-        .stat-block { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.04); }
+        .stat-block { border-right: none; border-bottom: 1px solid var(--card-border); }
     }
     </style>
 <script>
@@ -239,7 +309,14 @@
             </li>
 
             <li>
-                <a href="{% url 'public-blog' %}">RESOURCES</a>
+                <a href="#">RESOURCES <i class='bx bx-chevron-down'></i></a>
+                <div class="mega-menu">
+                    <div class="mega-col">
+                        <span class="mega-header">TECHNICAL LIBRARIES</span>
+                        <a href="#blog-insights">Latest insights Grid</a>
+                        <a href="{% url 'public-blog' %}">Articles & Sourcing Guides</a>
+                    </div>
+                </div>
             </li>
         </ul>
 
@@ -502,6 +579,51 @@
         <div class="trust-item"><i class='bx bx-code-block'></i>Full-Stack Dev</div>
         <div class="trust-item"><i class='bx bx-bot'></i>AI-Powered</div>
         <div class="trust-item"><i class='bx bx-support'></i>24/7 Support</div>
+    </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     RESOURCES & INSIGHTS
+     ═══════════════════════════════════════════════════════════ -->
+<section class="container relative mt-xl pb-lg border-bottom" id="blog-insights">
+    <div class="section-intro">
+        <span class="sub-tag">RESOURCES & INSIGHTS</span>
+        <h2 class="huge-title">Latest Technical Insights</h2>
+        <p class="text-gray" style="font-size: 1.05rem; line-height: 1.6;">
+            Stay ahead of the curve with our engineering articles, recruitment guides, and security reports.
+        </p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;">
+        <!-- Card 1 -->
+        <a href="{% url 'public-blog' %}" class="svc-card svc-dev" style="text-decoration: none; display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+                <span class="svc-mono" style="color: var(--color-dev);">ENGINEERING REPORT</span>
+                <h4 style="font-size: 1.25rem; margin: 12px 0 8px; font-weight: 800; line-height: 1.3;">Sourcing in 2026: Beyond Keyword Matching</h4>
+                <p class="text-gray" style="font-size: 0.85rem; line-height: 1.5;">How Cosine Similarity and NLP resume parsing models isolate top 1% talent without hiring manager review bias.</p>
+            </div>
+            <span class="svc-tag" style="margin-top: 20px; align-self: flex-start;">Read Article <i class="fa-solid fa-arrow-right" style="margin-left: 6px;"></i></span>
+        </a>
+
+        <!-- Card 2 -->
+        <a href="{% url 'public-blog' %}" class="svc-card svc-cyber" style="text-decoration: none; display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+                <span class="svc-mono" style="color: var(--color-cyber);">CYBERSECURITY</span>
+                <h4 style="font-size: 1.25rem; margin: 12px 0 8px; font-weight: 800; line-height: 1.3;">The Zero-Trust Compliance Blueprint</h4>
+                <p class="text-gray" style="font-size: 0.85rem; line-height: 1.5;">Achieving SOC2 and HIPAA compliance for remote staff. Practical steps to secure endpoint devices and encrypt PII vaults.</p>
+            </div>
+            <span class="svc-tag" style="margin-top: 20px; align-self: flex-start;">Read Article <i class="fa-solid fa-arrow-right" style="margin-left: 6px;"></i></span>
+        </a>
+
+        <!-- Card 3 -->
+        <a href="{% url 'public-blog' %}" class="svc-card svc-sales" style="text-decoration: none; display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+                <span class="svc-mono" style="color: var(--color-sales);">SALES INSIGHTS</span>
+                <h4 style="font-size: 1.25rem; margin: 12px 0 8px; font-weight: 800; line-height: 1.3;">SDR Email Deliverability Manual</h4>
+                <p class="text-gray" style="font-size: 0.85rem; line-height: 1.5;">Avoid spam folders. Dynamic IP warmups, SPF/DKIM validation, and SMTP sequences designed to secure 40% higher open rates.</p>
+            </div>
+            <span class="svc-tag" style="margin-top: 20px; align-self: flex-start;">Read Article <i class="fa-solid fa-arrow-right" style="margin-left: 6px;"></i></span>
+        </a>
     </div>
 </section>
 
