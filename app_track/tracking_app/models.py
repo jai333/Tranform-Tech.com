@@ -235,6 +235,16 @@ class User(AbstractUser):
     def is_admin_role(self):
         return self.role == self.ROLE_ADMIN
 
+    @property
+    def is_it_agent(self):
+        # Determine if the user is an IT agent based on their role or staff status
+        return self.is_staff or self.role == self.ROLE_ADMIN
+
+    @property
+    def is_it_enduser(self):
+        # Determine if the user is a standard end-user for IT Helpdesk purposes
+        return not self.is_it_agent
+
     def get_initials(self):
         return ''.join(word[0] for word in self.first_name.split() if word[0].isupper()) + ''.join(word[0] for word in self.last_name.split() if word[0].isupper())
 
@@ -588,3 +598,388 @@ from .sales_models import (  # noqa: F401, E402
     OutreachEmail, EmailReply, DemoBooking, Deal, DealActivity,
     SalesDailySnapshot, SalesAlert, OnboardingFunnel,
 )
+
+
+# =============================================================================
+# IT HELPDESK & ITSM MODELS
+# =============================================================================
+
+class ITVendor(models.Model):
+    name = models.CharField(max_length=200)
+    contact_name = models.CharField(max_length=150, null=True, blank=True)
+    contact_email = models.EmailField(null=True, blank=True)
+    contact_phone = models.CharField(max_length=50, null=True, blank=True)
+    support_portal_url = models.URLField(null=True, blank=True)
+    notes = models.TextField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.name
+
+class ITAsset(models.Model):
+    ASSET_TYPES = [
+        ('laptop', 'Laptop / Computer'),
+        ('mobile', 'Mobile Device'),
+        ('server', 'Server / Infrastructure'),
+        ('network', 'Network Equipment'),
+        ('software', 'Software License'),
+        ('other', 'Other'),
+    ]
+    STATUS_CHOICES = [
+        ('active', 'Active / In Use'),
+        ('available', 'Available in Inventory'),
+        ('in_repair', 'In Repair'),
+        ('retired', 'Retired / Decommissioned'),
+        ('lost', 'Lost / Stolen'),
+    ]
+    asset_tag = models.CharField(max_length=100, unique=True)
+    name = models.CharField(max_length=200)
+    asset_type = models.CharField(max_length=50, choices=ASSET_TYPES, default='laptop')
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='available')
+    owner = models.ForeignKey('User', on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_assets')
+    vendor = models.ForeignKey(ITVendor, on_delete=models.SET_NULL, null=True, blank=True, related_name='assets')
+    purchase_cost = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    purchase_date = models.DateField(null=True, blank=True)
+    warranty_expiry = models.DateField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.asset_tag} - {self.name}"
+
+class SLAConfiguration(models.Model):
+    priority = models.CharField(max_length=10, unique=True, choices=[
+        ('p1', 'P1 - Critical'),
+        ('p2', 'P2 - High'),
+        ('p3', 'P3 - Medium'),
+        ('p4', 'P4 - Low'),
+    ])
+    first_response_hours = models.FloatField(help_text="Hours until first response is required")
+    resolution_hours = models.FloatField(help_text="Hours until full resolution is required")
+    escalation_priority = models.CharField(max_length=10, null=True, blank=True, choices=[
+        ('p1', 'P1 - Critical'),
+        ('p2', 'P2 - High'),
+        ('p3', 'P3 - Medium'),
+        ('p4', 'P4 - Low'),
+    ], help_text="Priority to bump to if breached")
+    
+    def __str__(self):
+        return f"SLA config for {self.get_priority_display()}"
+
+
+class ITTicket(models.Model):
+    PRIORITY_CHOICES = [
+        ('p1', 'P1 - Critical'),
+        ('p2', 'P2 - High'),
+        ('p3', 'P3 - Medium'),
+        ('p4', 'P4 - Low'),
+    ]
+    CATEGORY_CHOICES = [
+        ('network', 'Network / Connectivity'),
+        ('hardware', 'Hardware'),
+        ('software', 'Software / Applications'),
+        ('cloud', 'Cloud Infrastructure'),
+        ('security', 'Security Incident'),
+        ('access', 'Access / Permissions'),
+        ('other', 'Other'),
+    ]
+    STATUS_CHOICES = [
+        ('open', 'Open'),
+        ('in_progress', 'In Progress'),
+        ('on_hold', 'On Hold'),
+        ('pending_user', 'Pending User Info'),
+        ('resolved', 'Resolved'),
+        ('closed', 'Closed'),
+    ]
+    title = models.CharField(max_length=300)
+    description = models.TextField()
+    priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default='p3')
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='other')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='open')
+    submitted_by = models.ForeignKey('User', on_delete=models.CASCADE, related_name='submitted_tickets')
+    assigned_to = models.ForeignKey('User', on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_tickets')
+    resolution_notes = models.TextField(blank=True, null=True)
+    asset = models.ForeignKey(ITAsset, on_delete=models.SET_NULL, null=True, blank=True, related_name='tickets')
+    device_asset_tag = models.CharField(max_length=100, null=True, blank=True)
+    csat_triggered = models.BooleanField(default=False)
+    
+    # SLA Tracking Fields
+    sla_due_at = models.DateTimeField(null=True, blank=True)
+    sla_status = models.CharField(max_length=20, default='healthy', choices=[
+        ('healthy', 'Healthy'),
+        ('at_risk', 'At Risk'),
+        ('breached', 'Breached')
+    ])
+    first_response_due_at = models.DateTimeField(null=True, blank=True)
+    first_responded_at = models.DateTimeField(null=True, blank=True)
+    resolve_due_at = models.DateTimeField(null=True, blank=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    resolved_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"TKT-{self.id}: {self.title}"
+
+    def save(self, *args, **kwargs):
+        from django.utils import timezone
+        from datetime import timedelta
+        
+        is_new = self.pk is None
+        
+        if is_new or (self.pk and hasattr(self, '_original_priority') and self._original_priority != self.priority):
+            try:
+                sla_config = SLAConfiguration.objects.get(priority=self.priority)
+                now = timezone.now()
+                if not self.first_response_due_at or not self.first_responded_at:
+                    self.first_response_due_at = now + timedelta(hours=sla_config.first_response_hours)
+                self.resolve_due_at = now + timedelta(hours=sla_config.resolution_hours)
+                if self.sla_status == 'breached':
+                    self.sla_status = 'healthy'
+            except SLAConfiguration.DoesNotExist:
+                sla_hours_map = {'p1': 4, 'p2': 24, 'p3': 72, 'p4': 120}
+                hours = sla_hours_map.get(self.priority, 24)
+                self.resolve_due_at = timezone.now() + timedelta(hours=hours)
+
+        if self.pk and not self.first_responded_at and self.status != 'open':
+            self.first_responded_at = timezone.now()
+            
+        if self.status in ['resolved', 'closed'] and not self.resolved_at:
+            self.resolved_at = timezone.now()
+        if self.status in ['open', 'in_progress'] and self.resolved_at:
+            self.resolved_at = None
+
+        super().save(*args, **kwargs)
+
+    def is_sla_breached(self):
+        from django.utils import timezone
+        if self.status not in ['resolved', 'closed']:
+            if self.resolve_due_at and timezone.now() > self.resolve_due_at:
+                return True
+        return False
+
+class ITTicketComment(models.Model):
+    ticket = models.ForeignKey(ITTicket, on_delete=models.CASCADE, related_name='comments')
+    author = models.ForeignKey('User', on_delete=models.CASCADE)
+    body = models.TextField()
+    is_internal = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Comment on {self.ticket} by {self.author.username}"
+
+class RoutingRule(models.Model):
+    category = models.CharField(max_length=50, unique=True, choices=ITTicket.CATEGORY_CHOICES)
+    assign_to = models.ForeignKey('User', on_delete=models.SET_NULL, null=True, blank=True, limit_choices_to={'role__in': ['admin', 'it_agent']})
+
+    def __str__(self):
+        return f"{self.get_category_display()} -> {self.assign_to}"
+
+class TicketAuditLog(models.Model):
+    ticket = models.ForeignKey(ITTicket, on_delete=models.CASCADE, related_name='audit_logs')
+    actor = models.ForeignKey('User', on_delete=models.SET_NULL, null=True, blank=True)
+    field_changed = models.CharField(max_length=50)
+    old_value = models.CharField(max_length=255, null=True, blank=True)
+    new_value = models.CharField(max_length=255, null=True, blank=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.ticket.id} - {self.field_changed} changed at {self.timestamp}"
+
+class KBArticle(models.Model):
+    title = models.CharField(max_length=255)
+    content = models.TextField()
+    tags = models.CharField(max_length=255, null=True, blank=True, help_text="Comma-separated tags")
+    upvotes = models.IntegerField(default=0)
+    view_count = models.IntegerField(default=0)
+    is_published = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title
+
+class TicketSurvey(models.Model):
+    ticket = models.OneToOneField(ITTicket, on_delete=models.CASCADE, related_name='survey')
+    rating = models.IntegerField(choices=[(i, str(i)) for i in range(1, 6)])
+    comment = models.TextField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Survey for Ticket {self.ticket.id} - {self.rating}/5"
+
+class TicketMacro(models.Model):
+    title = models.CharField(max_length=100)
+    response_text = models.TextField()
+    auto_status = models.CharField(max_length=20, choices=ITTicket.STATUS_CHOICES, null=True, blank=True)
+    auto_priority = models.CharField(max_length=10, choices=ITTicket.PRIORITY_CHOICES, null=True, blank=True)
+    created_by = models.ForeignKey('User', on_delete=models.SET_NULL, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title
+
+class TicketWorkLog(models.Model):
+    ticket = models.ForeignKey(ITTicket, on_delete=models.CASCADE, related_name='work_logs')
+    agent = models.ForeignKey('User', on_delete=models.CASCADE)
+    time_spent_minutes = models.PositiveIntegerField(help_text="Time spent in minutes")
+    date = models.DateField(auto_now_add=True)
+    description = models.TextField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.agent.username} - {self.time_spent_minutes}m on Ticket {self.ticket.id}"
+
+# =============================================================================
+# CYBERSECURITY SOC MODELS
+# =============================================================================
+
+class ThreatIncident(models.Model):
+    SEVERITY_CHOICES = [
+        ('critical', 'Critical'),
+        ('high', 'High'),
+        ('medium', 'Medium'),
+        ('low', 'Low'),
+    ]
+    CATEGORY_CHOICES = [
+        ('malware', 'Malware / Ransomware'),
+        ('phishing', 'Phishing / Social Engineering'),
+        ('ddos', 'DDoS Attack'),
+        ('data_breach', 'Data Breach / Leak'),
+        ('unauthorized_access', 'Unauthorized Access'),
+        ('insider_threat', 'Insider Threat'),
+        ('other', 'Other'),
+    ]
+    STATUS_CHOICES = [
+        ('open', 'Open'),
+        ('investigating', 'Investigating'),
+        ('contained', 'Contained'),
+        ('resolved', 'Resolved'),
+        ('false_positive', 'False Positive'),
+    ]
+    title = models.CharField(max_length=300)
+    description = models.TextField()
+    severity = models.CharField(max_length=20, choices=SEVERITY_CHOICES, default='medium')
+    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, default='other')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='open')
+    reported_by = models.ForeignKey('User', on_delete=models.SET_NULL, null=True, blank=True, related_name='reported_incidents')
+    assigned_to = models.ForeignKey('User', on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_incidents')
+    detection_source = models.CharField(max_length=150, blank=True, null=True)
+    file_hash = models.CharField(max_length=255, null=True, blank=True)
+    affected_system = models.CharField(max_length=255, null=True, blank=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    cvss_score = models.DecimalField(max_digits=4, decimal_places=1, null=True, blank=True)
+    malicious_domain = models.CharField(max_length=255, null=True, blank=True)
+    ioc_indicators = models.TextField(blank=True, null=True)
+    estimated_impact = models.TextField(blank=True, null=True)
+    attack_vector = models.CharField(max_length=255, null=True, blank=True)
+    response_notes = models.TextField(blank=True, null=True)
+    resolution_notes = models.TextField(blank=True, null=True)
+    detected_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    resolved_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-detected_at']
+
+    def __str__(self):
+        return f"INC-{self.id}: {self.title}"
+
+# =============================================================================
+# DEV PROJECT PORTAL MODELS
+# =============================================================================
+
+class DevProjectRequest(models.Model):
+    PROJECT_TYPE_CHOICES = [
+        ('web', 'Web Application'),
+        ('mobile', 'Mobile App'),
+        ('api', 'API Integration'),
+        ('migration', 'Cloud Migration'),
+        ('data', 'Data Analytics/Engineering'),
+        ('ai', 'AI/ML Model Development'),
+        ('other', 'Other Custom Software'),
+    ]
+    STATUS_CHOICES = [
+        ('new', 'New Request'),
+        ('review', 'Under Review'),
+        ('scoping', 'Scoping / Estimating'),
+        ('approved', 'Approved / Scheduled'),
+        ('in_progress', 'In Progress'),
+        ('completed', 'Completed'),
+        ('rejected', 'Rejected'),
+    ]
+    BUDGET_CHOICES = [
+        ('10k', 'Under $10,000'),
+        ('25k', '$10,000 - $25,000'),
+        ('50k', '$25,000 - $50,000'),
+        ('100k', '$50,000 - $100,000'),
+        ('100k+', '$100,000+'),
+        ('discuss', 'Not Sure / Let\'s Discuss'),
+    ]
+    TIMELINE_CHOICES = [
+        ('asap', 'ASAP (Urgent)'),
+        ('1mo', 'Within 1 Month'),
+        ('3mo', '1-3 Months'),
+        ('6mo', '3-6 Months'),
+        ('flexible', 'Flexible / No Rush'),
+    ]
+
+    contact_name = models.CharField(max_length=150)
+    contact_email = models.EmailField()
+    contact_phone = models.CharField(max_length=20, null=True, blank=True)
+    company_name = models.CharField(max_length=150, null=True, blank=True)
+    project_type = models.CharField(max_length=50, choices=PROJECT_TYPE_CHOICES, default='other')
+    project_title = models.CharField(max_length=300)
+    description = models.TextField()
+    tech_preferences = models.TextField(null=True, blank=True)
+    budget_range = models.CharField(max_length=20, choices=BUDGET_CHOICES, default='discuss')
+    timeline = models.CharField(max_length=20, choices=TIMELINE_CHOICES, default='flexible')
+    has_existing_codebase = models.BooleanField(default=False)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='new')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"PRJ-{self.id}: {self.project_title}"
+
+# =============================================================================
+# REPORTING & AUTOMATION MODELS
+# =============================================================================
+
+class ScheduledReport(models.Model):
+    title = models.CharField(max_length=255)
+    description = models.TextField(null=True, blank=True)
+    report_type = models.CharField(max_length=50, choices=[
+        ('it_metrics', 'IT Helpdesk Metrics'),
+        ('sec_summary', 'Security Incident Summary'),
+        ('sla_breach', 'SLA Breach Report')
+    ])
+    frequency = models.CharField(max_length=20, choices=[
+        ('daily', 'Daily'),
+        ('weekly', 'Weekly'),
+        ('monthly', 'Monthly')
+    ])
+    format = models.CharField(max_length=10, choices=[('pdf', 'PDF'), ('csv', 'CSV'), ('json', 'JSON')], default='pdf')
+    recipients = models.TextField(help_text="Comma separated email addresses")
+    created_by = models.ForeignKey('User', on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    last_run = models.DateTimeField(null=True, blank=True)
+    next_run = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.title} ({self.get_frequency_display()})"
+
+class AutomationRun(models.Model):
+    run_type = models.CharField(max_length=100)
+    status = models.CharField(max_length=20, choices=[('success', 'Success'), ('failed', 'Failed')])
+    log_output = models.TextField(blank=True, null=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.run_type} at {self.timestamp}"

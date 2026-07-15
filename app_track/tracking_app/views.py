@@ -6,7 +6,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth import login, authenticate
 from django.contrib import messages
 from django.http import Http404, JsonResponse
-from .models import Candidate, Job, Interview, User, Application, Friendship, Message, Notification, JobSeekerApplication, Note
+from django.core.exceptions import PermissionDenied
+from .models import Candidate, Job, Interview, User, Application, Friendship, Message, Notification, JobSeekerApplication, Note, ITTicket, ITTicketComment, ThreatIncident, DevProjectRequest, ScheduledReport, AutomationRun, ResumeData, ITAsset, KBArticle, TicketSurvey, TicketAuditLog, RoutingRule, SLAConfiguration, TicketMacro, TicketWorkLog
 from .forms import UserRegistrationForm, ProfileUpdateForm, JobSeekerApplicationForm, JobForm
 from django.db import models
 from datetime import datetime, timedelta
@@ -1070,3 +1071,913 @@ def api_update_pipeline_status(request):
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
     return JsonResponse({'status': 'error'}, status=400)
 
+
+# ─────────────────────────────────────────────────────────────────────────────
+# IT HELPDESK TICKET SYSTEM
+# ─────────────────────────────────────────────────────────────────────────────
+
+@login_required
+def it_helpdesk_list(request):
+    """Kanban-style view of all IT tickets grouped by status."""
+    statuses = ['open', 'in_progress', 'on_hold', 'pending_user', 'resolved']
+    base_qs = ITTicket.objects.select_related('submitted_by', 'assigned_to').prefetch_related('comments')
+    if request.user.is_it_enduser:
+        base_qs = base_qs.filter(submitted_by=request.user)
+    columns = {s: list(base_qs.filter(status=s)) for s in statuses}
+
+    # Calculate MTTR and SLA Compliance for resolved tickets
+    resolved_tickets = base_qs.filter(status__in=['resolved', 'closed']).exclude(resolved_at__isnull=True)
+    total_resolved_count = resolved_tickets.count()
+    
+    mttr_hours = 0
+    sla_compliance_rate = 100
+    
+    if total_resolved_count > 0:
+        total_time = sum((t.resolved_at - t.created_at).total_seconds() for t in resolved_tickets)
+        mttr_hours = round((total_time / total_resolved_count) / 3600, 1)
+        
+        sla_met_count = sum(1 for t in resolved_tickets if t.resolve_due_at and t.resolved_at <= t.resolve_due_at)
+        sla_compliance_rate = round((sla_met_count / total_resolved_count) * 100)
+
+    context = {
+        'columns': columns,
+        'total_open': base_qs.filter(status__in=['open', 'in_progress', 'on_hold', 'pending_user']).count(),
+        'total_resolved': base_qs.filter(status__in=['resolved', 'closed']).count(),
+        'breached_count': base_qs.filter(sla_status='breached').count(),
+        'mttr_hours': mttr_hours,
+        'sla_compliance_rate': sla_compliance_rate,
+        'priority_choices': ITTicket.PRIORITY_CHOICES,
+        'category_choices': ITTicket.CATEGORY_CHOICES,
+        'active_assets': ITAsset.objects.exclude(status='retired'),
+        'page_title': 'IT Helpdesk',
+    }
+    return render(request, 'tracking_app/it_helpdesk.html', context)
+
+
+@login_required
+def it_ticket_create(request):
+    """Create a new IT ticket."""
+    if request.method == 'POST':
+        title = request.POST.get('title', '').strip()
+        description = request.POST.get('description', '').strip()
+        priority = request.POST.get('priority', 'p3')
+        category = request.POST.get('category', 'other')
+        tags = request.POST.get('tags', '').strip()
+        attachment = request.FILES.get('attachment')
+        asset_id = request.POST.get('asset_id')
+        
+        if title and description:
+            ticket = ITTicket.objects.create(
+                title=title,
+                description=description,
+                priority=priority,
+                category=category,
+                tags=tags or None,
+                attachment=attachment,
+                submitted_by=request.user,
+                asset_id=asset_id if asset_id else None,
+            )
+            # Email notification to staff
+            try:
+                from django.core.mail import send_mail
+                from django.conf import settings
+                admin_email = getattr(settings, 'ADMIN_EMAIL', 'admin@transform.io')
+                send_mail(
+                    subject=f'[IT Ticket #{ticket.id}] New {ticket.get_priority_display()} — {title}',
+                    message=f'A new IT ticket has been submitted.\n\nTicket ID: #{ticket.id}\nTitle: {title}\nPriority: {ticket.get_priority_display()}\nCategory: {ticket.get_category_display()}\nSubmitted By: {request.user.username}\n\nDescription:\n{description}\n\nSLA Due: {ticket.resolve_due_at}',
+                    from_email=getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@transform.io'),
+                    recipient_list=[admin_email],
+                    fail_silently=True,
+                )
+            except Exception:
+                pass
+            messages.success(request, f'Ticket #{ticket.id} created successfully. SLA deadline: {ticket.resolve_due_at.strftime("%b %d, %H:%M")}')
+            return redirect('it-ticket-detail', pk=ticket.id)
+        else:
+            messages.error(request, 'Title and description are required.')
+    context = {
+        'priority_choices': ITTicket.PRIORITY_CHOICES,
+        'category_choices': ITTicket.CATEGORY_CHOICES,
+        'active_assets': ITAsset.objects.exclude(status='retired'),
+        'page_title': 'New IT Ticket',
+    }
+    return render(request, 'tracking_app/it_helpdesk.html', context)
+
+
+@login_required
+def it_ticket_detail(request, pk):
+    """Detail view for a single IT ticket with comment thread."""
+    ticket = get_object_or_404(ITTicket, pk=pk)
+    if not (request.user.is_staff or request.user.is_admin_role or ticket.submitted_by == request.user):
+        messages.error(request, 'You do not have permission to view this ticket.')
+        return redirect('it-helpdesk-list')
+
+    # Handle new comment POST
+    if request.method == 'POST' and request.POST.get('action') == 'comment':
+        body = request.POST.get('body', '').strip()
+        is_internal = request.POST.get('is_internal') == 'on'
+        comment_attachment = request.FILES.get('comment_attachment')
+        if body:
+            comment = ITTicketComment.objects.create(
+                ticket=ticket,
+                author=request.user,
+                body=body,
+                is_internal=is_internal,
+                attachment=comment_attachment,
+            )
+            # Notify the submitter unless they posted the comment themselves
+            if ticket.submitted_by != request.user:
+                try:
+                    from django.core.mail import send_mail
+                    from django.conf import settings
+                    send_mail(
+                        subject=f'[Ticket #{ticket.id}] New Update from IT Team',
+                        message=f'Your ticket has been updated.\n\nTicket: {ticket.title}\n\nNew message:\n{body}',
+                        from_email=getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@transform.io'),
+                        recipient_list=[ticket.submitted_by.email],
+                        fail_silently=True,
+                    )
+                except Exception:
+                    pass
+            messages.success(request, 'Comment added.')
+        return redirect('it-ticket-detail', pk=pk)
+
+    comments = ticket.comments.select_related('author').all()
+    if request.user.is_it_enduser:
+        comments = comments.exclude(is_internal=True)
+    if not (request.user.is_staff or request.user.is_admin_role):
+        comments = comments.filter(is_internal=False)
+
+    audit_logs = []
+    macros = []
+    work_logs = []
+    assets = []
+    total_time = 0
+    if request.user.is_it_agent:
+        audit_logs = ticket.audit_logs.all().order_by('-timestamp')
+        macros = TicketMacro.objects.all()
+        work_logs = ticket.work_logs.all().order_by('-created_at')
+        assets = ITAsset.objects.all()
+        total_time = sum(w.time_spent_minutes for w in work_logs)
+
+    context = {
+        'ticket': ticket,
+        'comments': comments,
+        'status_choices': ITTicket.STATUS_CHOICES,
+        'priority_choices': ITTicket.PRIORITY_CHOICES,
+        'users': User.objects.filter(is_active=True).order_by('first_name'),
+        'page_title': f'Ticket #{ticket.id}',
+        'audit_logs': audit_logs,
+        'macros': macros,
+        'work_logs': work_logs,
+        'total_time': total_time,
+        'assets': assets,
+    }
+    return render(request, 'tracking_app/it_ticket_detail.html', context)
+
+
+@login_required
+def it_ticket_update_status(request, pk):
+    """POST endpoint to update ticket status, priority, assignment and notes."""
+    from django.utils import timezone
+    ticket = get_object_or_404(ITTicket, pk=pk)
+    if not (request.user.is_staff or request.user.is_admin_role or ticket.submitted_by == request.user):
+        return JsonResponse({'error': 'Permission denied'}, status=403)
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        
+        if action == 'log_time' and request.user.is_it_agent:
+            time_spent = request.POST.get('time_spent_minutes')
+            description = request.POST.get('worklog_description', '')
+            if time_spent and time_spent.isdigit():
+                TicketWorkLog.objects.create(
+                    ticket=ticket,
+                    agent=request.user,
+                    time_spent_minutes=int(time_spent),
+                    description=description
+                )
+                messages.success(request, 'Time logged successfully.')
+            return redirect('it-ticket-detail', pk=pk)
+
+        new_status = request.POST.get('status')
+        new_priority = request.POST.get('priority')
+        resolution_notes = request.POST.get('resolution_notes', '')
+        assigned_to_id = request.POST.get('assigned_to')
+        asset_id = request.POST.get('asset_id')
+        prev_assigned = ticket.assigned_to
+
+        if new_status and new_status in dict(ITTicket.STATUS_CHOICES):
+            ticket.status = new_status
+        if new_priority and new_priority in dict(ITTicket.PRIORITY_CHOICES):
+            ticket.priority = new_priority
+        if resolution_notes:
+            ticket.resolution_notes = resolution_notes
+        if asset_id:
+            try:
+                ticket.asset = ITAsset.objects.get(id=asset_id)
+            except ITAsset.DoesNotExist:
+                pass
+        elif asset_id == '':
+            ticket.asset = None
+            
+        if assigned_to_id:
+            try:
+                new_assignee = User.objects.get(id=assigned_to_id)
+                if prev_assigned != new_assignee:
+                    ticket.assigned_to = new_assignee
+                    if ticket.status == 'open':
+                        ticket.status = 'in_progress'
+                    # Email the newly assigned person
+                    try:
+                        from django.core.mail import send_mail
+                        from django.conf import settings
+                        send_mail(
+                            subject=f'[Ticket #{ticket.id}] Assigned to You — {ticket.title}',
+                            message=f'You have been assigned IT Ticket #{ticket.id}.\n\nTitle: {ticket.title}\nPriority: {ticket.get_priority_display()}\nSLA Due: {ticket.resolve_due_at}\n\nPlease log in and take action.',
+                            from_email=getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@transform.io'),
+                            recipient_list=[new_assignee.email],
+                            fail_silently=True,
+                        )
+                    except Exception:
+                        pass
+                else:
+                    ticket.assigned_to = new_assignee
+            except User.DoesNotExist:
+                pass
+        elif assigned_to_id == '':
+            ticket.assigned_to = None
+
+        ticket.save()
+        # If resolved, notify submitter
+        if new_status in ['resolved', 'closed']:
+            try:
+                from django.core.mail import send_mail
+                from django.conf import settings
+                send_mail(
+                    subject=f'[Ticket #{ticket.id}] Your Issue Has Been Resolved',
+                    message=f'Great news! Your IT ticket has been resolved.\n\nTicket: {ticket.title}\nResolved at: {ticket.resolved_at}\n\nResolution Notes:\n{ticket.resolution_notes or "No notes provided."}',
+                    from_email=getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@transform.io'),
+                    recipient_list=[ticket.submitted_by.email],
+                    fail_silently=True,
+                )
+            except Exception:
+                pass
+                
+            # Trigger CSAT Survey
+            if not getattr(ticket, 'csat_triggered', False):
+                survey_html = f"""
+                <div style='margin-top:10px; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px dashed rgba(255,255,255,0.2);'>
+                    <strong>How did we do?</strong> Please rate your experience:<br><br>
+                    <div style='display:flex; gap:10px;'>
+                        <form method='POST' action='/it/tickets/{ticket.id}/csat/' style='display:inline'>
+                            <input type='hidden' name='rating' value='5'>
+                            <button type='submit' style='background:#10b981; color:#fff; border:none; padding:5px 10px; border-radius:5px; cursor:pointer;'>5 - Excellent</button>
+                        </form>
+                        <form method='POST' action='/it/tickets/{ticket.id}/csat/' style='display:inline'>
+                            <input type='hidden' name='rating' value='3'>
+                            <button type='submit' style='background:#f59e0b; color:#fff; border:none; padding:5px 10px; border-radius:5px; cursor:pointer;'>3 - Okay</button>
+                        </form>
+                        <form method='POST' action='/it/tickets/{ticket.id}/csat/' style='display:inline'>
+                            <input type='hidden' name='rating' value='1'>
+                            <button type='submit' style='background:#ef4444; color:#fff; border:none; padding:5px 10px; border-radius:5px; cursor:pointer;'>1 - Poor</button>
+                        </form>
+                    </div>
+                </div>
+                """
+                
+                ITTicketComment.objects.create(
+                    ticket=ticket,
+                    author=ticket.submitted_by,
+                    body=f"Your ticket has been marked as resolved.\n{survey_html}",
+                    is_internal=False
+                )
+                ticket.csat_triggered = True
+                
+        messages.success(request, 'Ticket updated successfully.')
+    return redirect('it-ticket-detail', pk=pk)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# CYBERSECURITY THREAT INCIDENT TRACKER
+# ─────────────────────────────────────────────────────────────────────────────
+
+@login_required
+def threat_dashboard(request):
+    """Security operations center dashboard listing all threat incidents."""
+    from django.db.models import Avg, Count
+    incidents = ThreatIncident.objects.select_related('reported_by', 'assigned_to').order_by('-detected_at')
+    severity_filter = request.GET.get('severity')
+    status_filter = request.GET.get('status')
+    category_filter = request.GET.get('category')
+    if severity_filter:
+        incidents = incidents.filter(severity=severity_filter)
+    if status_filter:
+        incidents = incidents.filter(status=status_filter)
+    if category_filter:
+        incidents = incidents.filter(category=category_filter)
+    from django.utils import timezone
+    stats = {
+        'critical': ThreatIncident.objects.filter(severity='critical').exclude(status__in=['resolved', 'false_positive']).count(),
+        'high': ThreatIncident.objects.filter(severity='high').exclude(status__in=['resolved', 'false_positive']).count(),
+        'open': ThreatIncident.objects.filter(status='open').count(),
+        'investigating': ThreatIncident.objects.filter(status='investigating').count(),
+        'contained': ThreatIncident.objects.filter(status='contained').count(),
+        'resolved_today': ThreatIncident.objects.filter(status='resolved', resolved_at__date=timezone.now().date()).count(),
+        'total': ThreatIncident.objects.count(),
+        'by_category': list(ThreatIncident.objects.values('category').annotate(n=Count('id')).order_by('-n')[:5]),
+        'by_severity': list(ThreatIncident.objects.values('severity').annotate(n=Count('id')).order_by('-n')),
+        'avg_cvss': round(ThreatIncident.objects.exclude(status__in=['resolved', 'false_positive']).aggregate(Avg('cvss_score'))['cvss_score__avg'] or 0.0, 1),
+        'top_ips': list(ThreatIncident.objects.exclude(ip_address__isnull=True).exclude(ip_address='').values('ip_address').annotate(n=Count('id')).order_by('-n')[:5]),
+    }
+    context = {
+        'incidents': incidents,
+        'stats': stats,
+        'severity_choices': ThreatIncident.SEVERITY_CHOICES,
+        'status_choices': ThreatIncident.STATUS_CHOICES,
+        'category_choices': ThreatIncident.CATEGORY_CHOICES,
+        'severity_filter': severity_filter,
+        'status_filter': status_filter,
+        'category_filter': category_filter,
+        'users': User.objects.filter(is_active=True).order_by('first_name'),
+        'page_title': 'Security Operations Center',
+    }
+    return render(request, 'tracking_app/threat_dashboard.html', context)
+
+
+@login_required
+def threat_incident_create(request):
+    """Create a new threat incident."""
+    if request.method == 'POST':
+        title = request.POST.get('title', '').strip()
+        description = request.POST.get('description', '').strip()
+        severity = request.POST.get('severity', 'medium')
+        category = request.POST.get('category', 'other')
+        affected_systems = request.POST.get('affected_systems', '')
+        detected_at_str = request.POST.get('detected_at', '')
+        from django.utils import timezone
+        import datetime as dt
+        try:
+            if detected_at_str:
+                parsed = dt.datetime.fromisoformat(detected_at_str)
+                if timezone.is_naive(parsed):
+                    detected_at = timezone.make_aware(parsed)
+                else:
+                    detected_at = parsed
+            else:
+                detected_at = timezone.now()
+        except Exception:
+            detected_at = timezone.now()
+        if title and description:
+            incident = ThreatIncident.objects.create(
+                title=title,
+                description=description,
+                severity=severity,
+                category=category,
+                affected_systems=affected_systems,
+                detected_at=detected_at,
+                reported_by=request.user,
+            )
+            messages.success(request, f'Incident #{incident.id} reported successfully.')
+            return redirect('threat-dashboard')
+        else:
+            messages.error(request, 'Title and description are required.')
+    context = {
+        'severity_choices': ThreatIncident.SEVERITY_CHOICES,
+        'category_choices': ThreatIncident.CATEGORY_CHOICES,
+        'page_title': 'Report Threat Incident',
+    }
+    return render(request, 'tracking_app/threat_incident_form.html', context)
+
+
+@login_required
+def threat_incident_detail(request, pk):
+    """Detail / update view for a single threat incident."""
+    incident = get_object_or_404(ThreatIncident, pk=pk)
+    # Auto-set containment deadline based on severity if not already set
+    auto_deadline = {'critical': 1, 'high': 4, 'medium': 24, 'low': 72, 'info': 168}
+    from django.utils import timezone
+    from datetime import timedelta
+    if not incident.containment_deadline and incident.detected_at:
+        hours = auto_deadline.get(incident.severity, 24)
+        incident.containment_deadline = incident.detected_at + timedelta(hours=hours)
+        incident.save(update_fields=['containment_deadline'])
+    if request.method == 'POST' and (request.user.is_staff or request.user.is_admin_role):
+        new_status = request.POST.get('status')
+        response_notes = request.POST.get('response_notes', '')
+        assigned_to_id = request.POST.get('assigned_to')
+        cvss_score = request.POST.get('cvss_score', '')
+        ioc_indicators = request.POST.get('ioc_indicators', '')
+        estimated_impact = request.POST.get('estimated_impact', '')
+        attack_vector = request.POST.get('attack_vector', '')
+        ip_address = request.POST.get('source_ip', '')
+        malicious_domain = request.POST.get('malicious_domain', '')
+        file_hash = request.POST.get('file_hash', '')
+        if ip_address: incident.ip_address = ip_address
+        if malicious_domain: incident.malicious_domain = malicious_domain
+        if file_hash: incident.file_hash = file_hash
+        if new_status:
+            incident.status = new_status
+            if new_status == 'resolved' and not incident.resolved_at:
+                incident.resolved_at = timezone.now()
+        if response_notes:
+            incident.response_notes = response_notes
+        if assigned_to_id:
+            try:
+                incident.assigned_to = User.objects.get(id=assigned_to_id)
+            except User.DoesNotExist:
+                pass
+        if cvss_score:
+            try:
+                incident.cvss_score = float(cvss_score)
+            except (ValueError, TypeError):
+                pass
+        if ioc_indicators is not None:
+            incident.ioc_indicators = ioc_indicators
+        if estimated_impact:
+            incident.estimated_impact = estimated_impact
+        if attack_vector:
+            incident.attack_vector = attack_vector
+        incident.save()
+        messages.success(request, 'Incident updated.')
+        return redirect('threat-incident-detail', pk=pk)
+    details = [
+        ('Severity', incident.get_severity_display()),
+        ('Category', incident.get_category_display()),
+        ('Status', incident.get_status_display()),
+        ('Detected', incident.detected_at.strftime('%b %d, %Y %H:%M') if incident.detected_at else '—'),
+        ('Assigned To', incident.assigned_to.get_full_name() if incident.assigned_to else '—'),
+        ('Time Active (hrs)', str(incident.time_to_contain_hours() or '—')),
+        ('CVSS Score', str(incident.cvss_score) if incident.cvss_score else '—'),
+        ('Source IP', incident.ip_address or '—'),
+        ('Malicious Domain', incident.malicious_domain or '—'),
+        ('File Hash', incident.file_hash or '—'),
+    ]
+    context = {
+        'incident': incident,
+        'status_choices': ThreatIncident.STATUS_CHOICES,
+        'users': User.objects.filter(is_active=True).order_by('first_name'),
+        'details': details,
+        'auto_deadline': auto_deadline,
+        'attack_vector_choices': ThreatIncident._meta.get_field('attack_vector').choices,
+        'estimated_impact_choices': ThreatIncident._meta.get_field('estimated_impact').choices,
+        'page_title': f'Incident #{incident.id}',
+    }
+    return render(request, 'tracking_app/threat_dashboard.html', context)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# DEV PROJECT REQUEST PORTAL
+# ─────────────────────────────────────────────────────────────────────────────
+
+def dev_project_request(request):
+    """Public form to submit a dev project request — no login required."""
+    if request.method == 'POST':
+        contact_name = request.POST.get('contact_name', '').strip()
+        contact_email = request.POST.get('contact_email', '').strip()
+        contact_phone = request.POST.get('contact_phone', '').strip()
+        company_name = request.POST.get('company_name', '').strip()
+        project_type = request.POST.get('project_type', '')
+        project_title = request.POST.get('project_title', '').strip()
+        description = request.POST.get('description', '').strip()
+        tech_preferences = request.POST.get('tech_preferences', '').strip()
+        budget_range = request.POST.get('budget_range', 'discuss')
+        timeline = request.POST.get('timeline', 'flexible')
+        has_existing_codebase = request.POST.get('has_existing_codebase') == 'on'
+        if contact_name and contact_email and project_title and description:
+            project = DevProjectRequest.objects.create(
+                contact_name=contact_name,
+                contact_email=contact_email,
+                contact_phone=contact_phone or None,
+                company_name=company_name or None,
+                project_type=project_type,
+                project_title=project_title,
+                description=description,
+                tech_preferences=tech_preferences or None,
+                budget_range=budget_range,
+                timeline=timeline,
+                has_existing_codebase=has_existing_codebase,
+            )
+            
+            # Send Email Notification
+            try:
+                from django.core.mail import send_mail
+                from django.conf import settings
+                send_mail(
+                    subject=f"New App/Dev Request: {project_title}",
+                    message=f"New project request from {contact_name} ({contact_email})\n\nTitle: {project_title}\nType: {project_type}\nBudget: {budget_range}\n\nDescription:\n{description}",
+                    from_email=settings.DEFAULT_FROM_EMAIL if hasattr(settings, 'DEFAULT_FROM_EMAIL') else 'noreply@transform.io',
+                    recipient_list=[settings.ADMIN_EMAIL if hasattr(settings, 'ADMIN_EMAIL') else 'admin@transform.io'],
+                    fail_silently=True,
+                )
+            except Exception:
+                pass
+                
+            messages.success(request, 'Your project request has been submitted! We will be in touch within 24 hours.')
+            return redirect('dev-project-request')
+        else:
+            messages.error(request, 'Please fill in all required fields.')
+    context = {
+        'project_type_choices': DevProjectRequest.PROJECT_TYPE_CHOICES,
+        'budget_choices': DevProjectRequest.BUDGET_CHOICES,
+        'timeline_choices': DevProjectRequest.TIMELINE_CHOICES,
+        'page_title': 'Start a Dev Project',
+    }
+    return render(request, 'tracking_app/dev_project_request.html', context)
+
+
+@login_required
+def dev_project_list(request):
+    """Staff-only listing of all project requests."""
+    if not (request.user.is_staff or request.user.is_admin_role):
+        messages.error(request, 'Access denied.')
+        return redirect('home')
+    requests_qs = DevProjectRequest.objects.all()
+    context = {
+        'requests': requests_qs,
+        'status_choices': DevProjectRequest.STATUS_CHOICES,
+        'page_title': 'Dev Project Requests',
+    }
+    return render(request, 'tracking_app/dev_project_request.html', context)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# INTERVIEW SCORECARD
+# ─────────────────────────────────────────────────────────────────────────────
+
+@login_required
+def scorecard_create(request, interview_id):
+    """Create or update an interview scorecard for a given interview."""
+    interview = get_object_or_404(Interview, pk=interview_id)
+    # Try to get existing scorecard
+    try:
+        scorecard = interview.scorecard
+    except InterviewScorecard.DoesNotExist:
+        scorecard = None
+
+    if request.method == 'POST':
+        def _int(key, default=3):
+            try:
+                val = int(request.POST.get(key, default))
+                return max(1, min(5, val))
+            except (ValueError, TypeError):
+                return default
+
+        data = {
+            'interview': interview,
+            'interviewer': request.user,
+            'technical_score': _int('technical_score'),
+            'communication_score': _int('communication_score'),
+            'culture_fit_score': _int('culture_fit_score'),
+            'problem_solving_score': _int('problem_solving_score'),
+            'overall_rating': _int('overall_rating'),
+            'strengths': request.POST.get('strengths', '').strip() or None,
+            'weaknesses': request.POST.get('weaknesses', '').strip() or None,
+            'notes': request.POST.get('notes', '').strip() or None,
+            'recommendation': request.POST.get('recommendation', 'maybe'),
+        }
+        if scorecard:
+            for k, v in data.items():
+                if k != 'interview':
+                    setattr(scorecard, k, v)
+            scorecard.save()
+            messages.success(request, 'Scorecard updated.')
+        else:
+            InterviewScorecard.objects.create(**data)
+            messages.success(request, 'Scorecard submitted.')
+        return redirect('scorecard-detail', interview_id=interview_id)
+
+    context = {
+        'interview': interview,
+        'scorecard': scorecard,
+        'recommendation_choices': InterviewScorecard._meta.get_field('recommendation').choices,
+        'score_range': range(1, 6),
+        'page_title': 'Interview Scorecard',
+    }
+    return render(request, 'tracking_app/interview_scorecard.html', context)
+
+
+@login_required
+def scorecard_detail(request, interview_id):
+    """Read-only view of a submitted scorecard."""
+    interview = get_object_or_404(Interview, pk=interview_id)
+    try:
+        scorecard = interview.scorecard
+    except InterviewScorecard.DoesNotExist:
+        messages.info(request, 'No scorecard has been submitted for this interview yet.')
+        return redirect('scorecard-create', interview_id=interview_id)
+    context = {
+        'interview': interview,
+        'scorecard': scorecard,
+        'page_title': 'Scorecard Results',
+    }
+    return render(request, 'tracking_app/interview_scorecard.html', context)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# NEW FEATURES (BI, ATS Bulk Upload, Lead Qual)
+# ─────────────────────────────────────────────────────────────────────────────
+
+from .models import ScheduledReport, ResumeData, Candidate
+from .sales_models import Lead
+import uuid
+
+@login_required
+def scheduled_report_list(request):
+    from django.db.models import Count, Sum
+    reports = ScheduledReport.objects.prefetch_related('runs').order_by('-created_at')
+    active_count = reports.filter(is_active=True).count()
+    total_runs = AutomationRun.objects.count()
+    success_runs = AutomationRun.objects.filter(status='success').count()
+    failed_runs = AutomationRun.objects.filter(status='failed').count()
+    recent_runs = AutomationRun.objects.select_related('report', 'triggered_by').order_by('-ran_at')[:10]
+    context = {
+        'reports': reports,
+        'active_count': active_count,
+        'total_runs': total_runs,
+        'success_runs': success_runs,
+        'failed_runs': failed_runs,
+        'recent_runs': recent_runs,
+        'page_title': 'Automation Engine',
+    }
+    return render(request, 'tracking_app/scheduled_reports.html', context)
+
+@login_required
+def run_report_now(request, pk):
+    """Manually trigger a report run (simulated)."""
+    from django.utils import timezone
+    import time, random
+    report = get_object_or_404(ScheduledReport, pk=pk)
+    if not (request.user.is_staff or request.user.is_admin_role):
+        messages.error(request, 'Staff access required.')
+        return redirect('scheduled-report-list')
+    # Simulate a run
+    duration = round(random.uniform(0.8, 4.5), 2)
+    run = AutomationRun.objects.create(
+        report=report,
+        triggered_by=request.user,
+        status='success',
+        output_log=f'Report "{report.name}" generated successfully.\nType: {report.get_report_type_display()}\nFrequency: {report.get_frequency_display()}\nRecipients: {report.recipients}\nTimestamp: {timezone.now().isoformat()}',
+        duration_seconds=duration,
+    )
+    report.run_count += 1
+    report.last_sent = timezone.now()
+    report.last_status = 'success'
+    report.save(update_fields=['run_count', 'last_sent', 'last_status'])
+    messages.success(request, f'Report "{report.name}" triggered successfully in {duration}s.')
+    return redirect('scheduled-report-list')
+
+@login_required
+def scheduled_report_create(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        report_type = request.POST.get('report_type')
+        frequency = request.POST.get('frequency')
+        recipients = request.POST.get('recipients')
+        is_active = request.POST.get('is_active') == 'on'
+        
+        report = ScheduledReport.objects.create(
+            name=name,
+            report_type=report_type,
+            frequency=frequency,
+            recipients=recipients,
+            is_active=is_active,
+            created_by=request.user
+        )
+        
+        # Send Email Notification
+        try:
+            from django.core.mail import send_mail
+            from django.conf import settings
+            send_mail(
+                subject=f"New Automation/Report Scheduled: {name}",
+                message=f"A new scheduled report has been configured by {request.user.username}.\n\nName: {name}\nType: {report_type}\nFrequency: {frequency}\nRecipients: {recipients}",
+                from_email=settings.DEFAULT_FROM_EMAIL if hasattr(settings, 'DEFAULT_FROM_EMAIL') else 'noreply@transform.io',
+                recipient_list=[settings.ADMIN_EMAIL if hasattr(settings, 'ADMIN_EMAIL') else 'admin@transform.io'],
+                fail_silently=True,
+            )
+        except Exception:
+            pass
+        messages.success(request, 'Scheduled report created successfully.')
+        return redirect('scheduled-report-list')
+    
+    return render(request, 'tracking_app/scheduled_report_form.html', {
+        'report_types': ScheduledReport.REPORT_TYPES,
+        'frequency_choices': ScheduledReport.FREQUENCY_CHOICES,
+    })
+
+@login_required
+def bulk_resume_upload(request):
+    if request.method == 'POST':
+        files = request.FILES.getlist('resumes')
+        success_count = 0
+        failure_count = 0
+        
+        for file in files:
+            try:
+                candidate = Candidate.objects.create(
+                    first_name=file.name,
+                    last_name='(Bulk Upload)',
+                    email=f'temp_{uuid.uuid4().hex[:8]}@example.com',
+                    user=request.user
+                )
+                candidate.email = f'pending_{candidate.id}@example.com'
+                candidate.save()
+                
+                ResumeData.objects.create(
+                    candidate=candidate,
+                    resume_file=file,
+                    parse_status='pending'
+                )
+                success_count += 1
+            except Exception as e:
+                failure_count += 1
+                
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'success_count': success_count, 'failure_count': failure_count})
+        
+        messages.success(request, f'Uploaded {success_count} resumes successfully.')
+        return redirect('candidate-list')
+
+    return render(request, 'tracking_app/bulk_resume_upload.html')
+
+def lead_qualification_form(request):
+    if request.method == 'POST':
+        contact_name = request.POST.get('contact_name', '')
+        email = request.POST.get('email', '')
+        company_name = request.POST.get('company_name', '')
+        company_size = request.POST.get('company_size', '')
+        current_tool = request.POST.get('current_tool', '')
+        pain_points = request.POST.getlist('pain_points')
+        budget = request.POST.get('budget', '')
+        
+        try:
+            size_int = int(company_size)
+        except (ValueError, TypeError):
+            size_int = 0
+            
+        score = 50
+        if size_int > 50: score += 20
+        if current_tool: score += 10
+        if budget == 'high': score += 20
+        
+        status = 'qualified' if score >= 70 else 'new'
+        
+        Lead.objects.create(
+            contact_name=contact_name,
+            email=email,
+            company_name=company_name,
+            company_size=size_int,
+            current_ats_tool=current_tool,
+            pain_points=pain_points,
+            icp_score=score,
+            status=status,
+            source='inbound'
+        )
+        return render(request, 'tracking_app/lead_qualification_success.html')
+        
+    return render(request, 'tracking_app/lead_qualification.html')
+
+@login_required
+def it_asset_list(request):
+    if not (request.user.is_staff or request.user.is_admin_role or request.user.is_it_agent):
+        messages.error(request, 'Permission denied')
+        return redirect('home')
+    
+    assets = ITAsset.objects.select_related('vendor', 'owner').all().order_by('-created_at')
+    vendors = ITVendor.objects.all().order_by('name')
+    
+    context = {
+        'assets': assets,
+        'vendors': vendors,
+        'page_title': 'IT Assets & Procurement'
+    }
+    return render(request, 'tracking_app/it_asset_list.html', context)
+
+@login_required
+def it_asset_detail(request, pk):
+    asset = get_object_or_404(ITAsset, pk=pk)
+    context = {
+        'asset': asset,
+        'tickets': asset.tickets.all().order_by('-created_at'),
+        'page_title': f'Asset: {asset.asset_tag}',
+    }
+    return render(request, 'tracking_app/it_asset_detail.html', context)
+
+@login_required
+def it_admin_settings(request):
+    if not request.user.is_it_admin:
+        raise PermissionDenied("Only IT Administrators can access this page.")
+        
+    slas = SLAConfiguration.objects.all().order_by('priority')
+    
+    context = {
+        'slas': slas,
+        'page_title': 'IT Admin Settings',
+    }
+    return render(request, 'tracking_app/it_admin_settings.html', context)
+
+import json
+from django.db.models import Count, Avg, F, ExpressionWrapper, fields
+from django.utils import timezone
+from datetime import timedelta
+
+@login_required
+def it_reports(request):
+    if not request.user.is_it_agent:
+        raise PermissionDenied("Only IT staff can view reports.")
+        
+    days = int(request.GET.get('days', 30))
+    start_date = timezone.now() - timedelta(days=days)
+    
+    base_qs = ITTicket.objects.filter(created_at__gte=start_date)
+    
+    # 1. Volume over time
+    volume_data = list(base_qs.extra({'day': "date(created_at)"}).values('day').annotate(count=Count('id')).order_by('day'))
+    volume_labels = [str(item['day']) for item in volume_data]
+    volume_counts = [item['count'] for item in volume_data]
+    
+    # 2. Tickets by Category
+    category_data = list(base_qs.values('category').annotate(count=Count('id')))
+    category_labels = [dict(ITTicket.CATEGORY_CHOICES).get(item['category'], item['category']) for item in category_data]
+    category_counts = [item['count'] for item in category_data]
+    
+    # 3. Agent Performance (MTTR)
+    resolved_qs = base_qs.filter(status__in=['resolved', 'closed'], resolved_at__isnull=False)
+    
+    agent_data = []
+    agents = User.objects.filter(role__in=['admin', 'it_agent'])
+    for agent in agents:
+        agent_tickets = resolved_qs.filter(assigned_to=agent)
+        total = agent_tickets.count()
+        if total > 0:
+            total_time = sum((t.resolved_at - t.created_at).total_seconds() for t in agent_tickets)
+            avg_hours = round(total_time / total / 3600, 1)
+            agent_data.append({
+                'name': agent.get_full_name() or agent.username,
+                'resolved_count': total,
+                'mttr': avg_hours
+            })
+            
+    # Calculate overall MTTR and SLA Compliance for the period
+    overall_mttr = 0
+    if resolved_qs.exists():
+        total_time = sum((t.resolved_at - t.created_at).total_seconds() for t in resolved_qs)
+        overall_mttr = round(total_time / resolved_qs.count() / 3600, 1)
+        
+    total_tickets = base_qs.count()
+    sla_breached = base_qs.filter(sla_status='breached').count()
+    compliance_rate = 100
+    if total_tickets > 0:
+        compliance_rate = round(((total_tickets - sla_breached) / total_tickets) * 100, 1)
+
+    context = {
+        'page_title': 'IT Reports & Analytics',
+        'days': days,
+        'volume_labels': json.dumps(volume_labels),
+        'volume_counts': json.dumps(volume_counts),
+        'category_labels': json.dumps(category_labels),
+        'category_counts': json.dumps(category_counts),
+        'agent_data': agent_data,
+        'overall_mttr': overall_mttr,
+        'compliance_rate': compliance_rate,
+        'total_tickets': total_tickets
+    }
+    return render(request, 'tracking_app/it_reports.html', context)
+import json
+from django.http import JsonResponse
+from django.db.models import Q
+
+def kb_search_api(request):
+    query = request.GET.get('q', '')
+    if len(query) < 3:
+        return JsonResponse({'articles': []})
+        
+    articles = KBArticle.objects.filter(
+        Q(title__icontains=query) | Q(tags__icontains=query)
+    )[:5]
+    
+    data = [{'id': a.id, 'title': a.title, 'preview': a.content[:100]} for a in articles]
+    return JsonResponse({'articles': data})
+
+@login_required
+def submit_csat(request, ticket_id):
+    ticket = get_object_or_404(ITTicket, pk=ticket_id)
+    if ticket.submitted_by != request.user:
+        raise PermissionDenied("You can only rate your own tickets.")
+        
+    rating = request.POST.get('rating')
+    comment = request.POST.get('comment', '')
+    
+    if rating:
+        TicketSurvey.objects.update_or_create(
+            ticket=ticket,
+            defaults={'rating': rating, 'comment': comment}
+        )
+        # Add comment confirming survey
+        ITTicketComment.objects.create(
+            ticket=ticket,
+            author=request.user,
+            body=f"✅ User submitted CSAT rating: {rating}/5. {comment}"
+        )
+        
+    return redirect('it-ticket-detail', pk=ticket.id)
