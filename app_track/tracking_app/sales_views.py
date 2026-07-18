@@ -882,48 +882,68 @@ def unified_inbox(request):
     from .models import Lead
     
     if request.method == 'POST':
-        reply_text = request.POST.get('reply_text')
-        lead_id = request.POST.get('lead_id')
-        subject = request.POST.get('subject', 'Re: ')
+        action = request.POST.get('action')
         
-        if reply_text and lead_id:
-            lead = Lead.objects.filter(id=lead_id).first()
-            if lead:
-                OutreachEmail.objects.create(
-                    lead=lead,
-                    subject=subject,
-                    body=reply_text,
-                    status='sent'
-                )
-                from django.contrib import messages
-                messages.success(request, "Reply sent successfully.")
-                from django.shortcuts import redirect
-                return redirect('unified-inbox')
+        if action == 'generate_ai':
+            # Mock AI Generation for MVP
+            prompt = request.POST.get('prompt', '')
+            import time
+            time.sleep(1) # simulate generation
+            generated_text = f"Subject: Following up regarding your inquiry\n\nHi there,\n\nI noticed you recently showed interest in our platform and I wanted to personally reach out. Based on your profile ({prompt}), I believe we could offer significant value to your workflow.\n\nCould we schedule a brief 10-minute call next week to discuss this further?\n\nBest regards,\nSales Team"
+            
+            from django.http import JsonResponse
+            return JsonResponse({'generated_text': generated_text})
+            
+        else:
+            reply_text = request.POST.get('reply_text')
+            lead_id = request.POST.get('lead_id')
+            subject = request.POST.get('subject', 'New Message')
+            status = request.POST.get('status', 'sent')
+            
+            if reply_text and lead_id:
+                lead = Lead.objects.filter(id=lead_id).first()
+                if lead:
+                    OutreachEmail.objects.create(
+                        lead=lead,
+                        subject=subject,
+                        body=reply_text,
+                        status=status
+                    )
+                    from django.contrib import messages
+                    if status == 'draft':
+                        messages.success(request, "Draft saved successfully.")
+                    else:
+                        messages.success(request, "Email sent successfully.")
+                    from django.shortcuts import redirect
+                    return redirect('unified-inbox')
     
-    # Get recent sent emails
-    sent_emails = OutreachEmail.objects.all().order_by('-id')[:20]
+    # Get all emails
+    all_emails = OutreachEmail.objects.all().order_by('-id')
+    sent_emails = []
+    draft_emails = []
     
-    # Get recent replies (incoming)
-    replies = EmailReply.objects.all().order_by('-id')[:20]
-    
-    # Combine and sort them by date (mocking a unified stream)
-    inbox_items = []
-    
-    for email in sent_emails:
-        inbox_items.append({
-            'type': 'sent',
+    for email in all_emails:
+        item = {
+            'type': 'sent' if email.status != 'draft' else 'draft',
             'id': email.id,
             'lead_id': email.lead_id if email.lead else '',
             'subject': email.subject,
             'preview': email.body[:100] if email.body else "No content",
             'full_body': email.body or "",
-            'date': email.id,  # Fallback sorting since we don't have sent_at
+            'date': email.id,  # Fallback sorting
             'contact': f"To: {email.lead.email if email.lead else 'Unknown'}",
             'status': email.status
-        })
-        
+        }
+        if email.status == 'draft':
+            draft_emails.append(item)
+        else:
+            sent_emails.append(item)
+    
+    # Get recent replies (incoming)
+    replies = EmailReply.objects.all().order_by('-id')
+    inbox_emails = []
     for reply in replies:
-        inbox_items.append({
+        inbox_emails.append({
             'type': 'received',
             'id': reply.id,
             'lead_id': reply.email.lead_id if reply.email and reply.email.lead else '',
@@ -935,10 +955,11 @@ def unified_inbox(request):
             'status': 'received'
         })
         
-    inbox_items.sort(key=lambda x: x['date'], reverse=True)
-    
     context = {
-        'inbox_items': inbox_items,
-        'page_title': 'Unified Inbox',
+        'inbox_emails': inbox_emails,
+        'sent_emails': sent_emails,
+        'draft_emails': draft_emails,
+        'all_leads': Lead.objects.all(),
+        'page_title': 'Mail',
     }
     return render(request, 'tracking_app/sales/unified_inbox.html', context)

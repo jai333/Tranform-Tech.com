@@ -14,6 +14,8 @@ class Candidate(models.Model):
     # Add user field to track who created this candidate
     user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='candidates', null=True)
 
+    tenant = models.ForeignKey('Tenant', on_delete=models.CASCADE, null=True, blank=True, related_name='%(class)ss')
+
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
     
@@ -54,6 +56,8 @@ class Job(models.Model):
     deadline = models.DateField(null=True, blank=True, help_text="Application deadline")
     # Add user field to track who created this job
     user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='jobs', null=True)
+
+    tenant = models.ForeignKey('Tenant', on_delete=models.CASCADE, null=True, blank=True, related_name='%(class)ss')
 
     def __str__(self):
         return self.title
@@ -167,6 +171,15 @@ class Interview(models.Model):
 # Using Django's built-in User model features for simplicity and security
 # Although the plan specifies a custom Users table, using AbstractUser 
 # allows leveraging Django's auth system while adding custom fields if needed.
+class Tenant(models.Model):
+    """Represents a company or organization using the platform (Multi-Tenancy)."""
+    name = models.CharField(max_length=255)
+    domain = models.CharField(max_length=255, unique=True, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+
 # For this prototype, we'll primarily use the fields from AbstractUser 
 # that match the plan's User table.
 class User(AbstractUser):
@@ -188,6 +201,14 @@ class User(AbstractUser):
         default=ROLE_JOBSEEKER,
         help_text='Designates the role and permissions of this user.'
     )
+    
+    # Dashboard Permissions (RBAC)
+    can_view_ats = models.BooleanField(default=True)
+    can_view_sales = models.BooleanField(default=True)
+    can_view_it = models.BooleanField(default=True)
+    can_view_executive = models.BooleanField(default=False)
+    
+    tenant = models.ForeignKey(Tenant, on_delete=models.SET_NULL, null=True, blank=True, related_name='users')
     
     # Add profile image field
     profile_image = models.ImageField(upload_to='profile_images/', null=True, blank=True)
@@ -780,6 +801,17 @@ class RoutingRule(models.Model):
 
     def __str__(self):
         return f"{self.get_category_display()} -> {self.assign_to}"
+
+class Workflow(models.Model):
+    name = models.CharField(max_length=255)
+    trigger_event = models.CharField(max_length=50)
+    action_type = models.CharField(max_length=50)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    tenant = models.ForeignKey('Tenant', on_delete=models.CASCADE, null=True, blank=True)
+
+    def __str__(self):
+        return self.name
 
 class TicketAuditLog(models.Model):
     ticket = models.ForeignKey(ITTicket, on_delete=models.CASCADE, related_name='audit_logs')

@@ -7,8 +7,8 @@
             <p class="text-muted small mb-0">Hardware, Software, and Vendor Procurement Dashboard</p>
         </div>
         <div class="d-flex gap-2">
-            <button class="btn btn-outline-secondary" style="border-radius: 8px;"><i class="bx bx-plus"></i> New Vendor</button>
-            <button class="btn btn-primary" style="border-radius: 8px;"><i class="bx bx-plus"></i> New Asset</button>
+            <button class="btn btn-outline-secondary" style="border-radius: 8px;" onclick="document.getElementById('vendorModal').classList.add('active')"><i class="bx bx-plus"></i> New Vendor</button>
+            <button class="btn btn-primary" style="border-radius: 8px;" onclick="document.getElementById('assetModal').classList.add('active')"><i class="bx bx-plus"></i> New Asset</button>
         </div>
     </div>
 
@@ -87,5 +87,70 @@
             </div>
         </div>
     </div>
+    </div>
 </div>
+
+<!-- Modals for Creation -->
+<style>
+.modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1050; align-items: center; justify-content: center; }
+.modal-overlay.active { display: flex; }
+.modal-box { background: var(--apple-card-bg); padding: 2rem; border-radius: 12px; border: 1px solid var(--apple-border); width: 400px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+.modal-box input, .modal-box select { width: 100%; padding: 0.5rem; margin-top: 0.5rem; margin-bottom: 1rem; border-radius: 6px; border: 1px solid var(--apple-border); background: var(--apple-input-bg); color: var(--apple-text); }
+</style>
+
+<!-- Vendor Modal -->
+<div class="modal-overlay" id="vendorModal">
+    <div class="modal-box">
+        <h4 class="mb-3 text-white">New Vendor</h4>
+        <form method="POST" action="{% url 'it-vendor-create' %}">
+            {% csrf_token %}
+            <label>Vendor Name *</label>
+            <input type="text" name="name" required>
+            <label>Contact Name</label>
+            <input type="text" name="contact_name">
+            <label>Contact Email</label>
+            <input type="email" name="contact_email">
+            <div class="d-flex gap-2 justify-content-end mt-3">
+                <button type="button" class="btn btn-secondary" onclick="document.getElementById('vendorModal').classList.remove('active')">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Vendor</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Asset Modal -->
+<div class="modal-overlay" id="assetModal">
+    <div class="modal-box">
+        <h4 class="mb-3 text-white">New IT Asset</h4>
+        <form method="POST" action="{% url 'it-asset-create' %}">
+            {% csrf_token %}
+            <label>Asset Name *</label>
+            <input type="text" name="name" required>
+            <label>Asset Tag *</label>
+            <input type="text" name="asset_tag" required>
+            
+            <label>Asset Type</label>
+            <select name="asset_type">
+                {% for val, label in asset_types %}<option value="{{ val }}">{{ label }}</option>{% endfor %}
+            </select>
+            
+            <label>Status</label>
+            <select name="status">
+                {% for val, label in status_choices %}<option value="{{ val }}">{{ label }}</option>{% endfor %}
+            </select>
+            
+            <label>Vendor</label>
+            <select name="vendor_id">
+                <option value="">-- No Vendor --</option>
+                {% for v in vendors %}<option value="{{ v.id }}">{{ v.name }}</option>{% endfor %}
+            </select>
+            
+            <div class="d-flex gap-2 justify-content-end mt-3">
+                <button type="button" class="btn btn-secondary" onclick="document.getElementById('assetModal').classList.remove('active')">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Asset</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 {% endblock %}

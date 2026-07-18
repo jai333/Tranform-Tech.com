@@ -9,7 +9,7 @@
     </div>
     <div style="display:flex; gap:12px;">
         <button class="btn" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#fff; border-radius:12px; padding:10px 20px; font-weight:600;" onclick="document.getElementById('simulator-modal').style.display='flex'"><i class="bx bx-play-circle" style="margin-right:6px;"></i> Simulator</button>
-        <button class="btn btn-primary" style="background:linear-gradient(135deg, #0A84FF, #005bb5); border:none; color:#fff; border-radius:12px; padding:10px 20px; font-weight:600;"><i class="bx bx-plus" style="margin-right:6px;"></i> New Workflow</button>
+        <button class="btn btn-primary" onclick="document.getElementById('workflow-builder-modal').style.display='flex'" style="background:linear-gradient(135deg, #0A84FF, #005bb5); border:none; color:#fff; border-radius:12px; padding:10px 20px; font-weight:600;"><i class="bx bx-plus" style="margin-right:6px;"></i> New Workflow</button>
     </div>
 </div>
 
@@ -49,11 +49,17 @@
                 </tr>
             </thead>
             <tbody>
-                {% for rule in routing_rules %}
+                {% for wf in workflows %}
                 <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
-                    <td style="padding:12px 0; font-size:0.9rem;">{{ rule.name }}</td>
-                    <td style="padding:12px 0; font-size:0.8rem; color:rgba(255,255,255,0.6);">Routing Rule</td>
-                    <td style="padding:12px 0;"><span style="background:rgba(50,215,75,0.1); color:#32d74b; padding:2px 8px; border-radius:12px; font-size:0.75rem;">Active</span></td>
+                    <td style="padding:12px 0; font-size:0.9rem;">{{ wf.name }}</td>
+                    <td style="padding:12px 0; font-size:0.8rem; color:rgba(255,255,255,0.6);">Custom Workflow</td>
+                    <td style="padding:12px 0;">
+                        {% if wf.is_active %}
+                        <span style="background:rgba(50,215,75,0.1); color:#32d74b; padding:2px 8px; border-radius:12px; font-size:0.75rem;">Active</span>
+                        {% else %}
+                        <span style="background:rgba(255,255,255,0.1); color:rgba(255,255,255,0.5); padding:2px 8px; border-radius:12px; font-size:0.75rem;">Inactive</span>
+                        {% endif %}
+                    </td>
                 </tr>
                 {% endfor %}
                 {% for seq in email_sequences %}
@@ -63,7 +69,7 @@
                     <td style="padding:12px 0;"><span style="background:rgba(50,215,75,0.1); color:#32d74b; padding:2px 8px; border-radius:12px; font-size:0.75rem;">Active</span></td>
                 </tr>
                 {% endfor %}
-                {% if not routing_rules and not email_sequences %}
+                {% if not workflows and not email_sequences %}
                 <tr><td colspan="3" style="padding:20px 0; text-align:center; color:rgba(255,255,255,0.4);">No active workflows found.</td></tr>
                 {% endif %}
             </tbody>
@@ -108,8 +114,8 @@
         <div style="margin-bottom:1rem;">
             <label style="color:rgba(255,255,255,0.6); font-size:0.85rem; margin-bottom:6px; display:block;">Select Workflow / Rule</label>
             <select class="form-select" style="background:rgba(0,0,0,0.2); border:1px solid rgba(255,255,255,0.1); color:#fff; border-radius:10px; padding:10px 14px; width:100%; outline:none;">
-                {% for rule in routing_rules %}
-                <option value="rule_{{ rule.id }}">[Routing] {{ rule.name }}</option>
+                {% for wf in workflows %}
+                <option value="wf_{{ wf.id }}">[Workflow] {{ wf.name }}</option>
                 {% endfor %}
                 {% for seq in email_sequences %}
                 <option value="seq_{{ seq.id }}">[Sequence] {{ seq.name }}</option>
@@ -144,6 +150,55 @@
             <button class="btn btn-primary" style="flex:1; background:linear-gradient(135deg, #0A84FF, #005bb5); border:none; border-radius:10px; padding:12px; font-weight:600;" onclick="document.getElementById('simulator-result').style.display='block'">Run Simulation</button>
             <button class="btn" style="flex:1; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#fff; border-radius:10px; padding:12px; font-weight:600;" onclick="document.getElementById('simulator-modal').style.display='none'">Close</button>
         </div>
+    </div>
+</div>
+
+<!-- Workflow Builder Modal -->
+<div id="workflow-builder-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:9999; align-items:center; justify-content:center; backdrop-filter:blur(8px);">
+    <div style="background:var(--apple-card-bg); border:1px solid rgba(255,255,255,0.1); border-radius:20px; width:90%; max-width:600px; padding:2rem; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+            <h3 style="color:#fff; margin:0; display:flex; align-items:center; gap:8px;"><i class="bx bx-git-merge" style="color:#0A84FF; font-size:1.5rem;"></i> New Workflow Builder</h3>
+            <i class="bx bx-x" style="color:rgba(255,255,255,0.5); font-size:1.5rem; cursor:pointer;" onclick="document.getElementById('workflow-builder-modal').style.display='none'"></i>
+        </div>
+        
+        <form action="{% url 'automation-dashboard' %}" method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="create_workflow">
+            
+            <div style="margin-bottom:1.2rem;">
+                <label style="color:rgba(255,255,255,0.6); font-size:0.85rem; margin-bottom:6px; display:block;">Workflow Name</label>
+                <input type="text" name="name" required placeholder="e.g., Enterprise Lead Assignment" style="background:rgba(0,0,0,0.2); border:1px solid rgba(255,255,255,0.1); color:#fff; border-radius:10px; padding:10px 14px; width:100%; outline:none;">
+            </div>
+
+            <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); border-radius:12px; padding:16px; margin-bottom:1.2rem;">
+                <h4 style="color:#fff; font-size:0.95rem; margin-bottom:12px; display:flex; align-items:center; gap:6px;"><i class="bx bx-bolt-circle" style="color:#f59e0b;"></i> Trigger</h4>
+                <select name="trigger" class="form-select" style="background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.1); color:#fff; border-radius:8px; padding:8px 12px; width:100%; outline:none; font-size:0.9rem;">
+                    <option value="new_lead">When a New Lead is created</option>
+                    <option value="new_ticket">When a New IT Ticket is submitted</option>
+                    <option value="security_alert">When a High-Severity Security Alert triggers</option>
+                    <option value="deal_won">When a Deal is marked as Won</option>
+                </select>
+            </div>
+
+            <div style="display:flex; justify-content:center; margin-bottom:1.2rem;">
+                <i class="bx bx-down-arrow-alt" style="color:rgba(255,255,255,0.3); font-size:1.5rem;"></i>
+            </div>
+
+            <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); border-radius:12px; padding:16px; margin-bottom:2rem;">
+                <h4 style="color:#fff; font-size:0.95rem; margin-bottom:12px; display:flex; align-items:center; gap:6px;"><i class="bx bx-play-circle" style="color:#32D74B;"></i> Action</h4>
+                <select name="action_type" class="form-select" style="background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.1); color:#fff; border-radius:8px; padding:8px 12px; width:100%; outline:none; font-size:0.9rem;">
+                    <option value="assign_rep">Assign to appropriate Sales Rep</option>
+                    <option value="send_email">Send introductory email sequence</option>
+                    <option value="create_task">Create follow-up task</option>
+                    <option value="notify_slack">Send notification to Slack</option>
+                </select>
+            </div>
+
+            <div style="display:flex; gap:12px;">
+                <button type="submit" class="btn btn-primary" style="flex:1; background:linear-gradient(135deg, #0A84FF, #005bb5); border:none; border-radius:10px; padding:12px; font-weight:600;">Create Workflow</button>
+                <button type="button" class="btn" style="flex:1; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#fff; border-radius:10px; padding:12px; font-weight:600;" onclick="document.getElementById('workflow-builder-modal').style.display='none'">Cancel</button>
+            </div>
+        </form>
     </div>
 </div>
 {% endblock %}

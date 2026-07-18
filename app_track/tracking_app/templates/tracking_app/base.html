@@ -93,6 +93,11 @@
             box-sizing: border-box;
         }
 
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
         html {
             scroll-behavior: smooth;
             scroll-padding-top: 90px;
@@ -236,8 +241,8 @@
         nav ul {
             list-style: none;
             display: flex;
-            gap: 1.5rem;
-            margin: 0;
+            width: 100%;
+            margin: 0 1.5rem;
             background-color: transparent;
             padding: 0;
             border-radius: 0;
@@ -246,7 +251,7 @@
             border: none;
             box-shadow: none;
             flex-wrap: nowrap;
-            justify-content: center;
+            justify-content: space-evenly;
             overflow: visible;
         }
 
@@ -260,18 +265,18 @@
             font-weight: 600;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.4rem;
             padding: 0.5rem 0;
             border-radius: 0;
             transition: all 0.2s ease;
             letter-spacing: 0.05em;
-            font-size: 0.85rem;
+            font-size: 0.75rem;
             font-family: 'Fira Code', monospace;
             text-transform: uppercase;
         }
 
         nav a i {
-            font-size: 1.1rem;
+            font-size: 1rem;
         }
 
         nav a:hover {
@@ -1103,14 +1108,15 @@
             display: none;
             position: absolute;
             top: 100%;
-            left: 0;
-            background-color: var(--glass-bg);
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--apple-dropdown-bg);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            min-width: 200px;
-            box-shadow: var(--glass-shadow);
-            border: 1px solid var(--glass-border);
-            border-radius: 8px;
+            min-width: 220px;
+            box-shadow: var(--apple-shadow);
+            border: 1px solid var(--apple-border);
+            border-radius: 12px;
             padding: 0.5rem;
             z-index: 1000;
         }
@@ -1217,24 +1223,26 @@
                         <!-- C-SUITE DASHBOARDS -->
                         {% if user.is_staff or user.is_admin_role %}
                         <li class="dropdown-nav" onclick="this.querySelector('.dropdown-content').classList.toggle('show-dropdown')">
-                            <a href="javascript:void(0)" class="{% if '/executive-dashboard/' in request.path or '/automation/dashboard/' in request.path %}active{% endif %}" style="color:#00E5FF; white-space: nowrap;">
+                            <a href="javascript:void(0)" class="{% if '/executive-dashboard/' in request.path or '/automation/dashboard/' in request.path or '/ai-pipeline/' in request.path %}active{% endif %}" style="color:#00E5FF; white-space: nowrap;">
                                 <i class="fa-solid fa-crown"></i> C-Suite <i class="fas fa-chevron-down" style="font-size: 0.7em; margin-left: 4px;"></i>
                             </a>
                             <ul class="dropdown-content">
                                 <li><a href="{% url 'executive-dashboard' %}"><i class="fa-solid fa-chart-pie"></i> Executive Analytics</a></li>
                                 <li><a href="{% url 'automation-dashboard' %}"><i class="fa-solid fa-robot"></i> Workflow Automation</a></li>
+                                <li><a href="{% url 'ai-pipeline-dashboard' %}"><i class="fa-solid fa-chart-network"></i> Recruitment Telemetry</a></li>
                             </ul>
                         </li>
                         {% endif %}
 
                         <!-- IT DASHBOARD -->
-                        {% if user.is_it_agent or user.is_it_admin %}
+                        {% if user.is_it_agent or user.is_it_admin or user.can_view_it %}
                         <li class="dropdown-nav" onclick="this.querySelector('.dropdown-content').classList.toggle('show-dropdown')">
-                            <a href="javascript:void(0)" class="{% if '/it/' in request.path %}active{% endif %}" style="white-space: nowrap;">
+                            <a href="{% url 'it-helpdesk-list' %}" class="{% if '/it/' in request.path %}active{% endif %}" style="white-space: nowrap;">
                                 <i class="fa-solid fa-desktop"></i> IT Dashboard <i class="fas fa-chevron-down" style="font-size: 0.7em; margin-left: 4px;"></i>
                             </a>
                             <ul class="dropdown-content">
                                 <li><a href="{% url 'it-helpdesk-list' %}"><i class="fa-solid fa-headset"></i> Tickets</a></li>
+                                <li><a href="{% url 'it-asset-list' %}"><i class="fa-solid fa-server"></i> Assets & Vendors</a></li>
                                 {% if user.is_it_admin %}
                                 <li><a href="{% url 'it-admin-settings' %}"><i class="fa-solid fa-gear"></i> IT Admin Settings</a></li>
                                 {% endif %}
@@ -1246,7 +1254,7 @@
                         {% endif %}
 
                         <!-- SALES DASHBOARD & ATS for Non-Jobseekers -->
-                        {% if not user.is_jobseeker or user.is_admin_role or user.is_staff %}
+                        {% if not user.is_jobseeker or user.is_admin_role or user.is_staff or user.can_view_sales %}
                         <li><a href="{% url 'sales-dashboard' %}" class="{% if '/sales/' in request.path %}active{% endif %}" style="white-space: nowrap;"><i class="fas fa-chart-line"></i> Sales</a></li>
                         
                         <li class="dropdown-nav" onclick="this.querySelector('.dropdown-content').classList.toggle('show-dropdown')">
@@ -1280,7 +1288,7 @@
                                 <i class="fa-solid fa-shield-halved"></i> Security <i class="fas fa-chevron-down" style="font-size: 0.7em; margin-left: 4px;"></i>
                             </a>
                             <ul class="dropdown-content">
-                                <li><a href="{% url 'threat-dashboard' %}"><i class="fa-solid fa-triangle-exclamation"></i> Incidents</a></li>
+                                <li><a href="{% url 'threat-dashboard' %}"><i class="fa-solid fa-triangle-exclamation"></i> Security Report</a></li>
                                 <li><a href="{% url 'vuln-list' %}"><i class="fa-solid fa-bug"></i> Vulnerabilities</a></li>
                                 <li><a href="{% url 'ip-blocklist' %}"><i class="fa-solid fa-ban"></i> IP Blocklist</a></li>
                                 <li><a href="{% url 'report-phishing' %}"><i class="fa-solid fa-fish"></i> Report Phishing</a></li>

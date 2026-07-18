@@ -378,6 +378,74 @@
             </div>
         </div>
 
+        <!-- Mail & Workflow Automation Showcase -->
+        <div class="showcase-row" data-reveal data-delay="100">
+            <div class="showcase-col-text">
+                <div class="label-tag label-cyan">MAIL & AUTOMATION</div>
+                <h2 class="showcase-h2">Your Entire Inbox.<br>Supercharged by AI.</h2>
+                <p class="showcase-p">Stop switching tabs. Manage your emails natively with our robust 3-pane Unified Inbox. Draft complex follow-ups instantly using the integrated AI Sales Outreach Generator.</p>
+                <ul class="showcase-checklist">
+                    <li>
+                        <div class="sc-check sc-cyan"><i class='bx bx-envelope'></i></div>
+                        <div><strong>Gmail-Native Experience</strong><span>Folders, drafts, and read-receipt tracking</span></div>
+                    </li>
+                    <li>
+                        <div class="sc-check sc-cyan"><i class='bx bx-bot'></i></div>
+                        <div><strong>AI Outreach Generator</strong><span>Draft high-converting emails in one click</span></div>
+                    </li>
+                    <li>
+                        <div class="sc-check sc-cyan"><i class='bx bx-git-branch'></i></div>
+                        <div><strong>Custom Workflows</strong><span>Build automated routing rules with our visual canvas</span></div>
+                    </li>
+                </ul>
+                <a href="{% url 'unified-inbox' %}" class="btn-showcase btn-showcase-cyan">Explore Inbox & Workflows →</a>
+            </div>
+            <div class="showcase-col-visual">
+                <div class="showcase-frame showcase-frame-cyan">
+                    <img src="{% static 'tracking_app/assets/inbox_cyan_dashboard.jpg' %}" alt="Mail Dashboard" class="showcase-img">
+                    <div class="sf-glow"></div>
+                    <div class="sf-badge sf-badge-top">
+                        <i class='bx bx-bot' style="color:#06b6d4;"></i>
+                        <span>AI Draft Generated</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Command+K Global Search Showcase -->
+        <div class="showcase-row showcase-reverse" data-reveal data-delay="100">
+            <div class="showcase-col-text">
+                <div class="label-tag label-cyan">PRODUCTIVITY & NAVIGATION</div>
+                <h2 class="showcase-h2">Global Command Palette.<br>Move at the speed of thought.</h2>
+                <p class="showcase-p">No more clicking through endless menus. Press <kbd style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; padding: 2px 8px; font-family: monospace;">Cmd + K</kbd> anywhere on the platform to instantly jump between dashboards, create tickets, or search your entire organization's data.</p>
+                <ul class="showcase-checklist">
+                    <li>
+                        <div class="sc-check sc-cyan"><i class='bx bx-search-alt-2'></i></div>
+                        <div><strong>Universal Search</strong><span>Instantly find tickets, leads, accounts, and assets</span></div>
+                    </li>
+                    <li>
+                        <div class="sc-check sc-cyan"><i class='bx bx-bolt-circle'></i></div>
+                        <div><strong>Quick Actions</strong><span>Create new entities without leaving your current page</span></div>
+                    </li>
+                    <li>
+                        <div class="sc-check sc-cyan"><i class='bx bx-navigation'></i></div>
+                        <div><strong>Lightning Navigation</strong><span>Jump directly to specialized dashboards in one keystroke</span></div>
+                    </li>
+                </ul>
+                <button class="btn-showcase btn-showcase-blue" onclick="document.dispatchEvent(new KeyboardEvent('keydown', {key: 'k', metaKey: true}))">Try Cmd+K Now →</button>
+            </div>
+            <div class="showcase-col-visual">
+                <div class="showcase-frame showcase-frame-cyan">
+                    <img src="{% static 'tracking_app/assets/cmd_k_modal_box.jpg' %}" alt="Command Palette" class="showcase-img">
+                    <div class="sf-glow"></div>
+                    <div class="sf-badge sf-badge-top">
+                        <i class='bx bx-command' style="color:#06b6d4;"></i>
+                        <span>Press Cmd+K</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- IT Ticketing Showcase -->
         <div class="showcase-row" data-reveal data-delay="100">
             <div class="showcase-col-text">
@@ -412,8 +480,8 @@
             </div>
         </div>
 
-        <!-- Cybersecurity Showcase (reversed) -->
-        <div class="showcase-row showcase-reverse" data-reveal data-delay="100">
+        <!-- Cybersecurity Showcase -->
+        <div class="showcase-row" data-reveal data-delay="100">
             <div class="showcase-col-text">
                 <div class="label-tag label-red">ENTERPRISE SECURITY</div>
                 <h2 class="showcase-h2">Security Is the Foundation,<br>Not a Feature.</h2>

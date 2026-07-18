@@ -7,7 +7,7 @@ from django.contrib.auth import login, authenticate
 from django.contrib import messages
 from django.http import Http404, JsonResponse
 from django.core.exceptions import PermissionDenied
-from .models import Candidate, Job, Interview, User, Application, Friendship, Message, Notification, JobSeekerApplication, Note, ITTicket, ITTicketComment, ThreatIncident, DevProjectRequest, ScheduledReport, AutomationRun, ResumeData, ITAsset, KBArticle, TicketSurvey, TicketAuditLog, RoutingRule, SLAConfiguration, TicketMacro, TicketWorkLog, ITProblem, ITChangeRequest, ChangeApprovalBoard, ServiceCatalogItem, ServiceRequest, TicketRoutingRule, AssetRelationship, SystemOutage, BusinessHoursSchedule, HolidayCalendar, VulnerabilityScan, IPBlocklist, PhishingReport
+from .models import Candidate, Job, Interview, User, Application, Friendship, Message, Notification, JobSeekerApplication, Note, ITTicket, ITTicketComment, ThreatIncident, DevProjectRequest, ScheduledReport, AutomationRun, ResumeData, ITAsset, ITVendor, KBArticle, TicketSurvey, TicketAuditLog, RoutingRule, SLAConfiguration, TicketMacro, TicketWorkLog, ITProblem, ITChangeRequest, ChangeApprovalBoard, ServiceCatalogItem, ServiceRequest, TicketRoutingRule, AssetRelationship, SystemOutage, BusinessHoursSchedule, HolidayCalendar, VulnerabilityScan, IPBlocklist, PhishingReport
 from .forms import UserRegistrationForm, ProfileUpdateForm, JobSeekerApplicationForm, JobForm
 from django.db import models
 from datetime import datetime, timedelta
@@ -1122,7 +1122,8 @@ def it_helpdesk_list(request):
             'sla_compliance_rate': sla_compliance_rate,
             'priority_choices': ITTicket.PRIORITY_CHOICES,
             'category_choices': ITTicket.CATEGORY_CHOICES,
-            'active_assets': ITAsset.objects.exclude(status='retired'),
+            'active_assets': ITAsset.objects.exclude(status='retired').order_by('-purchase_date')[:10],
+            'active_vendors': ITVendor.objects.all().order_by('-created_at')[:10],
             'page_title': 'IT Agent Dashboard',
         }
         return render(request, 'tracking_app/it_helpdesk.html', context)
@@ -1165,7 +1166,8 @@ def it_ticket_create(request):
                 )
             except Exception:
                 pass
-            messages.success(request, f'Ticket #{ticket.id} created successfully. SLA deadline: {ticket.resolve_due_at.strftime("%b %d, %H:%M")}')
+            deadline_str = ticket.resolve_due_at.strftime("%b %d, %H:%M") if ticket.resolve_due_at else "Not set"
+            messages.success(request, f'Ticket #{ticket.id} created successfully. SLA deadline: {deadline_str}')
             return redirect('it-ticket-detail', pk=ticket.id)
         else:
             messages.error(request, 'Title and description are required.')
@@ -1182,7 +1184,15 @@ def it_ticket_create(request):
 def it_ticket_detail(request, pk):
     """Detail view for a single IT ticket with comment thread."""
     ticket = get_object_or_404(ITTicket, pk=pk)
-    if not (request.user.is_staff or request.user.is_admin_role or ticket.submitted_by == request.user):
+    
+    # Check permissions: User must be an IT Agent, the submitter, or explicitly have IT View permissions
+    has_permission = (
+        request.user.is_it_agent or 
+        ticket.submitted_by == request.user or 
+        getattr(request.user, 'can_view_it', False)
+    )
+    
+    if not has_permission:
         messages.error(request, 'You do not have permission to view this ticket.')
         return redirect('it-helpdesk-list')
 
@@ -1852,7 +1862,7 @@ def lead_qualification_form(request):
 
 @login_required
 def it_asset_list(request):
-    if not (request.user.is_staff or request.user.is_admin_role or request.user.is_it_agent):
+    if not (request.user.is_staff or request.user.is_admin_role or request.user.is_it_agent or getattr(request.user, 'can_view_it', False)):
         messages.error(request, 'Permission denied')
         return redirect('home')
     
@@ -1862,9 +1872,58 @@ def it_asset_list(request):
     context = {
         'assets': assets,
         'vendors': vendors,
-        'page_title': 'IT Assets & Procurement'
+        'page_title': 'IT Assets & Procurement',
+        'asset_types': ITAsset.ASSET_TYPES,
+        'status_choices': ITAsset.STATUS_CHOICES,
+        'users': User.objects.filter(is_active=True)
     }
     return render(request, 'tracking_app/it_asset_list.html', context)
+
+@login_required
+def it_asset_create(request):
+    if not (request.user.is_staff or getattr(request.user, 'can_view_it', False)):
+        messages.error(request, 'Permission denied')
+        return redirect('it-asset-list')
+        
+    if request.method == 'POST':
+        name = request.POST.get('name', '').strip()
+        asset_tag = request.POST.get('asset_tag', '').strip()
+        asset_type = request.POST.get('asset_type', 'laptop')
+        status = request.POST.get('status', 'available')
+        vendor_id = request.POST.get('vendor_id')
+        owner_id = request.POST.get('owner_id')
+        
+        if name and asset_tag:
+            ITAsset.objects.create(
+                name=name,
+                asset_tag=asset_tag,
+                asset_type=asset_type,
+                status=status,
+                vendor_id=vendor_id if vendor_id else None,
+                owner_id=owner_id if owner_id else None
+            )
+            messages.success(request, f'Asset {asset_tag} added.')
+    return redirect('it-asset-list')
+
+@login_required
+def it_vendor_create(request):
+    if not (request.user.is_staff or getattr(request.user, 'can_view_it', False)):
+        messages.error(request, 'Permission denied')
+        return redirect('it-asset-list')
+        
+    if request.method == 'POST':
+        name = request.POST.get('name', '').strip()
+        contact_name = request.POST.get('contact_name', '').strip()
+        contact_email = request.POST.get('contact_email', '').strip()
+        
+        if name:
+            ITVendor.objects.create(
+                name=name,
+                contact_name=contact_name or None,
+                contact_email=contact_email or None
+            )
+            messages.success(request, f'Vendor {name} added.')
+    return redirect('it-asset-list')
 
 @login_required
 def it_asset_detail(request, pk):
@@ -2133,8 +2192,25 @@ def report_phishing(request):
 def account_list(request):
     """B2B Account directory."""
     from .sales_models import Account as SalesAccount, AccountActivity
+    
+    industry_filter = request.GET.get('industry')
+    size_filter = request.GET.get('size')
+    
     accounts = SalesAccount.objects.prefetch_related('contacts').order_by('-created_at')
-    return render(request, 'tracking_app/account_list.html', {'accounts': accounts})
+    
+    if industry_filter:
+        accounts = accounts.filter(industry=industry_filter)
+    if size_filter:
+        accounts = accounts.filter(size=size_filter)
+        
+    context = {
+        'accounts': accounts,
+        'industry_choices': SalesAccount.INDUSTRY_CHOICES,
+        'size_choices': SalesAccount.SIZE_CHOICES,
+        'selected_industry': industry_filter,
+        'selected_size': size_filter,
+    }
+    return render(request, 'tracking_app/account_list.html', context)
 
 
 @login_required
@@ -2179,11 +2255,24 @@ def account_detail(request, pk):
 
 @login_required
 def account_create(request):
-    """Create a new B2B Account."""
+    """Create a new B2B Account and provision an initial Admin User."""
     from .sales_models import Account as SalesAccount
+    from .models import Tenant, User
+    import secrets
+    import string
+    
     if request.method == 'POST':
+        # 1. Create the Tenant
+        company_name = request.POST.get('name', '')
+        tenant = Tenant.objects.create(
+            name=company_name,
+            domain=request.POST.get('website', '').replace('https://', '').replace('http://', '').strip('/') or f"{company_name.lower().replace(' ', '')}.com"
+        )
+        
+        # 2. Create the Account
         account = SalesAccount.objects.create(
-            name=request.POST.get('name', ''),
+            tenant=tenant,
+            name=company_name,
             industry=request.POST.get('industry', ''),
             website=request.POST.get('website', '') or None,
             phone=request.POST.get('phone', ''),
@@ -2191,9 +2280,51 @@ def account_create(request):
             employee_count=request.POST.get('employee_count', ''),
             owner=request.user,
         )
-        messages.success(request, f"Account '{account.name}' created!")
+        
+        # 3. Create the Initial User (if email is provided)
+        admin_email = request.POST.get('admin_email', '')
+        admin_first_name = request.POST.get('admin_first_name', 'Admin')
+        admin_last_name = request.POST.get('admin_last_name', '')
+        
+        if admin_email:
+            # Generate a secure random password
+            alphabet = string.ascii_letters + string.digits + "!@#$%^&*"
+            password = ''.join(secrets.choice(alphabet) for i in range(12))
+            
+            # Get dashboard permissions
+            can_view_ats = request.POST.get('can_view_ats') == 'on'
+            can_view_sales = request.POST.get('can_view_sales') == 'on'
+            can_view_it = request.POST.get('can_view_it') == 'on'
+            can_view_executive = request.POST.get('can_view_executive') == 'on'
+            
+            # Generate unique username
+            base_username = admin_email.split('@')[0]
+            username = base_username
+            counter = 1
+            while User.objects.filter(username=username).exists():
+                username = f"{base_username}{counter}"
+                counter += 1
+                
+            new_user = User.objects.create_user(
+                username=username,
+                email=admin_email,
+                password=password,
+                first_name=admin_first_name,
+                last_name=admin_last_name,
+                tenant=tenant,
+                role='admin',
+                can_view_ats=can_view_ats,
+                can_view_sales=can_view_sales,
+                can_view_it=can_view_it,
+                can_view_executive=can_view_executive
+            )
+            
+            messages.success(request, f"Account '{account.name}' created! Admin User: {username} | Password: {password}")
+        else:
+            messages.success(request, f"Account '{account.name}' created (No admin user provisioned).")
+            
         return redirect('account-detail', pk=account.pk)
-    from .sales_models import Account as SalesAccount
+        
     return render(request, 'tracking_app/account_create.html', {
         'industry_choices': SalesAccount.INDUSTRY_CHOICES,
         'size_choices': SalesAccount.SIZE_CHOICES,
@@ -2262,10 +2393,47 @@ def api_global_search(request):
         results.append({
             'type': 'Deal',
             'title': d.lead.company_name if d.lead else "Unknown Lead",
-            'subtitle': f"Stage: {d.get_stage_display()} - ${d.value}",
+            'subtitle': f"Stage: {d.get_stage_display()} - ${d.deal_value_annual}",
             'url': f"/sales/deals/{d.id}/" if hasattr(d, 'id') else "/sales/pipeline/",
             'icon': 'bx-dollar-circle',
             'color': '#32d74b'
+        })
+        
+    # 5. Search IT Assets
+    from tracking_app.models import ITAsset, ITVendor, ThreatIncident
+    assets = ITAsset.objects.filter(name__icontains=query)[:3]
+    for ast in assets:
+        results.append({
+            'type': 'IT Asset',
+            'title': ast.name,
+            'subtitle': f"Tag: {ast.asset_tag} - {ast.get_status_display()}",
+            'url': "/it/assets/",
+            'icon': 'bx-laptop',
+            'color': '#06b6d4'
+        })
+
+    # 6. Search IT Vendors
+    vendors = ITVendor.objects.filter(name__icontains=query)[:3]
+    for v in vendors:
+        results.append({
+            'type': 'IT Vendor',
+            'title': v.name,
+            'subtitle': v.contact_email or "Vendor",
+            'url': "/it/assets/",
+            'icon': 'bx-store-alt',
+            'color': '#06b6d4'
+        })
+
+    # 7. Search Security Threats
+    threats = ThreatIncident.objects.filter(title__icontains=query)[:3]
+    for t in threats:
+        results.append({
+            'type': 'Security Threat',
+            'title': t.title,
+            'subtitle': f"Severity: {t.get_severity_display()}",
+            'url': "/security/threats/",
+            'icon': 'bx-shield-quarter',
+            'color': '#ef4444'
         })
 
     # Action suggestions based on keywords
@@ -2344,10 +2512,28 @@ def executive_dashboard(request):
 @login_required
 def automation_dashboard(request):
     """Central view for managing system automations and routing rules."""
-    from .models import RoutingRule, AutomationRun, SLAConfiguration
+    from .models import RoutingRule, AutomationRun, SLAConfiguration, Workflow
     from .sales_models import EmailSequence
+    from django.contrib import messages
+    from django.shortcuts import redirect
     
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        if action == 'create_workflow':
+            name = request.POST.get('name')
+            trigger = request.POST.get('trigger')
+            action_type = request.POST.get('action_type')
+            
+            Workflow.objects.create(
+                name=name,
+                trigger_event=trigger,
+                action_type=action_type,
+            )
+            messages.success(request, f"Workflow '{name}' created successfully.")
+            return redirect('automation-dashboard')
+
     routing_rules = RoutingRule.objects.all()
+    workflows = Workflow.objects.all().order_by('-created_at')
     sla_configs = SLAConfiguration.objects.all()
     email_sequences = EmailSequence.objects.all()
     recent_runs = AutomationRun.objects.order_by('-timestamp')[:20]
@@ -2358,6 +2544,7 @@ def automation_dashboard(request):
     success_rate = round((success_count / total_runs * 100) if total_runs > 0 else 100, 1)
     
     context = {
+        'workflows': workflows,
         'routing_rules': routing_rules,
         'sla_configs': sla_configs,
         'email_sequences': email_sequences,

@@ -78,6 +78,8 @@ class Lead(models.Model):
     class Meta:
         ordering = ['-icp_score', '-created_at']
 
+    tenant = models.ForeignKey('tracking_app.Tenant', on_delete=models.CASCADE, null=True, blank=True, related_name='%(class)ss')
+
     def __str__(self):
         return f"{self.contact_name} @ {self.company_name} ({self.icp_score:.0f}/100)"
 
@@ -523,6 +525,8 @@ class Account(models.Model):
     owner          = models.ForeignKey('tracking_app.User', on_delete=models.SET_NULL, null=True, blank=True, related_name='owned_accounts')
     created_at     = models.DateTimeField(auto_now_add=True)
     updated_at     = models.DateTimeField(auto_now=True)
+
+    tenant = models.ForeignKey('tracking_app.Tenant', on_delete=models.CASCADE, null=True, blank=True, related_name='%(class)ss')
 
     def __str__(self):
         return self.name

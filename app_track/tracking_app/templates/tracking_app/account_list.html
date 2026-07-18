@@ -40,7 +40,37 @@
             <div style="font-size:2rem; font-weight:800; color:#fff; line-height:1;">{{ accounts.count }}</div>
         </div>
     </div>
+    
+    <div class="glass-card" style="display:flex; align-items:center; gap:16px;">
+        <div style="width:50px; height:50px; border-radius:12px; background:rgba(50, 215, 75, 0.1); display:flex; align-items:center; justify-content:center; color:#32D74B; font-size:1.5rem;"><i class="bx bx-line-chart"></i></div>
+        <div>
+            <div style="color:rgba(255,255,255,0.5); font-size:0.85rem; font-weight:600; text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">Pipeline Health</div>
+            <div style="font-size:2rem; font-weight:800; color:#fff; line-height:1;">Strong</div>
+        </div>
+    </div>
 </div>
+
+<form method="GET" class="glass-card" style="display:flex; gap:1rem; margin-bottom:1.5rem; align-items:flex-end;">
+    <div style="flex:1;">
+        <label style="color:rgba(255,255,255,0.6); font-size:0.8rem; margin-bottom:6px; display:block; text-transform:uppercase; letter-spacing:1px;">Filter by Industry</label>
+        <select name="industry" style="background:rgba(0,0,0,0.2); border:1px solid rgba(255,255,255,0.1); color:#fff; border-radius:8px; padding:10px; width:100%; outline:none;">
+            <option value="">All Industries</option>
+            {% for val, label in industry_choices %}
+            <option value="{{ val }}" {% if selected_industry == val %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div style="flex:1;">
+        <label style="color:rgba(255,255,255,0.6); font-size:0.8rem; margin-bottom:6px; display:block; text-transform:uppercase; letter-spacing:1px;">Filter by Size</label>
+        <select name="size" style="background:rgba(0,0,0,0.2); border:1px solid rgba(255,255,255,0.1); color:#fff; border-radius:8px; padding:10px; width:100%; outline:none;">
+            <option value="">All Sizes</option>
+            {% for val, label in size_choices %}
+            <option value="{{ val }}" {% if selected_size == val %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary" style="background:linear-gradient(135deg, #0A84FF, #005bb5); border:none; color:#fff; border-radius:8px; padding:10px 20px; font-weight:600; height:42px;">Filter Results</button>
+</form>
 
 <div class="glass-card" style="padding:0; overflow:hidden;">
     <table class="glass-table">
