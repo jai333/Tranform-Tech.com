@@ -1,0 +1,320 @@
+{% extends 'tracking_app/base.html' %}
+{% block title %}Interview Scorecard | Transform.io{% endblock %}
+
+{% block content %}
+<style>
+:root { --sc-purple: #8b5cf6; --sc-gold: #f59e0b; }
+.sc-page { padding: 2rem; max-width: 860px; margin: 0 auto; }
+.back-link { display: inline-flex; align-items: center; gap: 6px; color: rgba(255,255,255,0.5); font-size: 0.8rem; text-decoration: none; margin-bottom: 1.5rem; transition: color 0.2s; }
+.back-link:hover { color: var(--sc-purple); }
+.sc-header { background: rgba(255,255,255,0.02); border: 1px solid rgba(139,92,246,0.2); border-radius: 16px; padding: 1.75rem 2rem; margin-bottom: 1.5rem; position: relative; overflow: hidden; }
+.sc-header::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--sc-purple), #c084fc, var(--sc-gold)); }
+.sc-label { font-size: 0.72rem; color: var(--sc-purple); font-family: 'Fira Code', monospace; letter-spacing: 0.05em; margin-bottom: 6px; }
+.sc-title { font-size: 1.3rem; font-weight: 700; color: #fff; margin-bottom: 8px; }
+.sc-meta { display: flex; flex-wrap: wrap; gap: 10px; }
+.sc-meta-item { background: rgba(255,255,255,0.05); border-radius: 6px; padding: 4px 10px; font-size: 0.75rem; color: rgba(255,255,255,0.6); display: flex; align-items: center; gap: 5px; }
+.messages-area { margin-bottom: 1.25rem; }
+.alert { border-radius: 10px; padding: 12px 16px; font-size: 0.875rem; }
+.alert-success { background: rgba(139,92,246,0.1); border: 1px solid rgba(139,92,246,0.3); color: #c4b5fd; }
+.alert-info { background: rgba(0,229,255,0.06); border: 1px solid rgba(0,229,255,0.2); color: #67e8f9; }
+
+/* ── VIEW MODE ───────────────────────────────────────── */
+.scorecard-view { }
+.avg-badge { display: flex; align-items: center; justify-content: center; flex-direction: column; width: 90px; height: 90px; border-radius: 50%; border: 3px solid var(--sc-purple); background: rgba(139,92,246,0.1); margin: 0 auto 1.5rem; }
+.avg-num { font-size: 2rem; font-weight: 900; color: #fff; line-height: 1; }
+.avg-label { font-size: 0.6rem; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.05em; }
+.scores-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+@media (max-width: 540px) { .scores-grid { grid-template-columns: 1fr; } }
+.score-item { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; padding: 1rem; }
+.score-name { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: rgba(255,255,255,0.4); margin-bottom: 10px; }
+.star-row { display: flex; gap: 4px; }
+.star { font-size: 1.2rem; }
+.star.filled { color: var(--sc-gold); }
+.star.empty { color: rgba(255,255,255,0.1); }
+.score-num { font-size: 0.75rem; color: rgba(255,255,255,0.3); margin-top: 4px; }
+.reco-badge { display: inline-flex; align-items: center; gap: 6px; border-radius: 8px; padding: 8px 18px; font-size: 0.8rem; font-weight: 700; margin-top: 1rem; }
+.reco-strong_yes { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
+.reco-yes { background: rgba(16,185,129,0.08); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.2); }
+.reco-maybe { background: rgba(245,158,11,0.1); color: #fcd34d; border: 1px solid rgba(245,158,11,0.25); }
+.reco-no { background: rgba(239,68,68,0.08); color: #fca5a5; border: 1px solid rgba(239,68,68,0.2); }
+.reco-strong_no { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
+.note-block { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; padding: 1.25rem; margin-top: 1rem; }
+.note-block h4 { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: rgba(255,255,255,0.4); margin-bottom: 8px; }
+.note-block p { font-size: 0.875rem; color: rgba(255,255,255,0.75); line-height: 1.6; }
+.view-actions { display: flex; gap: 10px; margin-top: 1.5rem; }
+.btn-edit { background: rgba(139,92,246,0.1); border: 1px solid rgba(139,92,246,0.3); color: var(--sc-purple); border-radius: 8px; padding: 9px 18px; font-size: 0.875rem; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: background 0.2s; }
+.btn-edit:hover { background: rgba(139,92,246,0.2); color: var(--sc-purple); }
+.btn-back-int { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.6); border-radius: 8px; padding: 9px 18px; font-size: 0.875rem; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+
+/* ── FORM MODE ───────────────────────────────────────── */
+.scorecard-form { }
+.score-section { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; padding: 1.75rem; margin-bottom: 1.25rem; }
+.section-heading { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255,255,255,0.4); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 6px; }
+.slider-row { display: flex; align-items: center; gap: 16px; margin-bottom: 1.25rem; flex-wrap: wrap; }
+.slider-label { font-size: 0.82rem; color: rgba(255,255,255,0.7); min-width: 180px; }
+.slider-label strong { display: block; font-weight: 600; }
+.slider-label small { color: rgba(255,255,255,0.35); font-size: 0.72rem; }
+.star-input { display: flex; gap: 6px; flex-direction: row-reverse; }
+.star-input input { display: none; }
+.star-input label { font-size: 1.8rem; cursor: pointer; color: rgba(255,255,255,0.12); transition: color 0.15s, transform 0.1s; }
+.star-input label:hover, .star-input label:hover ~ label, .star-input input:checked ~ label { color: var(--sc-gold); }
+.star-input label:hover { transform: scale(1.15); }
+.score-display { font-size: 0.72rem; color: rgba(255,255,255,0.3); min-width: 30px; }
+
+.text-section { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; padding: 1.75rem; margin-bottom: 1.25rem; }
+.form-group-sc { margin-bottom: 1.25rem; }
+.form-group-sc:last-child { margin-bottom: 0; }
+.form-group-sc label { display: block; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255,255,255,0.4); margin-bottom: 7px; }
+.form-group-sc textarea { width: 100%; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 9px; padding: 11px 14px; color: #fff; font-size: 0.875rem; outline: none; font-family: inherit; transition: border-color 0.2s; box-sizing: border-box; }
+.form-group-sc textarea:focus { border-color: var(--sc-purple); }
+
+.recommendation-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+@media (max-width: 560px) { .recommendation-grid { grid-template-columns: repeat(2, 1fr); } }
+.reco-option { border-radius: 8px; padding: 10px 8px; text-align: center; cursor: pointer; border: 2px solid rgba(255,255,255,0.07); background: rgba(255,255,255,0.02); transition: all 0.2s; }
+.reco-option:hover { border-color: rgba(255,255,255,0.2); }
+.reco-option.selected-reco { border-color: var(--sc-purple); background: rgba(139,92,246,0.15); }
+.reco-option span { font-size: 0.72rem; font-weight: 600; display: block; }
+.reco-option i { font-size: 1.2rem; display: block; margin-bottom: 4px; }
+.reco-hidden { /* hidden input */ }
+.btn-submit-sc { background: linear-gradient(135deg, var(--sc-purple), #7c3aed); color: #fff; border: none; border-radius: 10px; padding: 13px 28px; font-size: 0.9rem; font-weight: 700; cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 8px; transition: opacity 0.2s, transform 0.2s; }
+.btn-submit-sc:hover { opacity: 0.9; transform: translateY(-1px); }
+</style>
+
+<div class="sc-page">
+    <a href="{% url 'interview-detail' interview.id %}" class="back-link"><i class="bx bx-arrow-back"></i> Back to Interview</a>
+
+    {% if messages %}
+    <div class="messages-area">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Interview Header -->
+    <div class="sc-header">
+        <div class="sc-label">INTERVIEW SCORECARD</div>
+        <div class="sc-title">{{ interview.candidate.full_name }} — {{ interview.job.title }}</div>
+        <div class="sc-meta">
+            <span class="sc-meta-item"><i class="bx bx-calendar"></i> {{ interview.date_time|date:"M d, Y · H:i" }}</span>
+            <span class="sc-meta-item"><i class="bx bx-user"></i> {{ interview.interviewer }}</span>
+            <span class="sc-meta-item"><i class="bx bx-video"></i> {{ interview.get_type_display }}</span>
+            <span class="sc-meta-item" style="color:{% if interview.status == 'completed' %}#6ee7b7{% else %}#fcd34d{% endif %}">
+                <i class="bx bx-radio-circle"></i> {{ interview.get_status_display }}
+            </span>
+        </div>
+    </div>
+
+    {% if scorecard and page_title == 'Scorecard Results' %}
+    <!-- ──── VIEW MODE ──────────────────────────────────────────────── -->
+    <div class="scorecard-view">
+        <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:2rem;margin-bottom:1.25rem">
+            <div style="text-align:center;margin-bottom:2rem">
+                <div class="avg-badge">
+                    <div class="avg-num">{{ scorecard.average_score }}</div>
+                    <div class="avg-label">/ 5.0</div>
+                </div>
+                <div style="font-size:0.8rem;color:rgba(255,255,255,0.4)">Average Score by {{ scorecard.interviewer.get_full_name|default:scorecard.interviewer.username }}</div>
+                <div>
+                    <span class="reco-badge reco-{{ scorecard.recommendation }}">
+                        {% if scorecard.recommendation == 'strong_yes' %}<i class="bx bx-star"></i> Strong Yes
+                        {% elif scorecard.recommendation == 'yes' %}<i class="bx bx-thumbs-up"></i> Yes
+                        {% elif scorecard.recommendation == 'maybe' %}<i class="bx bx-question-mark"></i> Maybe
+                        {% elif scorecard.recommendation == 'no' %}<i class="bx bx-thumbs-down"></i> No
+                        {% else %}<i class="bx bx-x-circle"></i> Strong No
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+
+            <div class="scores-grid">
+                {% for field_name, label, score in score_fields %}
+                <div class="score-item">
+                    <div class="score-name">{{ label }}</div>
+                    <div class="star-row">
+                        {% for i in "12345" %}<span class="star {% if forloop.counter <= score %}filled{% else %}empty{% endif %}">★</span>{% endfor %}
+                    </div>
+                    <div class="score-num">{{ score }} / 5</div>
+                </div>
+                {% endfor %}
+                <!-- Render directly when context doesn't have score_fields -->
+                {% if not score_fields %}
+                {% with s=scorecard %}
+                <div class="score-item"><div class="score-name">Technical</div><div class="star-row">{% for i in "12345" %}<span class="star {% if forloop.counter <= s.technical_score %}filled{% else %}empty{% endif %}">★</span>{% endfor %}</div><div class="score-num">{{ s.technical_score }}/5</div></div>
+                <div class="score-item"><div class="score-name">Communication</div><div class="star-row">{% for i in "12345" %}<span class="star {% if forloop.counter <= s.communication_score %}filled{% else %}empty{% endif %}">★</span>{% endfor %}</div><div class="score-num">{{ s.communication_score }}/5</div></div>
+                <div class="score-item"><div class="score-name">Culture Fit</div><div class="star-row">{% for i in "12345" %}<span class="star {% if forloop.counter <= s.culture_fit_score %}filled{% else %}empty{% endif %}">★</span>{% endfor %}</div><div class="score-num">{{ s.culture_fit_score }}/5</div></div>
+                <div class="score-item"><div class="score-name">Problem Solving</div><div class="star-row">{% for i in "12345" %}<span class="star {% if forloop.counter <= s.problem_solving_score %}filled{% else %}empty{% endif %}">★</span>{% endfor %}</div><div class="score-num">{{ s.problem_solving_score }}/5</div></div>
+                <div class="score-item" style="grid-column:span 2"><div class="score-name">Overall Rating</div><div class="star-row">{% for i in "12345" %}<span class="star {% if forloop.counter <= s.overall_rating %}filled{% else %}empty{% endif %}">★</span>{% endfor %}</div><div class="score-num">{{ s.overall_rating }}/5</div></div>
+                {% endwith %}
+                {% endif %}
+            </div>
+        </div>
+
+        {% if scorecard.strengths %}
+        <div class="note-block"><h4><i class="bx bx-trending-up" style="color:#34d399"></i> Strengths</h4><p>{{ scorecard.strengths }}</p></div>
+        {% endif %}
+        {% if scorecard.weaknesses %}
+        <div class="note-block"><h4><i class="bx bx-trending-down" style="color:#fca5a5"></i> Areas for Improvement</h4><p>{{ scorecard.weaknesses }}</p></div>
+        {% endif %}
+        {% if scorecard.notes %}
+        <div class="note-block"><h4><i class="bx bx-note"></i> Additional Notes</h4><p>{{ scorecard.notes }}</p></div>
+        {% endif %}
+
+        <div class="view-actions">
+            <a href="{% url 'scorecard-create' interview.id %}" class="btn-edit"><i class="bx bx-edit"></i> Edit Scorecard</a>
+            <a href="{% url 'interview-detail' interview.id %}" class="btn-back-int"><i class="bx bx-arrow-back"></i> Interview Details</a>
+        </div>
+    </div>
+
+    {% else %}
+    <!-- ──── FORM MODE ──────────────────────────────────────────────── -->
+    <div class="scorecard-form">
+        <form method="POST">
+            {% csrf_token %}
+            <!-- Score Sliders (star inputs) -->
+            <div class="score-section">
+                <div class="section-heading"><i class="bx bx-star" style="color:var(--sc-gold)"></i> Skill Scores</div>
+
+                {% for field_key, field_label, current_val in score_inputs %}
+                <div class="slider-row">
+                    <div class="slider-label"><strong>{{ field_label }}</strong></div>
+                    <div class="star-input" id="stars-{{ field_key }}">
+                        {% for n in "54321" %}
+                        <input type="radio" id="{{ field_key }}-{{ n }}" name="{{ field_key }}" value="{{ n }}" {% if current_val == n|add:0 %}checked{% endif %}>
+                        <label for="{{ field_key }}-{{ n }}">★</label>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+
+                <!-- Fallback if context doesn't provide score_inputs -->
+                {% if not score_inputs %}
+                {% for field_key, field_label, default_val in "technical_score,Technical Skill,3|communication_score,Communication,3|culture_fit_score,Culture Fit,3|problem_solving_score,Problem Solving,3|overall_rating,Overall Rating,3"|split:"|" %}
+                {% endfor %}
+                <!-- Direct rendering -->
+                {% for fkey, flabel in field_labels %}
+                <div class="slider-row">
+                    <div class="slider-label"><strong>{{ flabel }}</strong></div>
+                    <div class="star-input">
+                        <input type="radio" id="{{ fkey }}-5" name="{{ fkey }}" value="5"> <label for="{{ fkey }}-5">★</label>
+                        <input type="radio" id="{{ fkey }}-4" name="{{ fkey }}" value="4"> <label for="{{ fkey }}-4">★</label>
+                        <input type="radio" id="{{ fkey }}-3" name="{{ fkey }}" value="3" checked> <label for="{{ fkey }}-3">★</label>
+                        <input type="radio" id="{{ fkey }}-2" name="{{ fkey }}" value="2"> <label for="{{ fkey }}-2">★</label>
+                        <input type="radio" id="{{ fkey }}-1" name="{{ fkey }}" value="1"> <label for="{{ fkey }}-1">★</label>
+                    </div>
+                </div>
+                {% endfor %}
+                <!-- Always-present direct star inputs if context vars missing -->
+                {% if not field_labels %}
+                {% for fkey, flabel in field_list %}{% endfor %}
+                <div class="slider-row">
+                    <div class="slider-label"><strong>Technical Skill</strong></div>
+                    <div class="star-input">
+                        <input type="radio" id="ts-5" name="technical_score" value="5"><label for="ts-5">★</label>
+                        <input type="radio" id="ts-4" name="technical_score" value="4"><label for="ts-4">★</label>
+                        <input type="radio" id="ts-3" name="technical_score" value="3" {% if not scorecard %}checked{% elif scorecard.technical_score == 3 %}checked{% endif %}><label for="ts-3">★</label>
+                        <input type="radio" id="ts-2" name="technical_score" value="2" {% if scorecard and scorecard.technical_score == 2 %}checked{% endif %}><label for="ts-2">★</label>
+                        <input type="radio" id="ts-1" name="technical_score" value="1" {% if scorecard and scorecard.technical_score == 1 %}checked{% endif %}><label for="ts-1">★</label>
+                    </div>
+                </div>
+                <div class="slider-row">
+                    <div class="slider-label"><strong>Communication</strong></div>
+                    <div class="star-input">
+                        <input type="radio" id="cs-5" name="communication_score" value="5" {% if scorecard and scorecard.communication_score == 5 %}checked{% endif %}><label for="cs-5">★</label>
+                        <input type="radio" id="cs-4" name="communication_score" value="4" {% if scorecard and scorecard.communication_score == 4 %}checked{% endif %}><label for="cs-4">★</label>
+                        <input type="radio" id="cs-3" name="communication_score" value="3" {% if not scorecard %}checked{% elif scorecard.communication_score == 3 %}checked{% endif %}><label for="cs-3">★</label>
+                        <input type="radio" id="cs-2" name="communication_score" value="2" {% if scorecard and scorecard.communication_score == 2 %}checked{% endif %}><label for="cs-2">★</label>
+                        <input type="radio" id="cs-1" name="communication_score" value="1" {% if scorecard and scorecard.communication_score == 1 %}checked{% endif %}><label for="cs-1">★</label>
+                    </div>
+                </div>
+                <div class="slider-row">
+                    <div class="slider-label"><strong>Culture Fit</strong></div>
+                    <div class="star-input">
+                        <input type="radio" id="cf-5" name="culture_fit_score" value="5" {% if scorecard and scorecard.culture_fit_score == 5 %}checked{% endif %}><label for="cf-5">★</label>
+                        <input type="radio" id="cf-4" name="culture_fit_score" value="4" {% if scorecard and scorecard.culture_fit_score == 4 %}checked{% endif %}><label for="cf-4">★</label>
+                        <input type="radio" id="cf-3" name="culture_fit_score" value="3" {% if not scorecard %}checked{% elif scorecard.culture_fit_score == 3 %}checked{% endif %}><label for="cf-3">★</label>
+                        <input type="radio" id="cf-2" name="culture_fit_score" value="2" {% if scorecard and scorecard.culture_fit_score == 2 %}checked{% endif %}><label for="cf-2">★</label>
+                        <input type="radio" id="cf-1" name="culture_fit_score" value="1" {% if scorecard and scorecard.culture_fit_score == 1 %}checked{% endif %}><label for="cf-1">★</label>
+                    </div>
+                </div>
+                <div class="slider-row">
+                    <div class="slider-label"><strong>Problem Solving</strong></div>
+                    <div class="star-input">
+                        <input type="radio" id="ps-5" name="problem_solving_score" value="5" {% if scorecard and scorecard.problem_solving_score == 5 %}checked{% endif %}><label for="ps-5">★</label>
+                        <input type="radio" id="ps-4" name="problem_solving_score" value="4" {% if scorecard and scorecard.problem_solving_score == 4 %}checked{% endif %}><label for="ps-4">★</label>
+                        <input type="radio" id="ps-3" name="problem_solving_score" value="3" {% if not scorecard %}checked{% elif scorecard.problem_solving_score == 3 %}checked{% endif %}><label for="ps-3">★</label>
+                        <input type="radio" id="ps-2" name="problem_solving_score" value="2" {% if scorecard and scorecard.problem_solving_score == 2 %}checked{% endif %}><label for="ps-2">★</label>
+                        <input type="radio" id="ps-1" name="problem_solving_score" value="1" {% if scorecard and scorecard.problem_solving_score == 1 %}checked{% endif %}><label for="ps-1">★</label>
+                    </div>
+                </div>
+                <div class="slider-row" style="margin-top:1rem;padding-top:1rem;border-top:1px solid rgba(255,255,255,0.06)">
+                    <div class="slider-label"><strong>Overall Rating</strong><small>Holistic assessment</small></div>
+                    <div class="star-input">
+                        <input type="radio" id="or-5" name="overall_rating" value="5" {% if scorecard and scorecard.overall_rating == 5 %}checked{% endif %}><label for="or-5">★</label>
+                        <input type="radio" id="or-4" name="overall_rating" value="4" {% if scorecard and scorecard.overall_rating == 4 %}checked{% endif %}><label for="or-4">★</label>
+                        <input type="radio" id="or-3" name="overall_rating" value="3" {% if not scorecard %}checked{% elif scorecard.overall_rating == 3 %}checked{% endif %}><label for="or-3">★</label>
+                        <input type="radio" id="or-2" name="overall_rating" value="2" {% if scorecard and scorecard.overall_rating == 2 %}checked{% endif %}><label for="or-2">★</label>
+                        <input type="radio" id="or-1" name="overall_rating" value="1" {% if scorecard and scorecard.overall_rating == 1 %}checked{% endif %}><label for="or-1">★</label>
+                    </div>
+                </div>
+                {% endif %}
+                {% endif %}
+            </div>
+
+            <!-- Recommendation -->
+            <div class="score-section">
+                <div class="section-heading"><i class="bx bx-like"></i> Hiring Recommendation</div>
+                <input type="hidden" name="recommendation" id="recoInput" value="{% if scorecard %}{{ scorecard.recommendation }}{% else %}maybe{% endif %}">
+                <div class="recommendation-grid">
+                    <div class="reco-option {% if scorecard and scorecard.recommendation == 'strong_yes' %}selected-reco{% elif not scorecard and 'maybe' == 'strong_yes' %}selected-reco{% endif %}" onclick="pickReco('strong_yes',this)">
+                        <i class="bx bx-star" style="color:#34d399"></i><span style="color:#34d399">Strong Yes</span>
+                    </div>
+                    <div class="reco-option {% if scorecard and scorecard.recommendation == 'yes' %}selected-reco{% endif %}" onclick="pickReco('yes',this)">
+                        <i class="bx bx-thumbs-up" style="color:#6ee7b7"></i><span style="color:#6ee7b7">Yes</span>
+                    </div>
+                    <div class="reco-option {% if not scorecard %}selected-reco{% elif scorecard.recommendation == 'maybe' %}selected-reco{% endif %}" onclick="pickReco('maybe',this)">
+                        <i class="bx bx-question-mark" style="color:#fcd34d"></i><span style="color:#fcd34d">Maybe</span>
+                    </div>
+                    <div class="reco-option {% if scorecard and scorecard.recommendation == 'no' %}selected-reco{% endif %}" onclick="pickReco('no',this)">
+                        <i class="bx bx-thumbs-down" style="color:#fca5a5"></i><span style="color:#fca5a5">No</span>
+                    </div>
+                    <div class="reco-option {% if scorecard and scorecard.recommendation == 'strong_no' %}selected-reco{% endif %}" onclick="pickReco('strong_no',this)">
+                        <i class="bx bx-x-circle" style="color:#f87171"></i><span style="color:#f87171">Strong No</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Qualitative Notes -->
+            <div class="text-section">
+                <div class="section-heading"><i class="bx bx-notepad"></i> Qualitative Feedback</div>
+                <div class="form-group-sc">
+                    <label><i class="bx bx-trending-up" style="color:#34d399"></i> Candidate Strengths</label>
+                    <textarea name="strengths" rows="3" placeholder="What did this candidate do particularly well?">{{ scorecard.strengths|default:'' }}</textarea>
+                </div>
+                <div class="form-group-sc">
+                    <label><i class="bx bx-trending-down" style="color:#fca5a5"></i> Areas for Improvement</label>
+                    <textarea name="weaknesses" rows="3" placeholder="What skills or competencies need development?">{{ scorecard.weaknesses|default:'' }}</textarea>
+                </div>
+                <div class="form-group-sc">
+                    <label><i class="bx bx-note"></i> Additional Notes</label>
+                    <textarea name="notes" rows="3" placeholder="Any other observations, red flags, or context...">{{ scorecard.notes|default:'' }}</textarea>
+                </div>
+            </div>
+
+            <div style="display:flex;justify-content:flex-end;gap:10px">
+                <a href="{% url 'interview-detail' interview.id %}" class="btn-back-int">Cancel</a>
+                <button type="submit" class="btn-submit-sc"><i class="bx bx-check-double"></i> {% if scorecard %}Update{% else %}Submit{% endif %} Scorecard</button>
+            </div>
+        </form>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function pickReco(val, el) {
+    document.querySelectorAll('.reco-option').forEach(o => o.classList.remove('selected-reco'));
+    el.classList.add('selected-reco');
+    document.getElementById('recoInput').value = val;
+}
+</script>
+{% endblock %}

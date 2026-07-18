@@ -1,0 +1,48 @@
+{% extends 'tracking_app/base.html' %}
+{% block content %}
+<div class="container-fluid py-4" style="max-width: 1400px;">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="text-white mb-1"><i class="bx bx-calendar-event text-warning me-2"></i>Change Management</h2>
+            <p class="text-muted small mb-0">Schedule and approve infrastructure modifications</p>
+        </div>
+        <button class="btn btn-warning" style="border-radius: 8px;"><i class="bx bx-plus me-1"></i>New Change Request</button>
+    </div>
+
+    <div class="card shadow-sm" style="background: var(--apple-card-bg); border: 1px solid var(--apple-border); border-radius: 12px; overflow: hidden;">
+        <table class="table table-borderless table-hover mb-0" style="color: var(--apple-text);">
+            <thead style="background: rgba(255,255,255,0.05); border-bottom: 1px solid var(--apple-border);">
+                <tr>
+                    <th class="ps-4">Change Request</th>
+                    <th>Risk Level</th>
+                    <th>Status</th>
+                    <th>CAB Approval</th>
+                    <th>Requested By</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for change in changes %}
+                <tr style="border-bottom: 1px solid var(--apple-border-subtle); cursor: pointer;">
+                    <td class="ps-4">
+                        <div class="fw-bold">{{ change.title|truncatechars:40 }}</div>
+                        <small class="text-muted">#CHG-{{ change.id }}</small>
+                    </td>
+                    <td>
+                        {% if change.risk_level == 'high' %}<span class="badge bg-danger">High Risk</span>
+                        {% elif change.risk_level == 'medium' %}<span class="badge bg-warning text-dark">Medium Risk</span>
+                        {% else %}<span class="badge bg-success">Low Risk</span>{% endif %}
+                    </td>
+                    <td><span class="badge bg-secondary">{{ change.get_status_display }}</span></td>
+                    <td>
+                        <span class="text-muted"><i class="bx bx-group"></i> {{ change.cab_votes.count }} Votes</span>
+                    </td>
+                    <td>{{ change.requested_by.get_full_name|default:change.requested_by.username }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5" class="text-center py-4 text-muted">No change requests currently scheduled.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

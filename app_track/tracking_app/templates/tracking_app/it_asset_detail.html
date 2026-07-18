@@ -1,0 +1,92 @@
+{% extends 'tracking_app/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="content-container">
+    <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom: 2rem;">
+        <div>
+            <h1 class="page-title"><i class="bx bx-laptop" style="color:var(--it-blue)"></i> Asset: {{ asset.asset_tag }}</h1>
+            <p style="color: rgba(255,255,255,0.5); font-size: 0.9rem;">{{ asset.name }}</p>
+        </div>
+        <a href="{% url 'it-helpdesk-list' %}" class="btn-primary" style="background: rgba(255,255,255,0.1); color: #fff;"><i class="bx bx-arrow-back"></i> Back to Helpdesk</a>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 2rem;">
+        
+        <!-- Asset Metadata -->
+        <div class="card" style="border-top: 3px solid #6366f1;">
+            <div class="card-title">Configuration Item Details</div>
+            
+            <div class="info-row">
+                <span class="info-label">Tag / ID</span>
+                <span class="info-value" style="font-family: monospace;">{{ asset.asset_tag }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Type</span>
+                <span class="info-value">{{ asset.get_asset_type_display }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Status</span>
+                <span class="info-value">
+                    {% if asset.status == 'active' %}
+                        <span style="color:#10b981"><i class="bx bx-check-circle"></i> Active</span>
+                    {% elif asset.status == 'in_repair' %}
+                        <span style="color:#f59e0b"><i class="bx bx-wrench"></i> In Repair</span>
+                    {% else %}
+                        <span style="color:#ef4444"><i class="bx bx-x-circle"></i> {{ asset.get_status_display }}</span>
+                    {% endif %}
+                </span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Owner</span>
+                <span class="info-value">
+                    {% if asset.owner %}
+                        {{ asset.owner.get_full_name|default:asset.owner.username }}
+                    {% else %}
+                        <span style="color:rgba(255,255,255,0.3)">Unassigned</span>
+                    {% endif %}
+                </span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Purchased</span>
+                <span class="info-value">{{ asset.purchase_date|date:"M d, Y"|default:"N/A" }}</span>
+            </div>
+        </div>
+
+        <!-- Ticket History -->
+        <div class="card">
+            <div class="card-title">Ticket History ({{ tickets|length }})</div>
+            
+            {% if tickets %}
+                <table style="width:100%; border-collapse:collapse; font-size:0.85rem;">
+                    <thead>
+                        <tr style="border-bottom: 1px solid var(--apple-border-subtle); color: var(--apple-text-muted); text-align: left;">
+                            <th style="padding: 10px;">ID</th>
+                            <th style="padding: 10px;">Status</th>
+                            <th style="padding: 10px;">Title</th>
+                            <th style="padding: 10px;">Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for t in tickets %}
+                        <tr style="border-bottom: 1px solid var(--apple-border-subtle);">
+                            <td style="padding: 10px;"><a href="{% url 'it-ticket-detail' t.id %}" style="color: #6366f1;">#{{ t.id }}</a></td>
+                            <td style="padding: 10px;">
+                                <span style="font-size:0.7rem; padding: 2px 6px; border-radius:4px; border:1px solid rgba(255,255,255,0.1);">{{ t.get_status_display }}</span>
+                            </td>
+                            <td style="padding: 10px;">{{ t.title|truncatechars:40 }}</td>
+                            <td style="padding: 10px; color:rgba(255,255,255,0.4)">{{ t.created_at|date:"M d, Y" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <div style="text-align:center; padding: 2rem; color: rgba(255,255,255,0.3);">
+                    <i class="bx bx-check-shield" style="font-size:2rem; margin-bottom:10px;"></i>
+                    <p>No issues reported for this asset.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

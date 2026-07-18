@@ -1,0 +1,529 @@
+{% extends 'tracking_app/base.html' %}
+{% block title %}IT Helpdesk | Transform.io{% endblock %}
+
+{% block content %}
+<style>
+:root {
+    --it-blue: #00a6fb;
+    --it-blue-glow: rgba(0,166,251,0.18);
+    --col-open: #ef4444;
+    --col-inprog: #f59e0b;
+    --col-hold: #0ea5e9;
+    --col-resolved: #10b981;
+    --p1: #ef4444; --p2: #f59e0b; --p3: #00E5FF; --p4: #6b7280;
+}
+.it-page { padding: 2rem; max-width: 1600px; margin: 0 auto; }
+.it-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem; }
+.it-title { font-size: 1.6rem; font-weight: 800; color: var(--apple-text); letter-spacing: -0.02em; }
+.it-title span { color: var(--it-blue); }
+.it-stats { display: flex; gap: 1rem; flex-wrap: wrap; }
+.stat-pill { background: var(--apple-card-bg); border: 1px solid var(--apple-border); border-radius: 24px; padding: 6px 16px; font-size: 0.8rem; color: var(--apple-text-secondary); display: flex; align-items: center; gap: 6px; }
+.stat-pill strong { color: var(--apple-text); }
+.btn-new-ticket { background: linear-gradient(135deg, var(--it-blue), #0077cc); color: #fff; border: none; border-radius: 10px; padding: 10px 20px; font-size: 0.875rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; text-decoration: none; transition: opacity 0.2s, transform 0.2s; }
+.btn-new-ticket:hover { opacity: 0.9; transform: translateY(-1px); color: #fff; }
+
+/* Modal */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+.modal-overlay.active { display: flex; }
+.modal-box { background: var(--apple-card-bg); border: 1px solid var(--apple-border); border-radius: 18px; padding: 2rem; width: 540px; max-width: 95vw; max-height: 90vh; overflow-y: auto; box-shadow: var(--apple-shadow); }
+.modal-box h3 { font-size: 1.2rem; font-weight: 700; color: var(--apple-text); margin-bottom: 1.5rem; }
+.form-group { margin-bottom: 1rem; }
+.form-group label { display: block; font-size: 0.8rem; color: var(--apple-text-secondary); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+.form-group input, .form-group textarea, .form-group select { width: 100%; background: var(--apple-input-bg); border: 1px solid var(--apple-border); border-radius: 8px; padding: 10px 14px; color: var(--apple-text); font-size: 0.875rem; outline: none; transition: border-color 0.2s; font-family: inherit; }
+.form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: var(--it-blue); }
+.form-group select option { background: var(--apple-card-bg); color: var(--apple-text); }
+.modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 1.5rem; }
+.btn-cancel { background: var(--apple-card-bg); color: var(--apple-text-secondary); border: 1px solid var(--apple-border); border-radius: 8px; padding: 8px 18px; cursor: pointer; font-family: inherit; }
+.btn-cancel:hover { background: var(--apple-card-bg-hover); color: var(--apple-text); }
+.btn-submit { background: linear-gradient(135deg, var(--it-blue), #0077cc); color: #fff; border: none; border-radius: 8px; padding: 8px 18px; cursor: pointer; font-weight: 600; font-family: inherit; }
+
+/* Kanban board */
+.kanban-board { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1.25rem; }
+@media (max-width: 1400px) { .kanban-board { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 900px) { .kanban-board { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 640px) { .kanban-board { grid-template-columns: 1fr; } }
+
+.kanban-col { background: var(--apple-card-bg); border: 1px solid var(--apple-border); border-radius: 14px; padding: 1rem; }
+.col-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--apple-border-subtle); color: var(--apple-text); }
+.col-title { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; display: flex; align-items: center; gap: 8px; color: var(--apple-text); }
+.col-dot { width: 8px; height: 8px; border-radius: 50%; }
+.dot-open { background: var(--col-open); box-shadow: 0 0 8px var(--col-open); }
+.dot-inprog { background: var(--col-inprog); box-shadow: 0 0 8px var(--col-inprog); }
+.dot-hold { background: var(--col-hold); box-shadow: 0 0 8px var(--col-hold); }
+.dot-resolved { background: var(--col-resolved); box-shadow: 0 0 8px var(--col-resolved); }
+.col-count { font-size: 0.75rem; background: var(--apple-bg); border-radius: 20px; padding: 2px 8px; color: var(--apple-text-secondary); border: 1px solid var(--apple-border); }
+
+.ticket-card { background: var(--apple-bg); border: 1px solid var(--apple-border); border-radius: 10px; padding: 14px; margin-bottom: 10px; cursor: pointer; transition: transform 0.15s, border-color 0.15s, background 0.15s; text-decoration: none; display: block; color: var(--apple-text); }
+.ticket-card:hover { transform: translateY(-2px); background: var(--apple-card-bg-hover); border-color: var(--apple-accent-glow); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+.ticket-priority { display: inline-flex; align-items: center; gap: 5px; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; border-radius: 4px; padding: 2px 8px; margin-bottom: 8px; }
+.pri-p1 { background: rgba(239,68,68,0.15); color: var(--p1); border: 1px solid rgba(239,68,68,0.3); }
+.pri-p2 { background: rgba(245,158,11,0.15); color: var(--p2); border: 1px solid rgba(245,158,11,0.3); }
+.pri-p3 { background: rgba(0,229,255,0.1); color: var(--p3); border: 1px solid rgba(0,229,255,0.25); }
+.pri-p4 { background: rgba(107,114,128,0.15); color: var(--p4); border: 1px solid rgba(107,114,128,0.3); }
+.ticket-title { font-size: 0.875rem; font-weight: 600; color: #fff; line-height: 1.4; margin-bottom: 8px; }
+.ticket-meta { font-size: 0.72rem; color: rgba(255,255,255,0.45); display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.ticket-cat { background: rgba(0,166,251,0.1); color: var(--it-blue); border-radius: 4px; padding: 2px 6px; font-size: 0.68rem; }
+.empty-col { text-align: center; padding: 2rem 1rem; color: var(--apple-text-muted); font-size: 0.8rem; }
+.empty-col i { font-size: 1.5rem; display: block; margin-bottom: 6px; }
+.messages-area { margin-bottom: 1.5rem; }
+.alert { border-radius: 10px; padding: 12px 16px; font-size: 0.875rem; margin-bottom: 8px; }
+.alert-success { background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); color: #6ee7b7; }
+.alert-error { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #fca5a5; }
+.ticket-title { font-size: 0.9rem; font-weight: 600; color: var(--apple-text); margin-bottom: 8px; line-height: 1.4; }
+.ticket-meta { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; font-size: 0.75rem; }
+.ticket-cat { color: var(--apple-text-muted); background: var(--apple-card-bg); padding: 2px 8px; border-radius: 10px; border: 1px solid var(--apple-border); }
+.ticket-footer { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--apple-border-subtle); padding-top: 10px; }
+.ticket-footer-stat { font-size:0.68rem; color: var(--apple-text-secondary); display:flex; align-items:center; gap:4px; }
+.ticket-footer-stat i { font-size:0.8rem; }
+.filter-bar { display:flex; gap:8px; flex-wrap:wrap; align-items:center; background: var(--apple-card-bg); border: 1px solid var(--apple-border); border-radius:12px; padding:10px 14px; margin-bottom:1.5rem; }
+.filter-label { font-size:0.72rem; color: var(--apple-text-muted); text-transform:uppercase; letter-spacing:0.06em; margin-right:4px; }
+.filter-btn { background: var(--apple-bg); border: 1px solid var(--apple-border); border-radius:6px; padding:5px 12px; font-size:0.75rem; color: var(--apple-text-secondary); cursor:pointer; font-family:inherit; transition:all 0.2s; }
+.filter-btn:hover, .filter-btn.active { background: rgba(0,166,251,0.1); border-color: rgba(0,166,251,0.3); color: var(--it-blue); }
+.filter-btn.f-p1:hover, .filter-btn.f-p1.active { background:rgba(239,68,68,0.1); border-color:rgba(239,68,68,0.3); color:#ef4444; }
+.filter-btn.f-p2:hover, .filter-btn.f-p2.active { background:rgba(245,158,11,0.15); border-color:rgba(245,158,11,0.4); color:#f59e0b; }
+</style>
+
+<div class="it-page">
+    <!-- Header -->
+    <div class="it-header">
+        <div>
+            <div class="it-title"><i class="bx bx-support" style="color:var(--it-blue)"></i> IT <span>Helpdesk</span></div>
+            <div style="font-size:0.8rem;color:var(--apple-text-muted);margin-top:4px;font-family:'Fira Code',monospace">// TICKET_MANAGEMENT_SYSTEM · LIVE</div>
+        </div>
+        <div class="it-stats">
+            <div class="stat-pill"><i class="bx bx-loader-circle" style="color:#f59e0b"></i> Active: <strong>{{ total_open }}</strong></div>
+            <div class="stat-pill"><i class="bx bx-check-circle" style="color:#10b981"></i> Resolved: <strong>{{ total_resolved }}</strong></div>
+            <div class="stat-pill"><i class="bx bx-timer" style="color:#0ea5e9"></i> MTTR: <strong>{{ mttr_hours }}h</strong></div>
+            <div class="stat-pill"><i class="bx bx-shield-check" style="color:#00E5FF"></i> SLA Met: <strong>{{ sla_compliance_rate }}%</strong></div>
+            <div class="stat-pill" id="live-clock"><i class="bx bx-time" style="color:var(--apple-text-secondary)"></i> <strong id="clock-val">--:--:--</strong></div>
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <div style="background: var(--apple-card-bg); border: 1px solid var(--apple-border); border-radius: 10px; display: flex; overflow: hidden; padding: 2px;">
+                <button onclick="toggleView('kanban')" id="btnKanban" style="background: rgba(0,166,251,0.1); color: var(--it-blue); border: none; padding: 8px 12px; font-size: 0.8rem; cursor: pointer; border-radius: 8px; font-weight: 600;"><i class="bx bx-category"></i></button>
+                <button onclick="toggleView('list')" id="btnList" style="background: transparent; color: var(--apple-text-secondary); border: none; padding: 8px 12px; font-size: 0.8rem; cursor: pointer; border-radius: 8px; font-weight: 600;"><i class="bx bx-list-ul"></i></button>
+            </div>
+            <button class="btn-new-ticket" onclick="document.getElementById('newTicketModal').classList.add('active')">
+                <i class="bx bx-plus"></i> New Ticket
+            </button>
+        </div>
+    </div>
+
+    <!-- ITSM Modules Nav -->
+    <div class="mb-4" style="background: var(--apple-card-bg); border: 1px solid var(--apple-border); border-radius: 12px; padding: 10px; display: flex; gap: 10px; overflow-x: auto;">
+        <a href="{% url 'it-helpdesk-list' %}" class="btn btn-sm btn-primary"><i class="bx bx-support"></i> Incidents</a>
+        <a href="{% url 'it-problem-list' %}" class="btn btn-sm" style="color: var(--apple-text-secondary);"><i class="bx bx-error-alt"></i> Problems</a>
+        <a href="{% url 'it-change-list' %}" class="btn btn-sm" style="color: var(--apple-text-secondary);"><i class="bx bx-calendar-event"></i> Changes</a>
+        <a href="{% url 'it-service-catalog' %}" class="btn btn-sm" style="color: var(--apple-text-secondary);"><i class="bx bx-store"></i> Service Catalog</a>
+        <a href="{% url 'it-asset-list' %}" class="btn btn-sm" style="color: var(--apple-text-secondary);"><i class="bx bx-laptop"></i> Assets & Vendors</a>
+        <a href="{% url 'kb-article-list' %}" class="btn btn-sm" style="color: var(--apple-text-secondary);"><i class="bx bx-book"></i> Knowledge Base</a>
+        <a href="{% url 'it-status-page' %}" class="btn btn-sm" style="color: var(--apple-text-secondary);"><i class="bx bx-check-shield"></i> Status Page</a>
+    </div>
+
+    <!-- Analytics Strip -->
+    <div style="display:grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
+        <div style="background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 12px; padding: 1rem; text-align:center;">
+            <div style="font-size: 1.8rem; font-weight: 800; color: #ef4444;">{{ columns.open|length }}</div>
+            <div style="font-size: 0.7rem; color: var(--apple-text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 4px;"><i class="bx bx-error-circle"></i> Open</div>
+        </div>
+        <div style="background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2); border-radius: 12px; padding: 1rem; text-align:center;">
+            <div style="font-size: 1.8rem; font-weight: 800; color: #f59e0b;">{{ columns.in_progress|length }}</div>
+            <div style="font-size: 0.7rem; color: var(--apple-text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 4px;"><i class="bx bx-loader-circle"></i> In Progress</div>
+        </div>
+        <div style="background: rgba(14,165,233,0.08); border: 1px solid rgba(14,165,233,0.2); border-radius: 12px; padding: 1rem; text-align:center;">
+            <div style="font-size: 1.8rem; font-weight: 800; color: #0ea5e9;">{{ columns.on_hold|length }}</div>
+            <div style="font-size: 0.7rem; color: var(--apple-text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 4px;"><i class="bx bx-pause-circle"></i> On Hold</div>
+        </div>
+        <div style="background: rgba(100,116,139,0.08); border: 1px solid rgba(100,116,139,0.2); border-radius: 12px; padding: 1rem; text-align:center;">
+            <div style="font-size: 1.8rem; font-weight: 800; color: #64748b;">{{ columns.pending_user|length }}</div>
+            <div style="font-size: 0.7rem; color: var(--apple-text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 4px;"><i class="bx bx-user-voice"></i> Pending</div>
+        </div>
+        <div style="background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.2); border-radius: 12px; padding: 1rem; text-align:center;">
+            <div style="font-size: 1.8rem; font-weight: 800; color: #10b981;">{{ columns.resolved|length }}</div>
+            <div style="font-size: 0.7rem; color: var(--apple-text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 4px;"><i class="bx bx-check-double"></i> Resolved</div>
+        </div>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+        <span class="filter-label"><i class="bx bx-filter-alt"></i> Filter:</span>
+        <button class="filter-btn active" onclick="filterTickets('all', this)">All</button>
+        <button class="filter-btn f-p1" onclick="filterTickets('p1', this)"><i class="bx bx-error"></i> P1 Critical</button>
+        <button class="filter-btn f-p2" onclick="filterTickets('p2', this)"><i class="bx bx-error-circle"></i> P2 High</button>
+        <button class="filter-btn" onclick="filterTickets('my', this)"><i class="bx bx-user"></i> Mine</button>
+        {% if not user.is_it_enduser %}<button class="filter-btn" onclick="filterTickets('sla', this)"><i class="bx bx-time-five"></i> SLA Breached <span class="badge" style="background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid rgba(239,68,68,0.5); border-radius: 10px; padding: 2px 6px; font-size: 0.75rem; margin-left: 4px;">{{ breached_count }}</span></button>{% endif %}
+        <button class="filter-btn" onclick="filterTickets('unassigned', this)"><i class="bx bx-user-x"></i> Unassigned</button>
+    </div>
+
+    <!-- Messages -->
+    {% if messages %}
+    <div class="messages-area">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Kanban Board -->
+    <div class="kanban-board">
+        <!-- OPEN -->
+        <div class="kanban-col">
+            <div class="col-header">
+                <div class="col-title"><span class="col-dot dot-open"></span><span style="color:var(--col-open)">Open</span></div>
+                <span class="col-count">{{ columns.open|length }}</span>
+            </div>
+            {% for ticket in columns.open %}
+            <a href="{% url 'it-ticket-detail' ticket.id %}" class="ticket-card" data-priority="{{ ticket.priority }}" data-owner="{{ ticket.submitted_by.username }}" data-assigned="{% if ticket.assigned_to %}{{ ticket.assigned_to.username }}{% endif %}" data-sla="{% if ticket.sla_status == 'breached' %}1{% else %}0{% endif %}">
+                <div class="ticket-priority pri-{{ ticket.priority }}">
+                    <i class="bx bx-flag"></i>{{ ticket.get_priority_display }}
+                </div>
+                <div class="ticket-title">{{ ticket.title|truncatechars:70 }}</div>
+                <div class="ticket-meta">
+                    <span class="ticket-cat">{{ ticket.get_category_display }}</span>
+                    <span>·</span>
+                    <span>{{ ticket.submitted_by.get_full_name|default:ticket.submitted_by.username }}</span>
+                    {% if ticket.sla_status == 'breached' %}<span class="sla-breach"><i class="bx bx-time-five bx-tada"></i> SLA Breached</span>
+                    {% elif ticket.sla_status == 'at_risk' %}<span class="sla-warning" style="color: #f59e0b; font-size: 0.65rem; font-weight: 600; text-transform: uppercase; background: rgba(245,158,11,0.1); padding: 2px 6px; border-radius: 4px;"><i class="bx bx-error"></i> At Risk</span>
+                    {% else %}<span style="color:#10b981; font-size:0.65rem;"><i class="bx bx-check-shield"></i> SLA OK</span>{% endif %}
+                </div>
+                <div class="ticket-footer">
+                    <span class="ticket-footer-stat"><i class="bx bx-chat"></i>{{ ticket.get_comment_count }}</span>
+                    {% if ticket.attachment %}<span class="ticket-footer-stat"><i class="bx bx-paperclip"></i></span>{% endif %}
+                    <span class="ticket-footer-stat">{{ ticket.created_at|timesince }} ago</span>
+                </div>
+            </a>
+            {% empty %}<div class="empty-col"><i class="bx bx-check-circle"></i>No open tickets</div>{% endfor %}
+        </div>
+
+        <!-- IN PROGRESS -->
+        <div class="kanban-col">
+            <div class="col-header">
+                <div class="col-title"><span class="col-dot dot-inprog"></span><span style="color:var(--col-inprog)">In Progress</span></div>
+                <span class="col-count">{{ columns.in_progress|length }}</span>
+            </div>
+            {% for ticket in columns.in_progress %}
+            <a href="{% url 'it-ticket-detail' ticket.id %}" class="ticket-card" data-priority="{{ ticket.priority }}" data-owner="{{ ticket.submitted_by.username }}" data-assigned="{% if ticket.assigned_to %}{{ ticket.assigned_to.username }}{% endif %}" data-sla="{% if ticket.sla_status == 'breached' %}1{% else %}0{% endif %}">
+                <div class="ticket-priority pri-{{ ticket.priority }}">
+                    <i class="bx bx-flag"></i>{{ ticket.get_priority_display }}
+                </div>
+                <div class="ticket-title">{{ ticket.title|truncatechars:70 }}</div>
+                <div class="ticket-meta">
+                    <span class="ticket-cat">{{ ticket.get_category_display }}</span>
+                    <span>·</span>
+                    {% if ticket.assigned_to %}<span style="color:#00E5FF"><i class="bx bx-user-check"></i> {{ ticket.assigned_to.get_full_name|default:ticket.assigned_to.username }}</span>
+                    {% else %}<span style="color:#f59e0b"><i class="bx bx-user-x"></i> Unassigned</span>{% endif %}
+                    {% if ticket.sla_status == 'breached' %}<span class="sla-breach"><i class="bx bx-time-five bx-tada"></i> SLA Breached</span>
+                    {% elif ticket.sla_status == 'at_risk' %}<span class="sla-warning" style="color: #f59e0b; font-size: 0.65rem; font-weight: 600; text-transform: uppercase; background: rgba(245,158,11,0.1); padding: 2px 6px; border-radius: 4px;"><i class="bx bx-error"></i> At Risk</span>
+                    {% else %}<span style="color:#10b981; font-size:0.65rem;"><i class="bx bx-check-shield"></i> SLA OK</span>{% endif %}
+                </div>
+                <div class="ticket-footer">
+                    <span class="ticket-footer-stat"><i class="bx bx-chat"></i>{{ ticket.get_comment_count }}</span>
+                    {% if ticket.attachment %}<span class="ticket-footer-stat"><i class="bx bx-paperclip"></i></span>{% endif %}
+                    <span class="ticket-footer-stat">{{ ticket.updated_at|timesince }} ago</span>
+                </div>
+            </a>
+            {% empty %}<div class="empty-col"><i class="bx bx-time"></i>Nothing in progress</div>{% endfor %}
+        </div>
+
+        <!-- ON HOLD -->
+        <div class="kanban-col">
+            <div class="col-header">
+                <div class="col-title"><span class="col-dot dot-hold"></span><span style="color:var(--col-hold)">On Hold</span></div>
+                <span class="col-count">{{ columns.on_hold|length }}</span>
+            </div>
+            {% for ticket in columns.on_hold %}
+            <a href="{% url 'it-ticket-detail' ticket.id %}" class="ticket-card" data-priority="{{ ticket.priority }}" data-owner="{{ ticket.submitted_by.username }}" data-assigned="{% if ticket.assigned_to %}{{ ticket.assigned_to.username }}{% endif %}" data-sla="0">
+                <div class="ticket-priority pri-{{ ticket.priority }}">
+                    <i class="bx bx-flag"></i>{{ ticket.get_priority_display }}
+                </div>
+                <div class="ticket-title">{{ ticket.title|truncatechars:70 }}</div>
+                <div class="ticket-meta">
+                    <span class="ticket-cat">{{ ticket.get_category_display }}</span>
+                    <span style="color:#94a3b8"><i class="bx bx-pause-circle"></i> SLA Paused</span>
+                </div>
+                <div class="ticket-footer">
+                    <span class="ticket-footer-stat"><i class="bx bx-chat"></i>{{ ticket.get_comment_count }}</span>
+                    {% if ticket.attachment %}<span class="ticket-footer-stat"><i class="bx bx-paperclip"></i></span>{% endif %}
+                    <span class="ticket-footer-stat">{{ ticket.updated_at|timesince }} ago</span>
+                </div>
+            </a>
+            {% empty %}<div class="empty-col"><i class="bx bx-pause-circle"></i>Nothing on hold</div>{% endfor %}
+        </div>
+
+        <!-- PENDING USER -->
+        <div class="kanban-col">
+            <div class="col-header">
+                <div class="col-title"><span class="col-dot" style="background:#64748b;box-shadow:0 0 8px #64748b"></span><span style="color:#cbd5e1">Pending User</span></div>
+                <span class="col-count">{{ columns.pending_user|length }}</span>
+            </div>
+            {% for ticket in columns.pending_user %}
+            <a href="{% url 'it-ticket-detail' ticket.id %}" class="ticket-card" data-priority="{{ ticket.priority }}" data-owner="{{ ticket.submitted_by.username }}" data-assigned="{% if ticket.assigned_to %}{{ ticket.assigned_to.username }}{% endif %}" data-sla="0">
+                <div class="ticket-priority" style="background:rgba(100,116,139,0.1);color:#cbd5e1;border:1px solid rgba(100,116,139,0.3);">
+                    <i class="bx bx-question-mark"></i>{{ ticket.get_priority_display }}
+                </div>
+                <div class="ticket-title">{{ ticket.title|truncatechars:70 }}</div>
+                <div class="ticket-meta">
+                    <span class="ticket-cat">{{ ticket.get_category_display }}</span>
+                    <span style="color:#cbd5e1"><i class="bx bx-user-voice"></i> Awaiting Reply</span>
+                </div>
+                <div class="ticket-footer">
+                    <span class="ticket-footer-stat"><i class="bx bx-chat"></i>{{ ticket.get_comment_count }}</span>
+                    {% if ticket.attachment %}<span class="ticket-footer-stat"><i class="bx bx-paperclip"></i></span>{% endif %}
+                    <span class="ticket-footer-stat">{{ ticket.updated_at|timesince }} ago</span>
+                </div>
+            </a>
+            {% empty %}<div class="empty-col"><i class="bx bx-user-voice"></i>No pending replies</div>{% endfor %}
+        </div>
+
+        <!-- RESOLVED -->
+        <div class="kanban-col">
+            <div class="col-header">
+                <div class="col-title"><span class="col-dot dot-resolved"></span><span style="color:var(--col-resolved)">Resolved</span></div>
+                <span class="col-count">{{ columns.resolved|length }}</span>
+            </div>
+            {% for ticket in columns.resolved %}
+            <a href="{% url 'it-ticket-detail' ticket.id %}" class="ticket-card" style="opacity:0.7">
+                <div class="ticket-priority pri-p4">
+                    <i class="bx bx-check"></i>Resolved
+                </div>
+                <div class="ticket-title">{{ ticket.title|truncatechars:70 }}</div>
+                <div class="ticket-meta">
+                    <span class="ticket-cat">{{ ticket.get_category_display }}</span>
+                    {% if ticket.resolved_at %}<span>{{ ticket.resolved_at|timesince }} ago</span>{% endif %}
+                </div>
+            </a>
+            {% empty %}<div class="empty-col"><i class="bx bx-trophy"></i>No resolved tickets yet</div>{% endfor %}
+        </div>
+    </div>
+    
+    <!-- List View (Hidden by default) -->
+    <div class="list-board" style="display: none;">
+        <div class="card p-0" style="overflow: hidden;">
+            <table class="table table-borderless table-hover mb-0" style="color: var(--apple-text);">
+                <thead style="background: rgba(255,255,255,0.05); border-bottom: 1px solid var(--apple-border);">
+                    <tr>
+                        <th class="ps-4">Ticket</th>
+                        <th>Status</th>
+                        <th>Priority</th>
+                        <th>Requester</th>
+                        <th>Assignee</th>
+                        <th>SLA Status</th>
+                        <th>Updated</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ticket in all_tickets %}
+                    <tr style="border-bottom: 1px solid var(--apple-border-subtle); cursor: pointer;" onclick="window.location.href='{% url 'it-ticket-detail' ticket.id %}'">
+                        <td class="ps-4">
+                            <div class="fw-bold">{{ ticket.title|truncatechars:40 }}</div>
+                            <small class="text-muted">#TKT-{{ ticket.id }} • {{ ticket.get_category_display }}</small>
+                        </td>
+                        <td>
+                            <span class="badge badge-{{ ticket.status }}">{{ ticket.get_status_display }}</span>
+                        </td>
+                        <td>
+                            <div class="ticket-priority pri-{{ ticket.priority }}" style="margin: 0;">
+                                {{ ticket.get_priority_display }}
+                            </div>
+                        </td>
+                        <td>{{ ticket.submitted_by.get_full_name|default:ticket.submitted_by.username }}</td>
+                        <td>
+                            {% if ticket.assigned_to %}
+                                {{ ticket.assigned_to.get_full_name|default:ticket.assigned_to.username }}
+                            {% else %}
+                                <span class="text-muted">Unassigned</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if ticket.status == 'resolved' or ticket.status == 'closed' %}
+                                <span class="text-muted"><i class="bx bx-check"></i> Done</span>
+                            {% elif ticket.sla_status == 'breached' %}
+                                <span class="sla-breach"><i class="bx bx-time-five bx-tada"></i> Breached</span>
+                            {% elif ticket.sla_status == 'at_risk' %}
+                                <span class="sla-warning" style="color: #f59e0b; font-size: 0.7rem; font-weight: 600; text-transform: uppercase;"><i class="bx bx-error"></i> At Risk</span>
+                            {% else %}
+                                <span style="color:#10b981; font-size:0.7rem;"><i class="bx bx-check-shield"></i> OK</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-muted small">{{ ticket.updated_at|timesince }} ago</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="7" class="text-center py-4 text-muted">No tickets found.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- New Ticket Modal -->
+<div class="modal-overlay" id="newTicketModal">
+    <div class="modal-box">
+        <h3><i class="bx bx-plus-circle" style="color:var(--it-blue);margin-right:8px"></i>Submit New IT Ticket</h3>
+        <form method="POST" action="{% url 'it-ticket-create' %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="form-group full-width">
+                <label>Ticket Title *</label>
+                <input type="text" name="title" id="ticketTitle" placeholder="Brief summary of the issue" required>
+                <div id="kbSuggestions" style="display:none; margin-top: 10px; background: rgba(0,0,0,0.3); border: 1px solid var(--apple-border); border-radius: 8px; padding: 10px;">
+                    <div style="font-size: 0.75rem; color: #3b82f6; margin-bottom: 5px; font-weight: 600;"><i class="bx bx-bulb"></i> Suggested Articles</div>
+                    <ul id="kbList" style="list-style:none; padding:0; margin:0; font-size:0.85rem;"></ul>
+                </div>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                <div class="form-group">
+                    <label>Priority</label>
+                    <select name="priority">
+                        {% for val, label in priority_choices %}
+                        <option value="{{ val }}" {% if val == 'p3' %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <select name="category">
+                        {% for val, label in category_choices %}
+                        <option value="{{ val }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Description *</label>
+                <textarea name="description" rows="4" placeholder="Explain the issue in detail, steps to reproduce, error messages..." required></textarea>
+            </div>
+            <div class="form-group">
+                <label>Linked Asset (Optional)</label>
+                <select name="asset_id" style="background: rgba(0,0,0,0.2); border: 1px solid var(--apple-border); border-radius: 8px; color: #fff; padding: 10px; width: 100%;">
+                    <option value="">-- No Asset Linked --</option>
+                    {% for asset in active_assets %}
+                        <option value="{{ asset.id }}">[{{ asset.asset_tag }}] {{ asset.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Tags <span style="color:rgba(255,255,255,0.3);font-size:0.7rem">(optional, space-separated)</span></label>
+                <input type="text" name="tags" placeholder="e.g. VPN Windows Office365">
+            </div>
+            <div class="form-group">
+                <label>Attachment <span style="color:rgba(255,255,255,0.3);font-size:0.7rem">(screenshot or file, optional)</span></label>
+                <input type="file" name="attachment" style="color:rgba(255,255,255,0.6); font-size:0.8rem;">
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-cancel" onclick="document.getElementById('newTicketModal').classList.remove('active')">Cancel</button>
+                <button type="submit" class="btn-submit"><i class="bx bx-send"></i> Submit Ticket</button>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+document.getElementById('newTicketModal').addEventListener('click', function(e) {
+    if (e.target === this) this.classList.remove('active');
+});
+{% if priority_choices and not columns %}
+document.getElementById('newTicketModal').classList.add('active');
+{% endif %}
+
+function filterTickets(type, btn) {
+    // Update active state
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+
+    const cards = document.querySelectorAll('.ticket-card');
+    const currentUser = "{{ request.user.username }}";
+    cards.forEach(card => {
+        const p = card.dataset.priority;
+        const owner = card.dataset.owner;
+        const assigned = card.dataset.assigned || '';
+        const slaBreached = card.dataset.sla === '1';
+        const inner = card.innerHTML;
+        let show = true;
+        if (type === 'p1') show = p === 'p1';
+        else if (type === 'p2') show = p === 'p2';
+        else if (type === 'my') show = owner === currentUser || assigned === currentUser;
+        else if (type === 'sla') show = slaBreached;
+        else if (type === 'unassigned') show = assigned === '';
+        card.style.display = show ? 'block' : 'none';
+    });
+}
+
+function toggleView(viewType) {
+    const kanban = document.querySelector('.kanban-board');
+    const list = document.querySelector('.list-board');
+    const btnKanban = document.getElementById('btnKanban');
+    const btnList = document.getElementById('btnList');
+    
+    if (viewType === 'kanban') {
+        kanban.style.display = 'grid';
+        list.style.display = 'none';
+        btnKanban.style.background = 'rgba(0,166,251,0.1)';
+        btnKanban.style.color = 'var(--it-blue)';
+        btnList.style.background = 'transparent';
+        btnList.style.color = 'var(--apple-text-secondary)';
+    } else {
+        kanban.style.display = 'none';
+        list.style.display = 'block';
+        btnList.style.background = 'rgba(0,166,251,0.1)';
+        btnList.style.color = 'var(--it-blue)';
+        btnKanban.style.background = 'transparent';
+        btnKanban.style.color = 'var(--apple-text-secondary)';
+    }
+}
+
+// Live clock
+function updateClock() {
+    const now = new Date();
+    const h = String(now.getHours()).padStart(2,'0');
+    const m = String(now.getMinutes()).padStart(2,'0');
+    const s = String(now.getSeconds()).padStart(2,'0');
+    const el = document.getElementById('clock-val');
+    if (el) el.textContent = h + ':' + m + ':' + s;
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// Fade-in animation for cards
+document.querySelectorAll('.ticket-card').forEach((card, i) => {
+    card.style.opacity = '0';
+    card.style.transform = 'translateY(8px)';
+    card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+    setTimeout(() => {
+        card.style.opacity = '';
+        card.style.transform = '';
+    }, 50 + i * 30);
+});
+
+// KB Search API Integration
+const titleInput = document.getElementById('ticketTitle');
+const kbSuggestions = document.getElementById('kbSuggestions');
+const kbList = document.getElementById('kbList');
+let debounceTimer;
+
+if (titleInput) {
+    titleInput.addEventListener('input', function() {
+        clearTimeout(debounceTimer);
+        const query = this.value;
+        
+        if (query.length < 3) {
+            kbSuggestions.style.display = 'none';
+            return;
+        }
+        
+        debounceTimer = setTimeout(() => {
+            fetch(`{% url 'api-kb-search' %}?q=${encodeURIComponent(query)}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.articles && data.articles.length > 0) {
+                        kbList.innerHTML = '';
+                        data.articles.forEach(article => {
+                            kbList.innerHTML += `<li style="margin-bottom: 5px; padding-bottom: 5px; border-bottom: 1px solid rgba(255,255,255,0.05);"><a href="#" style="color: #0ea5e9; text-decoration: none;">${article.title}</a> <span style="color: rgba(255,255,255,0.4); font-size: 0.7rem;">- ${article.preview.substring(0, 50)}...</span></li>`;
+                        });
+                        kbSuggestions.style.display = 'block';
+                    } else {
+                        kbSuggestions.style.display = 'none';
+                    }
+                });
+        }, 500);
+    });
+}
+</script>
+{% endblock %}

@@ -1,0 +1,81 @@
+{% extends 'tracking_app/base.html' %}
+{% block content %}
+<div class="container-fluid py-4" style="max-width: 1400px;">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="text-white mb-1"><i class="bx bx-store text-success me-2"></i>IT Service Catalog</h2>
+            <p class="text-muted small mb-0">Request hardware, software, and access permissions</p>
+        </div>
+        <a href="{% url 'it-helpdesk-list' %}" class="btn btn-outline-secondary" style="border-radius: 8px;">Back to Portal</a>
+    </div>
+
+    <!-- Messages -->
+    {% if messages %}
+    <div class="mb-4">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="row">
+        <!-- Catalog Items -->
+        <div class="col-md-8">
+            <h5 class="text-white mb-3"><i class="bx bx-package text-muted"></i> Available Services</h5>
+            <div class="row g-3">
+                {% for item in items %}
+                <div class="col-md-6">
+                    <div class="card h-100 shadow-sm" style="background: var(--apple-card-bg); border: 1px solid var(--apple-border); border-radius: 12px;">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <h6 class="text-white fw-bold">{{ item.name }}</h6>
+                                {% if item.category == 'hardware' %}<i class="bx bx-laptop text-info"></i>
+                                {% elif item.category == 'software' %}<i class="bx bx-code-alt text-warning"></i>
+                                {% else %}<i class="bx bx-key text-success"></i>{% endif %}
+                            </div>
+                            <p class="text-muted small mb-3" style="min-height: 40px;">{{ item.description }}</p>
+                            
+                            <form method="POST">
+                                {% csrf_token %}
+                                <input type="hidden" name="item_id" value="{{ item.id }}">
+                                {% if item.requires_approval %}
+                                <input type="text" name="justification" class="form-control form-control-sm mb-2" placeholder="Business justification required..." required style="background: rgba(0,0,0,0.2); border: 1px solid var(--apple-border); color: white;">
+                                {% endif %}
+                                <button type="submit" class="btn btn-sm btn-primary w-100" style="border-radius: 6px;">
+                                    <i class="bx bx-cart-add"></i> Request Item
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12 text-muted">No items available in the catalog.</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- My Requests -->
+        <div class="col-md-4">
+            <h5 class="text-white mb-3"><i class="bx bx-history text-muted"></i> My Requests</h5>
+            <div class="card shadow-sm" style="background: var(--apple-card-bg); border: 1px solid var(--apple-border); border-radius: 12px; overflow: hidden;">
+                <div class="list-group list-group-flush">
+                    {% for req in my_requests %}
+                    <div class="list-group-item bg-transparent" style="border-bottom: 1px solid var(--apple-border-subtle);">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <strong class="text-white" style="font-size: 0.9rem;">{{ req.item.name }}</strong>
+                            {% if req.status == 'approved' %}<span class="badge bg-success" style="font-size: 0.65rem;">Approved</span>
+                            {% elif req.status == 'rejected' %}<span class="badge bg-danger" style="font-size: 0.65rem;">Rejected</span>
+                            {% elif req.status == 'fulfilled' %}<span class="badge bg-secondary" style="font-size: 0.65rem;">Fulfilled</span>
+                            {% else %}<span class="badge bg-warning text-dark" style="font-size: 0.65rem;">Pending</span>{% endif %}
+                        </div>
+                        <div class="text-muted small"><i class="bx bx-time"></i> {{ req.created_at|date:"M d" }}</div>
+                    </div>
+                    {% empty %}
+                    <div class="p-4 text-center text-muted small">No requests submitted.</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

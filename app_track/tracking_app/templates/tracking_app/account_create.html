@@ -1,0 +1,59 @@
+{% extends 'tracking_app/base.html' %}
+{% block title %}New Account | B2B CRM{% endblock %}
+{% block content %}
+<div class="container py-5" style="max-width:680px;">
+    <a href="{% url 'account-list' %}" class="text-muted small mb-3 d-inline-flex align-items-center gap-1"><i class="bx bx-arrow-back"></i> Back to Accounts</a>
+    <h2 class="text-white fw-bold mb-4">Create New Account</h2>
+
+    <div class="card p-4" style="background:var(--apple-card-bg);border:1px solid var(--apple-border);border-radius:14px;">
+        <form method="POST">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label class="form-label text-muted small text-uppercase">Company Name *</label>
+                <input type="text" name="name" class="form-control" placeholder="Acme Corp" required
+                    style="background:rgba(0,0,0,.3);border:1px solid var(--apple-border);color:white;border-radius:8px;padding:.65rem 1rem;">
+            </div>
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <label class="form-label text-muted small text-uppercase">Industry</label>
+                    <select name="industry" class="form-select" style="background:rgba(0,0,0,.3);border:1px solid var(--apple-border);color:white;border-radius:8px;">
+                        <option value="">Select industry...</option>
+                        {% for val, label in industry_choices %}
+                        <option value="{{ val }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label text-muted small text-uppercase">Company Size</label>
+                    <select name="employee_count" class="form-select" style="background:rgba(0,0,0,.3);border:1px solid var(--apple-border);color:white;border-radius:8px;">
+                        <option value="">Select size...</option>
+                        {% for val, label in size_choices %}
+                        <option value="{{ val }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <label class="form-label text-muted small text-uppercase">Website</label>
+                    <input type="url" name="website" class="form-control" placeholder="https://acmecorp.com"
+                        style="background:rgba(0,0,0,.3);border:1px solid var(--apple-border);color:white;border-radius:8px;padding:.65rem 1rem;">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label text-muted small text-uppercase">Phone</label>
+                    <input type="text" name="phone" class="form-control" placeholder="+1 555 000 0000"
+                        style="background:rgba(0,0,0,.3);border:1px solid var(--apple-border);color:white;border-radius:8px;padding:.65rem 1rem;">
+                </div>
+            </div>
+            <div class="mb-4">
+                <label class="form-label text-muted small text-uppercase">Description / Notes</label>
+                <textarea name="description" class="form-control" rows="3" placeholder="Brief description of the company and the opportunity..."
+                    style="background:rgba(0,0,0,.3);border:1px solid var(--apple-border);color:white;border-radius:8px;padding:.65rem 1rem;"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary w-100" style="border-radius:8px;padding:.7rem;font-weight:600;">
+                <i class="bx bx-buildings me-1"></i> Create Account
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

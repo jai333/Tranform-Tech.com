@@ -1,0 +1,18 @@
+{% extends 'tracking_app/base_public.html' %}
+{% block content %}
+<div class="container mt-5">
+    <h2>{{ vendor.name }}</h2>
+    <div class="card bg-dark text-white mb-3">
+        <div class="card-body">
+            <p><strong>Support Phone:</strong> {{ vendor.support_phone }}</p>
+            <p><strong>Email:</strong> {{ vendor.contact_email }}</p>
+            <p><strong>Phone:</strong> {{ vendor.support_phone }}</p>
+            <p><strong>Support Portal:</strong> <a href="{{ vendor.website }}" target="_blank">{{ vendor.website }}</a></p>
+            <p><strong>Created At:</strong> {{ vendor.created_at }}</p>
+        </div>
+    </div>
+    <a href="{% url 'it-vendor-update' vendor.pk %}" class="btn btn-info">Edit</a>
+    <a href="{% url 'it-vendor-delete' vendor.pk %}" class="btn btn-danger">Delete</a>
+    <a href="{% url 'it-vendor-list' %}" class="btn btn-secondary">Back to List</a>
+</div>
+{% endblock %}

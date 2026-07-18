@@ -105,6 +105,49 @@ urlpatterns = [
     path('ai-pipeline/', ai_views.ai_pipeline_dashboard, name='ai-pipeline-dashboard'),
     path('add-ons/', views.service_addons_view, name='service-addons'),
 
+    # ── IT Helpdesk ──────────────────────────────────────────────────────────
+    path('it/tickets/', views.it_helpdesk_list, name='it-helpdesk-list'),
+    path('it/tickets/new/', views.it_ticket_create, name='it-ticket-create'),
+    path('it/tickets/<int:pk>/', views.it_ticket_detail, name='it-ticket-detail'),
+    path('it/assets/', views.it_asset_list, name='it-asset-list'),
+    path('it/assets/<int:pk>/', views.it_asset_detail, name='it-asset-detail'),
+    path('it/admin/settings/', views.it_admin_settings, name='it-admin-settings'),
+    path('it/reports/', views.it_reports, name='it-reports'),
+    path('it/api/kb-search/', views.kb_search_api, name='api-kb-search'),
+    path('it/tickets/<int:ticket_id>/csat/', views.submit_csat, name='it-ticket-csat'),
+    path('it/tickets/<int:pk>/status/', views.it_ticket_update_status, name='it-ticket-update-status'),
+    path('it/kb/', views.kb_article_list, name='kb-article-list'),
+    path('it/kb/<int:pk>/', views.kb_article_detail, name='kb-article-detail'),
+    path('it/problems/', views.it_problem_list, name='it-problem-list'),
+    path('it/changes/', views.it_change_list, name='it-change-list'),
+    path('it/service-catalog/', views.it_service_catalog, name='it-service-catalog'),
+    path('status/', views.it_status_page, name='it-status-page'),
+    # ── Security / Threat Dashboard ──────────────────────────────────────────
+    path('security/dashboard/', views.threat_dashboard, name='threat-dashboard'),
+    path('security/incident/new/', views.threat_incident_create, name='threat-incident-create'),
+    path('security/incident/<int:pk>/', views.threat_incident_detail, name='threat-incident-detail'),
+    path('security/vulnerabilities/', views.vuln_list, name='vuln-list'),
+    path('security/ip-blocklist/', views.ip_blocklist, name='ip-blocklist'),
+    path('security/report-phishing/', views.report_phishing, name='report-phishing'),
+
+    # ── B2B Sales Accounts ───────────────────────────────────────────────────
+    path('accounts/', views.account_list, name='account-list'),
+    path('accounts/new/', views.account_create, name='account-create'),
+    path('accounts/<int:pk>/', views.account_detail, name='account-detail'),
+
+    # ── Dev Project Request Portal ───────────────────────────────────────────
+    path('services/dev-request/', views.dev_project_request, name='dev-project-request'),
+    path('services/dev-requests/', views.dev_project_list, name='dev-project-list'),
+
+    # ── Interview Scorecard ──────────────────────────────────────────────────
+    path('interviews/<int:interview_id>/scorecard/', views.scorecard_create, name='scorecard-create'),
+    path('interviews/<int:interview_id>/scorecard/view/', views.scorecard_detail, name='scorecard-detail'),
+
     # ── AI Sales System (auto-appended) ─────────────────────────
+    path('analytics/reports/', views.scheduled_report_list, name='scheduled-report-list'),
+    path('analytics/reports/new/', views.scheduled_report_create, name='scheduled-report-create'),
+    path('analytics/reports/<int:pk>/run/', views.run_report_now, name='run-report-now'),
+    path('candidates/bulk-upload/', views.bulk_resume_upload, name='bulk-resume-upload'),
+    path('qualify/', views.lead_qualification_form, name='lead-qualification-form'),
     *sales_urlpatterns,
 ]

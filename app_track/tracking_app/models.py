@@ -702,6 +702,8 @@ class ITTicket(models.Model):
     resolution_notes = models.TextField(blank=True, null=True)
     asset = models.ForeignKey(ITAsset, on_delete=models.SET_NULL, null=True, blank=True, related_name='tickets')
     device_asset_tag = models.CharField(max_length=100, null=True, blank=True)
+    tags = models.CharField(max_length=255, blank=True, null=True)
+    attachment = models.FileField(upload_to='it_tickets/', blank=True, null=True)
     csat_triggered = models.BooleanField(default=False)
     
     # SLA Tracking Fields
@@ -888,6 +890,90 @@ class ThreatIncident(models.Model):
     def __str__(self):
         return f"INC-{self.id}: {self.title}"
 
+class ITProblem(models.Model):
+    title = models.CharField(max_length=300)
+    description = models.TextField()
+    workaround = models.TextField(blank=True, null=True)
+    status = models.CharField(max_length=50, choices=[
+        ('investigating', 'Investigating'),
+        ('identified', 'Root Cause Identified'),
+        ('resolved', 'Resolved')
+    ], default='investigating')
+    related_tickets = models.ManyToManyField(ITTicket, blank=True, related_name='problems')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return f"PRB-{self.id}: {self.title}"
+
+class ITChangeRequest(models.Model):
+    title = models.CharField(max_length=300)
+    description = models.TextField()
+    risk_level = models.CharField(max_length=20, choices=[('low', 'Low'), ('medium', 'Medium'), ('high', 'High')], default='low')
+    backout_plan = models.TextField(blank=True, null=True)
+    status = models.CharField(max_length=50, choices=[
+        ('planning', 'Planning'),
+        ('pending_cab', 'Pending CAB Approval'),
+        ('approved', 'Approved'),
+        ('implemented', 'Implemented'),
+        ('rejected', 'Rejected')
+    ], default='planning')
+    requested_by = models.ForeignKey('User', on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+class ChangeApprovalBoard(models.Model):
+    change_request = models.ForeignKey(ITChangeRequest, on_delete=models.CASCADE, related_name='cab_votes')
+    approver = models.ForeignKey('User', on_delete=models.CASCADE)
+    vote = models.CharField(max_length=20, choices=[('pending', 'Pending'), ('approved', 'Approved'), ('rejected', 'Rejected')], default='pending')
+    comments = models.TextField(blank=True, null=True)
+    voted_at = models.DateTimeField(null=True, blank=True)
+
+class ServiceCatalogItem(models.Model):
+    name = models.CharField(max_length=200)
+    description = models.TextField()
+    category = models.CharField(max_length=50, choices=[('hardware', 'Hardware'), ('software', 'Software'), ('access', 'Access Request')])
+    estimated_cost = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    requires_approval = models.BooleanField(default=True)
+    
+    def __str__(self):
+        return self.name
+
+class ServiceRequest(models.Model):
+    item = models.ForeignKey(ServiceCatalogItem, on_delete=models.CASCADE)
+    requested_by = models.ForeignKey('User', on_delete=models.CASCADE)
+    justification = models.TextField()
+    status = models.CharField(max_length=50, choices=[('pending_approval', 'Pending Approval'), ('approved', 'Approved'), ('fulfilled', 'Fulfilled'), ('rejected', 'Rejected')], default='pending_approval')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+class TicketRoutingRule(models.Model):
+    name = models.CharField(max_length=150)
+    condition_category = models.CharField(max_length=50, choices=ITTicket.CATEGORY_CHOICES, null=True, blank=True)
+    action_assign_to = models.ForeignKey('User', on_delete=models.SET_NULL, null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+
+class AssetRelationship(models.Model):
+    primary_asset = models.ForeignKey(ITAsset, on_delete=models.CASCADE, related_name='downstream_rels')
+    dependent_asset = models.ForeignKey(ITAsset, on_delete=models.CASCADE, related_name='upstream_rels')
+    relationship_type = models.CharField(max_length=50, choices=[('runs_on', 'Runs On'), ('depends_on', 'Depends On')])
+
+class SystemOutage(models.Model):
+    title = models.CharField(max_length=200)
+    description = models.TextField()
+    status = models.CharField(max_length=50, choices=[('investigating', 'Investigating'), ('identified', 'Identified'), ('monitoring', 'Monitoring'), ('resolved', 'Resolved')])
+    start_time = models.DateTimeField()
+    end_time = models.DateTimeField(null=True, blank=True)
+
+class BusinessHoursSchedule(models.Model):
+    name = models.CharField(max_length=100)
+    timezone = models.CharField(max_length=50, default='UTC')
+    work_start_time = models.TimeField(default='09:00:00')
+    work_end_time = models.TimeField(default='17:00:00')
+
+class HolidayCalendar(models.Model):
+    name = models.CharField(max_length=100)
+    date = models.DateField()
+
 # =============================================================================
 # DEV PROJECT PORTAL MODELS
 # =============================================================================
@@ -983,3 +1069,77 @@ class AutomationRun(models.Model):
 
     def __str__(self):
         return f"{self.run_type} at {self.timestamp}"
+
+
+# ═══════════════════════════════════════════════════════════════
+#  CYBERSECURITY EXPANSION MODELS
+# ═══════════════════════════════════════════════════════════════
+
+class VulnerabilityScan(models.Model):
+    SEVERITY_CHOICES = [
+        ('critical',  'Critical'),
+        ('high',      'High'),
+        ('medium',    'Medium'),
+        ('low',       'Low'),
+        ('info',      'Informational'),
+    ]
+    STATUS_CHOICES = [
+        ('open',      'Open'),
+        ('in_progress','In Progress'),
+        ('patched',   'Patched'),
+        ('accepted',  'Risk Accepted'),
+        ('false_positive','False Positive'),
+    ]
+    title       = models.CharField(max_length=255)
+    cve_id      = models.CharField(max_length=30, blank=True, help_text='e.g. CVE-2024-1234')
+    severity    = models.CharField(max_length=20, choices=SEVERITY_CHOICES, default='medium')
+    cvss_score  = models.FloatField(null=True, blank=True, help_text='CVSS score 0.0-10.0')
+    affected_asset = models.ForeignKey('ITAsset', on_delete=models.SET_NULL, null=True, blank=True, related_name='vulnerabilities')
+    description = models.TextField(blank=True)
+    remediation = models.TextField(blank=True)
+    status      = models.CharField(max_length=20, choices=STATUS_CHOICES, default='open')
+    discovered_at = models.DateTimeField(auto_now_add=True)
+    patched_at  = models.DateTimeField(null=True, blank=True)
+    reported_by = models.ForeignKey('User', on_delete=models.SET_NULL, null=True, blank=True)
+
+    def __str__(self):
+        return f"[{self.severity.upper()}] {self.title}"
+
+
+class IPBlocklist(models.Model):
+    REASON_CHOICES = [
+        ('malware',   'Malware / C2'),
+        ('phishing',  'Phishing'),
+        ('brute_force','Brute Force'),
+        ('spam',      'Spam'),
+        ('tor_exit',  'Tor Exit Node'),
+        ('other',     'Other'),
+    ]
+    ip_address  = models.GenericIPAddressField(unique=True)
+    reason      = models.CharField(max_length=20, choices=REASON_CHOICES, default='other')
+    description = models.TextField(blank=True)
+    added_by    = models.ForeignKey('User', on_delete=models.SET_NULL, null=True, blank=True)
+    added_at    = models.DateTimeField(auto_now_add=True)
+    expires_at  = models.DateTimeField(null=True, blank=True)
+    is_active   = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"{self.ip_address} ({self.get_reason_display()})"
+
+
+class PhishingReport(models.Model):
+    STATUS_CHOICES = [
+        ('pending',     'Pending Review'),
+        ('confirmed',   'Confirmed Phishing'),
+        ('false_positive','False Positive'),
+    ]
+    reported_by     = models.ForeignKey('User', on_delete=models.SET_NULL, null=True, related_name='phishing_reports')
+    sender_email    = models.EmailField()
+    subject         = models.CharField(max_length=500)
+    description     = models.TextField()
+    status          = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    reviewed_by     = models.ForeignKey('User', on_delete=models.SET_NULL, null=True, blank=True, related_name='reviewed_phishing')
+    created_at      = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Phishing report from {self.reported_by} – {self.subject[:50]}"

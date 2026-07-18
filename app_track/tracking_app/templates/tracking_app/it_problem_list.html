@@ -1,0 +1,48 @@
+{% extends 'tracking_app/base.html' %}
+{% block content %}
+<div class="container-fluid py-4" style="max-width: 1400px;">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="text-white mb-1"><i class="bx bx-error-alt text-danger me-2"></i>Problem Management</h2>
+            <p class="text-muted small mb-0">Group related incidents to identify and fix root causes</p>
+        </div>
+        <button class="btn btn-primary" style="border-radius: 8px;"><i class="bx bx-plus me-1"></i>New Problem</button>
+    </div>
+
+    <div class="card shadow-sm" style="background: var(--apple-card-bg); border: 1px solid var(--apple-border); border-radius: 12px; overflow: hidden;">
+        <table class="table table-borderless table-hover mb-0" style="color: var(--apple-text);">
+            <thead style="background: rgba(255,255,255,0.05); border-bottom: 1px solid var(--apple-border);">
+                <tr>
+                    <th class="ps-4">Problem</th>
+                    <th>Status</th>
+                    <th>Workaround</th>
+                    <th>Linked Incidents</th>
+                    <th>Created</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for problem in problems %}
+                <tr style="border-bottom: 1px solid var(--apple-border-subtle); cursor: pointer;">
+                    <td class="ps-4">
+                        <div class="fw-bold">{{ problem.title|truncatechars:40 }}</div>
+                        <small class="text-muted">#PRB-{{ problem.id }}</small>
+                    </td>
+                    <td><span class="badge bg-secondary">{{ problem.get_status_display }}</span></td>
+                    <td>
+                        {% if problem.workaround %}
+                        <span class="text-success"><i class="bx bx-check"></i> Documented</span>
+                        {% else %}
+                        <span class="text-warning"><i class="bx bx-time"></i> Pending</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ problem.related_tickets.count }} Incidents</td>
+                    <td class="text-muted small">{{ problem.created_at|date:"M d, Y" }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5" class="text-center py-4 text-muted">No problems currently tracked.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

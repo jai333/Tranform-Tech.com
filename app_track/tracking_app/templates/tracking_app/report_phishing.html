@@ -1,0 +1,42 @@
+{% extends 'tracking_app/base.html' %}
+{% block title %}Report Phishing | Security{% endblock %}
+{% block content %}
+<div class="container py-5" style="max-width:640px;">
+    <div class="text-center mb-5">
+        <div style="width:72px;height:72px;background:rgba(255,59,48,.1);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
+            <i class="bx bx-fish" style="font-size:2.2rem;color:#ff3b30;"></i>
+        </div>
+        <h2 class="text-white fw-bold mb-2">Report a Phishing Email</h2>
+        <p class="text-muted">Suspected spam or phishing? Report it here and our security team will investigate within 24 hours.</p>
+    </div>
+
+    {% if messages %}{% for m in messages %}<div class="alert alert-success mb-4">{{ m }}</div>{% endfor %}{% endif %}
+
+    <div class="card p-4" style="background:var(--apple-card-bg);border:1px solid rgba(255,59,48,.2);border-radius:14px;">
+        <form method="POST">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label class="form-label text-muted small text-uppercase">Sender Email Address</label>
+                <input type="email" name="sender_email" class="form-control" placeholder="badactor@evil.com" required
+                    style="background:rgba(0,0,0,.3);border:1px solid var(--apple-border);color:white;border-radius:8px;padding:.65rem 1rem;">
+            </div>
+            <div class="mb-3">
+                <label class="form-label text-muted small text-uppercase">Email Subject Line</label>
+                <input type="text" name="subject" class="form-control" placeholder="Your account has been compromised..." required
+                    style="background:rgba(0,0,0,.3);border:1px solid var(--apple-border);color:white;border-radius:8px;padding:.65rem 1rem;">
+            </div>
+            <div class="mb-4">
+                <label class="form-label text-muted small text-uppercase">Description / What happened?</label>
+                <textarea name="description" class="form-control" rows="4" placeholder="Describe the email contents, any links you clicked, or attachments you opened..." required
+                    style="background:rgba(0,0,0,.3);border:1px solid var(--apple-border);color:white;border-radius:8px;padding:.65rem 1rem;"></textarea>
+            </div>
+            <button type="submit" class="btn btn-danger w-100" style="border-radius:8px;font-weight:600;padding:.65rem;">
+                <i class="bx bx-send me-1"></i> Submit Phishing Report
+            </button>
+        </form>
+    </div>
+    <div class="text-center mt-3">
+        <a href="{% url 'it-helpdesk-list' %}" class="text-muted small">Cancel — Back to IT Portal</a>
+    </div>
+</div>
+{% endblock %}

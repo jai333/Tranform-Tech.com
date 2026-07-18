@@ -1,0 +1,12 @@
+{% extends 'tracking_app/base_public.html' %}
+{% block content %}
+<div class="container mt-5">
+    <h2>Delete Asset</h2>
+    <p>Are you sure you want to delete the asset "{{ asset.name }}" ({{ asset.asset_tag }})?</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Yes, Delete</button>
+        <a href="{% url 'it-asset-detail' asset.pk %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

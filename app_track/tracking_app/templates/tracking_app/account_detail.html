@@ -1,0 +1,159 @@
+{% extends 'tracking_app/base.html' %}
+{% block title %}{{ account.name }} | B2B Account{% endblock %}
+{% block content %}
+<div class="container-fluid py-4" style="max-width:1400px;">
+
+    <!-- Breadcrumb -->
+    <a href="{% url 'account-list' %}" class="text-muted small mb-3 d-inline-flex align-items-center gap-1"><i class="bx bx-arrow-back"></i> All Accounts</a>
+
+    {% if messages %}{% for m in messages %}<div class="alert alert-{{ m.tags }} mt-2">{{ m }}</div>{% endfor %}{% endif %}
+
+    <!-- Account Header -->
+    <div class="card p-4 mb-4" style="background:var(--apple-card-bg);border:1px solid var(--apple-border);border-radius:14px;">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+            <div>
+                <h1 class="text-white fw-bold mb-1" style="font-size:1.75rem;">{{ account.name }}</h1>
+                <div class="d-flex flex-wrap gap-3 text-muted small">
+                    {% if account.industry %}<span><i class="bx bx-category"></i> {{ account.get_industry_display }}</span>{% endif %}
+                    {% if account.employee_count %}<span><i class="bx bx-group"></i> {{ account.get_employee_count_display }}</span>{% endif %}
+                    {% if account.phone %}<span><i class="bx bx-phone"></i> {{ account.phone }}</span>{% endif %}
+                    {% if account.website %}<a href="{{ account.website }}" target="_blank" class="text-info"><i class="bx bx-link-external"></i> {{ account.website }}</a>{% endif %}
+                </div>
+                {% if account.description %}<p class="text-muted small mt-2 mb-0">{{ account.description }}</p>{% endif %}
+            </div>
+            <div class="d-flex gap-2">
+                <button class="btn btn-sm" style="border:1px solid var(--apple-border);color:var(--apple-text-secondary);border-radius:8px;" onclick="document.getElementById('activity-modal').style.display='flex'"><i class="bx bx-plus"></i> Log Activity</button>
+                <button class="btn btn-sm btn-primary" style="border-radius:8px;" onclick="document.getElementById('contact-modal').style.display='flex'"><i class="bx bx-user-plus"></i> Add Contact</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Contacts -->
+        <div class="col-md-4">
+            <div class="card h-100" style="background:var(--apple-card-bg);border:1px solid var(--apple-border);border-radius:12px;overflow:hidden;">
+                <div class="card-header p-3" style="background:rgba(255,255,255,.02);border-bottom:1px solid var(--apple-border);">
+                    <h6 class="text-white mb-0"><i class="bx bx-group me-1"></i> Contacts ({{ contacts.count }})</h6>
+                </div>
+                <div class="list-group list-group-flush">
+                    {% for c in contacts %}
+                    <div class="list-group-item bg-transparent p-3" style="border-bottom:1px solid var(--apple-border-subtle);">
+                        <div class="d-flex align-items-center gap-2">
+                            <div style="width:36px;height:36px;border-radius:50%;background:rgba(0,229,255,.1);display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:700;color:var(--brand-primary);">{{ c.first_name.0 }}{{ c.last_name.0 }}</div>
+                            <div>
+                                <div class="fw-bold text-white" style="font-size:.9rem;">{{ c.full_name }}</div>
+                                <div class="text-muted" style="font-size:.75rem;">{{ c.title|default:"—" }}</div>
+                                {% if c.email %}<div class="text-muted" style="font-size:.72rem;"><i class="bx bx-envelope"></i> {{ c.email }}</div>{% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="p-4 text-center text-muted small">No contacts yet.</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Activity Timeline -->
+        <div class="col-md-4">
+            <div class="card h-100" style="background:var(--apple-card-bg);border:1px solid var(--apple-border);border-radius:12px;overflow:hidden;">
+                <div class="card-header p-3" style="background:rgba(255,255,255,.02);border-bottom:1px solid var(--apple-border);">
+                    <h6 class="text-white mb-0"><i class="bx bx-history me-1"></i> Activity Timeline</h6>
+                </div>
+                <div style="max-height:400px;overflow-y:auto;">
+                    {% for a in activities %}
+                    <div class="p-3" style="border-bottom:1px solid var(--apple-border-subtle);">
+                        <div class="d-flex gap-2 align-items-start">
+                            <div style="width:28px;height:28px;border-radius:50%;background:rgba(0,229,255,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;">
+                                {% if a.activity_type == 'call' %}<i class="bx bx-phone-call" style="color:var(--brand-primary);font-size:.8rem;"></i>
+                                {% elif a.activity_type == 'email' %}<i class="bx bx-envelope" style="color:#10b981;font-size:.8rem;"></i>
+                                {% elif a.activity_type == 'meeting' %}<i class="bx bx-video" style="color:#f59e0b;font-size:.8rem;"></i>
+                                {% else %}<i class="bx bx-note" style="color:rgba(255,255,255,.4);font-size:.8rem;"></i>{% endif %}
+                            </div>
+                            <div>
+                                <div class="fw-semibold text-white" style="font-size:.85rem;">{{ a.subject }}</div>
+                                <div class="text-muted" style="font-size:.72rem;">{{ a.get_activity_type_display }} · {{ a.performed_by.username|default:"—" }} · {{ a.created_at|date:"M d" }}</div>
+                                {% if a.notes %}<div class="text-muted small mt-1">{{ a.notes|truncatechars:80 }}</div>{% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="p-4 text-center text-muted small">No activities logged.</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Deals -->
+        <div class="col-md-4">
+            <div class="card h-100" style="background:var(--apple-card-bg);border:1px solid var(--apple-border);border-radius:12px;overflow:hidden;">
+                <div class="card-header p-3" style="background:rgba(255,255,255,.02);border-bottom:1px solid var(--apple-border);">
+                    <h6 class="text-white mb-0"><i class="bx bx-dollar-circle me-1"></i> Deals ({{ deals|length }})</h6>
+                </div>
+                {% for d in deals %}
+                <div class="p-3" style="border-bottom:1px solid var(--apple-border-subtle);">
+                    <div class="fw-semibold text-white mb-1" style="font-size:.9rem;">{{ d.lead.company_name|default:d }}</div>
+                    <div class="d-flex justify-content-between">
+                        <span class="badge bg-secondary" style="font-size:.7rem;">{{ d.get_stage_display }}</span>
+                        <span class="text-success fw-bold" style="font-size:.85rem;">${{ d.deal_value_monthly|default:d.value|floatformat:0 }}/mo</span>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="p-4 text-center text-muted small">No deals linked.</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Log Activity Modal -->
+<div id="activity-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;align-items:center;justify-content:center;backdrop-filter:blur(6px);">
+    <div class="card p-4" style="background:var(--apple-card-bg);border:1px solid var(--apple-border);border-radius:16px;width:90%;max-width:480px;">
+        <h5 class="text-white mb-4"><i class="bx bx-history text-info me-2"></i>Log Activity</h5>
+        <form method="POST">{% csrf_token %}
+            <input type="hidden" name="action" value="log_activity">
+            <div class="mb-3">
+                <select name="activity_type" class="form-select" style="background:rgba(0,0,0,.3);border:1px solid var(--apple-border);color:white;border-radius:8px;">
+                    <option value="call">📞 Phone Call</option>
+                    <option value="email">📧 Email</option>
+                    <option value="meeting">🎥 Meeting</option>
+                    <option value="demo">🖥️ Product Demo</option>
+                    <option value="follow_up">🔁 Follow-up</option>
+                    <option value="note">📝 Note</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <input type="text" name="subject" class="form-control" placeholder="Subject / Summary" required style="background:rgba(0,0,0,.3);border:1px solid var(--apple-border);color:white;border-radius:8px;">
+            </div>
+            <div class="mb-4">
+                <textarea name="notes" class="form-control" rows="3" placeholder="Notes..." style="background:rgba(0,0,0,.3);border:1px solid var(--apple-border);color:white;border-radius:8px;"></textarea>
+            </div>
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary flex-grow-1" style="border-radius:8px;">Save</button>
+                <button type="button" class="btn" style="border:1px solid var(--apple-border);color:var(--apple-text-secondary);border-radius:8px;" onclick="document.getElementById('activity-modal').style.display='none'">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Add Contact Modal -->
+<div id="contact-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;align-items:center;justify-content:center;backdrop-filter:blur(6px);">
+    <div class="card p-4" style="background:var(--apple-card-bg);border:1px solid var(--apple-border);border-radius:16px;width:90%;max-width:480px;">
+        <h5 class="text-white mb-4"><i class="bx bx-user-plus text-primary me-2"></i>Add Contact</h5>
+        <form method="POST">{% csrf_token %}
+            <input type="hidden" name="action" value="add_contact">
+            <div class="row g-3 mb-3">
+                <div class="col-6"><input type="text" name="first_name" class="form-control" placeholder="First Name" required style="background:rgba(0,0,0,.3);border:1px solid var(--apple-border);color:white;border-radius:8px;"></div>
+                <div class="col-6"><input type="text" name="last_name" class="form-control" placeholder="Last Name" required style="background:rgba(0,0,0,.3);border:1px solid var(--apple-border);color:white;border-radius:8px;"></div>
+            </div>
+            <div class="mb-3"><input type="text" name="title" class="form-control" placeholder="Job Title" style="background:rgba(0,0,0,.3);border:1px solid var(--apple-border);color:white;border-radius:8px;"></div>
+            <div class="mb-3"><input type="email" name="email" class="form-control" placeholder="Email" style="background:rgba(0,0,0,.3);border:1px solid var(--apple-border);color:white;border-radius:8px;"></div>
+            <div class="mb-4"><input type="text" name="phone" class="form-control" placeholder="Phone" style="background:rgba(0,0,0,.3);border:1px solid var(--apple-border);color:white;border-radius:8px;"></div>
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary flex-grow-1" style="border-radius:8px;">Add Contact</button>
+                <button type="button" class="btn" style="border:1px solid var(--apple-border);color:var(--apple-text-secondary);border-radius:8px;" onclick="document.getElementById('contact-modal').style.display='none'">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

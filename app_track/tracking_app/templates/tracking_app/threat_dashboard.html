@@ -1,0 +1,313 @@
+{% extends 'tracking_app/base.html' %}
+{% block title %}Security Operations Center | Transform.io{% endblock %}
+
+{% block content %}
+<style>
+:root {
+    --cyber-red: #ff3b30;
+    --cyber-red-glow: rgba(255,59,48,0.2);
+    --cyber-orange: #ff9500;
+    --cyber-amber: #ffd60a;
+    --cyber-green: #32d74b;
+    --cyber-blue: #0a84ff;
+}
+.soc-page { padding: 2rem; max-width: 1600px; margin: 0 auto; }
+
+/* Header */
+.soc-header { margin-bottom: 2rem; }
+.soc-header-top { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; }
+.soc-title { font-size: 1.6rem; font-weight: 800; color: var(--apple-text); display: flex; align-items: center; gap: 10px; }
+.soc-title .pulse { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--cyber-red); box-shadow: 0 0 0 0 rgba(255,59,48,0.6); animation: pulse-ring 1.5s ease-out infinite; }
+@keyframes pulse-ring { 0% { box-shadow: 0 0 0 0 rgba(255,59,48,0.6); } 100% { box-shadow: 0 0 0 12px rgba(255,59,48,0); } }
+.soc-subtitle { font-size: 0.8rem; color: var(--apple-text-muted); margin-top: 4px; font-family: 'Fira Code', monospace; }
+.btn-report { background: linear-gradient(135deg, var(--cyber-red), #cc1f1f); color: #fff; border: none; border-radius: 10px; padding: 10px 20px; font-size: 0.875rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; transition: opacity 0.2s, transform 0.2s; }
+.btn-report:hover { opacity: 0.9; transform: translateY(-1px); color: #fff; }
+
+/* Stats bar */
+.stats-bar { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; margin-bottom: 2rem; }
+@media (max-width: 900px) { .stats-bar { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 500px) { .stats-bar { grid-template-columns: repeat(2, 1fr); } }
+.stat-card { background: var(--apple-card-bg); border: 1px solid var(--apple-border); border-radius: 12px; padding: 1rem 1.25rem; position: relative; overflow: hidden; }
+.stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+.stat-card.critical::before { background: var(--cyber-red); }
+.stat-card.high::before { background: var(--cyber-orange); }
+.stat-card.open::before { background: var(--cyber-amber); }
+.stat-card.investigating::before { background: var(--cyber-blue); }
+.stat-card.total::before { background: var(--apple-border); }
+.stat-val { font-size: 2rem; font-weight: 800; margin-bottom: 2px; }
+.stat-card.critical .stat-val { color: var(--cyber-red); }
+.stat-card.high .stat-val { color: var(--cyber-orange); }
+.stat-card.open .stat-val { color: var(--cyber-amber); }
+.stat-card.investigating .stat-val { color: var(--cyber-blue); }
+.stat-card.total .stat-val { color: var(--apple-text); }
+.stat-label { font-size: 0.72rem; color: var(--apple-text-secondary); text-transform: uppercase; letter-spacing: 0.08em; }
+
+/* Filters */
+.filters { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 1.5rem; align-items: center; }
+.filter-select { background: var(--apple-input-bg); border: 1px solid var(--apple-border); border-radius: 8px; padding: 8px 14px; color: var(--apple-text); font-size: 0.8rem; outline: none; cursor: pointer; font-family: inherit; }
+.filter-select option { background: var(--apple-card-bg); color: var(--apple-text); }
+.filter-label { font-size: 0.75rem; color: var(--apple-text-secondary); }
+.btn-filter { background: rgba(255,59,48,0.12); border: 1px solid rgba(255,59,48,0.3); color: #f87171; border-radius: 8px; padding: 8px 16px; font-size: 0.8rem; cursor: pointer; font-family: inherit; transition: background 0.2s; }
+.btn-filter:hover { background: rgba(255,59,48,0.2); }
+.btn-clear { background: transparent; border: 1px solid var(--apple-border); color: var(--apple-text-secondary); border-radius: 8px; padding: 8px 14px; font-size: 0.8rem; cursor: pointer; font-family: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; }
+
+/* Incident table */
+.incident-table-wrap { background: var(--apple-card-bg); border: 1px solid var(--apple-border); border-radius: 14px; overflow: hidden; }
+.incident-table { width: 100%; border-collapse: collapse; }
+.incident-table thead th { background: var(--apple-bg); padding: 12px 16px; text-align: left; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--apple-text-secondary); border-bottom: 1px solid var(--apple-border-subtle); }
+.incident-table tbody tr { border-bottom: 1px solid var(--apple-border-subtle); transition: background 0.15s; cursor: pointer; color: var(--apple-text); }
+.incident-table tbody tr:hover { background: var(--apple-row-hover); }
+.incident-table tbody tr:last-child { border-bottom: none; }
+.incident-table td { padding: 14px 16px; vertical-align: middle; font-size: 0.875rem; }
+.severity-badge { display: inline-flex; align-items: center; gap: 4px; border-radius: 6px; padding: 3px 9px; font-size: 0.69rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; border: 1px solid; }
+.sev-critical { background: rgba(255,59,48,0.15); color: #ff6b6b; border-color: rgba(255,59,48,0.35); }
+.sev-high { background: rgba(255,149,0,0.12); color: #ffa733; border-color: rgba(255,149,0,0.3); }
+.sev-medium { background: rgba(255,214,10,0.1); color: #ffd60a; border-color: rgba(255,214,10,0.25); }
+.sev-low { background: rgba(50,215,75,0.1); color: #5edb78; border-color: rgba(50,215,75,0.25); }
+.sev-info { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.5); border-color: rgba(255,255,255,0.12); }
+.status-badge { display: inline-flex; align-items: center; gap: 4px; border-radius: 12px; padding: 3px 9px; font-size: 0.69rem; font-weight: 600; }
+.st-open { background: rgba(255,214,10,0.1); color: #ffd60a; }
+.st-investigating { background: rgba(10,132,255,0.1); color: #6ab4ff; }
+.st-contained { background: rgba(255,149,0,0.1); color: #ffa733; }
+.st-resolved { background: rgba(50,215,75,0.1); color: #5edb78; }
+.st-false_positive { background: var(--apple-input-bg); color: var(--apple-text-secondary); }
+.incident-title-cell { color: var(--apple-text); font-weight: 500; max-width: 300px; }
+.incident-title-cell small { display: block; color: var(--apple-text-secondary); font-size: 0.72rem; margin-top: 2px; }
+.affected-tag { font-family: 'Fira Code', monospace; font-size: 0.68rem; background: var(--apple-bg); border: 1px solid var(--apple-border); border-radius: 4px; padding: 1px 5px; color: var(--apple-text-secondary); margin-right: 3px; }
+.empty-state { text-align: center; padding: 4rem 2rem; color: var(--apple-text-muted); }
+.empty-state i { font-size: 3rem; display: block; margin-bottom: 1rem; color: rgba(255,59,48,0.3); }
+.empty-state h3 { font-size: 1rem; font-weight: 500; margin-bottom: 6px; color: var(--apple-text-secondary); }
+.detail-mode { /* used when showing single incident */ }
+.messages-area { margin-bottom: 1.25rem; }
+.alert { border-radius: 10px; padding: 12px 16px; font-size: 0.875rem; margin-bottom: 8px; }
+.alert-success { background: rgba(50,215,75,0.1); border: 1px solid rgba(50,215,75,0.3); color: #6ee7b7; }
+.alert-error { background: rgba(255,59,48,0.1); border: 1px solid rgba(255,59,48,0.3); color: #fca5a5; }
+
+.threat-grid { display: grid; grid-template-columns: 1fr 350px; gap: 1.5rem; margin-bottom: 2rem; }
+@media (max-width: 1000px) { .threat-grid { grid-template-columns: 1fr; } }
+.map-panel { background: var(--apple-card-bg); border: 1px solid var(--apple-border); border-radius: 12px; padding: 1.5rem; position: relative; overflow: hidden; min-height: 250px; display: flex; flex-direction: column; justify-content: space-between;}
+.map-bg { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-image: radial-gradient(circle at 50% 50%, rgba(255,59,48,0.05) 0%, transparent 60%), linear-gradient(0deg, transparent 24%, rgba(0, 229, 255, 0.03) 25%, rgba(0, 229, 255, 0.03) 26%, transparent 27%, transparent 74%, rgba(0, 229, 255, 0.03) 75%, rgba(0, 229, 255, 0.03) 76%, transparent 77%, transparent), linear-gradient(90deg, transparent 24%, rgba(0, 229, 255, 0.03) 25%, rgba(0, 229, 255, 0.03) 26%, transparent 27%, transparent 74%, rgba(0, 229, 255, 0.03) 75%, rgba(0, 229, 255, 0.03) 76%, transparent 77%, transparent); background-size: 100% 100%, 30px 30px, 30px 30px; opacity: 0.8; z-index: 0; }
+.map-point { position: absolute; width: 8px; height: 8px; background: var(--cyber-red); border-radius: 50%; box-shadow: 0 0 10px var(--cyber-red); z-index: 2; }
+.map-point::after { content: ''; position: absolute; top: -6px; left: -6px; right: -6px; bottom: -6px; border: 1px solid var(--cyber-red); border-radius: 50%; animation: pulse-ring 2s infinite; opacity: 0.5; }
+.top-ips-panel { background: var(--apple-card-bg); border: 1px solid var(--apple-border); border-radius: 12px; padding: 1.25rem; }
+.ip-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--apple-border-subtle); font-size: 0.85rem; }
+.ip-row:last-child { border-bottom: none; }
+.ip-addr { font-family: 'Fira Code', monospace; color: var(--apple-text); }
+.ip-count { color: var(--cyber-red); font-weight: 600; }
+</style>
+
+<div class="soc-page">
+
+    {% if messages %}
+    <div class="messages-area">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if incident %}
+    <!-- ── SINGLE INCIDENT DETAIL MODE ─────────────────────────────────── -->
+    <a href="{% url 'threat-dashboard' %}" style="display:inline-flex;align-items:center;gap:6px;color:rgba(255,255,255,0.5);font-size:0.8rem;text-decoration:none;margin-bottom:1.5rem"><i class="bx bx-arrow-back"></i> Back to SOC Dashboard</a>
+
+    <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,59,48,0.2);border-radius:16px;padding:2rem;margin-bottom:1.5rem;position:relative;overflow:hidden">
+        <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--cyber-red),#ff6b6b)"></div>
+        <div style="font-size:0.72rem;color:var(--cyber-red);font-family:'Fira Code',monospace;margin-bottom:6px">INCIDENT-{{ incident.id }} · Detected {{ incident.detected_at|date:"M d, Y H:i" }}</div>
+        <div style="font-size:1.4rem;font-weight:700;color:#fff;margin-bottom:1rem">{{ incident.title }}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px">
+            <span class="severity-badge sev-{{ incident.severity }}">{{ incident.get_severity_display }}</span>
+            <span class="status-badge st-{{ incident.status }}">{{ incident.get_status_display }}</span>
+            <span style="background:rgba(255,255,255,0.06);border-radius:6px;padding:3px 9px;font-size:0.72rem;color:rgba(255,255,255,0.5);border:1px solid rgba(255,255,255,0.1)">{{ incident.get_category_display }}</span>
+        </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 320px;gap:1.25rem">
+        <div>
+            <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:1.5rem;margin-bottom:1.25rem">
+                <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:rgba(255,255,255,0.4);margin-bottom:1rem">Description</div>
+                <div style="color:rgba(255,255,255,0.8);font-size:0.9rem;line-height:1.7;white-space:pre-wrap">{{ incident.description }}</div>
+            </div>
+            {% if incident.affected_systems %}
+            <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:1.5rem;margin-bottom:1.25rem">
+                <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:rgba(255,255,255,0.4);margin-bottom:10px">Affected Systems</div>
+                <div>{% for sys in incident.affected_systems.split %}{% if sys %}<span class="affected-tag">{{ sys|slice:":50" }}</span>{% endif %}{% endfor %}</div>
+            </div>
+            {% endif %}
+            {% if incident.response_notes %}
+            <div style="background:rgba(50,215,75,0.05);border:1px solid rgba(50,215,75,0.2);border-radius:14px;padding:1.5rem">
+                <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#5edb78;margin-bottom:10px">Response Notes</div>
+                <div style="color:rgba(255,255,255,0.75);font-size:0.9rem;line-height:1.7;white-space:pre-wrap">{{ incident.response_notes }}</div>
+            </div>
+            {% endif %}
+        </div>
+        <div>
+            <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:1.5rem;margin-bottom:1.25rem">
+                <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:rgba(255,255,255,0.4);margin-bottom:1rem">Incident Info</div>
+                {% for label, val in details %}
+                <div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:0.83rem">
+                    <span style="color:rgba(255,255,255,0.4)">{{ label }}</span>
+                    <span style="color:#fff;font-weight:500;text-align:right;max-width:180px">{{ val }}</span>
+                </div>
+                {% endfor %}
+                <div style="display:flex;justify-content:space-between;padding:9px 0;font-size:0.83rem"><span style="color:rgba(255,255,255,0.4)">Reported By</span><span style="color:#fff;font-weight:500">{% if incident and incident.reported_by %}{{ incident.reported_by.get_full_name|default:incident.reported_by.username }}{% endif %}</span></div>
+                <div style="display:flex;justify-content:space-between;padding:9px 0;font-size:0.83rem;border-top:1px solid rgba(255,255,255,0.05)"><span style="color:rgba(255,255,255,0.4)">Assigned To</span><span style="color:#fff;font-weight:500">{{ incident.assigned_to.get_full_name|default:"—" }}</span></div>
+                {% if incident.resolved_at %}<div style="display:flex;justify-content:space-between;padding:9px 0;font-size:0.83rem;border-top:1px solid rgba(255,255,255,0.05)"><span style="color:rgba(255,255,255,0.4)">Resolved At</span><span style="color:#6ee7b7;font-weight:500">{{ incident.resolved_at|date:"M d, H:i" }}</span></div>{% endif %}
+            </div>
+            {% if user.is_staff or user.is_admin_role %}
+            <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:1.5rem">
+                <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:rgba(255,255,255,0.4);margin-bottom:1rem">Update Incident</div>
+                <form method="POST">
+                    {% csrf_token %}
+                    <label style="display:block;font-size:0.72rem;color:rgba(255,255,255,0.4);margin-bottom:6px;text-transform:uppercase">Status</label>
+                    <select name="status" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:9px 12px;color:#fff;font-size:0.85rem;outline:none;font-family:inherit;margin-bottom:1rem">
+                        {% for val, label in status_choices %}
+                        <option value="{{ val }}" {% if val == incident.status %}selected{% endif %} style="background:#1a1a1a">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                    <label style="display:block;font-size:0.72rem;color:rgba(255,255,255,0.4);margin-bottom:6px;text-transform:uppercase">Assign To</label>
+                    <select name="assigned_to" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:9px 12px;color:#fff;font-size:0.85rem;outline:none;font-family:inherit;margin-bottom:1rem">
+                        <option value="" style="background:#1a1a1a">— Unassigned —</option>
+                        {% for u in users %}<option value="{{ u.id }}" {% if incident.assigned_to and incident.assigned_to.id == u.id %}selected{% endif %} style="background:#1a1a1a">{{ u.get_full_name|default:u.username }}</option>{% endfor %}
+                    </select>
+                    <label style="display:block;font-size:0.72rem;color:rgba(255,255,255,0.4);margin-bottom:6px;text-transform:uppercase">Response Notes</label>
+                    <textarea name="response_notes" rows="3" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:9px 12px;color:#fff;font-size:0.85rem;outline:none;font-family:inherit" placeholder="Add containment / response steps...">{{ incident.response_notes|default:'' }}</textarea>
+                    <button type="submit" style="margin-top:1rem;width:100%;background:linear-gradient(135deg,var(--cyber-red),#cc1f1f);color:#fff;border:none;border-radius:8px;padding:11px;font-weight:600;cursor:pointer;font-family:inherit;font-size:0.875rem">Save Changes</button>
+                </form>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% else %}
+    <!-- ── DASHBOARD LIST MODE ──────────────────────────────────────────── -->
+    <style>
+        .radar-box { position: relative; width: 120px; height: 120px; border-radius: 50%; border: 1px solid rgba(0, 229, 255, 0.2); background: radial-gradient(circle, rgba(0,229,255,0.05) 0%, transparent 70%); display: flex; align-items: center; justify-content: center; margin-right: 20px; overflow: hidden; box-shadow: inset 0 0 20px rgba(0, 229, 255, 0.1); }
+        .radar-box::before { content: ''; position: absolute; width: 50%; height: 50%; background: linear-gradient(45deg, rgba(0,229,255,0.8), transparent); border-radius: 100% 0 0 0; transform-origin: bottom right; animation: radar-spin 2s linear infinite; top: 0; left: 0; }
+        .radar-box::after { content: ''; position: absolute; inset: 1px; border-radius: 50%; background: var(--cyber-bg, #0a0a0a); z-index: 1; }
+        .radar-grid { position: absolute; inset: 0; border-radius: 50%; border: 1px dashed rgba(0,229,255,0.15); z-index: 2; margin: 20px; }
+        .radar-grid::before { content: ''; position: absolute; inset: 0; border-radius: 50%; border: 1px dashed rgba(0,229,255,0.15); margin: 20px; }
+        .radar-blip { position: absolute; width: 4px; height: 4px; background: #ff3b30; border-radius: 50%; z-index: 3; box-shadow: 0 0 8px #ff3b30; animation: blip-pulse 1.5s infinite; }
+        @keyframes radar-spin { 100% { transform: rotate(360deg); } }
+        @keyframes blip-pulse { 0%, 100% { opacity: 0.2; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.5); } }
+        
+        .soc-header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; background: rgba(0,0,0,0.4); padding: 20px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); }
+        .soc-header-left { display: flex; align-items: center; }
+    
+.threat-grid { display: grid; grid-template-columns: 1fr 350px; gap: 1.5rem; margin-bottom: 2rem; }
+@media (max-width: 1000px) { .threat-grid { grid-template-columns: 1fr; } }
+.map-panel { background: var(--apple-card-bg); border: 1px solid var(--apple-border); border-radius: 12px; padding: 1.5rem; position: relative; overflow: hidden; min-height: 250px; display: flex; flex-direction: column; justify-content: space-between;}
+.map-bg { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-image: radial-gradient(circle at 50% 50%, rgba(255,59,48,0.05) 0%, transparent 60%), linear-gradient(0deg, transparent 24%, rgba(0, 229, 255, 0.03) 25%, rgba(0, 229, 255, 0.03) 26%, transparent 27%, transparent 74%, rgba(0, 229, 255, 0.03) 75%, rgba(0, 229, 255, 0.03) 76%, transparent 77%, transparent), linear-gradient(90deg, transparent 24%, rgba(0, 229, 255, 0.03) 25%, rgba(0, 229, 255, 0.03) 26%, transparent 27%, transparent 74%, rgba(0, 229, 255, 0.03) 75%, rgba(0, 229, 255, 0.03) 76%, transparent 77%, transparent); background-size: 100% 100%, 30px 30px, 30px 30px; opacity: 0.8; z-index: 0; }
+.map-point { position: absolute; width: 8px; height: 8px; background: var(--cyber-red); border-radius: 50%; box-shadow: 0 0 10px var(--cyber-red); z-index: 2; }
+.map-point::after { content: ''; position: absolute; top: -6px; left: -6px; right: -6px; bottom: -6px; border: 1px solid var(--cyber-red); border-radius: 50%; animation: pulse-ring 2s infinite; opacity: 0.5; }
+.top-ips-panel { background: var(--apple-card-bg); border: 1px solid var(--apple-border); border-radius: 12px; padding: 1.25rem; }
+.ip-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--apple-border-subtle); font-size: 0.85rem; }
+.ip-row:last-child { border-bottom: none; }
+.ip-addr { font-family: 'Fira Code', monospace; color: var(--apple-text); }
+.ip-count { color: var(--cyber-red); font-weight: 600; }
+</style>
+    <div class="soc-header">
+        <div class="soc-header-top">
+            <div class="soc-header-left">
+                <div class="radar-box">
+                    <div class="radar-grid"></div>
+                    <div class="radar-blip" style="top: 25px; left: 35px;"></div>
+                    <div class="radar-blip" style="top: 65px; left: 80px; background: #f59e0b; box-shadow: 0 0 8px #f59e0b; animation-delay: 0.5s;"></div>
+                    <i class="bx bx-target-lock" style="position: absolute; z-index: 4; font-size: 24px; color: rgba(0,229,255,0.3);"></i>
+                </div>
+                <div>
+                    <div class="soc-title" style="font-size: 1.8rem; margin-bottom: 4px;"><span class="pulse"></span> Security Operations Center</div>
+                    <div class="soc-subtitle" style="color: #00E5FF; font-family: 'Fira Code', monospace; font-size: 0.85rem; letter-spacing: 1px;">// LIVE_THREAT_MONITOR · {{ incidents|length }} ACTIVE VECTORS</div>
+                </div>
+            </div>
+            <a href="{% url 'threat-incident-create' %}" class="btn-report" style="padding: 12px 24px; font-size: 1rem; border-radius: 12px; box-shadow: 0 0 20px rgba(255, 59, 48, 0.2);"><i class="bx bx-shield-x"></i> Initialize Response</a>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-bar">
+            <div class="stat-card critical">
+                <div class="stat-val">{{ stats.critical }}</div>
+                <div class="stat-label"><i class="bx bx-error"></i> Critical Active</div>
+            </div>
+            <div class="stat-card high">
+                <div class="stat-val">{{ stats.high }}</div>
+                <div class="stat-label"><i class="bx bx-error-circle"></i> High Active</div>
+            </div>
+            <div class="stat-card open">
+                <div class="stat-val">{{ stats.open }}</div>
+                <div class="stat-label"><i class="bx bx-radio-circle-marked"></i> Open</div>
+            </div>
+            <div class="stat-card investigating">
+                <div class="stat-val">{{ stats.investigating }}</div>
+                <div class="stat-label"><i class="bx bx-search-alt"></i> Investigating</div>
+            </div>
+            <div class="stat-card total">
+                <div class="stat-val">{{ stats.total }}</div>
+                <div class="stat-label"><i class="bx bx-list-ul"></i> All Time</div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <form class="filters" method="GET">
+            <span class="filter-label">Filter:</span>
+            <select class="filter-select" name="severity">
+                <option value="">All Severities</option>
+                {% for val, label in severity_choices %}
+                <option value="{{ val }}" {% if severity_filter == val %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+            <select class="filter-select" name="status">
+                <option value="">All Statuses</option>
+                {% for val, label in status_choices %}
+                <option value="{{ val }}" {% if status_filter == val %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="btn-filter"><i class="bx bx-filter-alt"></i> Apply</button>
+            {% if severity_filter or status_filter %}<a href="{% url 'threat-dashboard' %}" class="btn-clear"><i class="bx bx-x"></i> Clear</a>{% endif %}
+        </form>
+    </div>
+
+    <!-- Incident Table -->
+    <div class="incident-table-wrap">
+        <table class="incident-table">
+            <thead>
+                <tr>
+                    <th>Severity</th>
+                    <th>Incident</th>
+                    <th>Category</th>
+                    <th>Status</th>
+                    <th>Affected Systems</th>
+                    <th>Detected</th>
+                    <th>Assigned To</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for inc in incidents %}
+                <tr onclick="window.location='{% url 'threat-incident-detail' inc.id %}'">
+                    <td><span class="severity-badge sev-{{ inc.severity }}"><i class="bx bx-error-alt"></i>{{ inc.get_severity_display }}</span></td>
+                    <td class="incident-title-cell">
+                        {{ inc.title|truncatechars:60 }}
+                        <small>by {% if inc.reported_by %}{{ inc.reported_by.get_full_name|default:inc.reported_by.username }}{% endif %}</small>
+                    </td>
+                    <td style="color:rgba(255,255,255,0.55);font-size:0.8rem">{{ inc.get_category_display }}</td>
+                    <td><span class="status-badge st-{{ inc.status }}">{{ inc.get_status_display }}</span></td>
+                    <td style="font-size:0.78rem;color:rgba(255,255,255,0.5)">
+                        {% if inc.affected_systems %}{{ inc.affected_systems|truncatechars:40 }}{% else %}—{% endif %}
+                    </td>
+                    <td style="color:rgba(255,255,255,0.5);font-size:0.8rem;white-space:nowrap">{{ inc.detected_at|date:"M d, H:i" }}</td>
+                    <td style="color:rgba(255,255,255,0.7);font-size:0.8rem">{% if inc.assigned_to %}{{ inc.assigned_to.get_full_name|default:inc.assigned_to.username }}{% else %}—{% endif %}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7">
+                    <div class="empty-state">
+                        <i class="bx bx-shield-check"></i>
+                        <h3>No Incidents Found</h3>
+                        <p>No threats match your current filters.</p>
+                    </div>
+                </td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

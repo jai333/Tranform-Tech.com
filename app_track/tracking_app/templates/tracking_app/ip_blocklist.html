@@ -1,0 +1,74 @@
+{% extends 'tracking_app/base.html' %}
+{% block title %}IP Blocklist | Security{% endblock %}
+{% block content %}
+<div class="container-fluid py-4" style="max-width:900px;">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="text-white mb-1"><i class="bx bx-block" style="color:#ff3b30"></i> IP Blocklist</h2>
+            <p class="text-muted small mb-0">Firewall-blocked malicious IP addresses</p>
+        </div>
+        <a href="{% url 'threat-dashboard' %}" class="btn btn-sm" style="color:rgba(255,255,255,.5);border:1px solid #2a2a2a;border-radius:8px;"><i class="bx bx-arrow-back"></i> Back to SOC</a>
+    </div>
+
+    {% if messages %}{% for m in messages %}<div class="alert alert-{{ m.tags }} mb-3">{{ m }}</div>{% endfor %}{% endif %}
+
+    <!-- Add IP Form -->
+    <div class="card mb-4 p-4" style="background:var(--apple-card-bg);border:1px solid var(--apple-border);border-radius:12px;">
+        <h5 class="text-white mb-3"><i class="bx bx-plus-circle text-danger me-1"></i> Block an IP Address</h5>
+        <form method="POST" class="row g-3">
+            {% csrf_token %}
+            <div class="col-md-4">
+                <input type="text" name="ip_address" class="form-control" placeholder="192.168.1.1 or 2001:db8::1" required
+                    style="background:rgba(0,0,0,.3);border:1px solid var(--apple-border);color:white;border-radius:8px;font-family:'Fira Code',monospace;">
+            </div>
+            <div class="col-md-3">
+                <select name="reason" class="form-select" style="background:rgba(0,0,0,.3);border:1px solid var(--apple-border);color:white;border-radius:8px;">
+                    <option value="malware">Malware / C2</option>
+                    <option value="phishing">Phishing</option>
+                    <option value="brute_force">Brute Force</option>
+                    <option value="spam">Spam</option>
+                    <option value="tor_exit">Tor Exit Node</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <input type="text" name="description" class="form-control" placeholder="Optional note..."
+                    style="background:rgba(0,0,0,.3);border:1px solid var(--apple-border);color:white;border-radius:8px;">
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-danger w-100" style="border-radius:8px;"><i class="bx bx-block"></i> Block</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Blocked IPs Table -->
+    <div class="card" style="background:var(--apple-card-bg);border:1px solid var(--apple-border);border-radius:12px;overflow:hidden;">
+        <div class="card-header" style="background:rgba(255,59,48,.05);border-bottom:1px solid var(--apple-border);padding:.75rem 1rem;">
+            <span class="text-white fw-semibold"><i class="bx bx-list-ul"></i> Active Blocked IPs ({{ ips.count }})</span>
+        </div>
+        <table class="table table-borderless table-hover mb-0" style="color:var(--apple-text);">
+            <thead style="background:rgba(255,255,255,.04);border-bottom:1px solid var(--apple-border);">
+                <tr><th class="ps-4">IP Address</th><th>Reason</th><th>Added By</th><th>Notes</th><th>Blocked At</th></tr>
+            </thead>
+            <tbody>
+                {% for ip in ips %}
+                <tr style="border-bottom:1px solid var(--apple-border-subtle);">
+                    <td class="ps-4"><code style="font-family:'Fira Code',monospace;color:#ff6b6b;font-size:.9rem;">{{ ip.ip_address }}</code></td>
+                    <td>
+                        {% if ip.reason == 'malware' %}<span class="badge" style="background:rgba(255,59,48,.2);color:#ff6b6b;">🦠 Malware</span>
+                        {% elif ip.reason == 'phishing' %}<span class="badge" style="background:rgba(255,149,0,.15);color:#ffa733;">🎣 Phishing</span>
+                        {% elif ip.reason == 'brute_force' %}<span class="badge" style="background:rgba(255,214,10,.1);color:#ffd60a;">💣 Brute Force</span>
+                        {% else %}<span class="badge bg-secondary">{{ ip.get_reason_display }}</span>{% endif %}
+                    </td>
+                    <td class="text-muted small">{{ ip.added_by.username|default:"System" }}</td>
+                    <td class="text-muted small">{{ ip.description|default:"—"|truncatechars:40 }}</td>
+                    <td class="text-muted small">{{ ip.added_at|date:"M d, Y H:i" }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5" class="text-center py-4 text-muted">No IPs currently blocked.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

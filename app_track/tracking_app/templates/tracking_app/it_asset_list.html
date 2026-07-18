@@ -1,0 +1,91 @@
+{% extends 'tracking_app/base.html' %}
+{% block content %}
+<div class="container-fluid py-4" style="max-width: 1400px;">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="text-white mb-1"><i class="bx bx-laptop text-info me-2"></i>IT Assets & Vendors</h2>
+            <p class="text-muted small mb-0">Hardware, Software, and Vendor Procurement Dashboard</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-secondary" style="border-radius: 8px;"><i class="bx bx-plus"></i> New Vendor</button>
+            <button class="btn btn-primary" style="border-radius: 8px;"><i class="bx bx-plus"></i> New Asset</button>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Asset List -->
+        <div class="col-md-8">
+            <div class="card shadow-sm" style="background: var(--apple-card-bg); border: 1px solid var(--apple-border); border-radius: 12px; overflow: hidden;">
+                <div class="card-header border-bottom" style="background: rgba(255,255,255,0.02); border-color: var(--apple-border-subtle) !important;">
+                    <h5 class="mb-0 text-white"><i class="bx bx-list-ul me-2"></i> Asset Inventory</h5>
+                </div>
+                <table class="table table-borderless table-hover mb-0" style="color: var(--apple-text);">
+                    <thead style="background: rgba(255,255,255,0.05); border-bottom: 1px solid var(--apple-border);">
+                        <tr>
+                            <th class="ps-4">Asset</th>
+                            <th>Status</th>
+                            <th>Owner</th>
+                            <th>Vendor</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for asset in assets %}
+                        <tr style="border-bottom: 1px solid var(--apple-border-subtle); cursor: pointer;" onclick="window.location.href='{% url 'it-asset-detail' asset.id %}'">
+                            <td class="ps-4">
+                                <div class="fw-bold">{{ asset.name|truncatechars:30 }}</div>
+                                <small class="text-muted">[{{ asset.asset_tag }}] • {{ asset.get_asset_type_display }}</small>
+                            </td>
+                            <td>
+                                {% if asset.status == 'active' %}<span class="badge bg-success">Active</span>
+                                {% elif asset.status == 'available' %}<span class="badge bg-info text-dark">Available</span>
+                                {% elif asset.status == 'in_repair' %}<span class="badge bg-warning text-dark">In Repair</span>
+                                {% else %}<span class="badge bg-secondary">{{ asset.get_status_display }}</span>{% endif %}
+                            </td>
+                            <td>
+                                {% if asset.owner %}
+                                    {{ asset.owner.get_full_name|default:asset.owner.username }}
+                                {% else %}
+                                    <span class="text-muted">Unassigned</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-muted small">{{ asset.vendor.name|default:"-" }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="4" class="text-center py-4 text-muted">No assets currently tracked.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Vendor List -->
+        <div class="col-md-4">
+            <div class="card shadow-sm" style="background: var(--apple-card-bg); border: 1px solid var(--apple-border); border-radius: 12px; overflow: hidden;">
+                <div class="card-header border-bottom" style="background: rgba(255,255,255,0.02); border-color: var(--apple-border-subtle) !important;">
+                    <h5 class="mb-0 text-white"><i class="bx bx-buildings me-2"></i> Vendors</h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    {% for vendor in vendors %}
+                    <div class="list-group-item bg-transparent" style="border-bottom: 1px solid var(--apple-border-subtle);">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <strong class="text-white">{{ vendor.name }}</strong>
+                            {% if vendor.support_portal_url %}
+                            <a href="{{ vendor.support_portal_url }}" target="_blank" class="text-info"><i class="bx bx-link-external"></i></a>
+                            {% endif %}
+                        </div>
+                        {% if vendor.contact_name %}
+                        <div class="text-muted small"><i class="bx bx-user"></i> {{ vendor.contact_name }}</div>
+                        {% endif %}
+                        {% if vendor.contact_email %}
+                        <div class="text-muted small"><i class="bx bx-envelope"></i> {{ vendor.contact_email }}</div>
+                        {% endif %}
+                    </div>
+                    {% empty %}
+                    <div class="p-4 text-center text-muted small">No vendors registered.</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

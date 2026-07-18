@@ -1,0 +1,118 @@
+{% extends 'tracking_app/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="content-container">
+    <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom: 2rem;">
+        <div>
+            <h1 class="page-title"><i class="bx bx-bar-chart-alt-2" style="color:var(--it-blue)"></i> IT Analytics & Reports</h1>
+            <p style="color: rgba(255,255,255,0.5); font-size: 0.9rem;">Performance metrics for the last {{ days }} days.</p>
+        </div>
+        <div style="display:flex; gap: 10px;">
+            <a href="{% url 'it-reports' %}?days=7" class="btn {% if days == 7 %}btn-primary{% else %}btn-secondary{% endif %}">7 Days</a>
+            <a href="{% url 'it-reports' %}?days=30" class="btn {% if days == 30 %}btn-primary{% else %}btn-secondary{% endif %}">30 Days</a>
+            <a href="{% url 'it-helpdesk-list' %}" class="btn-primary" style="background: rgba(255,255,255,0.1); color: #fff;"><i class="bx bx-arrow-back"></i> Kanban Board</a>
+        </div>
+    </div>
+
+    <!-- Top Stats -->
+    <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 2rem;">
+        <div class="card" style="text-align:center;">
+            <div style="font-size: 2.5rem; font-weight: 700; color: #fff;">{{ total_tickets }}</div>
+            <div style="color: rgba(255,255,255,0.5); font-size: 0.9rem;">Total Tickets</div>
+        </div>
+        <div class="card" style="text-align:center;">
+            <div style="font-size: 2.5rem; font-weight: 700; color: #3b82f6;">{{ overall_mttr }}h</div>
+            <div style="color: rgba(255,255,255,0.5); font-size: 0.9rem;">Average MTTR</div>
+        </div>
+        <div class="card" style="text-align:center;">
+            <div style="font-size: 2.5rem; font-weight: 700; color: {% if compliance_rate >= 90 %}#10b981{% else %}#ef4444{% endif %};">{{ compliance_rate }}%</div>
+            <div style="color: rgba(255,255,255,0.5); font-size: 0.9rem;">SLA Compliance</div>
+        </div>
+    </div>
+
+    <!-- Charts -->
+    <div style="display:grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+        <div class="card">
+            <div class="card-title">Ticket Volume</div>
+            <canvas id="volumeChart" height="100"></canvas>
+        </div>
+        <div class="card">
+            <div class="card-title">Tickets by Category</div>
+            <canvas id="categoryChart" height="200"></canvas>
+        </div>
+    </div>
+
+    <!-- Agent Performance -->
+    <div class="card">
+        <div class="card-title">Agent Performance (Resolved Tickets)</div>
+        <table style="width:100%; border-collapse:collapse; font-size:0.9rem;">
+            <thead>
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); text-align: left; color: rgba(255,255,255,0.5);">
+                    <th style="padding: 12px;">Agent Name</th>
+                    <th style="padding: 12px;">Tickets Resolved</th>
+                    <th style="padding: 12px;">Agent MTTR (Hours)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for agent in agent_data %}
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <td style="padding: 12px; color: #fff;">{{ agent.name }}</td>
+                    <td style="padding: 12px; color: #3b82f6; font-weight: 600;">{{ agent.resolved_count }}</td>
+                    <td style="padding: 12px;">{{ agent.mttr }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="3" style="padding: 12px; text-align:center; color:rgba(255,255,255,0.3);">No resolved tickets in this period.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    Chart.defaults.color = 'rgba(255, 255, 255, 0.5)';
+    Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.1)';
+
+    const volCtx = document.getElementById('volumeChart').getContext('2d');
+    new Chart(volCtx, {
+        type: 'line',
+        data: {
+            labels: {{ volume_labels|safe }},
+            datasets: [{
+                label: 'Tickets Created',
+                data: {{ volume_counts|safe }},
+                borderColor: '#6366f1',
+                backgroundColor: 'rgba(99, 102, 241, 0.2)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } }
+        }
+    });
+
+    const catCtx = document.getElementById('categoryChart').getContext('2d');
+    new Chart(catCtx, {
+        type: 'doughnut',
+        data: {
+            labels: {{ category_labels|safe }},
+            datasets: [{
+                data: {{ category_counts|safe }},
+                backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            cutout: '75%',
+            plugins: {
+                legend: { position: 'bottom' }
+            }
+        }
+    });
+</script>
+{% endblock %}

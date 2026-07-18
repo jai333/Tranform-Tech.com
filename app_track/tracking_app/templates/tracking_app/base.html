@@ -247,7 +247,7 @@
             box-shadow: none;
             flex-wrap: nowrap;
             justify-content: center;
-            overflow-x: auto;
+            overflow: visible;
         }
 
         nav li {
@@ -1096,8 +1096,105 @@
         .notification-container, .user-dropdown-menu {
             transition: background-color 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease !important;
         }
+        .dropdown-nav {
+            position: relative;
+        }
+        .dropdown-nav .dropdown-content {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            min-width: 200px;
+            box-shadow: var(--glass-shadow);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            padding: 0.5rem;
+            z-index: 1000;
+        }
+        .dropdown-nav:hover .dropdown-content, .dropdown-content.show-dropdown {
+            display: flex;
+            flex-direction: column;
+        }
+        .dropdown-nav .dropdown-content li {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+        }
+        .dropdown-nav .dropdown-content a {
+            display: block;
+            padding: 0.7rem 1rem;
+            border-radius: 6px;
+        }
+        .dropdown-nav .dropdown-content a:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        /* ── SUPER SMOOTH GLOBAL EFFECTS ────────────────────────────────────────── */
+        @keyframes pageFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(15px) scale(0.995);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        main, .container-fluid, .it-page {
+            animation: pageFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        /* Universal Transitions */
+        a, button, .btn, .card, input, select, textarea, .stat-pill, .ticket-card, .list-group-item {
+            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        }
+
+        /* Card Floating Effects */
+        .card:not(.no-float):hover, .ticket-card:hover {
+            transform: translateY(-4px) scale(1.01) !important;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(0, 229, 255, 0.2) !important;
+        }
+        
+        body.light-theme .card:not(.no-float):hover, body.light-theme .ticket-card:hover {
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(8, 145, 178, 0.2) !important;
+        }
+
+        /* Glassmorphism for Overlays */
+        .modal-box, .dropdown-menu, .nav-sidebar, .it-header {
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
+        }
+
+        /* Staggered Animations for Lists */
+        .list-group-item {
+            animation: pageFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+        .list-group-item:nth-child(1) { animation-delay: 0.02s; }
+        .list-group-item:nth-child(2) { animation-delay: 0.04s; }
+        .list-group-item:nth-child(3) { animation-delay: 0.06s; }
+        .list-group-item:nth-child(4) { animation-delay: 0.08s; }
+        .list-group-item:nth-child(5) { animation-delay: 0.10s; }
+        .list-group-item:nth-child(n+6) { animation-delay: 0.12s; }
     </style>
     {% block extra_styles %}{% endblock %}
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+
+    <style>
+    .htmx-indicator {
+        opacity: 0;
+        transition: opacity 200ms ease-in;
+    }
+    .htmx-request .htmx-indicator {
+        opacity: 1;
+    }
+    .htmx-request.htmx-indicator {
+        opacity: 1;
+    }
+    </style>
+
 </head>
 
 <body>
@@ -1139,7 +1236,36 @@
                     <li><a href="{% url 'ai-pipeline-dashboard' %}" class="{% if '/ai-pipeline/' in request.path %}active{% endif %}"><i class="fa-solid fa-chart-network"></i> AI Pipeline</a></li>
                     {% endif %}
                     {% if user.is_authenticated %}
+                    {% if user.is_it_agent or user.is_it_admin %}
+                    <li class="dropdown-nav" onclick="this.querySelector('.dropdown-content').classList.toggle('show-dropdown')">
+                        <a href="javascript:void(0)" class="{% if '/it/' in request.path %}active{% endif %}">
+                            <i class="fa-solid fa-desktop"></i> IT Dashboard <i class="fas fa-chevron-down" style="font-size: 0.7em; margin-left: 4px;"></i>
+                        </a>
+                        <ul class="dropdown-content">
+                            <li><a href="{% url 'it-helpdesk-list' %}"><i class="fa-solid fa-headset"></i> Tickets</a></li>
+                            {% if user.is_it_admin %}
+                            <li><a href="{% url 'it-admin-settings' %}"><i class="fa-solid fa-gear"></i> IT Admin Settings</a></li>
+                            {% endif %}
+                            {% if user.is_it_agent %}
+                            <li><a href="{% url 'it-reports' %}"><i class="fa-solid fa-chart-bar"></i> IT Reports</a></li>
+                            {% endif %}
+                        </ul>
+                    </li>
+                    {% endif %}
                     <li><a href="{% url 'service-addons' %}" class="{% if '/add-ons/' in request.path %}active{% endif %}"><i class="fa-solid fa-server"></i> Services</a></li>
+                    {% if user.is_authenticated %}
+                    <li><a href="{% url 'account-list' %}" class="{% if '/accounts/' in request.path %}active{% endif %}"><i class="fa-solid fa-buildings"></i> Accounts</a></li>
+                    <li class="dropdown-nav" onclick="this.querySelector('.dropdown-content').classList.toggle('show-dropdown')">
+                        <a href="javascript:void(0)" class="{% if '/security/' in request.path %}active{% endif %}">
+                            <i class="fa-solid fa-shield-halved"></i> Security <i class="fas fa-chevron-down" style="font-size: 0.7em; margin-left: 4px;"></i>
+                        </a>
+                        <ul class="dropdown-content">
+                            <li><a href="{% url 'threat-dashboard' %}"><i class="fa-solid fa-triangle-exclamation"></i> Incidents</a></li>
+                            <li><a href="{% url 'vuln-list' %}"><i class="fa-solid fa-bug"></i> Vulnerabilities</a></li>
+                            <li><a href="{% url 'ip-blocklist' %}"><i class="fa-solid fa-ban"></i> IP Blocklist</a></li>
+                            <li><a href="{% url 'report-phishing' %}"><i class="fa-solid fa-fish"></i> Report Phishing</a></li>
+                        </ul>
+                    </li>
                     {% endif %}
                     <!-- All users can see jobs -->
                     <li><a href="{% url 'job-list' %}" class="{% if '/jobs/' in request.path %}active{% endif %}"><i
@@ -1465,7 +1591,47 @@
         });
     </script>
 
+    <style>
+        #instant-loader { position: fixed; top: 0; left: 0; width: 0; height: 3px; background: #00E5FF; z-index: 99999; transition: width 0.3s ease, opacity 0.3s ease; box-shadow: 0 0 10px #00E5FF; pointer-events: none; opacity: 0; }
+    </style>
+    <div id="instant-loader"></div>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const loader = document.getElementById("instant-loader");
+            document.querySelectorAll('a[href]:not([href^="#"]):not([href^="javascript:"]):not([target="_blank"])').forEach(a => {
+                a.addEventListener("click", function(e) {
+                    if (e.ctrlKey || e.metaKey || e.shiftKey) return;
+                    loader.style.opacity = "1";
+                    loader.style.width = "30%";
+                    setTimeout(() => loader.style.width = "60%", 100);
+                    setTimeout(() => loader.style.width = "90%", 300);
+                });
+            });
+            window.addEventListener("pageshow", () => {
+                loader.style.width = "100%";
+                setTimeout(() => { loader.style.opacity = "0"; setTimeout(() => loader.style.width = "0", 300); }, 200);
+            });
+        });
+    </script>
     {% block extra_scripts %}{% endblock %}
-</body>
+
+    <script>
+        document.body.addEventListener('htmx:beforeRequest', function() {
+            const loader = document.getElementById('instant-loader');
+            if(loader) { loader.style.opacity = '1'; loader.style.width = '30%'; }
+        });
+        document.body.addEventListener('htmx:afterOnLoad', function() {
+            const loader = document.getElementById('instant-loader');
+            if(loader) {
+                loader.style.width = '100%';
+                setTimeout(() => {
+                    loader.style.opacity = '0';
+                    setTimeout(() => { loader.style.width = '0'; }, 300);
+                }, 200);
+            }
+        });
+    </script>
+    </body>
+
 
 </html>

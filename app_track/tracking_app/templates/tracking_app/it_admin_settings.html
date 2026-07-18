@@ -1,0 +1,59 @@
+{% extends 'tracking_app/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="content-container">
+    <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom: 2rem;">
+        <div>
+            <h1 class="page-title"><i class="bx bx-cog" style="color:var(--it-blue)"></i> IT Admin Settings</h1>
+            <p style="color: rgba(255,255,255,0.5); font-size: 0.9rem;">Configure SLAs, Routing Rules, and Helpdesk Settings</p>
+        </div>
+        <a href="{% url 'it-helpdesk-list' %}" class="btn-primary" style="background: rgba(255,255,255,0.1); color: #fff;"><i class="bx bx-arrow-back"></i> Back to Helpdesk</a>
+    </div>
+
+    <div class="card" style="border-top: 3px solid #6366f1;">
+        <div class="card-title">Service Level Agreement (SLA) Configuration</div>
+        <p style="color: rgba(255,255,255,0.5); font-size: 0.85rem; margin-bottom: 1rem;">
+            Set the threshold hours for First Response and Full Resolution. If an SLA is breached, the ticket will auto-escalate.
+        </p>
+        
+        <table style="width:100%; border-collapse:collapse; font-size:0.85rem;">
+            <thead>
+                <tr style="border-bottom: 1px solid var(--apple-border-subtle); color: var(--apple-text-muted); text-align: left;">
+                    <th style="padding: 10px;">Priority</th>
+                    <th style="padding: 10px;">First Response (Hrs)</th>
+                    <th style="padding: 10px;">Resolution (Hrs)</th>
+                    <th style="padding: 10px;">Escalation Trigger</th>
+                    <th style="padding: 10px;">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sla in slas %}
+                <tr style="border-bottom: 1px solid var(--apple-border-subtle);">
+                    <td style="padding: 10px; font-weight: 600;">
+                        <span class="badge badge-{{ sla.priority }}">{{ sla.get_priority_display }}</span>
+                    </td>
+                    <td style="padding: 10px;">{{ sla.first_response_hours }}</td>
+                    <td style="padding: 10px;">{{ sla.resolution_hours }}</td>
+                    <td style="padding: 10px;">
+                        {% if sla.escalation_priority %}
+                            Bump to {{ sla.get_escalation_priority_display }}
+                        {% else %}
+                            <span style="color: rgba(255,255,255,0.3)">None (Max Priority)</span>
+                        {% endif %}
+                    </td>
+                    <td style="padding: 10px;">
+                        <button class="btn" style="padding: 4px 10px; font-size: 0.75rem;">Edit</button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" style="text-align:center; padding: 20px; color:rgba(255,255,255,0.4)">No SLA configurations found. Run seed script.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+{% endblock %}

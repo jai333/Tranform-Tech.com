@@ -485,3 +485,89 @@ class OnboardingFunnel(models.Model):
             remaining = (self.trial_ends_at - timezone.now()).days
             return max(0, remaining)
         return None
+
+
+# ─────────────────────────────────────────────────────────────────
+# LAYER 8 — B2B Account & Contact Management
+# ─────────────────────────────────────────────────────────────────
+
+class Account(models.Model):
+    """A B2B client company / prospect organisation."""
+    INDUSTRY_CHOICES = [
+        ('technology',    'Technology'),
+        ('finance',       'Finance & Banking'),
+        ('healthcare',    'Healthcare'),
+        ('retail',        'Retail & E-commerce'),
+        ('manufacturing', 'Manufacturing'),
+        ('consulting',    'Consulting'),
+        ('media',         'Media & Advertising'),
+        ('education',     'Education'),
+        ('real_estate',   'Real Estate'),
+        ('other',         'Other'),
+    ]
+    SIZE_CHOICES = [
+        ('1-10',     '1–10 employees'),
+        ('11-50',    '11–50 employees'),
+        ('51-200',   '51–200 employees'),
+        ('201-1000', '201–1,000 employees'),
+        ('1000+',    '1,000+ employees'),
+    ]
+    name           = models.CharField(max_length=255)
+    industry       = models.CharField(max_length=50, choices=INDUSTRY_CHOICES, blank=True)
+    website        = models.URLField(blank=True, null=True)
+    annual_revenue = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
+    employee_count = models.CharField(max_length=20, choices=SIZE_CHOICES, blank=True)
+    phone          = models.CharField(max_length=30, blank=True)
+    address        = models.TextField(blank=True)
+    description    = models.TextField(blank=True)
+    owner          = models.ForeignKey('tracking_app.User', on_delete=models.SET_NULL, null=True, blank=True, related_name='owned_accounts')
+    created_at     = models.DateTimeField(auto_now_add=True)
+    updated_at     = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.name
+
+
+class AccountContact(models.Model):
+    """A key stakeholder or buyer persona at a B2B account."""
+    account    = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='contacts')
+    first_name = models.CharField(max_length=100)
+    last_name  = models.CharField(max_length=100)
+    title      = models.CharField(max_length=150, blank=True)
+    email      = models.EmailField(blank=True)
+    phone      = models.CharField(max_length=30, blank=True)
+    linkedin   = models.URLField(blank=True, null=True)
+    is_primary = models.BooleanField(default=False)
+    notes      = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.first_name} {self.last_name} @ {self.account.name}"
+
+    @property
+    def full_name(self):
+        return f"{self.first_name} {self.last_name}"
+
+
+class AccountActivity(models.Model):
+    """Log calls, emails, demos, notes against a B2B account."""
+    TYPE_CHOICES = [
+        ('call',      'Phone Call'),
+        ('email',     'Email'),
+        ('meeting',   'Meeting'),
+        ('demo',      'Product Demo'),
+        ('follow_up', 'Follow-up'),
+        ('note',      'Note'),
+    ]
+    account       = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='account_activities')
+    contact       = models.ForeignKey(AccountContact, on_delete=models.SET_NULL, null=True, blank=True)
+    activity_type = models.CharField(max_length=20, choices=TYPE_CHOICES, default='call')
+    subject       = models.CharField(max_length=255)
+    notes         = models.TextField(blank=True)
+    performed_by  = models.ForeignKey('tracking_app.User', on_delete=models.SET_NULL, null=True, related_name='account_activities')
+    created_at    = models.DateTimeField(auto_now_add=True)
+    due_date      = models.DateField(null=True, blank=True)
+    completed     = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.get_activity_type_display()} – {self.subject}"

@@ -1,0 +1,87 @@
+{% extends 'tracking_app/base.html' %}
+{% block title %}Vulnerability Tracker | Security{% endblock %}
+{% block content %}
+<div class="container-fluid py-4" style="max-width:1400px;">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="text-white mb-1"><i class="bx bx-shield-quarter" style="color:#ff3b30"></i> Vulnerability Tracker</h2>
+            <p class="text-muted small mb-0">CVEs, CVSS scores, remediation status</p>
+        </div>
+        <a href="{% url 'threat-dashboard' %}" class="btn btn-sm" style="color:rgba(255,255,255,.5);border:1px solid #2a2a2a;border-radius:8px;"><i class="bx bx-arrow-back"></i> Back to SOC</a>
+    </div>
+
+    <!-- Stats Bar -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="card text-center py-3" style="background:rgba(255,59,48,.08);border:1px solid rgba(255,59,48,.25);border-radius:12px;">
+                <div style="font-size:2rem;font-weight:800;color:#ff3b30;">{{ stats.critical }}</div>
+                <div class="text-muted small">Critical Open</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card text-center py-3" style="background:rgba(255,149,0,.08);border:1px solid rgba(255,149,0,.25);border-radius:12px;">
+                <div style="font-size:2rem;font-weight:800;color:#ff9500;">{{ stats.high }}</div>
+                <div class="text-muted small">High Open</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card text-center py-3" style="background:rgba(255,214,10,.08);border:1px solid rgba(255,214,10,.25);border-radius:12px;">
+                <div style="font-size:2rem;font-weight:800;color:#ffd60a;">{{ stats.open }}</div>
+                <div class="text-muted small">Total Open</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card text-center py-3" style="background:rgba(50,215,75,.08);border:1px solid rgba(50,215,75,.25);border-radius:12px;">
+                <div style="font-size:2rem;font-weight:800;color:#32d74b;">{{ stats.patched }}</div>
+                <div class="text-muted small">Patched</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="card" style="background:var(--apple-card-bg);border:1px solid var(--apple-border);border-radius:12px;overflow:hidden;">
+        <table class="table table-borderless table-hover mb-0" style="color:var(--apple-text);">
+            <thead style="background:rgba(255,255,255,.04);border-bottom:1px solid var(--apple-border);">
+                <tr>
+                    <th class="ps-4">Vulnerability</th>
+                    <th>CVE</th>
+                    <th>Severity</th>
+                    <th>CVSS</th>
+                    <th>Affected Asset</th>
+                    <th>Status</th>
+                    <th>Discovered</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for v in vulns %}
+                <tr style="border-bottom:1px solid var(--apple-border-subtle);">
+                    <td class="ps-4 fw-bold">{{ v.title|truncatechars:45 }}</td>
+                    <td><code style="font-size:.75rem;color:#0a84ff;">{{ v.cve_id|default:"—" }}</code></td>
+                    <td>
+                        {% if v.severity == 'critical' %}<span class="badge" style="background:rgba(255,59,48,.2);color:#ff6b6b;border:1px solid rgba(255,59,48,.4);">Critical</span>
+                        {% elif v.severity == 'high' %}<span class="badge" style="background:rgba(255,149,0,.15);color:#ffa733;border:1px solid rgba(255,149,0,.3);">High</span>
+                        {% elif v.severity == 'medium' %}<span class="badge" style="background:rgba(255,214,10,.1);color:#ffd60a;border:1px solid rgba(255,214,10,.25);">Medium</span>
+                        {% else %}<span class="badge bg-secondary">{{ v.get_severity_display }}</span>{% endif %}
+                    </td>
+                    <td>
+                        {% if v.cvss_score %}
+                        <span style="font-family:'Fira Code',monospace;font-size:.85rem;color:{% if v.cvss_score >= 9 %}#ff3b30{% elif v.cvss_score >= 7 %}#ff9500{% else %}#ffd60a{% endif %};">{{ v.cvss_score }}</span>
+                        {% else %}—{% endif %}
+                    </td>
+                    <td class="text-muted small">{{ v.affected_asset.name|default:"Unknown" }}</td>
+                    <td>
+                        {% if v.status == 'patched' %}<span class="badge bg-success">Patched</span>
+                        {% elif v.status == 'open' %}<span class="badge" style="background:rgba(255,214,10,.1);color:#ffd60a;">Open</span>
+                        {% elif v.status == 'in_progress' %}<span class="badge" style="background:rgba(10,132,255,.1);color:#6ab4ff;">In Progress</span>
+                        {% else %}<span class="badge bg-secondary">{{ v.get_status_display }}</span>{% endif %}
+                    </td>
+                    <td class="text-muted small">{{ v.discovered_at|date:"M d, Y" }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7" class="text-center py-5 text-muted"><i class="bx bx-check-shield" style="font-size:2.5rem;color:rgba(50,215,75,.4);display:block;margin-bottom:.75rem;"></i>No vulnerabilities tracked yet.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

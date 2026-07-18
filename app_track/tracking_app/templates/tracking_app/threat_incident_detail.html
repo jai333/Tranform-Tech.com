@@ -1,0 +1,227 @@
+{% extends 'tracking_app/base.html' %}
+{% block title %}Incident #{{ incident.id }} | Cyber SOC | Transform.io{% endblock %}
+
+{% block content %}
+<style>
+:root {
+    --cyber-red: #ff3b30;
+    --cyber-orange: #ff9500;
+    --cyber-amber: #ffd60a;
+    --cyber-green: #32d74b;
+    --cyber-blue: #0a84ff;
+    --bg-dark: #0a0a0c;
+}
+.soc-detail-page { padding: 2rem; max-width: 1200px; margin: 0 auto; }
+.back-link { display: inline-flex; align-items: center; gap: 6px; color: var(--apple-text-secondary); font-size: 0.8rem; text-decoration: none; margin-bottom: 1.5rem; transition: color 0.2s; }
+.back-link:hover { color: var(--cyber-red); }
+
+/* Header */
+.inc-header { background: var(--apple-card-bg); border: 1px solid var(--apple-border); border-radius: 16px; padding: 2rem; margin-bottom: 2rem; position: relative; overflow: hidden; }
+.inc-header::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; }
+.inc-critical::before { background: var(--cyber-red); box-shadow: 0 0 15px var(--cyber-red); }
+.inc-high::before { background: var(--cyber-orange); box-shadow: 0 0 15px var(--cyber-orange); }
+.inc-medium::before { background: var(--cyber-amber); }
+.inc-low::before, .inc-info::before { background: var(--cyber-blue); }
+
+.inc-id { font-size: 0.8rem; color: var(--apple-text-secondary); font-family: 'Fira Code', monospace; margin-bottom: 0.5rem; letter-spacing: 0.05em; }
+.inc-title { font-size: 1.8rem; font-weight: 800; color: var(--apple-text); margin-bottom: 1rem; line-height: 1.3; }
+.inc-badges { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.badge { display: inline-flex; align-items: center; gap: 5px; border-radius: 6px; padding: 4px 10px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; border: 1px solid; }
+
+/* Grid Layout */
+.grid-cols-3 { display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; }
+@media (max-width: 900px) { .grid-cols-3 { grid-template-columns: 1fr; } }
+
+/* Cards */
+.soc-card { background: var(--apple-card-bg); border: 1px solid var(--apple-border); border-radius: 16px; padding: 1.5rem; margin-bottom: 1.5rem; }
+.soc-card-title { font-size: 0.9rem; font-weight: 700; color: var(--apple-text); margin-bottom: 1.25rem; display: flex; align-items: center; gap: 8px; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--apple-border-subtle); padding-bottom: 10px; }
+.soc-card-title i { color: var(--cyber-red); }
+
+/* Details Grid */
+.detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+.detail-item { display: flex; flex-direction: column; gap: 4px; }
+.detail-label { font-size: 0.7rem; color: var(--apple-text-secondary); text-transform: uppercase; letter-spacing: 0.05em; }
+.detail-val { font-size: 0.9rem; color: var(--apple-text); font-weight: 500; }
+.detail-mono { font-family: 'Fira Code', monospace; color: var(--cyber-blue); }
+
+/* Forms */
+.form-group { margin-bottom: 1.25rem; }
+.form-group label { display: block; font-size: 0.75rem; color: var(--apple-text-secondary); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+.form-group input, .form-group select, .form-group textarea { width: 100%; background: var(--apple-input-bg); border: 1px solid var(--apple-border); border-radius: 8px; padding: 10px 14px; color: var(--apple-text); font-size: 0.9rem; outline: none; transition: border-color 0.2s; font-family: inherit; }
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--cyber-red); }
+.btn-save { background: rgba(255,59,48,0.1); color: var(--cyber-red); border: 1px solid rgba(255,59,48,0.3); border-radius: 8px; padding: 10px 20px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s; width: 100%; justify-content: center; }
+.btn-save:hover { background: var(--cyber-red); color: #fff; }
+
+.ioc-box { background: var(--apple-input-bg); border: 1px dashed var(--apple-border); padding: 12px; border-radius: 8px; font-family: 'Fira Code', monospace; font-size: 0.8rem; color: var(--cyber-orange); white-space: pre-wrap; word-break: break-all; }
+.desc-box { line-height: 1.6; color: var(--apple-text); font-size: 0.95rem; }
+
+/* Timeline */
+.timeline { position: relative; padding-left: 20px; margin-top: 1rem; }
+.timeline::before { content: ''; position: absolute; left: 4px; top: 0; bottom: 0; width: 1px; background: var(--apple-border); }
+.tl-item { position: relative; margin-bottom: 1.5rem; }
+.tl-dot { position: absolute; left: -20px; top: 4px; width: 9px; height: 9px; border-radius: 50%; background: var(--cyber-blue); border: 2px solid var(--apple-card-bg); }
+.tl-dot.red { background: var(--cyber-red); box-shadow: 0 0 8px var(--cyber-red); }
+.tl-dot.green { background: var(--cyber-green); box-shadow: 0 0 8px var(--cyber-green); }
+.tl-time { font-size: 0.7rem; color: var(--apple-text-secondary); margin-bottom: 2px; }
+.tl-title { font-size: 0.85rem; font-weight: 600; color: var(--apple-text); }
+</style>
+
+<div class="soc-detail-page">
+    <a href="{% url 'threat-dashboard' %}" class="back-link"><i class="bx bx-arrow-back"></i> Back to SOC Dashboard</a>
+
+    {% if messages %}
+    <div style="margin-bottom:1.5rem">
+        {% for message in messages %}
+        <div style="background:rgba(50,215,75,0.1);border:1px solid rgba(50,215,75,0.3);color:var(--cyber-green);padding:12px 16px;border-radius:10px;font-size:0.875rem;">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="inc-header inc-{{ incident.severity }}">
+        <div class="inc-id">INCIDENT-{{ incident.id|stringformat:"05d" }}</div>
+        <h1 class="inc-title">{{ incident.title }}</h1>
+        <div class="inc-badges">
+            <span class="badge" style="{% if incident.severity == 'critical' %}background:rgba(255,59,48,0.1);color:#ff3b30;border-color:rgba(255,59,48,0.3){% elif incident.severity == 'high' %}background:rgba(255,149,0,0.1);color:#ff9500;border-color:rgba(255,149,0,0.3){% else %}background:rgba(255,214,10,0.1);color:#ffd60a;border-color:rgba(255,214,10,0.3){% endif %}">
+                <i class="bx bx-error-circle"></i> {{ incident.get_severity_display }}
+            </span>
+            <span class="badge" style="background:var(--apple-input-bg);color:var(--apple-text);border-color:var(--apple-border)">
+                <i class="bx bx-radar"></i> {{ incident.get_status_display }}
+            </span>
+            {% if incident.cvss_score %}
+            <span class="badge" style="background:rgba(10,132,255,0.1);color:var(--cyber-blue);border-color:rgba(10,132,255,0.3)">
+                CVSS: {{ incident.cvss_score }}
+            </span>
+            {% endif %}
+            <span class="badge" style="background:var(--apple-input-bg);color:var(--apple-text-secondary);border-color:var(--apple-border)">
+                <i class="bx bx-category"></i> {{ incident.get_category_display }}
+            </span>
+        </div>
+    </div>
+
+    <div class="grid-cols-3">
+        <!-- Left Column -->
+        <div>
+            <div class="soc-card">
+                <div class="soc-card-title"><i class="bx bx-info-circle"></i> Incident Description</div>
+                <div class="desc-box">{{ incident.description|linebreaksbr }}</div>
+            </div>
+
+            {% if incident.ioc_indicators %}
+            <div class="soc-card">
+                <div class="soc-card-title"><i class="bx bx-target-lock"></i> Indicators of Compromise (IoC)</div>
+                <div class="ioc-box">{{ incident.ioc_indicators }}</div>
+            </div>
+            {% endif %}
+
+            <div class="soc-card">
+                <div class="soc-card-title"><i class="bx bx-time-five"></i> Threat Timeline</div>
+                <div class="timeline">
+                    <div class="tl-item">
+                        <div class="tl-dot red"></div>
+                        <div class="tl-time">{{ incident.detected_at|date:"M d, Y H:i" }}</div>
+                        <div class="tl-title">Threat Detected</div>
+                        <div style="font-size:0.75rem;color:rgba(255,255,255,0.5);margin-top:4px;">Initial alert triggered and logged by {{ incident.reported_by.get_full_name }}.</div>
+                    </div>
+                    {% if incident.assigned_to %}
+                    <div class="tl-item">
+                        <div class="tl-dot"></div>
+                        <div class="tl-time">Shortly after</div>
+                        <div class="tl-title">Investigation Started</div>
+                        <div style="font-size:0.75rem;color:rgba(255,255,255,0.5);margin-top:4px;">Assigned to {{ incident.assigned_to.get_full_name }}.</div>
+                    </div>
+                    {% endif %}
+                    {% if incident.containment_deadline %}
+                    <div class="tl-item">
+                        <div class="tl-dot {% if incident.is_deadline_breached %}red{% else %}green{% endif %}"></div>
+                        <div class="tl-time">{{ incident.containment_deadline|date:"M d, Y H:i" }}</div>
+                        <div class="tl-title">Containment Deadline</div>
+                        <div style="font-size:0.75rem;color:rgba(255,255,255,0.5);margin-top:4px;">Required containment SLA based on {{ incident.severity }} severity.</div>
+                    </div>
+                    {% endif %}
+                    {% if incident.resolved_at %}
+                    <div class="tl-item">
+                        <div class="tl-dot green"></div>
+                        <div class="tl-time">{{ incident.resolved_at|date:"M d, Y H:i" }}</div>
+                        <div class="tl-title">Incident Resolved</div>
+                        <div style="font-size:0.75rem;color:rgba(255,255,255,0.5);margin-top:4px;">Status marked as resolved/contained.</div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column (Update Form & Details) -->
+        <div>
+            <div class="soc-card">
+                <div class="soc-card-title"><i class="bx bx-server"></i> System Data</div>
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">Affected Systems</span>
+                        <span class="detail-val">{{ incident.affected_systems|default:"None specified" }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Attack Vector</span>
+                        <span class="detail-val">{{ incident.get_attack_vector_display|default:"Unknown" }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Est. Impact</span>
+                        <span class="detail-val">{{ incident.get_estimated_impact_display|default:"Unknown" }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">SLA Breached</span>
+                        <span class="detail-val" style="{% if incident.is_deadline_breached %}color:var(--cyber-red){% else %}color:var(--cyber-green){% endif %}">{{ incident.is_deadline_breached|yesno:"Yes,No" }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="soc-card">
+                <div class="soc-card-title"><i class="bx bx-edit"></i> Update Incident</div>
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select name="status">
+                            {% for val, label in status_choices %}
+                            <option value="{{ val }}" {% if incident.status == val %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Assigned To</label>
+                        <select name="assigned_to">
+                            <option value="">-- Unassigned --</option>
+                            {% for u in users %}
+                            <option value="{{ u.id }}" {% if incident.assigned_to_id == u.id %}selected{% endif %}>{{ u.get_full_name }} ({{ u.username }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>CVSS Score (0-10)</label>
+                        <input type="number" step="0.1" min="0" max="10" name="cvss_score" value="{{ incident.cvss_score|default:'' }}">
+                    </div>
+                    <div class="form-group">
+                        <label>Attack Vector</label>
+                        <select name="attack_vector">
+                            <option value="">-- Select --</option>
+                            {% for val, label in attack_vector_choices %}
+                            <option value="{{ val }}" {% if incident.attack_vector == val %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>IoC Indicators (IPs, Hashes)</label>
+                        <textarea name="ioc_indicators" rows="3">{{ incident.ioc_indicators|default:'' }}</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Response Notes</label>
+                        <textarea name="response_notes" rows="4">{{ incident.response_notes|default:'' }}</textarea>
+                    </div>
+                    <button type="submit" class="btn-save"><i class="bx bx-save"></i> Save Updates</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

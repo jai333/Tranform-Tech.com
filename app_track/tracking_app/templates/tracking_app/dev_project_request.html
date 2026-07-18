@@ -1,0 +1,247 @@
+{% extends 'tracking_app/base_public.html' %}
+{% block title %}Start a Dev Project | Transform.io{% endblock %}
+
+{% block content %}
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800;900&display=swap');
+:root {
+    --dev-green: #10b981;
+    --dev-green-glow: rgba(16,185,129,0.18);
+    --dev-cyan: #00E5FF;
+}
+.devreq-page { font-family: 'Inter', sans-serif; }
+
+/* ── Hero Banner ─── */
+.devreq-hero { position: relative; padding: 5rem 2rem 4rem; text-align: center; overflow: hidden; background: linear-gradient(135deg, #040a06 0%, #061412 50%, #070e0a 100%); border-bottom: 1px solid rgba(16,185,129,0.15); }
+.devreq-hero::before { content: ''; position: absolute; top: -50%; left: 50%; transform: translateX(-50%); width: 800px; height: 800px; background: radial-gradient(circle, rgba(16,185,129,0.12) 0%, transparent 65%); pointer-events: none; }
+.hero-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); border-radius: 20px; padding: 6px 16px; font-size: 0.72rem; color: var(--dev-green); font-family: 'Fira Code', monospace; letter-spacing: 0.08em; margin-bottom: 1.25rem; }
+.hero-h1 { font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 900; color: #fff; line-height: 1.1; letter-spacing: -0.03em; margin-bottom: 1rem; }
+.hero-h1 span { background: linear-gradient(135deg, var(--dev-green), var(--dev-cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.hero-sub { font-size: 1rem; color: rgba(255,255,255,0.55); max-width: 560px; margin: 0 auto 2rem; line-height: 1.6; }
+.trust-row { display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap; }
+.trust-item { display: flex; align-items: center; gap: 6px; font-size: 0.78rem; color: rgba(255,255,255,0.4); }
+.trust-item i { color: var(--dev-green); }
+
+/* ── Form Section ─── */
+.devreq-body { max-width: 860px; margin: 0 auto; padding: 3rem 2rem 4rem; }
+.messages-area { margin-bottom: 1.5rem; }
+.alert { border-radius: 10px; padding: 12px 16px; font-size: 0.875rem; margin-bottom: 8px; }
+.alert-success { background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); color: #6ee7b7; display: flex; align-items: center; gap: 8px; }
+.alert-error { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #fca5a5; }
+
+.form-section { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.07); border-radius: 16px; padding: 2rem; margin-bottom: 1.5rem; position: relative; }
+.section-title { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--dev-green); margin-bottom: 1.25rem; display: flex; align-items: center; gap: 8px; }
+.section-number { width: 22px; height: 22px; border-radius: 50%; background: rgba(16,185,129,0.2); border: 1px solid rgba(16,185,129,0.4); display: inline-flex; align-items: center; justify-content: center; font-size: 0.68rem; font-weight: 700; color: var(--dev-green); }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+@media (max-width: 660px) { .form-row, .form-row-3 { grid-template-columns: 1fr; } }
+.form-group { margin-bottom: 1rem; }
+.form-group:last-child { margin-bottom: 0; }
+.form-group label { display: block; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255,255,255,0.5); margin-bottom: 7px; }
+.form-group label .req { color: var(--dev-green); }
+.form-group input, .form-group textarea, .form-group select { width: 100%; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 9px; padding: 11px 14px; color: #fff; font-size: 0.875rem; outline: none; font-family: inherit; transition: border-color 0.2s, background 0.2s; box-sizing: border-box; }
+.form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: var(--dev-green); background: rgba(16,185,129,0.04); }
+.form-group input::placeholder, .form-group textarea::placeholder { color: rgba(255,255,255,0.2); }
+.form-group select option { background: #0d1f0e; }
+
+/* Project Type Grid */
+.type-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 1rem; }
+@media (max-width: 560px) { .type-grid { grid-template-columns: repeat(2, 1fr); } }
+.type-card { background: rgba(255,255,255,0.03); border: 2px solid rgba(255,255,255,0.07); border-radius: 10px; padding: 14px 12px; text-align: center; cursor: pointer; transition: all 0.2s; }
+.type-card:hover, .type-card.selected { background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.5); }
+.type-card i { font-size: 1.5rem; display: block; margin-bottom: 6px; color: rgba(255,255,255,0.4); }
+.type-card.selected i { color: var(--dev-green); }
+.type-card span { font-size: 0.75rem; color: rgba(255,255,255,0.6); font-weight: 500; }
+.type-card.selected span { color: var(--dev-green); }
+input[type='hidden']#projectTypeInput {}
+
+/* Checkbox */
+.checkbox-row { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+.checkbox-row input[type='checkbox'] { width: 18px; height: 18px; accent-color: var(--dev-green); cursor: pointer; }
+.checkbox-row span { font-size: 0.875rem; color: rgba(255,255,255,0.7); }
+
+/* Submit */
+.submit-area { text-align: center; padding: 1rem 0; }
+.btn-submit-main { background: linear-gradient(135deg, var(--dev-green), #059669); color: #fff; border: none; border-radius: 12px; padding: 16px 40px; font-size: 1rem; font-weight: 700; cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 10px; transition: opacity 0.2s, transform 0.2s; letter-spacing: -0.01em; }
+.btn-submit-main:hover { opacity: 0.9; transform: translateY(-2px); }
+.submit-note { font-size: 0.75rem; color: rgba(255,255,255,0.3); margin-top: 10px; }
+
+/* Staff list table (reused for dev_project_list view) */
+.staff-table-wrap { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; overflow: hidden; margin-top: 2rem; }
+.staff-table { width: 100%; border-collapse: collapse; }
+.staff-table th { background: rgba(255,255,255,0.03); padding: 12px 16px; text-align: left; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255,255,255,0.4); border-bottom: 1px solid rgba(255,255,255,0.07); }
+.staff-table td { padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 0.875rem; color: rgba(255,255,255,0.8); vertical-align: middle; }
+.staff-table tbody tr:last-child td { border-bottom: none; }
+.status-pill { display: inline-block; border-radius: 12px; padding: 3px 10px; font-size: 0.68rem; font-weight: 600; }
+.st-new { background: rgba(16,185,129,0.1); color: #6ee7b7; }
+.st-reviewing { background: rgba(0,229,255,0.08); color: #00E5FF; }
+.st-proposal_sent { background: rgba(245,158,11,0.1); color: #fcd34d; }
+.st-won { background: rgba(16,185,129,0.15); color: #34d399; }
+.st-lost { background: rgba(107,114,128,0.1); color: #9ca3af; }
+</style>
+
+{% if requests %}
+<!-- ─── STAFF: LIST MODE ──────────────────────────────────────────── -->
+<div class="devreq-body">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem">
+        <div>
+            <h1 style="font-size:1.5rem;font-weight:800;color:#fff;margin-bottom:4px">Dev Project Requests</h1>
+            <p style="font-size:0.8rem;color:rgba(255,255,255,0.4)">{{ requests|length }} total submissions</p>
+        </div>
+        <a href="{% url 'dev-project-request' %}" style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);color:var(--dev-green);border-radius:8px;padding:8px 16px;text-decoration:none;font-size:0.8rem;display:inline-flex;align-items:center;gap:6px"><i class="bx bx-plus"></i> View Public Form</a>
+    </div>
+    <div class="staff-table-wrap">
+        <table class="staff-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Project</th>
+                    <th>Contact</th>
+                    <th>Type</th>
+                    <th>Budget</th>
+                    <th>Timeline</th>
+                    <th>Status</th>
+                    <th>Submitted</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for req in requests %}
+                <tr>
+                    <td style="color:rgba(255,255,255,0.3);font-family:'Fira Code',monospace;font-size:0.75rem">#{{ req.id }}</td>
+                    <td>
+                        <div style="color:#fff;font-weight:500">{{ req.project_title|truncatechars:45 }}</div>
+                        {% if req.company_name %}<div style="font-size:0.72rem;color:rgba(255,255,255,0.4)">{{ req.company_name }}</div>{% endif %}
+                    </td>
+                    <td>
+                        <div>{{ req.contact_name }}</div>
+                        <div style="font-size:0.72rem;color:rgba(255,255,255,0.4)">{{ req.contact_email }}</div>
+                    </td>
+                    <td style="font-size:0.8rem;color:rgba(255,255,255,0.6)">{{ req.get_project_type_display }}</td>
+                    <td style="font-size:0.8rem;color:rgba(255,255,255,0.6)">{{ req.get_budget_range_display }}</td>
+                    <td style="font-size:0.8rem;color:rgba(255,255,255,0.6)">{{ req.get_timeline_display }}</td>
+                    <td><span class="status-pill st-{{ req.status }}">{{ req.get_status_display }}</span></td>
+                    <td style="font-size:0.78rem;color:rgba(255,255,255,0.4);white-space:nowrap">{{ req.created_at|date:"M d, Y" }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="8" style="text-align:center;padding:3rem;color:rgba(255,255,255,0.3)">No project requests yet.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% else %}
+<!-- ─── PUBLIC: FORM MODE ─────────────────────────────────────────── -->
+<div class="devreq-page">
+    <!-- Hero -->
+    <div class="devreq-hero">
+        <div class="hero-badge"><i class="bx bx-code-alt"></i> DEV PROJECT PORTAL</div>
+        <h1 class="hero-h1">Build Something <span>Extraordinary</span></h1>
+        <p class="hero-sub">Tell us about your project idea. Our senior engineering team will review your submission and reach out within 24 hours with a tailored proposal.</p>
+        <div class="trust-row">
+            <div class="trust-item"><i class="bx bx-check"></i> No commitment required</div>
+            <div class="trust-item"><i class="bx bx-check"></i> Free consultation</div>
+            <div class="trust-item"><i class="bx bx-check"></i> Response in 24h</div>
+        </div>
+    </div>
+
+    <!-- Form Body -->
+    <div class="devreq-body">
+        {% if messages %}
+        <div class="messages-area">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {% if 'success' in message.tags %}<i class="bx bx-check-circle" style="font-size:1.1rem"></i>{% endif %}
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <form method="POST" action="{% url 'dev-project-request' %}">
+            {% csrf_token %}
+            <input type="hidden" name="project_type" id="projectTypeInput" value="">
+
+            <!-- Section 1: Contact Info -->
+            <div class="form-section">
+                <div class="section-title"><span class="section-number">1</span> Your Contact Details</div>
+                <div class="form-row">
+                    <div class="form-group"><label>Full Name <span class="req">*</span></label><input type="text" name="contact_name" placeholder="Jane Doe" required></div>
+                    <div class="form-group"><label>Work Email <span class="req">*</span></label><input type="email" name="contact_email" placeholder="jane@company.com" required></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Phone</label><input type="tel" name="contact_phone" placeholder="+1 (555) 000-0000"></div>
+                    <div class="form-group"><label>Company / Organisation</label><input type="text" name="company_name" placeholder="Acme Corp."></div>
+                </div>
+            </div>
+
+            <!-- Section 2: Project Type -->
+            <div class="form-section">
+                <div class="section-title"><span class="section-number">2</span> Project Type <span style="color:rgba(255,255,255,0.3);font-weight:400;font-size:0.68rem;margin-left:6px">(required)</span></div>
+                <div class="type-grid">
+                    {% for val, label in project_type_choices %}
+                    {% if val == 'saas' %}<div class="type-card" data-val="{{ val }}" onclick="pickType(this)"><i class="bx bx-cloud"></i><span>{{ label }}</span></div>
+                    {% elif val == 'mobile' %}<div class="type-card" data-val="{{ val }}" onclick="pickType(this)"><i class="bx bx-mobile-alt"></i><span>{{ label }}</span></div>
+                    {% elif val == 'internal' %}<div class="type-card" data-val="{{ val }}" onclick="pickType(this)"><i class="bx bx-bar-chart-alt-2"></i><span>{{ label }}</span></div>
+                    {% elif val == 'ecommerce' %}<div class="type-card" data-val="{{ val }}" onclick="pickType(this)"><i class="bx bx-store"></i><span>{{ label }}</span></div>
+                    {% elif val == 'api' %}<div class="type-card" data-val="{{ val }}" onclick="pickType(this)"><i class="bx bx-plug"></i><span>{{ label }}</span></div>
+                    {% else %}<div class="type-card" data-val="{{ val }}" onclick="pickType(this)"><i class="bx bx-dots-horizontal-rounded"></i><span>{{ label }}</span></div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Section 3: Project Details -->
+            <div class="form-section">
+                <div class="section-title"><span class="section-number">3</span> Project Details</div>
+                <div class="form-group"><label>Project / Product Title <span class="req">*</span></label><input type="text" name="project_title" placeholder="e.g. AI-powered HR dashboard for enterprise" required></div>
+                <div class="form-group"><label>Project Description <span class="req">*</span></label><textarea name="description" rows="5" placeholder="What do you want to build? Who is the audience? What problem does it solve? The more detail, the better our proposal..." required></textarea></div>
+                <div class="form-group"><label>Tech Preferences</label><input type="text" name="tech_preferences" placeholder="e.g. React, Django REST, PostgreSQL, AWS — leave blank if flexible"></div>
+                <div class="form-group">
+                    <label class="checkbox-row">
+                        <input type="checkbox" name="has_existing_codebase">
+                        <span>We have an existing codebase (continue / extend project)</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Section 4: Budget & Timeline -->
+            <div class="form-section">
+                <div class="section-title"><span class="section-number">4</span> Budget & Timeline</div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Budget Range</label>
+                        <select name="budget_range">
+                            {% for val, label in budget_choices %}
+                            <option value="{{ val }}" {% if val == 'discuss' %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Desired Timeline</label>
+                        <select name="timeline">
+                            {% for val, label in timeline_choices %}
+                            <option value="{{ val }}" {% if val == 'flexible' %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="submit-area">
+                <button type="submit" class="btn-submit-main"><i class="bx bx-rocket"></i> Submit Project Request</button>
+                <div class="submit-note">By submitting you agree to be contacted by our team. No spam, ever.</div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+<script>
+function pickType(el) {
+    document.querySelectorAll('.type-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    document.getElementById('projectTypeInput').value = el.getAttribute('data-val');
+}
+</script>
+{% endblock %}

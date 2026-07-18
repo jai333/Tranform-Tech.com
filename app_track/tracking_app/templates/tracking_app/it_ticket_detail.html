@@ -1,0 +1,543 @@
+{% extends 'tracking_app/base.html' %}
+{% block title %}Ticket #{{ ticket.id }} | IT Helpdesk | Transform.io{% endblock %}
+
+{% block content %}
+<style>
+:root { --it-blue: #00a6fb; --it-blue-glow: rgba(0,166,251,0.18); }
+.detail-page { padding: 2rem; max-width: 1100px; margin: 0 auto; }
+.back-link { display: inline-flex; align-items: center; gap: 6px; color: rgba(255,255,255,0.5); font-size: 0.8rem; text-decoration: none; margin-bottom: 1.5rem; transition: color 0.2s; }
+.back-link:hover { color: var(--it-blue); }
+
+/* Header */
+.ticket-header { background: var(--apple-card-bg); border: 1px solid var(--apple-border); border-radius: 16px; padding: 1.75rem 2rem; margin-bottom: 1.5rem; position: relative; overflow: hidden; }
+.ticket-header::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--it-blue), #0077cc); }
+.ticket-id { font-size: 0.75rem; color: var(--it-blue); font-family: 'Fira Code', monospace; margin-bottom: 0.5rem; letter-spacing: 0.05em; }
+.ticket-h-title { font-size: 1.4rem; font-weight: 700; color: var(--apple-text); margin-bottom: 1rem; line-height: 1.3; }
+.badge-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.badge { display: inline-flex; align-items: center; gap: 5px; border-radius: 6px; padding: 4px 10px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; border: 1px solid; }
+.badge-p1 { background: rgba(239,68,68,0.12); color: #f87171; border-color: rgba(239,68,68,0.3); }
+.badge-p2 { background: rgba(245,158,11,0.12); color: #fcd34d; border-color: rgba(245,158,11,0.3); }
+.badge-p3 { background: rgba(0,229,255,0.08); color: #00E5FF; border-color: rgba(0,229,255,0.25); }
+.badge-p4 { background: rgba(107,114,128,0.12); color: #9ca3af; border-color: rgba(107,114,128,0.3); }
+.badge-open { background: rgba(239,68,68,0.1); color: #f87171; border-color: rgba(239,68,68,0.25); }
+.badge-in_progress { background: rgba(245,158,11,0.1); color: #fcd34d; border-color: rgba(245,158,11,0.25); }
+.badge-on_hold { background: rgba(99,102,241,0.1); color: #a5b4fc; border-color: rgba(99,102,241,0.25); }
+.badge-pending_user { background: rgba(168,85,247,0.1); color: #c4b5fd; border-color: rgba(168,85,247,0.25); }
+.badge-resolved, .badge-closed { background: rgba(16,185,129,0.1); color: #6ee7b7; border-color: rgba(16,185,129,0.25); }
+
+/* SLA Bar */
+.sla-bar-wrap { background: var(--apple-card-bg); border: 1px solid var(--apple-border); border-radius: 12px; padding: 1rem 1.5rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; }
+.sla-label { font-size: 0.75rem; color: var(--apple-text-secondary); text-transform: uppercase; letter-spacing: 0.06em; }
+.sla-val { font-size: 1.1rem; font-weight: 700; font-family: 'Fira Code', monospace; }
+.sla-val.ok { color: #10b981; }
+.sla-val.warning { color: #f59e0b; }
+.sla-val.breached { color: #ef4444; animation: pulse-red 1.5s infinite; }
+@keyframes pulse-red { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+.sla-progress-outer { flex: 1; min-width: 180px; background: var(--apple-border); border-radius: 99px; height: 6px; overflow: hidden; }
+.sla-progress-inner { height: 100%; border-radius: 99px; transition: width 1s linear; }
+
+/* Grid */
+.content-grid { display: grid; grid-template-columns: 1fr 360px; gap: 1.25rem; }
+@media (max-width: 860px) { .content-grid { grid-template-columns: 1fr; } }
+.card { background: var(--apple-card-bg); border: 1px solid var(--apple-border); border-radius: 14px; padding: 1.5rem; }
+.card + .card { margin-top: 1.25rem; }
+.card-title { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--apple-text-secondary); margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+.description-text { color: var(--apple-text); font-size: 0.9rem; line-height: 1.75; white-space: pre-wrap; }
+.resolution-box { background: rgba(16,185,129,0.06); border: 1px solid rgba(16,185,129,0.2); border-radius: 10px; padding: 1rem; margin-top: 1rem; }
+.resolution-box h4 { font-size: 0.78rem; color: #6ee7b7; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.06em; display: flex; align-items: center; gap: 6px; }
+.resolution-box p { color: var(--apple-text-secondary); font-size: 0.875rem; line-height: 1.6; }
+
+/* Tag pills */
+.tag-pill { display: inline-block; background: rgba(0,166,251,0.08); color: var(--it-blue); border: 1px solid rgba(0,166,251,0.2); border-radius: 99px; padding: 2px 10px; font-size: 0.68rem; margin: 2px; }
+
+/* Attachment preview */
+.attachment-link { display: inline-flex; align-items: center; gap: 6px; background: var(--apple-input-bg); border: 1px solid var(--apple-border); border-radius: 8px; padding: 6px 12px; color: var(--apple-text-secondary); font-size: 0.8rem; text-decoration: none; transition: border-color 0.2s; margin-top: 8px; }
+.attachment-link:hover { border-color: var(--it-blue); color: var(--it-blue); }
+
+/* Comment thread */
+.thread { display: flex; flex-direction: column; gap: 14px; margin-bottom: 1.25rem; }
+.comment-bubble { display: flex; gap: 12px; }
+.comment-bubble.internal .bubble-body { border-left: 3px solid rgba(168,85,247,0.5); background: rgba(168,85,247,0.04); }
+.avatar { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, var(--it-blue), #0077cc); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; color: #fff; flex-shrink: 0; }
+.bubble-body { flex: 1; background: var(--apple-input-bg); border: 1px solid var(--apple-border); border-radius: 10px; padding: 12px 14px; }
+.bubble-meta { font-size: 0.72rem; color: var(--apple-text-muted); margin-bottom: 6px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.bubble-meta strong { color: var(--apple-text); }
+.bubble-text { color: var(--apple-text); font-size: 0.875rem; line-height: 1.6; white-space: pre-wrap; }
+.internal-tag { background: rgba(168,85,247,0.15); color: #9c27b0; border-radius: 4px; padding: 1px 6px; font-size: 0.65rem; }
+.comment-form { border-top: 1px solid var(--apple-border-subtle); padding-top: 1.25rem; }
+.comment-form textarea { width: 100%; background: var(--apple-input-bg); border: 1px solid var(--apple-border); border-radius: 10px; padding: 12px 14px; color: var(--apple-text); font-size: 0.875rem; outline: none; font-family: inherit; resize: vertical; min-height: 90px; transition: border-color 0.2s; }
+.comment-form textarea:focus { border-color: var(--it-blue); }
+.comment-actions { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; flex-wrap: wrap; gap: 8px; }
+.internal-toggle { display: flex; align-items: center; gap: 6px; font-size: 0.78rem; color: var(--apple-text-secondary); cursor: pointer; }
+.internal-toggle input { accent-color: #a855f7; }
+.btn-comment { background: linear-gradient(135deg, var(--it-blue), #0077cc); color: #fff; border: none; border-radius: 8px; padding: 8px 18px; font-size: 0.875rem; font-weight: 600; cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 6px; transition: opacity 0.2s; }
+.btn-comment:hover { opacity: 0.88; }
+
+/* Right panel */
+.info-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--apple-border-subtle); font-size: 0.85rem; }
+.info-row:last-child { border-bottom: none; }
+.info-label { color: var(--apple-text-secondary); }
+.info-value { color: var(--apple-text); font-weight: 500; text-align: right; }
+.update-form label { display: block; font-size: 0.75rem; color: var(--apple-text-secondary); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.04em; margin-top: 1rem; }
+.update-form label:first-child { margin-top: 0; }
+.update-form select { width: 100%; background: var(--apple-input-bg); border: 1px solid var(--apple-border); border-radius: 8px; padding: 9px 12px; color: var(--apple-text); font-size: 0.875rem; outline: none; font-family: inherit; transition: border-color 0.2s; }
+.update-form select:focus { border-color: var(--it-blue); }
+.update-form select option { background: var(--apple-card-bg); color: var(--apple-text); }
+.update-form textarea { width: 100%; background: var(--apple-input-bg); border: 1px solid var(--apple-border); border-radius: 8px; padding: 9px 12px; color: var(--apple-text); font-size: 0.875rem; outline: none; font-family: inherit; resize: vertical; }
+.update-form textarea:focus { border-color: var(--it-blue); }
+.btn-update { margin-top: 1.25rem; width: 100%; background: linear-gradient(135deg, var(--it-blue), #0077cc); color: #fff; border: none; border-radius: 8px; padding: 11px; font-weight: 600; cursor: pointer; font-family: inherit; font-size: 0.875rem; transition: opacity 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px; }
+.btn-update:hover { opacity: 0.88; }
+.resolution-required-hint { font-size: 0.72rem; color: #f87171; display: none; margin-top: 6px; }
+
+/* Activity timeline */
+.timeline-item { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--apple-border-subtle); font-size: 0.8rem; }
+.timeline-item:last-child { border-bottom: none; }
+.tl-icon { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; flex-shrink: 0; }
+.tl-text { color: var(--apple-text-secondary); line-height: 1.5; }
+
+/* Alerts */
+.alert { border-radius: 10px; padding: 12px 16px; font-size: 0.875rem; margin-bottom: 8px; }
+.alert-success { background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); color: #6ee7b7; }
+.alert-error { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #fca5a5; }
+.alert-info { background: rgba(0,166,251,0.1); border: 1px solid rgba(0,166,251,0.3); color: #7dd3fc; }
+.sla-alert-banner { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.3); border-radius: 10px; padding: 12px 16px; margin-bottom: 1.5rem; color: #fca5a5; font-size: 0.85rem; display: flex; align-items: center; gap: 10px; }
+</style>
+
+<div class="detail-page">
+    <a href="{% url 'it-helpdesk-list' %}" class="back-link"><i class="bx bx-arrow-back"></i> Back to IT Helpdesk</a>
+
+    {% if messages %}
+    <div style="margin-bottom:1rem">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if ticket.is_sla_breached %}
+    <div class="sla-alert-banner">
+        <i class="bx bx-time-five bx-tada" style="font-size:1.2rem"></i>
+        <div><strong>SLA Breached</strong> — This ticket exceeded its service level agreement deadline. Immediate escalation required.</div>
+    </div>
+    {% endif %}
+
+    <!-- Ticket Header -->
+    <div class="ticket-header">
+        <div class="ticket-id">TICKET-{{ ticket.id }} · Opened {{ ticket.created_at|date:"M d, Y H:i" }}</div>
+        <div class="ticket-h-title">{{ ticket.title }}</div>
+        <div class="badge-row">
+            <span class="badge badge-{{ ticket.priority }}"><i class="bx bx-flag"></i>{{ ticket.get_priority_display }}</span>
+            <span class="badge badge-{{ ticket.status }}"><i class="bx bx-radio-circle"></i>{{ ticket.get_status_display }}</span>
+            <span class="badge" style="background:rgba(0,166,251,0.1);color:var(--it-blue);border-color:rgba(0,166,251,0.25)"><i class="bx bx-category"></i>{{ ticket.get_category_display }}</span>
+            {% if ticket.tags %}
+                {% for tag in ticket.tags.split %}
+                <span class="tag-pill">{{ tag|cut:"," }}</span>
+                {% endfor %}
+            {% endif %}
+            <span class="badge" style="background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.5);border-color:rgba(255,255,255,0.1)"><i class="bx bx-chat"></i>{{ ticket.get_comment_count }} comments</span>
+        </div>
+    </div>
+
+    <!-- SLA Countdown Bar -->
+    {% if not user.is_it_enduser and ticket.status not in 'resolved,closed,on_hold' %}
+    <div class="sla-bar-wrap">
+        <div>
+            <div class="sla-label">SLA Deadline</div>
+            <div class="sla-val {% if ticket.is_sla_breached %}breached{% elif ticket.sla_remaining_minutes < 60 %}warning{% else %}ok{% endif %}" id="sla-countdown">
+                {{ ticket.resolve_due_at|date:"M d, H:i" }}
+            </div>
+        </div>
+        <div class="sla-progress-outer">
+            <div class="sla-progress-inner" id="sla-bar"
+                 style="width: 100%; background: {% if ticket.is_sla_breached %}#ef4444{% elif ticket.sla_remaining_minutes < 120 %}#f59e0b{% else %}#10b981{% endif %}">
+            </div>
+        </div>
+        <div style="font-size:0.75rem; color:rgba(255,255,255,0.4);">
+            {% if ticket.is_sla_breached %}
+                <span style="color:#ef4444"><i class="bx bx-error"></i> Overdue</span>
+            {% else %}
+                ~{{ ticket.sla_remaining_minutes }}m remaining
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="content-grid">
+        <!-- Left: Description + Comments -->
+        <div>
+            <!-- Description -->
+            <div class="card">
+                <div class="card-title"><i class="bx bx-file-blank"></i> Description</div>
+                <div class="description-text">{{ ticket.description }}</div>
+                {% if ticket.attachment %}
+                <a href="{{ ticket.attachment.url }}" class="attachment-link" target="_blank">
+                    <i class="bx bx-paperclip"></i> View Attachment
+                </a>
+                {% endif %}
+            </div>
+
+            {% if ticket.resolution_notes %}
+            <div class="card" style="margin-top:1.25rem">
+                <div class="resolution-box">
+                    <h4><i class="bx bx-check-circle"></i> Resolution Notes</h4>
+                    <p>{{ ticket.resolution_notes }}</p>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Comment Thread -->
+            <div class="card" style="margin-top:1.25rem">
+                <div class="card-title"><i class="bx bx-conversation"></i> Activity & Comments ({{ comments|length }})</div>
+
+                {% if comments %}
+                <div class="thread">
+                    {% for comment in comments %}
+                    <div class="comment-bubble {% if comment.is_internal %}internal{% endif %}">
+                        <div class="avatar" title="{{ comment.author.get_full_name|default:comment.author.username }}">
+                            {{ comment.author.first_name|first|default:comment.author.username|first|upper }}
+                        </div>
+                        <div class="bubble-body">
+                            <div class="bubble-meta">
+                                <strong>{{ comment.author.get_full_name|default:comment.author.username }}</strong>
+                                <span>{{ comment.created_at|timesince }} ago</span>
+                                {% if comment.is_internal %}<span class="internal-tag"><i class="bx bx-lock-alt"></i> Staff Only</span>{% endif %}
+                            </div>
+                            <div class="bubble-text">{{ comment.body|safe }}</div>
+                            {% if comment.attachment %}
+                            <a href="{{ comment.attachment.url }}" class="attachment-link" target="_blank">
+                                <i class="bx bx-paperclip"></i> Attachment
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div style="text-align:center; padding: 1.5rem 0; color: rgba(255,255,255,0.25); font-size: 0.85rem;">
+                    <i class="bx bx-chat" style="font-size:1.5rem; display:block; margin-bottom:6px;"></i>
+                    No comments yet. Be the first to respond.
+                </div>
+                {% endif %}
+
+                <!-- Add Comment Form -->
+                <div class="comment-form">
+                    <form method="POST" action="{% url 'it-ticket-detail' ticket.id %}" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="comment">
+                        <textarea name="body" placeholder="Add a comment or update..." required></textarea>
+                        <input type="file" name="comment_attachment" style="display:none" id="commentFile">
+                        <div class="comment-actions">
+                            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                                {% if user.is_it_agent %}
+                                <label class="internal-toggle">
+                                    <input type="checkbox" name="is_internal"> <i class="bx bx-lock-alt"></i> Internal Note
+                                </label>
+                                {% endif %}
+                                <label for="commentFile" style="cursor:pointer; font-size:0.78rem; color:rgba(255,255,255,0.45); display:flex; align-items:center; gap:5px;">
+                                    <i class="bx bx-paperclip"></i> Attach file
+                                </label>
+                            </div>
+                            <button type="submit" class="btn-comment"><i class="bx bx-send"></i> Post Comment</button>
+                        </div>
+                    </form>
+                </div>
+                </div>
+                
+                <!-- Audit Log (Internal) -->
+                {% if user.is_it_agent and audit_logs %}
+                <div class="card" style="margin-top: 2rem; border-top: 3px solid #8b5cf6;">
+                    <div class="card-title"><i class="bx bx-history"></i> System Audit Log</div>
+                    <table style="width:100%; border-collapse:collapse; font-size:0.8rem; color: rgba(255,255,255,0.6);">
+                        <thead>
+                            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); text-align: left;">
+                                <th style="padding: 8px;">Time</th>
+                                <th style="padding: 8px;">Actor</th>
+                                <th style="padding: 8px;">Action</th>
+                                <th style="padding: 8px;">Details</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for log in audit_logs %}
+                            <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                <td style="padding: 8px;">{{ log.timestamp|date:"M d, H:i:s" }}</td>
+                                <td style="padding: 8px;">{{ log.actor.username|default:"System" }}</td>
+                                <td style="padding: 8px;">Updated {{ log.field_changed }}</td>
+                                <td style="padding: 8px;">
+                                    {% if log.old_value %}
+                                        <span style="text-decoration:line-through; color:rgba(255,255,255,0.4)">{{ log.old_value }}</span> &rarr;
+                                    {% endif %}
+                                    <span style="color: #fff">{{ log.new_value }}</span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Right Panel: Info + Update -->
+        <div>
+            <!-- Ticket Info -->
+            <div class="card">
+                <div class="card-title"><i class="bx bx-info-circle"></i> Ticket Info</div>
+                <div class="info-row">
+                    <span class="info-label">Submitted By</span>
+                    <span class="info-value">{{ ticket.submitted_by.get_full_name|default:ticket.submitted_by.username }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Assigned To</span>
+                    <span class="info-value">{% if ticket.assigned_to %}{{ ticket.assigned_to.get_full_name|default:ticket.assigned_to.username }}{% else %}<span style="color:#f59e0b">Unassigned</span>{% endif %}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">SLA Due</span>
+                    <span class="info-value {% if ticket.is_sla_breached %}sla-val breached{% endif %}">{{ ticket.resolve_due_at|date:"M d, H:i" }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Created</span>
+                    <span class="info-value">{{ ticket.created_at|timesince }} ago</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Last Updated</span>
+                    <span class="info-value">{{ ticket.updated_at|timesince }} ago</span>
+                </div>
+                {% if ticket.resolved_at %}
+                <div class="info-row">
+                    <span class="info-label">Resolved At</span>
+                    <span class="info-value" style="color:#6ee7b7">{{ ticket.resolved_at|date:"M d, H:i" }}</span>
+                </div>
+                {% endif %}
+                {% if ticket.sla_paused_at %}
+                <div class="info-row">
+                    <span class="info-label">SLA Paused</span>
+                    <span class="info-value" style="color:#a5b4fc"><i class="bx bx-pause"></i> On Hold</span>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Associated Asset -->
+            {% if ticket.asset %}
+            <div class="card" style="border-left: 3px solid #6366f1;">
+                <div class="card-title" style="display:flex; justify-content:space-between;">
+                    <span><i class="bx bx-laptop"></i> Associated Asset</span>
+                    <a href="{% url 'it-asset-detail' ticket.asset.id %}" style="font-size:0.75rem; color:#6366f1; text-decoration:none;">View CI <i class="bx bx-right-arrow-alt"></i></a>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Tag / ID</span>
+                    <span class="info-value" style="font-family: monospace;">{{ ticket.asset.asset_tag }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Type</span>
+                    <span class="info-value">{{ ticket.asset.get_asset_type_display }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Owner</span>
+                    <span class="info-value">{% if ticket.asset.owner %}{{ ticket.asset.owner.get_full_name|default:ticket.asset.owner.username }}{% else %}-{% endif %}</span>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Update Ticket Form -->
+            {% if user.is_it_agent %}
+            <div class="card">
+                <div class="card-title"><i class="bx bx-edit"></i> Manage Ticket</div>
+                <form class="update-form" method="POST" action="{% url 'it-ticket-update-status' ticket.id %}">
+                    {% csrf_token %}
+                    <label>Status</label>
+                    <select name="status" id="statusSelect" onchange="checkResolutionRequired()">
+                        {% for val, label in status_choices %}
+                        <option value="{{ val }}" {% if val == ticket.status %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+
+                    {% if user.is_staff or user.is_admin_role %}
+                    <label>Escalate Priority</label>
+                    <select name="priority">
+                        {% for val, label in priority_choices %}
+                        <option value="{{ val }}" {% if val == ticket.priority %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <label>Assign To</label>
+                    <select name="assigned_to">
+                        <option value="">— Unassigned —</option>
+                        {% for u in users %}
+                        <option value="{{ u.id }}" {% if ticket.assigned_to and ticket.assigned_to.id == u.id %}selected{% endif %}>{{ u.get_full_name|default:u.username }}</option>
+                        {% endfor %}
+                    </select>
+                    {% endif %}
+
+                    <label>Linked Asset (CI)</label>
+                    <select name="asset_id">
+                        <option value="">— None —</option>
+                        {% for a in assets %}
+                        <option value="{{ a.id }}" {% if ticket.asset and ticket.asset.id == a.id %}selected{% endif %}>{{ a.asset_tag }} - {{ a.name }}</option>
+                        {% endfor %}
+                    </select>
+
+                    {% if macros %}
+                    <label>Apply Macro</label>
+                    <select id="macroSelect" onchange="applyMacro()" style="margin-bottom: 15px;">
+                        <option value="">— Select a Macro —</option>
+                        {% for macro in macros %}
+                        <option value="{{ macro.id }}" data-text="{{ macro.response_text|escapejs }}" data-status="{{ macro.auto_status|default:'' }}" data-priority="{{ macro.auto_priority|default:'' }}">{{ macro.title }}</option>
+                        {% endfor %}
+                    </select>
+                    {% endif %}
+
+                    <label>Resolution / Update Notes <span id="resolution-hint" class="resolution-required-hint">(Required when resolving)</span></label>
+                    <textarea name="resolution_notes" rows="3" id="resolutionNotes" placeholder="Add resolution details or progress notes...">{{ ticket.resolution_notes|default:'' }}</textarea>
+
+                    <button type="submit" class="btn-update" id="updateBtn"><i class="bx bx-save"></i> Save Changes</button>
+                </form>
+            </div>
+            {% endif %}
+
+            <!-- Time Tracking (Work Logs) -->
+            {% if user.is_it_agent %}
+            <div class="card" style="margin-top: 1rem;">
+                <div class="card-title" style="display:flex; justify-content:space-between;">
+                    <span><i class="bx bx-time-five"></i> Time Tracking</span>
+                    <span style="color: #10b981; font-weight:600;">Total: {{ total_time }} min</span>
+                </div>
+                
+                <div class="worklogs-list" style="max-height: 150px; overflow-y: auto; margin-bottom: 1rem; font-size: 0.8rem; color: rgba(255,255,255,0.6);">
+                    {% for log in work_logs %}
+                    <div style="border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 5px; margin-bottom: 5px;">
+                        <div style="display:flex; justify-content:space-between;">
+                            <strong style="color: #fff">{{ log.agent.username }}</strong>
+                            <span style="color: #3b82f6">{{ log.time_spent_minutes }} min</span>
+                        </div>
+                        <div style="font-size: 0.75rem;">{{ log.description|default:"No description" }}</div>
+                        <div style="font-size: 0.7rem; color: rgba(255,255,255,0.3);">{{ log.date }}</div>
+                    </div>
+                    {% empty %}
+                    <div style="text-align:center; padding: 10px;">No time logged yet.</div>
+                    {% endfor %}
+                </div>
+
+                <form method="POST" action="{% url 'it-ticket-update-status' ticket.id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="log_time">
+                    <div style="display:grid; grid-template-columns: 1fr 2fr; gap: 5px; margin-bottom: 10px;">
+                        <div>
+                            <label style="font-size: 0.75rem;">Minutes</label>
+                            <input type="number" name="time_spent_minutes" min="1" required style="padding: 5px;">
+                        </div>
+                        <div>
+                            <label style="font-size: 0.75rem;">Description</label>
+                            <input type="text" name="worklog_description" placeholder="Optional" style="padding: 5px;">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-primary" style="width:100%; padding: 5px; font-size: 0.85rem;"><i class="bx bx-plus"></i> Log Time</button>
+                </form>
+            </div>
+            {% endif %}
+
+            <!-- Quick Actions -->
+            {% if user.is_staff or user.is_admin_role %}
+            <div class="card">
+                <div class="card-title"><i class="bx bx-zap"></i> Quick Actions</div>
+                <div style="display:flex; flex-direction:column; gap:8px;">
+                    <form method="POST" action="{% url 'it-ticket-update-status' ticket.id %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="status" value="in_progress">
+                        <button type="submit" style="width:100%; background:rgba(245,158,11,0.1); border:1px solid rgba(245,158,11,0.3); color:#fcd34d; border-radius:8px; padding:9px; font-family:inherit; cursor:pointer; font-size:0.8rem; font-weight:600;"><i class="bx bx-play"></i> Start Working</button>
+                    </form>
+                    <form method="POST" action="{% url 'it-ticket-update-status' ticket.id %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="status" value="on_hold">
+                        <button type="submit" style="width:100%; background:rgba(99,102,241,0.1); border:1px solid rgba(99,102,241,0.3); color:#a5b4fc; border-radius:8px; padding:9px; font-family:inherit; cursor:pointer; font-size:0.8rem; font-weight:600;"><i class="bx bx-pause"></i> Place On Hold (Pause SLA)</button>
+                    </form>
+                    <form method="POST" action="{% url 'it-ticket-update-status' ticket.id %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="status" value="resolved">
+                        <input type="hidden" name="resolution_notes" value="Marked as resolved via quick action.">
+                        <button type="submit" style="width:100%; background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); color:#6ee7b7; border-radius:8px; padding:9px; font-family:inherit; cursor:pointer; font-size:0.8rem; font-weight:600;"><i class="bx bx-check-double"></i> Mark as Resolved</button>
+                    </form>
+                    <form method="POST" action="{% url 'it-ticket-update-status' ticket.id %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="status" value="pending_user">
+                        <button type="submit" style="width:100%; background:rgba(168,85,247,0.1); border:1px solid rgba(168,85,247,0.3); color:#c4b5fd; border-radius:8px; padding:9px; font-family:inherit; cursor:pointer; font-size:0.8rem; font-weight:600;"><i class="bx bx-question-mark"></i> Awaiting User Response</button>
+                    </form>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+function checkResolutionRequired() {
+    const status = document.getElementById('statusSelect').value;
+    const hint = document.getElementById('resolution-hint');
+    const notes = document.getElementById('resolutionNotes');
+    if (status === 'resolved' || status === 'closed') {
+        hint.style.display = 'inline';
+        notes.required = true;
+        notes.placeholder = 'Resolution notes are required when closing a ticket...';
+    } else {
+        hint.style.display = 'none';
+        notes.required = false;
+        notes.placeholder = 'Add resolution details or progress notes...';
+    }
+}
+
+// Live SLA countdown
+{% if not ticket.is_sla_breached and ticket.sla_remaining_minutes %}
+(function() {
+    let remaining = {{ ticket.sla_remaining_minutes }} * 60; // seconds
+    function update() {
+        if (remaining <= 0) {
+            document.getElementById('sla-countdown').className = 'sla-val breached';
+            document.getElementById('sla-countdown').textContent = 'BREACHED';
+            document.getElementById('sla-bar').style.background = '#ef4444';
+            document.getElementById('sla-bar').style.width = '100%';
+            return;
+        }
+        remaining--;
+        const h = Math.floor(remaining / 3600);
+        const m = Math.floor((remaining % 3600) / 60);
+        const s = remaining % 60;
+        document.getElementById('sla-countdown').textContent =
+            (h > 0 ? h + 'h ' : '') + m + 'm ' + s + 's left';
+    }
+    setInterval(update, 1000);
+    update();
+})();
+{% endif %}
+</script>
+<script>
+function applyMacro() {
+    const select = document.getElementById('macroSelect');
+    const option = select.options[select.selectedIndex];
+    if (!option.value) return;
+
+    // Populate main comment box
+    const commentBox = document.querySelector('textarea[name="body"]');
+    if (commentBox) {
+        commentBox.value = option.dataset.text;
+    }
+
+    // Populate status and priority
+    const statusVal = option.dataset.status;
+    const priorityVal = option.dataset.priority;
+    
+    if (statusVal) {
+        const statusSelect = document.getElementById('statusSelect');
+        if (statusSelect) statusSelect.value = statusVal;
+    }
+    
+    if (priorityVal) {
+        const prioritySelect = document.querySelector('select[name="priority"]');
+        if (prioritySelect) prioritySelect.value = priorityVal;
+    }
+    
+    // Check resolution requirements
+    if (typeof checkResolutionRequired === 'function') {
+        checkResolutionRequired();
+    }
+}
+</script>
+{% endblock %}

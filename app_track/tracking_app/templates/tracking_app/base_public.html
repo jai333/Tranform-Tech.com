@@ -1,0 +1,635 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transform.io — The One Platform for IT, Recruitment, Security & Development</title>
+    <meta name="description" content="Transform.io is the unified platform for AI Sales, Cybersecurity, Recruiting & Sourcing, ATS-CRM with interviews, Web & App Development, Data Dashboards, and IT Management as a Service.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;600&family=Inter:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'tracking_app/transform.css' %}?v=503">
+    <style>
+    /* ══════════════════════════════════════════════════════════════
+       PREMIUM HOME — Exotic glassmorphic theme variables
+       ══════════════════════════════════════════════════════════════ */
+    :root {
+        --card-bg: rgba(255, 255, 255, 0.03);
+        --card-border: rgba(255, 255, 255, 0.06);
+        --transition-theme: background 0.35s ease, background-color 0.35s ease, color 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+        
+        /* Service Colors */
+        --color-sales: #00E5FF;
+        --bg-sales-tag: rgba(0, 229, 255, 0.08);
+        --color-cyber: #FF3B30;
+        --bg-cyber-tag: rgba(255, 59, 48, 0.08);
+        --color-recruit: #8b5cf6;
+        --bg-recruit-tag: rgba(139, 92, 246, 0.08);
+        --color-dev: #10b981;
+        --bg-dev-tag: rgba(16, 185, 129, 0.08);
+        --color-dash: #FFCC00;
+        --bg-dash-tag: rgba(255, 204, 0, 0.08);
+        --color-itops: #00a6fb;
+        --bg-itops-tag: rgba(0, 166, 251, 0.08);
+    }
+    body.light-theme {
+        --card-bg: rgba(0, 0, 0, 0.02);
+        --card-border: rgba(0, 0, 0, 0.08);
+        
+        /* Service Colors for light background readability */
+        --color-sales: #0891b2;
+        --bg-sales-tag: rgba(8, 145, 178, 0.1);
+        --color-cyber: #dc2626;
+        --bg-cyber-tag: rgba(220, 38, 38, 0.1);
+        --color-recruit: #6d28d9;
+        --bg-recruit-tag: rgba(109, 40, 217, 0.1);
+        --color-dev: #047857;
+        --bg-dev-tag: rgba(4, 120, 87, 0.1);
+        --color-dash: #b45309;
+        --bg-dash-tag: rgba(180, 83, 9, 0.1);
+        --color-itops: #0369a1;
+        --bg-itops-tag: rgba(3, 105, 161, 0.1);
+    }
+
+    /* ── Smooth Theme Transitions ─────────────────────────── */
+    body, html, .navbar, .svc-card, .stat-block, .bento-box, .huge-title, .hero-title, .hero-subtitle, p, h1, h2, h3, h4, span, a, .border-glow, .cta-banner, .footer {
+        transition: var(--transition-theme);
+    }
+
+    /* ── Ambient glow orbs ─────────────────────────────────── */
+    .bg-gradient {
+        position: fixed;
+        top: 0; left: 0; width: 100vw; height: 100vh;
+        z-index: -15; pointer-events: none;
+        opacity: 0; transition: opacity 0.4s ease;
+    }
+    body.light-theme .bg-gradient {
+        background: radial-gradient(circle at top left, #dbeafe 0%, #f0f4f8 60%, #e9ecef 100%);
+        opacity: 1;
+    }
+    .orb {
+        position: fixed; border-radius: 50%; pointer-events: none; z-index: -10;
+        filter: blur(140px); opacity: 0.08;
+    }
+    @keyframes float-orb-1 {
+        0% { transform: translate(0, 0) scale(1); }
+        50% { transform: translate(50px, 30px) scale(1.05); }
+        100% { transform: translate(0, 0) scale(1); }
+    }
+    @keyframes float-orb-2 {
+        0% { transform: translate(0, 0) scale(1); }
+        50% { transform: translate(-40px, -50px) scale(0.95); }
+        100% { transform: translate(0, 0) scale(1); }
+    }
+    @keyframes float-orb-3 {
+        0% { transform: translate(0, 0) scale(1); }
+        50% { transform: translate(30px, -30px) scale(1.1); }
+        100% { transform: translate(0, 0) scale(1); }
+    }
+    .orb-1 { width: 700px; height: 700px; background: #6366f1; top: -15%; left: -15%; animation: float-orb-1 20s ease infinite alternate; }
+    .orb-2 { width: 550px; height: 550px; background: #06b6d4; bottom: 5%; right: -10%; animation: float-orb-2 25s ease infinite alternate; }
+    .orb-3 { width: 400px; height: 400px; background: #10b981; top: 45%; left: 35%; animation: float-orb-3 18s ease infinite alternate; }
+
+    /* ── Utility ────────────────────────────────────────────── */
+    .relative { position: relative; }
+    .huge-title { font-size: 2.8rem; letter-spacing: -0.04em; color: var(--text-white); margin-bottom: 20px; line-height: 1.08; font-weight: 900; }
+    .sub-tag { color: var(--primary); font-family: var(--font-mono); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 12px; display: block; }
+    .section-intro { max-width: 720px; margin: 0 auto 56px; text-align: center; }
+
+    /* ── Z-Index: Navbar always on top ─────────────────────────── */
+    /* Handled in transform.css. No inline override needed. */
+
+    /* ── Hero ───────────────────────────────────────────────── */
+    .hero-badge {
+        display: inline-flex; align-items: center; gap: 8px;
+        background: rgba(0,229,255,0.08); border: 1px solid rgba(0,229,255,0.2);
+        border-radius: 50px; padding: 6px 16px; margin-bottom: 20px;
+        font-family: var(--font-mono); font-size: 0.72rem; color: var(--primary);
+        animation: pulse-glow 3s ease infinite;
+    }
+    .hero-badge .dot { width: 6px; height: 6px; background: #34C759; border-radius: 50%; }
+
+    /* ── Service Cards (glassmorphic) ──────────────────────── */
+    .svc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .svc-card {
+        background: var(--card-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+        border: 1px solid var(--card-border); border-radius: 16px;
+        padding: 28px 24px; position: relative; overflow: hidden;
+        transition: all 0.45s cubic-bezier(0.16,1,0.3,1);
+    }
+    .svc-card::before {
+        content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+        border-radius: 16px 16px 0 0; transition: opacity 0.3s ease;
+    }
+    .svc-card:hover {
+        transform: translateY(-6px);
+        border-color: rgba(0,229,255,0.25);
+        box-shadow: 0 24px 64px rgba(0,0,0,0.4), 0 0 40px rgba(0,229,255,0.06);
+    }
+    .svc-icon {
+        width: 48px; height: 48px; border-radius: 12px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.4rem; margin-bottom: 16px;
+    }
+    .svc-card h4 { color: var(--text-white); font-size: 1rem; font-weight: 700; margin-bottom: 6px; }
+    .svc-card .svc-mono { font-family: var(--font-mono); font-size: 0.62rem; color: var(--text-dark-gray); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+    .svc-card p { color: var(--text-gray); font-size: 0.82rem; line-height: 1.55; }
+    .svc-card .svc-tag {
+        display: inline-block; margin-top: 14px; padding: 4px 10px;
+        border-radius: 4px; font-family: var(--font-mono); font-size: 0.62rem;
+        text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    /* Color themes per card */
+    .svc-sales::before { background: linear-gradient(90deg, var(--color-sales), #3a7bd5); }
+    .svc-sales .svc-icon { background: var(--bg-sales-tag); color: var(--color-sales); }
+    .svc-sales .svc-tag { background: var(--bg-sales-tag); color: var(--color-sales); }
+
+    .svc-cyber::before { background: linear-gradient(90deg, var(--color-cyber), #FF9500); }
+    .svc-cyber .svc-icon { background: var(--bg-cyber-tag); color: var(--color-cyber); }
+    .svc-cyber .svc-tag { background: var(--bg-cyber-tag); color: var(--color-cyber); }
+
+    .svc-recruit::before { background: linear-gradient(90deg, var(--color-recruit), #a78bfa); }
+    .svc-recruit .svc-icon { background: var(--bg-recruit-tag); color: var(--color-recruit); }
+    .svc-recruit .svc-tag { background: var(--bg-recruit-tag); color: var(--color-recruit); }
+
+    .svc-ats::before { background: linear-gradient(90deg, var(--color-sales), #06b6d4); }
+    .svc-ats .svc-icon { background: var(--bg-sales-tag); color: var(--color-sales); }
+    .svc-ats .svc-tag { background: var(--bg-sales-tag); color: var(--color-sales); }
+
+    .svc-dev::before { background: linear-gradient(90deg, var(--color-dev), #34d399); }
+    .svc-dev .svc-icon { background: var(--bg-dev-tag); color: var(--color-dev); }
+    .svc-dev .svc-tag { background: var(--bg-dev-tag); color: var(--color-dev); }
+
+    .svc-dash::before { background: linear-gradient(90deg, var(--color-dash), #FF9500); }
+    .svc-dash .svc-icon { background: var(--bg-dash-tag); color: var(--color-dash); }
+    .svc-dash .svc-tag { background: var(--bg-dash-tag); color: var(--color-dash); }
+
+    .svc-itops::before { background: linear-gradient(90deg, var(--color-itops), #3a7bd5); }
+    .svc-itops .svc-icon { background: var(--bg-itops-tag); color: var(--color-itops); }
+    .svc-itops .svc-tag { background: var(--bg-itops-tag); color: var(--color-itops); }
+
+    /* Keep simulated terminal dark in both themes for glow readability */
+    .terminal-mock {
+        background-color: #050505 !important;
+        border-color: rgba(255, 255, 255, 0.1) !important;
+    }
+    .terminal-header {
+        background-color: #0b0b0b !important;
+        border-color: rgba(255, 255, 255, 0.1) !important;
+    }
+
+    /* ── Stats row ─────────────────────────────────────────── */
+    .stats-row {
+        display: grid; grid-template-columns: repeat(4, 1fr); gap: 0;
+        background: var(--card-bg); border: 1px solid var(--card-border);
+        border-radius: 16px; overflow: hidden;
+    }
+    .stat-block {
+        text-align: center; padding: 32px 16px;
+        border-right: 1px solid var(--card-border);
+    }
+    .stat-block:last-child { border-right: none; }
+    .stat-block:hover { background: rgba(0,229,255,0.03); }
+    .stat-block .stat-num { font-size: 2.4rem; font-weight: 900; font-family: var(--font-mono); color: var(--text-white); line-height: 1; }
+    .stat-block .stat-label { font-size: 0.68rem; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-dark-gray); margin-top: 8px; }
+
+    /* ── Showcase split ─────────────────────────────────────── */
+    .showcase-split {
+        display: flex; flex-wrap: wrap; gap: 56px; align-items: center; margin-bottom: 64px;
+    }
+    .showcase-text { flex: 1; min-width: 320px; }
+    .showcase-visual { flex: 1; min-width: 320px; }
+    .showcase-visual .img-wrap {
+        border: 1px solid var(--card-border); border-radius: 12px;
+        padding: 4px; position: relative; overflow: hidden;
+    }
+    .showcase-visual .img-wrap::before {
+        content: ''; position: absolute; inset: 0;
+        background: linear-gradient(135deg, rgba(0,229,255,0.12), transparent 60%);
+        pointer-events: none; z-index: 1;
+    }
+    .showcase-visual img { width: 100%; border-radius: 8px; display: block; }
+
+    .feature-pill {
+        display: inline-flex; align-items: center; gap: 6px;
+        background: var(--primary-dim); border: 1px solid var(--primary-dim);
+        border-radius: 6px; padding: 6px 12px; margin: 4px 4px 4px 0;
+        font-family: var(--font-mono); font-size: 0.68rem; color: var(--primary);
+    }
+
+    /* ── Why us / Trust strip ──────────────────────────────── */
+    .trust-strip {
+        display: flex; justify-content: center; gap: 48px; flex-wrap: wrap;
+        padding: 40px 0;
+    }
+    .trust-item {
+        text-align: center; color: var(--text-dark-gray);
+        font-family: var(--font-mono); font-size: 0.72rem;
+    }
+    .trust-item i { font-size: 1.6rem; display: block; margin-bottom: 6px; color: var(--primary); opacity: 0.5; }
+
+    /* ── CTA banner ────────────────────────────────────────── */
+    .cta-banner {
+        background: linear-gradient(135deg, rgba(0,229,255,0.08), rgba(139,92,246,0.06));
+        border: 1px solid var(--card-border); border-radius: 20px;
+        padding: 56px 48px; text-align: center;
+    }
+
+    /* ── Responsive ────────────────────────────────────────── */
+    @media (max-width: 900px) {
+        .svc-grid { grid-template-columns: 1fr 1fr; }
+        .stats-row { grid-template-columns: 1fr 1fr; }
+        .huge-title { font-size: 2rem; }
+    }
+    @media (max-width: 600px) {
+        .svc-grid { grid-template-columns: 1fr; }
+        .stats-row { grid-template-columns: 1fr; }
+        .stat-block { border-right: none; border-bottom: 1px solid var(--card-border); }
+    }
+    </style>
+<script>
+    (function(){
+        const saved = localStorage.getItem('theme') || 'dark';
+        if (saved === 'light') document.documentElement.classList.add('light-theme');
+    })();
+</script>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+
+    <style>
+    .htmx-indicator {
+        opacity: 0;
+        transition: opacity 200ms ease-in;
+    }
+    .htmx-request .htmx-indicator {
+        opacity: 1;
+    }
+    .htmx-request.htmx-indicator {
+        opacity: 1;
+    }
+    </style>
+
+</head>
+<body>
+
+<!-- Ambient glow orbs -->
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     NAVIGATION
+     ═══════════════════════════════════════════════════════════ -->
+<nav class="navbar border-bottom relative">
+    <div class="container nav-content">
+        <a href="{% url 'home' %}" class="logo font-mono" style="text-decoration: none; display: flex; align-items: center; gap: 12px; position: relative; z-index: 100;">
+            <img src="{% static 'tracking_app/assets/logo-333.png' %}" alt="Transform.io" style="height: 48px; width: auto; max-width: 250px; border-radius: 4px; box-shadow: 0 0 10px rgba(0, 229, 255, 0.5);">
+            <span style="font-size: 1.5rem; font-weight: 800; color: var(--text-white); letter-spacing: -0.02em;">Transform.io</span>
+        </a>
+        
+        <ul class="nav-links text-sm" style="font-family: var(--font-sans); font-weight: 600;">
+            <li>
+                <a href="#">PLATFORM <i class='bx bx-chevron-down'></i></a>
+                <div class="mega-menu">
+                    <div class="mega-col">
+                        <span class="mega-header">CORE MODULES</span>
+                        <a href="{% url 'candidate-list' %}" class="mega-item">
+                            <div class="mega-icon" style="color: var(--color-sales); background: var(--bg-sales-tag);"><i class='bx bx-video'></i></div>
+                            <div class="mega-text">
+                                <span class="mega-title">ATS & Interview Suite</span>
+                                <span class="mega-desc">Full hiring infra with video</span>
+                            </div>
+                        </a>
+                        <a href="{% url 'sales-dashboard' %}" class="mega-item">
+                            <div class="mega-icon" style="color: var(--color-recruit); background: var(--bg-recruit-tag);"><i class='bx bx-briefcase'></i></div>
+                            <div class="mega-text">
+                                <span class="mega-title">Client CRM Matrix</span>
+                                <span class="mega-desc">Manage clients & placements</span>
+                            </div>
+                        </a>
+                        <a href="{% url 'bulk-resume-upload' %}" class="mega-item">
+                            <div class="mega-icon" style="color: var(--color-dev); background: var(--bg-dev-tag);"><i class='bx bx-brain'></i></div>
+                            <div class="mega-text">
+                                <span class="mega-title">AI Resume Parsing</span>
+                                <span class="mega-desc">NLP matching & scoring</span>
+                            </div>
+                        </a>
+                        <a href="{% url 'scheduled-report-list' %}" class="mega-item">
+                            <div class="mega-icon" style="color: var(--color-dash); background: var(--bg-dash-tag);"><i class='bx bx-git-merge'></i></div>
+                            <div class="mega-text">
+                                <span class="mega-title">Workflow Automation</span>
+                                <span class="mega-desc">Automate manual tasks</span>
+                            </div>
+                        </a>
+                        <a href="{% url 'sales-analytics' %}" class="mega-item">
+                            <div class="mega-icon" style="color: var(--color-itops); background: var(--bg-itops-tag);"><i class='bx bx-line-chart'></i></div>
+                            <div class="mega-text">
+                                <span class="mega-title">Data Dashboards</span>
+                                <span class="mega-desc">Real-time business BI</span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </li>
+
+            <li>
+                <a href="#">SERVICES <i class='bx bx-chevron-down'></i></a>
+                <div class="mega-menu">
+                    <div class="mega-col">
+                        <span class="mega-header">FULL STACK IT</span>
+                        <a href="{% url 'threat-dashboard' %}" class="mega-item">
+                            <div class="mega-icon" style="color: var(--color-cyber); background: var(--bg-cyber-tag);"><i class='bx bx-shield-quarter'></i></div>
+                            <div class="mega-text">
+                                <span class="mega-title">Cybersecurity</span>
+                                <span class="mega-desc">SOC2 &amp; Zero-Trust Architecture</span>
+                            </div>
+                        </a>
+                        <a href="{% url 'dev-project-request' %}" class="mega-item">
+                            <div class="mega-icon" style="color: var(--color-recruit); background: var(--bg-recruit-tag);"><i class='bx bx-code-block'></i></div>
+                            <div class="mega-text">
+                                <span class="mega-title">Web &amp; App Dev</span>
+                                <span class="mega-desc">Start a project request</span>
+                            </div>
+                        </a>
+                        <a href="{% url 'it-helpdesk-list' %}" class="mega-item">
+                            <div class="mega-icon" style="color: var(--color-itops); background: var(--bg-itops-tag);"><i class='bx bx-server'></i></div>
+                            <div class="mega-text">
+                                <span class="mega-title">IT Helpdesk</span>
+                                <span class="mega-desc">Submit &amp; track IT tickets</span>
+                            </div>
+                        </a>
+                        <a href="#services" class="mega-item">
+                            <div class="mega-icon" style="color: var(--color-dev); background: var(--bg-dev-tag);"><i class='bx bx-search-alt'></i></div>
+                            <div class="mega-text">
+                                <span class="mega-title">Recruiting</span>
+                                <span class="mega-desc">Sourcing top 1% talent</span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </li>
+
+            <li>
+                <a href="#">SALES ENGINE <i class='bx bx-chevron-down'></i></a>
+                <div class="mega-menu">
+                    <div class="mega-col">
+                        <span class="mega-header">AI SALES SYSTEM</span>
+                        <a href="{% url 'demo-booking' %}" class="mega-item">
+                            <div class="mega-icon" style="color: var(--color-dash); background: var(--bg-dash-tag);"><i class='bx bx-calendar'></i></div>
+                            <div class="mega-text">
+                                <span class="mega-title">Book A Demo</span>
+                                <span class="mega-desc">See the engine in action</span>
+                            </div>
+                        </a>
+                        {% if user.is_authenticated %}
+                        <a href="{% url 'sales-dashboard' %}" class="mega-item">
+                            <div class="mega-icon" style="color: var(--color-sales); background: var(--bg-sales-tag);"><i class='bx bx-rocket'></i></div>
+                            <div class="mega-text">
+                                <span class="mega-title">Sales Dashboard</span>
+                                <span class="mega-desc">Manage automated outreach</span>
+                            </div>
+                        </a>
+                        <a href="{% url 'deal-pipeline' %}" class="mega-item">
+                            <div class="mega-icon" style="color: var(--color-recruit); background: var(--bg-recruit-tag);"><i class='bx bx-git-pull-request'></i></div>
+                            <div class="mega-text">
+                                <span class="mega-title">Deal Pipeline</span>
+                                <span class="mega-desc">Track active opportunities</span>
+                            </div>
+                        </a>
+                        <a href="{% url 'lead-list' %}" class="mega-item">
+                            <div class="mega-icon" style="color: var(--color-itops); background: var(--bg-itops-tag);"><i class='bx bx-user-plus'></i></div>
+                            <div class="mega-text">
+                                <span class="mega-title">Leads Manager</span>
+                                <span class="mega-desc">Score & segment targets</span>
+                            </div>
+                        </a>
+                        <a href="{% url 'sales-analytics' %}" class="mega-item">
+                            <div class="mega-icon" style="color: var(--color-dev); background: var(--bg-dev-tag);"><i class='bx bx-bar-chart-alt-2'></i></div>
+                            <div class="mega-text">
+                                <span class="mega-title">Sales Analytics</span>
+                                <span class="mega-desc">Performance metrics & MRR</span>
+                            </div>
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </li>
+
+            <li>
+                <a href="#">RESOURCES <i class='bx bx-chevron-down'></i></a>
+                <div class="mega-menu">
+                    <div class="mega-col">
+                        <span class="mega-header">TECHNICAL LIBRARIES</span>
+                        <a href="#blog-insights" class="mega-item">
+                            <div class="mega-icon" style="color: var(--color-sales); background: var(--bg-sales-tag);"><i class='bx bx-grid-alt'></i></div>
+                            <div class="mega-text">
+                                <span class="mega-title">Latest Insights Grid</span>
+                                <span class="mega-desc">Recent engineering reports</span>
+                            </div>
+                        </a>
+                        <a href="{% url 'public-blog' %}" class="mega-item">
+                            <div class="mega-icon" style="color: var(--color-recruit); background: var(--bg-recruit-tag);"><i class='bx bx-book-open'></i></div>
+                            <div class="mega-text">
+                                <span class="mega-title">Articles & Guides</span>
+                                <span class="mega-desc">Deep-dives and tutorials</span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </li>
+        </ul>
+
+        <div class="flex gap-sm">
+            <button id="theme-toggle" class="btn btn-primary btn-sm" title="Toggle theme" style="width: 44px; height: 44px; padding: 0; display: flex; align-items: center; justify-content: center; margin-right: 0.5rem; border-radius: 50%;"><i id="theme-icon" class="fas fa-moon"></i></button>
+            {% if user.is_authenticated %}
+            <a href="{% url 'candidate-list' %}" class="btn btn-cyan font-mono">/DASHBOARD</a>
+            {% else %}
+            <a href="{% url 'login' %}" style="color:var(--text-gray); margin-right:16px; padding-top:10px;" class="font-mono text-sm">/LOGIN</a>
+            <a href="{% url 'register' %}" class="btn btn-outline font-mono">/GET_STARTED</a>
+            {% endif %}
+        </div>
+    </div>
+</nav>
+
+{% block content %}
+{% endblock %}
+
+<!-- ═══════════════════════════════════════════════════════════
+     FOOTER
+     ═══════════════════════════════════════════════════════════ -->
+<footer class="footer font-mono mt-xl relative">
+    <div class="container footer-mega-grid">
+        <div class="footer-brand footer-col">
+            <a href="{% url 'home' %}" class="logo text-xl mb-md" style="text-decoration: none; display: flex; align-items: center; gap: 12px;">
+                <img src="{% static 'tracking_app/assets/logo-333.png' %}" alt="Transform.io" style="height: 48px; width: auto; max-width: 250px; border-radius: 4px; box-shadow: 0 0 10px rgba(0, 229, 255, 0.5);">
+                <span class="footer-brand-name">Transform.io</span>
+            </a>
+            <p class="text-gray text-xs mb-md" style="line-height:1.6;">The unified platform for IT, Sales, Security, Recruiting, Development, and Operations. One partner. Every solution.</p>
+        </div>
+        
+        <div class="footer-col">
+            <h4 class="font-mono text-white">PLATFORM</h4>
+            <a href="{% url 'public-ats' %}">ATS & Interviews</a>
+            <a href="{% url 'public-crm' %}">Client CRM</a>
+            <a href="{% url 'public-ai' %}">AI Resume Parsing</a>
+            <a href="{% url 'public-telemetry' %}">Data Dashboards</a>
+        </div>
+
+        <div class="footer-col">
+            <h4 class="font-mono text-white">SERVICES</h4>
+            <a href="#services">AI Sales & Outreach</a>
+            <a href="#services">Cybersecurity</a>
+            <a href="#services">Web & App Dev</a>
+            <a href="#services">IT Management</a>
+        </div>
+
+        <div class="footer-col">
+            <h4 class="font-mono text-white">COMPANY</h4>
+            <a href="{% url 'demo-booking' %}">Book A Demo</a>
+            <a href="{% url 'public-blog' %}">Resources</a>
+            <a href="{% url 'register' %}">Get Started</a>
+        </div>
+    </div>
+
+    <div class="container footer-bottom mt-lg">
+        <p>&copy; 2026 Transform.io — Unified IT Solutions Platform.</p>
+    </div>
+</footer>
+
+<script src="{% static 'tracking_app/transform.js' %}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Scroll-reveal for all sections and cards
+        const revealEls = document.querySelectorAll('section, .svc-card, .showcase-split, .stats-row, .cta-banner');
+        revealEls.forEach(el => el.classList.add('reveal'));
+
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('revealed');
+                }
+            });
+        }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+
+        document.querySelectorAll('.reveal, .reveal-left, .reveal-right').forEach(el => observer.observe(el));
+
+        // Stagger service cards
+        document.querySelectorAll('.svc-card').forEach((card, i) => {
+            card.style.transitionDelay = (i * 0.06) + 's';
+        });
+
+        // Navbar scroll effect
+        const navbar = document.querySelector('.navbar');
+        if (navbar) {
+            window.addEventListener('scroll', () => {
+                navbar.classList.toggle('scrolled', window.scrollY > 50);
+            });
+        }
+
+        // Animated counters
+        const statObserver = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting && !entry.target.dataset.animated) {
+                    entry.target.dataset.animated = 'true';
+                    const text = entry.target.textContent;
+                    const target = parseInt(text);
+                    const suffix = text.replace(/[\d]/g, '');
+                    if (!isNaN(target) && target > 1) {
+                        let start = 0;
+                        const increment = target / 60;
+                        function step() {
+                            start += increment;
+                            if (start >= target) { entry.target.textContent = target + suffix; return; }
+                            entry.target.textContent = Math.floor(start) + suffix;
+                            requestAnimationFrame(step);
+                        }
+                        step();
+                    }
+                }
+            });
+        }, { threshold: 0.5 });
+
+        document.querySelectorAll('.stat-num').forEach(el => statObserver.observe(el));
+    });
+</script>
+<style>
+    #instant-loader { position: fixed; top: 0; left: 0; width: 0; height: 3px; background: #00E5FF; z-index: 99999; transition: width 0.3s ease, opacity 0.3s ease; box-shadow: 0 0 10px #00E5FF; pointer-events: none; opacity: 0; }
+</style>
+<div id="instant-loader"></div>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+    // --- Theme Toggle Logic ---
+    const themeToggles = document.querySelectorAll('#theme-toggle');
+    const themeIcons = document.querySelectorAll('#theme-icon');
+    const rootElement = document.documentElement;
+    const bodyElement = document.body;
+
+    function applyTheme(theme) {
+        if (theme === 'light') {
+            rootElement.classList.add('light-theme');
+            bodyElement.classList.add('light-theme');
+            themeIcons.forEach(icon => {
+                icon.className = 'fas fa-sun';
+                icon.style.color = '#00E5FF';
+            });
+        } else {
+            rootElement.classList.remove('light-theme');
+            bodyElement.classList.remove('light-theme');
+            themeIcons.forEach(icon => {
+                icon.className = 'fas fa-moon';
+                icon.style.color = '';
+            });
+        }
+    }
+
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    applyTheme(savedTheme);
+
+    themeToggles.forEach(toggle => {
+        toggle.addEventListener('click', (e) => {
+            e.preventDefault();
+            const currentTheme = bodyElement.classList.contains('light-theme') ? 'light' : 'dark';
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            localStorage.setItem('theme', newTheme);
+            applyTheme(newTheme);
+        });
+    });
+
+        const loader = document.getElementById("instant-loader");
+        document.querySelectorAll('a[href]:not([href^="#"]):not([href^="javascript:"]):not([target="_blank"])').forEach(a => {
+            a.addEventListener("click", function(e) {
+                if (e.ctrlKey || e.metaKey || e.shiftKey) return;
+                loader.style.opacity = "1";
+                loader.style.width = "30%";
+                setTimeout(() => loader.style.width = "60%", 100);
+                setTimeout(() => loader.style.width = "90%", 300);
+            });
+        });
+        window.addEventListener("pageshow", () => {
+            loader.style.width = "100%";
+            setTimeout(() => { loader.style.opacity = "0"; setTimeout(() => loader.style.width = "0", 300); }, 200);
+        });
+    });
+</script>
+
+    <script>
+        document.body.addEventListener('htmx:beforeRequest', function() {
+            const loader = document.getElementById('instant-loader');
+            if(loader) { loader.style.opacity = '1'; loader.style.width = '30%'; }
+        });
+        document.body.addEventListener('htmx:afterOnLoad', function() {
+            const loader = document.getElementById('instant-loader');
+            if(loader) {
+                loader.style.width = '100%';
+                setTimeout(() => {
+                    loader.style.opacity = '0';
+                    setTimeout(() => { loader.style.width = '0'; }, 300);
+                }, 200);
+            }
+        });
+    </script>
+    </body>
+
+</html>

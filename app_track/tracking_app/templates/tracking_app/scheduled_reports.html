@@ -1,0 +1,328 @@
+{% extends "tracking_app/base.html" %}
+{% block title %}Automation Engine | Transform.io{% endblock %}
+
+{% block content %}
+<style>
+:root {
+    --auto-cyan: #00E5FF;
+    --auto-cyan-glow: rgba(0,229,255,0.2);
+    --auto-green: #10b981;
+    --auto-amber: #f59e0b;
+    --auto-red: #ef4444;
+    --auto-gray: #6b7280;
+    --bg-dark: #07090f;
+}
+.auto-page { padding: 2rem; max-width: 1400px; margin: 0 auto; }
+
+/* Header */
+.auto-header { margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem; }
+.auto-title-box { display: flex; align-items: center; gap: 1rem; }
+.auto-icon-box { width: 56px; height: 56px; border-radius: 14px; background: rgba(0,229,255,0.1); border: 1px solid var(--auto-cyan-glow); display: flex; align-items: center; justify-content: center; font-size: 1.8rem; color: var(--auto-cyan); animation: float 3s ease-in-out infinite; box-shadow: 0 0 15px var(--auto-cyan-glow); }
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+.auto-title { font-size: 2rem; font-weight: 800; color: var(--apple-text); margin: 0; line-height: 1.1; }
+.auto-subtitle { font-size: 0.8rem; color: var(--auto-cyan); font-family: 'Fira Code', monospace; margin-top: 4px; display: flex; align-items: center; gap: 6px; letter-spacing: 0.05em; }
+.status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--auto-cyan); box-shadow: 0 0 8px var(--auto-cyan); animation: pulse-cyan 2s infinite; }
+@keyframes pulse-cyan { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.2); } 100% { opacity: 1; transform: scale(1); } }
+.btn-new { background: linear-gradient(135deg, var(--auto-cyan), #0088cc); color: #fff; border: none; border-radius: 10px; padding: 12px 24px; font-size: 0.95rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: opacity 0.2s, transform 0.2s; box-shadow: 0 4px 15px rgba(0,229,255,0.3); text-decoration: none; }
+.btn-new:hover { opacity: 0.9; transform: translateY(-1px); color: #fff; }
+
+/* Stats Row */
+.stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem; margin-bottom: 2.5rem; }
+@media (max-width: 900px) { .stats-row { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 500px) { .stats-row { grid-template-columns: 1fr; } }
+.stat-card { background: var(--apple-card-bg); border: 1px solid var(--apple-border); border-radius: 16px; padding: 1.5rem; position: relative; overflow: hidden; transition: transform 0.2s, border-color 0.2s; }
+.stat-card:hover { transform: translateY(-2px); border-color: var(--apple-border-subtle); box-shadow: var(--apple-shadow); }
+.stat-card::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; }
+.stat-card.active::before { background: var(--auto-green); box-shadow: 0 0 10px var(--auto-green); }
+.stat-card.total::before { background: var(--auto-cyan); box-shadow: 0 0 10px var(--auto-cyan); }
+.stat-card.success::before { background: var(--auto-green); box-shadow: 0 0 10px var(--auto-green); }
+.stat-card.failed::before { background: var(--auto-red); box-shadow: 0 0 10px var(--auto-red); }
+.stat-val { font-size: 2.5rem; font-weight: 800; color: var(--apple-text); margin-bottom: 4px; line-height: 1; }
+.stat-label { font-size: 0.75rem; color: var(--apple-text-secondary); text-transform: uppercase; letter-spacing: 0.08em; display: flex; align-items: center; gap: 6px; }
+
+/* Main Grid */
+.auto-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; }
+@media (max-width: 1000px) { .auto-grid { grid-template-columns: 1fr; } }
+
+/* Cards Grid */
+.cards-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem; }
+@media (max-width: 1300px) { .cards-grid { grid-template-columns: 1fr; } }
+.report-card { background: var(--apple-card-bg); border: 1px solid var(--apple-border); border-radius: 16px; padding: 1.5rem; position: relative; transition: all 0.3s; display: flex; flex-direction: column; }
+.report-card:hover { background: var(--apple-card-bg-hover); border-color: var(--apple-accent-glow); box-shadow: var(--apple-shadow); }
+.report-card::before { content: ''; position: absolute; top: 0; left: 0; bottom: 0; width: 3px; border-radius: 16px 0 0 16px; transition: background 0.3s; }
+.card-st-success::before { background: var(--auto-green); box-shadow: 0 0 8px var(--auto-green); }
+.card-st-failed::before { background: var(--auto-red); box-shadow: 0 0 8px var(--auto-red); }
+.card-st-running::before { background: var(--auto-amber); box-shadow: 0 0 8px var(--auto-amber); animation: pulse-border 1.5s infinite; }
+.card-st-pending::before { background: var(--auto-gray); }
+@keyframes pulse-border { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+.rc-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; }
+.rc-title { font-size: 1.1rem; font-weight: 700; color: var(--apple-text); margin-bottom: 6px; }
+.rc-type { display: inline-flex; align-items: center; gap: 4px; font-size: 0.72rem; color: var(--auto-cyan); background: rgba(0,229,255,0.1); border-radius: 4px; padding: 2px 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+.rc-badges { display: flex; gap: 6px; margin-bottom: 1rem; flex-wrap: wrap; }
+.rc-badge { font-size: 0.7rem; color: var(--apple-text-secondary); background: var(--apple-input-bg); border: 1px solid var(--apple-border); border-radius: 10px; padding: 3px 10px; display: inline-flex; align-items: center; gap: 5px; }
+.rc-desc { font-size: 0.85rem; color: var(--apple-text-secondary); margin-bottom: 1rem; line-height: 1.5; flex: 1; }
+.rc-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1.25rem; font-size: 0.75rem; background: var(--apple-input-bg); padding: 10px; border-radius: 10px; border: 1px solid var(--apple-border); }
+.rc-meta-item { display: flex; flex-direction: column; gap: 3px; }
+.rc-meta-label { color: var(--apple-text-muted); text-transform: uppercase; font-size: 0.65rem; letter-spacing: 0.05em; }
+.rc-meta-val { color: var(--apple-text); font-family: 'Fira Code', monospace; font-weight: 500; }
+.rc-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--apple-border-subtle); padding-top: 1rem; margin-top: auto; }
+.active-toggle { display: flex; align-items: center; gap: 6px; font-size: 0.75rem; color: var(--apple-text-secondary); cursor: pointer; }
+.active-dot { width: 8px; height: 8px; border-radius: 50%; }
+.active-dot.on { background: var(--auto-green); box-shadow: 0 0 5px var(--auto-green); }
+.active-dot.off { background: var(--auto-gray); }
+.btn-run { background: rgba(0,229,255,0.1); color: var(--auto-cyan); border: 1px solid rgba(0,229,255,0.3); border-radius: 8px; padding: 6px 14px; font-size: 0.8rem; cursor: pointer; font-family: inherit; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s; }
+.btn-run:hover { background: var(--auto-cyan); color: #fff; }
+
+/* Log Panel */
+.log-panel { background: var(--apple-card-bg); border: 1px solid var(--apple-border); border-radius: 16px; padding: 1.5rem; }
+.log-header { font-size: 0.85rem; font-weight: 700; color: var(--apple-text-secondary); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 8px; }
+.log-list { display: flex; flex-direction: column; gap: 8px; }
+.log-item { background: var(--apple-input-bg); border: 1px solid var(--apple-border); border-radius: 10px; overflow: hidden; }
+.log-item-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; cursor: pointer; transition: background 0.2s; }
+.log-item-header:hover { background: var(--apple-row-hover); }
+.log-left { display: flex; align-items: center; gap: 10px; }
+.log-icon { font-size: 1.1rem; }
+.log-success .log-icon { color: var(--auto-green); }
+.log-failed .log-icon { color: var(--auto-red); }
+.log-running .log-icon { color: var(--auto-amber); animation: spin 2s linear infinite; }
+@keyframes spin { 100% { transform: rotate(360deg); } }
+.log-title { font-size: 0.85rem; color: var(--apple-text); font-weight: 500; }
+.log-meta { font-size: 0.72rem; color: var(--apple-text-secondary); display: flex; gap: 10px; align-items: center; }
+.log-meta span { font-family: 'Fira Code', monospace; }
+.log-body { padding: 0 14px 14px 14px; display: none; }
+.log-item.open .log-body { display: block; }
+.log-output { background: #000; border: 1px solid var(--apple-border); border-radius: 8px; padding: 10px; font-family: 'Fira Code', monospace; font-size: 0.75rem; color: var(--auto-cyan); white-space: pre-wrap; margin-top: 10px; line-height: 1.5; }
+.log-output-err { color: var(--auto-red); }
+
+/* Animation classes */
+.fade-in { animation: fadeIn 0.4s ease-out forwards; opacity: 0; transform: translateY(10px); }
+@keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
+
+/* Modal tweaks */
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; z-index: 1000; opacity: 0; visibility: hidden; transition: all 0.3s; }
+.modal-overlay.active { opacity: 1; visibility: visible; }
+.modal-box { background: #111; border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 2rem; width: 100%; max-width: 600px; transform: translateY(20px); transition: all 0.3s; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+.modal-overlay.active .modal-box { transform: translateY(0); }
+.form-group label { display: block; font-size: 0.75rem; color: rgba(255,255,255,0.5); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+.form-group input, .form-group select, .form-group textarea { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 10px 14px; color: #fff; font-size: 0.9rem; margin-bottom: 1rem; outline: none; transition: border-color 0.2s; font-family: inherit; }
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--auto-cyan); }
+.modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 1.5rem; }
+.btn-cancel { background: transparent; border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 8px; padding: 10px 20px; cursor: pointer; }
+.btn-submit { background: var(--auto-cyan); color: #000; border: none; border-radius: 8px; padding: 10px 20px; font-weight: 600; cursor: pointer; }
+</style>
+
+<div class="auto-page">
+
+    {% if messages %}
+    <div style="margin-bottom:1.5rem">
+        {% for message in messages %}
+        <div style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);color:#6ee7b7;padding:12px 16px;border-radius:10px;font-size:0.875rem;">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Header -->
+    <div class="auto-header fade-in">
+        <div class="auto-title-box">
+            <div class="auto-icon-box"><i class="bx bx-bolt-circle"></i></div>
+            <div>
+                <h1 class="auto-title">Automation Engine</h1>
+                <div class="auto-subtitle">
+                    <span class="status-dot"></span> // WORKFLOW_ORCHESTRATOR · ONLINE
+                </div>
+            </div>
+        </div>
+        <button class="btn-new" onclick="document.getElementById('newReportModal').classList.add('active')">
+            <i class="bx bx-plus"></i> New Automation
+        </button>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+        <div class="stat-card active fade-in" style="animation-delay: 0.1s">
+            <div class="stat-val">{{ active_count }}</div>
+            <div class="stat-label"><i class="bx bx-power-off"></i> Active Automations</div>
+        </div>
+        <div class="stat-card total fade-in" style="animation-delay: 0.15s">
+            <div class="stat-val">{{ total_runs }}</div>
+            <div class="stat-label"><i class="bx bx-list-ul"></i> Total Executions</div>
+        </div>
+        <div class="stat-card success fade-in" style="animation-delay: 0.2s">
+            <div class="stat-val">{{ success_runs }}</div>
+            <div class="stat-label" style="color:var(--auto-green)"><i class="bx bx-check-circle"></i> Successful Runs</div>
+        </div>
+        <div class="stat-card failed fade-in" style="animation-delay: 0.25s">
+            <div class="stat-val">{{ failed_runs }}</div>
+            <div class="stat-label" style="color:var(--auto-red)"><i class="bx bx-error-circle"></i> Failed Runs</div>
+        </div>
+    </div>
+
+    <div class="auto-grid">
+        <!-- Left: Reports Grid -->
+        <div>
+            <div class="cards-grid">
+                {% for report in reports %}
+                <div class="report-card card-st-{{ report.last_status }} fade-in">
+                    <div class="rc-header">
+                        <div class="rc-title">{{ report.name }}</div>
+                        <div class="rc-type">
+                            {% if report.report_type == 'executive' %}<i class="bx bx-line-chart"></i>
+                            {% elif report.report_type == 'recruiting' %}<i class="bx bx-user-pin"></i>
+                            {% elif report.report_type == 'it_ops' %}<i class="bx bx-server"></i>
+                            {% else %}<i class="bx bx-shield"></i>{% endif %}
+                            {{ report.get_report_type_display|truncatechars:20 }}
+                        </div>
+                    </div>
+                    
+                    <div class="rc-badges">
+                        <span class="rc-badge"><i class="bx bx-time-five"></i> {{ report.get_frequency_display }}</span>
+                        <span class="rc-badge">
+                            {% if report.format == 'email' %}<i class="bx bx-envelope"></i> Email
+                            {% elif report.format == 'pdf' %}<i class="bx bx-file-pdf"></i> PDF
+                            {% elif report.format == 'slack' %}<i class="bx bxl-slack"></i> Slack
+                            {% else %}<i class="bx bx-code-curly"></i> Webhook{% endif %}
+                        </span>
+                        {% if report.tags %}
+                            {% for tag in report.tags.split %}
+                            <span class="rc-badge" style="border-color:rgba(0,229,255,0.2);color:var(--auto-cyan)">#{{ tag }}</span>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <div class="rc-desc">{{ report.description|default:"No description provided."|truncatechars:80 }}</div>
+
+                    <div class="rc-meta">
+                        <div class="rc-meta-item">
+                            <span class="rc-meta-label">Next Run</span>
+                            <span class="rc-meta-val" style="{% if report.get_next_run_label == 'Overdue' %}color:var(--auto-red){% else %}color:var(--auto-cyan){% endif %}">{{ report.get_next_run_label }}</span>
+                        </div>
+                        <div class="rc-meta-item">
+                            <span class="rc-meta-label">Last Run</span>
+                            <span class="rc-meta-val">{{ report.last_sent|timesince|default:"Never" }}{% if report.last_sent %} ago{% endif %}</span>
+                        </div>
+                    </div>
+
+                    <div class="rc-footer">
+                        <div class="active-toggle" title="{% if report.is_active %}Active{% else %}Inactive{% endif %}">
+                            <div class="active-dot {% if report.is_active %}on{% else %}off{% endif %}"></div>
+                            {{ report.run_count }} total runs
+                        </div>
+                        <form method="POST" action="{% url 'run-report-now' report.id %}" style="margin:0">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-run"><i class="bx bx-play"></i> Trigger Now</button>
+                        </form>
+                    </div>
+                </div>
+                {% empty %}
+                <div style="grid-column:1/-1; padding:3rem; text-align:center; color:rgba(255,255,255,0.3); border:1px dashed rgba(255,255,255,0.1); border-radius:16px;">
+                    <i class="bx bx-bot" style="font-size:3rem; margin-bottom:1rem; opacity:0.5;"></i>
+                    <p>No automations configured yet.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Right: Recent Activity Log -->
+        <div>
+            <div class="log-panel fade-in" style="animation-delay: 0.5s">
+                <div class="log-header">
+                    <i class="bx bx-terminal"></i> Execution Log
+                </div>
+                <div class="log-list">
+                    {% for run in recent_runs %}
+                    <div class="log-item log-{{ run.status }}" onclick="this.classList.toggle('open')">
+                        <div class="log-item-header">
+                            <div class="log-left">
+                                <i class="bx {% if run.status == 'success' %}bx-check{% elif run.status == 'failed' %}bx-x{% else %}bx-loader-circle{% endif %} log-icon"></i>
+                                <div>
+                                    <div class="log-title">{{ run.report.name|truncatechars:25 }}</div>
+                                    <div class="log-meta">
+                                        <span>{{ run.ran_at|date:"H:i:s" }}</span>
+                                        {% if run.duration_seconds %}<span>· {{ run.duration_seconds }}s</span>{% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            <i class="bx bx-chevron-down" style="color:rgba(255,255,255,0.3)"></i>
+                        </div>
+                        <div class="log-body">
+                            <div class="log-output {% if run.status == 'failed' %}log-output-err{% endif %}">{{ run.output_log|default:"No output captured." }}</div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div style="text-align:center; padding:2rem; color:rgba(255,255,255,0.2); font-size:0.8rem;">
+                        No recent activity.
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="newReportModal">
+    <div class="modal-box">
+        <h3 style="margin-bottom:1.5rem; color:#fff; display:flex; align-items:center; gap:8px;"><i class="bx bx-plus-circle" style="color:var(--auto-cyan)"></i> Create Automation</h3>
+        <form method="POST" action="{% url 'scheduled-report-create' %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <label>Automation Name</label>
+                <input type="text" name="name" required placeholder="e.g. Weekly Sales Summary">
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                <div class="form-group">
+                    <label>Report Type</label>
+                    <select name="report_type">
+                        <option value="executive">Executive Summary</option>
+                        <option value="recruiting">Recruiting Metrics</option>
+                        <option value="it_ops">IT Operations</option>
+                        <option value="cyber">Cybersecurity</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Frequency</label>
+                    <select name="frequency">
+                        <option value="daily">Daily</option>
+                        <option value="weekly" selected>Weekly</option>
+                        <option value="monthly">Monthly</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Output Format</label>
+                <select name="format">
+                    <option value="email">Email Digest</option>
+                    <option value="pdf">PDF Attachment</option>
+                    <option value="slack">Slack Alert</option>
+                    <option value="webhook">Webhook POST</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Recipients (Emails or Webhook URL)</label>
+                <textarea name="recipients" rows="2" placeholder="comma-separated emails or URL" required></textarea>
+            </div>
+            <div class="form-group">
+                <label>Tags (optional)</label>
+                <input type="text" name="tags" placeholder="e.g. execs, sales, high-priority">
+            </div>
+            <div style="display:flex; align-items:center; gap:8px; margin-top:1rem;">
+                <input type="checkbox" name="is_active" id="isActive" checked style="accent-color:var(--auto-cyan); width:16px; height:16px;">
+                <label for="isActive" style="margin:0; color:#fff; cursor:pointer;">Enable immediately</label>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-cancel" onclick="document.getElementById('newReportModal').classList.remove('active')">Cancel</button>
+                <button type="submit" class="btn-submit">Create Automation</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.getElementById('newReportModal').addEventListener('click', function(e) {
+    if (e.target === this) this.classList.remove('active');
+});
+</script>
+{% endblock %}

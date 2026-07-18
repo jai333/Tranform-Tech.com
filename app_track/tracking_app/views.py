@@ -7,7 +7,7 @@ from django.contrib.auth import login, authenticate
 from django.contrib import messages
 from django.http import Http404, JsonResponse
 from django.core.exceptions import PermissionDenied
-from .models import Candidate, Job, Interview, User, Application, Friendship, Message, Notification, JobSeekerApplication, Note, ITTicket, ITTicketComment, ThreatIncident, DevProjectRequest, ScheduledReport, AutomationRun, ResumeData, ITAsset, KBArticle, TicketSurvey, TicketAuditLog, RoutingRule, SLAConfiguration, TicketMacro, TicketWorkLog
+from .models import Candidate, Job, Interview, User, Application, Friendship, Message, Notification, JobSeekerApplication, Note, ITTicket, ITTicketComment, ThreatIncident, DevProjectRequest, ScheduledReport, AutomationRun, ResumeData, ITAsset, KBArticle, TicketSurvey, TicketAuditLog, RoutingRule, SLAConfiguration, TicketMacro, TicketWorkLog, ITProblem, ITChangeRequest, ChangeApprovalBoard, ServiceCatalogItem, ServiceRequest, TicketRoutingRule, AssetRelationship, SystemOutage, BusinessHoursSchedule, HolidayCalendar, VulnerabilityScan, IPBlocklist, PhishingReport
 from .forms import UserRegistrationForm, ProfileUpdateForm, JobSeekerApplicationForm, JobForm
 from django.db import models
 from datetime import datetime, timedelta
@@ -1099,19 +1099,33 @@ def it_helpdesk_list(request):
         sla_met_count = sum(1 for t in resolved_tickets if t.resolve_due_at and t.resolved_at <= t.resolve_due_at)
         sla_compliance_rate = round((sla_met_count / total_resolved_count) * 100)
 
-    context = {
-        'columns': columns,
-        'total_open': base_qs.filter(status__in=['open', 'in_progress', 'on_hold', 'pending_user']).count(),
-        'total_resolved': base_qs.filter(status__in=['resolved', 'closed']).count(),
-        'breached_count': base_qs.filter(sla_status='breached').count(),
-        'mttr_hours': mttr_hours,
-        'sla_compliance_rate': sla_compliance_rate,
-        'priority_choices': ITTicket.PRIORITY_CHOICES,
-        'category_choices': ITTicket.CATEGORY_CHOICES,
-        'active_assets': ITAsset.objects.exclude(status='retired'),
-        'page_title': 'IT Helpdesk',
-    }
-    return render(request, 'tracking_app/it_helpdesk.html', context)
+    if request.user.is_it_enduser:
+        context = {
+            'my_tickets': base_qs.filter(status__in=['open', 'in_progress', 'on_hold', 'pending_user']).order_by('-created_at')[:5],
+            'recent_resolved': base_qs.filter(status__in=['resolved', 'closed']).order_by('-resolved_at')[:5],
+            'my_assets': ITAsset.objects.filter(owner=request.user),
+            'kb_articles': KBArticle.objects.filter(is_published=True).order_by('-view_count')[:5],
+            'priority_choices': ITTicket.PRIORITY_CHOICES,
+            'category_choices': ITTicket.CATEGORY_CHOICES,
+            'page_title': 'IT Service Portal',
+        }
+        return render(request, 'tracking_app/it_enduser_portal.html', context)
+    else:
+        # IT Agent Dashboard
+        context = {
+            'columns': columns,
+            'all_tickets': base_qs.order_by('-created_at'),
+            'total_open': base_qs.filter(status__in=['open', 'in_progress', 'on_hold', 'pending_user']).count(),
+            'total_resolved': base_qs.filter(status__in=['resolved', 'closed']).count(),
+            'breached_count': base_qs.filter(sla_status='breached').count(),
+            'mttr_hours': mttr_hours,
+            'sla_compliance_rate': sla_compliance_rate,
+            'priority_choices': ITTicket.PRIORITY_CHOICES,
+            'category_choices': ITTicket.CATEGORY_CHOICES,
+            'active_assets': ITAsset.objects.exclude(status='retired'),
+            'page_title': 'IT Agent Dashboard',
+        }
+        return render(request, 'tracking_app/it_helpdesk.html', context)
 
 
 @login_required
@@ -1981,3 +1995,207 @@ def submit_csat(request, ticket_id):
         )
         
     return redirect('it-ticket-detail', pk=ticket.id)
+
+@login_required
+def kb_article_list(request):
+    """Knowledge Base article list for end users and agents."""
+    category = request.GET.get('category')
+    search = request.GET.get('q')
+    articles = KBArticle.objects.filter(is_published=True)
+    if category:
+        articles = articles.filter(category=category)
+    if search:
+        articles = articles.filter(models.Q(title__icontains=search) | models.Q(content__icontains=search))
+    
+    categories = [c[0] for c in KBArticle.CATEGORY_CHOICES]
+    
+    context = {
+        'articles': articles,
+        'categories': KBArticle.CATEGORY_CHOICES,
+        'current_category': category,
+        'search_query': search,
+        'page_title': 'Knowledge Base',
+    }
+    return render(request, 'tracking_app/kb_list.html', context)
+
+@login_required
+def kb_article_detail(request, pk):
+    """Detail view for a Knowledge Base article."""
+    article = get_object_or_404(KBArticle, pk=pk, is_published=True)
+    # Increment view count
+    article.view_count += 1
+    article.save(update_fields=['view_count'])
+    
+    context = {
+        'article': article,
+        'page_title': article.title,
+    }
+    return render(request, 'tracking_app/kb_detail.html', context)
+
+# ── ITSM Advanced Views (8 Phases) ─────────────────────────
+
+@login_required
+def it_problem_list(request):
+    """Phase 1: IT Problem Dashboard"""
+    if not request.user.is_it_agent and not request.user.is_admin_role:
+        raise PermissionDenied
+    problems = ITProblem.objects.all().order_by('-created_at')
+    return render(request, 'tracking_app/it_problem_list.html', {'problems': problems})
+
+@login_required
+def it_change_list(request):
+    """Phase 2: Change Management Dashboard"""
+    if not request.user.is_it_agent and not request.user.is_admin_role:
+        raise PermissionDenied
+    changes = ITChangeRequest.objects.prefetch_related('cab_votes').order_by('-created_at')
+    return render(request, 'tracking_app/it_change_list.html', {'changes': changes})
+
+@login_required
+def it_service_catalog(request):
+    """Phase 3: Service Catalog"""
+    items = ServiceCatalogItem.objects.all()
+    my_requests = ServiceRequest.objects.filter(requested_by=request.user).order_by('-created_at')
+    
+    if request.method == 'POST':
+        item_id = request.POST.get('item_id')
+        justification = request.POST.get('justification', '')
+        item = get_object_or_404(ServiceCatalogItem, pk=item_id)
+        status = 'pending_approval' if item.requires_approval else 'approved'
+        ServiceRequest.objects.create(item=item, requested_by=request.user, justification=justification, status=status)
+        messages.success(request, f"Requested: {item.name}")
+        return redirect('it-service-catalog')
+
+    return render(request, 'tracking_app/it_service_catalog.html', {'items': items, 'my_requests': my_requests})
+
+def it_status_page(request):
+    """Phase 6: Public Status Page"""
+    outages = SystemOutage.objects.all().order_by('-start_time')
+    return render(request, 'tracking_app/it_status_page.html', {'outages': outages})
+
+
+# ── CYBERSECURITY EXPANSION VIEWS ──────────────────────────────
+
+@login_required
+def vuln_list(request):
+    """Vulnerability scan tracker."""
+    if not (request.user.is_staff or request.user.is_admin_role or request.user.is_it_agent):
+        raise PermissionDenied
+    vulns = VulnerabilityScan.objects.select_related('affected_asset').order_by('-discovered_at')
+    # summary stats
+    stats = {
+        'critical': vulns.filter(severity='critical', status='open').count(),
+        'high':     vulns.filter(severity='high', status='open').count(),
+        'open':     vulns.filter(status='open').count(),
+        'patched':  vulns.filter(status='patched').count(),
+    }
+    return render(request, 'tracking_app/vuln_list.html', {'vulns': vulns, 'stats': stats})
+
+
+@login_required
+def ip_blocklist(request):
+    """Blocked IP address management."""
+    if not (request.user.is_staff or request.user.is_admin_role or request.user.is_it_agent):
+        raise PermissionDenied
+
+    if request.method == 'POST':
+        ip  = request.POST.get('ip_address', '').strip()
+        reason = request.POST.get('reason', 'other')
+        desc   = request.POST.get('description', '')
+        if ip:
+            obj, created = IPBlocklist.objects.get_or_create(ip_address=ip, defaults={'reason': reason, 'description': desc, 'added_by': request.user})
+            if created:
+                messages.success(request, f"IP {ip} added to blocklist.")
+            else:
+                messages.warning(request, f"IP {ip} is already in the blocklist.")
+        return redirect('ip-blocklist')
+
+    ips = IPBlocklist.objects.filter(is_active=True).order_by('-added_at')
+    return render(request, 'tracking_app/ip_blocklist.html', {'ips': ips})
+
+
+@login_required
+def report_phishing(request):
+    """End-user phishing report."""
+    if request.method == 'POST':
+        PhishingReport.objects.create(
+            reported_by=request.user,
+            sender_email=request.POST.get('sender_email', ''),
+            subject=request.POST.get('subject', ''),
+            description=request.POST.get('description', ''),
+        )
+        messages.success(request, "Phishing report submitted. Our security team will review it.")
+        return redirect('it-enduser-portal')
+    return render(request, 'tracking_app/report_phishing.html')
+
+
+# ── B2B SALES ACCOUNT VIEWS ─────────────────────────────────────
+
+@login_required
+def account_list(request):
+    """B2B Account directory."""
+    from .sales_models import Account as SalesAccount, AccountActivity
+    accounts = SalesAccount.objects.prefetch_related('contacts', 'deals').order_by('-created_at')
+    return render(request, 'tracking_app/account_list.html', {'accounts': accounts})
+
+
+@login_required
+def account_detail(request, pk):
+    """360° B2B Account view."""
+    from .sales_models import Account as SalesAccount, AccountActivity, AccountContact
+    account = get_object_or_404(SalesAccount, pk=pk)
+    contacts = account.contacts.all()
+    activities = account.account_activities.order_by('-created_at')[:20]
+    deals = account.deals.all() if hasattr(account, 'deals') else []
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        if action == 'add_contact':
+            AccountContact.objects.create(
+                account=account,
+                first_name=request.POST.get('first_name', ''),
+                last_name=request.POST.get('last_name', ''),
+                title=request.POST.get('title', ''),
+                email=request.POST.get('email', ''),
+                phone=request.POST.get('phone', ''),
+            )
+            messages.success(request, "Contact added.")
+        elif action == 'log_activity':
+            AccountActivity.objects.create(
+                account=account,
+                activity_type=request.POST.get('activity_type', 'call'),
+                subject=request.POST.get('subject', ''),
+                notes=request.POST.get('notes', ''),
+                performed_by=request.user,
+            )
+            messages.success(request, "Activity logged.")
+        return redirect('account-detail', pk=pk)
+
+    return render(request, 'tracking_app/account_detail.html', {
+        'account': account,
+        'contacts': contacts,
+        'activities': activities,
+        'deals': deals,
+    })
+
+
+@login_required
+def account_create(request):
+    """Create a new B2B Account."""
+    from .sales_models import Account as SalesAccount
+    if request.method == 'POST':
+        account = SalesAccount.objects.create(
+            name=request.POST.get('name', ''),
+            industry=request.POST.get('industry', ''),
+            website=request.POST.get('website', '') or None,
+            phone=request.POST.get('phone', ''),
+            description=request.POST.get('description', ''),
+            employee_count=request.POST.get('employee_count', ''),
+            owner=request.user,
+        )
+        messages.success(request, f"Account '{account.name}' created!")
+        return redirect('account-detail', pk=account.pk)
+    from .sales_models import Account as SalesAccount
+    return render(request, 'tracking_app/account_create.html', {
+        'industry_choices': SalesAccount.INDUSTRY_CHOICES,
+        'size_choices': SalesAccount.SIZE_CHOICES,
+    })

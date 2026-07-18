@@ -1,0 +1,184 @@
+{% extends 'tracking_app/base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="display-5 fw-bold" style="color: var(--apple-text)">{{ page_title }}</h1>
+            <p class="text-muted">Welcome to the IT Service Portal. How can we help you today?</p>
+        </div>
+    </div>
+
+    <!-- Knowledge Base Search -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card shadow-sm" style="background: rgba(255,255,255,0.05); border: 1px solid var(--apple-border); border-radius: 12px;">
+                <div class="card-body p-4 text-center">
+                    <h3 class="mb-3" style="color: var(--apple-text)">Search the Knowledge Base</h3>
+                    <form action="{% url 'kb-article-list' %}" method="GET" class="d-flex justify-content-center">
+                        <input type="text" name="q" class="form-control me-2 w-50" placeholder="Search for answers, guides, or troubleshooting..." style="background: rgba(0,0,0,0.2); border: 1px solid var(--apple-border); color: white; border-radius: 8px;">
+                        <button type="submit" class="btn btn-primary" style="border-radius: 8px;">Search</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Main Content (Service Catalog & Tickets) -->
+        <div class="col-lg-8">
+            <h4 class="mb-3" style="color: var(--apple-text)">Service Catalog</h4>
+            <div class="row mb-4">
+                <div class="col-md-3 mb-3">
+                    <div class="card shadow-sm h-100" style="background: rgba(255,255,255,0.05); border: 1px solid var(--apple-border); border-radius: 12px; cursor: pointer;" onclick="document.getElementById('ticketFormCard').style.display='block';">
+                        <div class="card-body text-center py-4">
+                            <i class="bi bi-laptop fs-1 mb-2 text-primary"></i>
+                            <h5 class="card-title text-white">Report an Issue</h5>
+                            <p class="text-muted small mb-0">Hardware or software</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <a href="{% url 'it-service-catalog' %}" class="text-decoration-none">
+                        <div class="card shadow-sm h-100" style="background: rgba(255,255,255,0.05); border: 1px solid var(--apple-border); border-radius: 12px;">
+                            <div class="card-body text-center py-4">
+                                <i class="bi bi-box-seam fs-1 mb-2 text-success"></i>
+                                <h5 class="card-title text-white">Request Service</h5>
+                                <p class="text-muted small mb-0">Software & Equipment</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <a href="{% url 'kb-article-list' %}" class="text-decoration-none">
+                        <div class="card shadow-sm h-100" style="background: rgba(255,255,255,0.05); border: 1px solid var(--apple-border); border-radius: 12px;">
+                            <div class="card-body text-center py-4">
+                                <i class="bi bi-book fs-1 mb-2 text-info"></i>
+                                <h5 class="card-title text-white">Browse Articles</h5>
+                                <p class="text-muted small mb-0">Read guides and FAQs</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <a href="{% url 'it-status-page' %}" class="text-decoration-none">
+                        <div class="card shadow-sm h-100" style="background: rgba(255,255,255,0.05); border: 1px solid var(--apple-border); border-radius: 12px;">
+                            <div class="card-body text-center py-4">
+                                <i class="bi bi-check-shield fs-1 mb-2 text-warning"></i>
+                                <h5 class="card-title text-white">System Status</h5>
+                                <p class="text-muted small mb-0">Check for outages</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Create Ticket Form (Hidden by default, shown when catalog items clicked) -->
+            <div id="ticketFormCard" class="card shadow-sm mb-4" style="display: none; background: rgba(255,255,255,0.05); border: 1px solid var(--apple-border); border-radius: 12px;">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="card-title text-white mb-0">Submit a Ticket</h4>
+                        <button class="btn btn-close btn-close-white" onclick="document.getElementById('ticketFormCard').style.display='none';"></button>
+                    </div>
+                    <form action="{% url 'it-ticket-create' %}" method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label text-white">Subject</label>
+                            <input type="text" name="title" class="form-control" required style="background: rgba(0,0,0,0.2); border: 1px solid var(--apple-border); color: white; border-radius: 8px;">
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label text-white">Category</label>
+                                <select name="category" class="form-select" style="background: rgba(0,0,0,0.2); border: 1px solid var(--apple-border); color: white; border-radius: 8px;">
+                                    {% for code, label in category_choices %}
+                                        <option value="{{ code }}" style="background: #2c2c2e;">{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label text-white">Related Asset (Optional)</label>
+                                <select name="asset_id" class="form-select" style="background: rgba(0,0,0,0.2); border: 1px solid var(--apple-border); color: white; border-radius: 8px;">
+                                    <option value="" style="background: #2c2c2e;">-- None --</option>
+                                    {% for asset in my_assets %}
+                                        <option value="{{ asset.id }}" style="background: #2c2c2e;">{{ asset.name }} ({{ asset.asset_tag }})</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-white">Description</label>
+                            <textarea name="description" class="form-control" rows="4" required style="background: rgba(0,0,0,0.2); border: 1px solid var(--apple-border); color: white; border-radius: 8px;"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-white">Attachment (Optional)</label>
+                            <input type="file" name="attachment" class="form-control" style="background: rgba(0,0,0,0.2); border: 1px solid var(--apple-border); color: white; border-radius: 8px;">
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100" style="border-radius: 8px;">Submit Request</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- My Recent Tickets -->
+            <h4 class="mb-3 mt-4" style="color: var(--apple-text)">My Tickets</h4>
+            <div class="card shadow-sm mb-4" style="background: rgba(255,255,255,0.05); border: 1px solid var(--apple-border); border-radius: 12px;">
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush" style="border-radius: 12px; overflow: hidden;">
+                        {% for ticket in my_tickets %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center" style="background: transparent; border-bottom: 1px solid var(--apple-border); padding: 15px 20px;">
+                            <div>
+                                <a href="{% url 'it-ticket-detail' ticket.id %}" class="text-white text-decoration-none fw-bold">{{ ticket.title }}</a>
+                                <div class="text-muted small mt-1">#TKT-{{ ticket.id }} • Created {{ ticket.created_at|timesince }} ago</div>
+                            </div>
+                            <span class="badge bg-warning text-dark" style="border-radius: 20px; font-weight: 500;">{{ ticket.get_status_display }}</span>
+                        </li>
+                        {% empty %}
+                        <li class="list-group-item text-center text-muted" style="background: transparent; padding: 20px;">No open tickets.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar (My Assets & Popular Articles) -->
+        <div class="col-lg-4">
+            <h4 class="mb-3" style="color: var(--apple-text)">My Assets</h4>
+            <div class="card shadow-sm mb-4" style="background: rgba(255,255,255,0.05); border: 1px solid var(--apple-border); border-radius: 12px;">
+                <div class="card-body">
+                    {% for asset in my_assets %}
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px; background: rgba(255,255,255,0.1);">
+                            {% if asset.asset_type == 'laptop' %}<i class="bi bi-laptop text-white"></i>
+                            {% elif asset.asset_type == 'mobile' %}<i class="bi bi-phone text-white"></i>
+                            {% else %}<i class="bi bi-device-hdd text-white"></i>{% endif %}
+                        </div>
+                        <div>
+                            <div class="text-white fw-bold">{{ asset.name }}</div>
+                            <div class="text-muted small">{{ asset.asset_tag }}</div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted small mb-0">No assets assigned to you.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <h4 class="mb-3 mt-4" style="color: var(--apple-text)">Popular Articles</h4>
+            <div class="card shadow-sm" style="background: rgba(255,255,255,0.05); border: 1px solid var(--apple-border); border-radius: 12px;">
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush" style="border-radius: 12px; overflow: hidden;">
+                        {% for article in kb_articles %}
+                        <a href="{% url 'kb-article-detail' article.id %}" class="list-group-item list-group-item-action" style="background: transparent; border-bottom: 1px solid var(--apple-border); padding: 15px 20px; color: var(--apple-text);">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span><i class="bi bi-file-text me-2 text-primary"></i>{{ article.title }}</span>
+                                <i class="bi bi-chevron-right text-muted"></i>
+                            </div>
+                        </a>
+                        {% empty %}
+                        <li class="list-group-item text-center text-muted" style="background: transparent;">No articles available.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

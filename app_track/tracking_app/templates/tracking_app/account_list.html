@@ -1,0 +1,65 @@
+{% extends 'tracking_app/base.html' %}
+{% block title %}B2B Accounts | CRM{% endblock %}
+{% block content %}
+<div class="container-fluid py-4" style="max-width:1400px;">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="text-white mb-1"><i class="bx bx-buildings" style="color:var(--brand-primary)"></i> B2B Accounts</h2>
+            <p class="text-muted small mb-0">Company directory · Contacts · Pipeline</p>
+        </div>
+        <a href="{% url 'account-create' %}" class="btn btn-primary" style="border-radius:8px;"><i class="bx bx-plus me-1"></i> New Account</a>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card text-center py-3" style="background:var(--apple-card-bg);border:1px solid var(--apple-border);border-radius:12px;">
+                <div class="fw-bold" style="font-size:2rem;color:var(--brand-primary);">{{ accounts.count }}</div>
+                <div class="text-muted small">Total Accounts</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card" style="background:var(--apple-card-bg);border:1px solid var(--apple-border);border-radius:12px;overflow:hidden;">
+        <table class="table table-borderless table-hover mb-0" style="color:var(--apple-text);">
+            <thead style="background:rgba(255,255,255,.04);border-bottom:1px solid var(--apple-border);">
+                <tr>
+                    <th class="ps-4">Company</th>
+                    <th>Industry</th>
+                    <th>Size</th>
+                    <th>Contacts</th>
+                    <th>Deals</th>
+                    <th>Created</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for acc in accounts %}
+                <tr style="border-bottom:1px solid var(--apple-border-subtle);cursor:pointer;" onclick="window.location='{% url 'account-detail' acc.id %}'">
+                    <td class="ps-4">
+                        <div class="fw-bold">{{ acc.name }}</div>
+                        {% if acc.website %}<small class="text-muted"><i class="bx bx-link"></i> {{ acc.website|truncatechars:35 }}</small>{% endif %}
+                    </td>
+                    <td class="text-muted small">{{ acc.get_industry_display|default:"—" }}</td>
+                    <td class="text-muted small">{{ acc.get_employee_count_display|default:"—" }}</td>
+                    <td>
+                        <span class="badge bg-secondary">{{ acc.contacts.count }}</span>
+                    </td>
+                    <td>
+                        <span class="badge" style="background:rgba(0,229,255,.1);color:var(--brand-primary);">
+                            {{ acc.deals.count }}
+                        </span>
+                    </td>
+                    <td class="text-muted small">{{ acc.created_at|date:"M d, Y" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center py-5 text-muted">
+                        <i class="bx bx-buildings" style="font-size:2.5rem;display:block;margin-bottom:.75rem;opacity:.3;"></i>
+                        No accounts yet. <a href="{% url 'account-create' %}" class="text-info">Add your first account</a>.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

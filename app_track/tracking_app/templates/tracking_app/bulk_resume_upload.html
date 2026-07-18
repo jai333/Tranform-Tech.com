@@ -1,0 +1,136 @@
+{% extends "tracking_app/base.html" %}
+{% block content %}
+<style>
+    body {
+        background: linear-gradient(135deg, #f6f8fd 0%, #f1f6f9 100%);
+    }
+    .glass-panel {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+        padding: 40px;
+    }
+    .drop-zone {
+        border: 2px dashed #4a90e2;
+        border-radius: 15px;
+        padding: 50px 20px;
+        text-align: center;
+        background: rgba(255, 255, 255, 0.5);
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    .drop-zone.dragover {
+        background: rgba(74, 144, 226, 0.1);
+        border-color: #357abd;
+        transform: scale(1.02);
+    }
+    .drop-zone-icon {
+        font-size: 3rem;
+        color: #4a90e2;
+        margin-bottom: 15px;
+    }
+</style>
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 text-center">
+            <h1 class="mb-4" style="color: #2c3e50; font-weight: 800;">Bulk Resume Upload</h1>
+            <p class="text-muted mb-5">Upload multiple resumes at once. Our AI will automatically parse and create candidate profiles.</p>
+            
+            <div class="glass-panel">
+                <form action="{% url 'bulk-resume-upload' %}" method="POST" enctype="multipart/form-data" id="uploadForm">
+                    {% csrf_token %}
+                    <div class="drop-zone" id="dropZone">
+                        <i class="fas fa-cloud-upload-alt drop-zone-icon"></i>
+                        <h4 class="mb-2">Drag & Drop Resumes Here</h4>
+                        <p class="text-muted">or click to browse files (PDF, DOCX)</p>
+                        <input type="file" name="resumes" id="fileInput" multiple accept=".pdf,.doc,.docx" style="display: none;">
+                    </div>
+                    
+                    <div id="fileList" class="mt-4 text-start" style="max-height: 200px; overflow-y: auto;">
+                        <!-- Selected files will appear here -->
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg mt-4 px-5" style="border-radius: 30px; font-weight: 600;" id="submitBtn" disabled>
+                        Upload Files <i class="fas fa-arrow-right ms-2"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const fileList = document.getElementById('fileList');
+        const submitBtn = document.getElementById('submitBtn');
+
+        // Prevent default drag behaviors
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, preventDefaults, false);
+            document.body.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        // Highlight drop zone when item is dragged over it
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, () => {
+                dropZone.classList.add('dragover');
+            }, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, () => {
+                dropZone.classList.remove('dragover');
+            }, false);
+        });
+
+        // Handle dropped files
+        dropZone.addEventListener('drop', (e) => {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            handleFiles(files);
+            
+            // Assign files to input element
+            fileInput.files = files;
+        }, false);
+
+        // Handle clicked upload
+        dropZone.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', function() {
+            handleFiles(this.files);
+        });
+
+        function handleFiles(files) {
+            fileList.innerHTML = '';
+            if (files.length > 0) {
+                const list = document.createElement('ul');
+                list.className = 'list-group list-group-flush bg-transparent';
+                
+                for (let i = 0; i < files.length; i++) {
+                    const li = document.createElement('li');
+                    li.className = 'list-group-item bg-transparent border-bottom d-flex align-items-center py-2';
+                    li.innerHTML = `<i class="fas fa-file-alt text-primary me-3"></i> ${files[i].name} <span class="ms-auto text-muted small">${(files[i].size / 1024).toFixed(1)} KB</span>`;
+                    list.appendChild(li);
+                }
+                fileList.appendChild(list);
+                submitBtn.disabled = false;
+            } else {
+                submitBtn.disabled = true;
+            }
+        }
+    });
+</script>
+{% endblock %}
