@@ -1447,8 +1447,7 @@ def threat_incident_create(request):
                 description=description,
                 severity=severity,
                 category=category,
-                affected_systems=affected_systems,
-                detected_at=detected_at,
+                affected_system=affected_systems,
                 reported_by=request.user,
             )
             messages.success(request, f'Incident #{incident.id} reported successfully.')
@@ -1467,14 +1466,9 @@ def threat_incident_create(request):
 def threat_incident_detail(request, pk):
     """Detail / update view for a single threat incident."""
     incident = get_object_or_404(ThreatIncident, pk=pk)
-    # Auto-set containment deadline based on severity if not already set
     auto_deadline = {'critical': 1, 'high': 4, 'medium': 24, 'low': 72, 'info': 168}
     from django.utils import timezone
     from datetime import timedelta
-    if not incident.containment_deadline and incident.detected_at:
-        hours = auto_deadline.get(incident.severity, 24)
-        incident.containment_deadline = incident.detected_at + timedelta(hours=hours)
-        incident.save(update_fields=['containment_deadline'])
     if request.method == 'POST' and (request.user.is_staff or request.user.is_admin_role):
         new_status = request.POST.get('status')
         response_notes = request.POST.get('response_notes', '')
@@ -1514,14 +1508,21 @@ def threat_incident_detail(request, pk):
         incident.save()
         messages.success(request, 'Incident updated.')
         return redirect('threat-incident-detail', pk=pk)
+    # Calculate hours active
+    hours_active = '—'
+    if incident.detected_at:
+        delta = timezone.now() - incident.detected_at
+        hours_active = round(delta.total_seconds() / 3600, 1)
+
     details = [
         ('Severity', incident.get_severity_display()),
         ('Category', incident.get_category_display()),
         ('Status', incident.get_status_display()),
         ('Detected', incident.detected_at.strftime('%b %d, %Y %H:%M') if incident.detected_at else '—'),
         ('Assigned To', incident.assigned_to.get_full_name() if incident.assigned_to else '—'),
-        ('Time Active (hrs)', str(incident.time_to_contain_hours() or '—')),
+        ('Time Active (hrs)', str(hours_active)),
         ('CVSS Score', str(incident.cvss_score) if incident.cvss_score else '—'),
+        ('Affected System', incident.affected_system or '—'),
         ('Source IP', incident.ip_address or '—'),
         ('Malicious Domain', incident.malicious_domain or '—'),
         ('File Hash', incident.file_hash or '—'),
@@ -1532,8 +1533,6 @@ def threat_incident_detail(request, pk):
         'users': User.objects.filter(is_active=True).order_by('first_name'),
         'details': details,
         'auto_deadline': auto_deadline,
-        'attack_vector_choices': ThreatIncident._meta.get_field('attack_vector').choices,
-        'estimated_impact_choices': ThreatIncident._meta.get_field('estimated_impact').choices,
         'page_title': f'Incident #{incident.id}',
     }
     return render(request, 'tracking_app/threat_dashboard.html', context)

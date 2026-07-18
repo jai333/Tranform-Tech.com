@@ -1253,7 +1253,6 @@
                     </li>
                     {% endif %}
                     <li><a href="{% url 'service-addons' %}" class="{% if '/add-ons/' in request.path %}active{% endif %}"><i class="fa-solid fa-server"></i> Services</a></li>
-                    {% if user.is_authenticated %}
                     <li><a href="{% url 'account-list' %}" class="{% if '/accounts/' in request.path %}active{% endif %}"><i class="fa-solid fa-buildings"></i> Accounts</a></li>
                     <li class="dropdown-nav" onclick="this.querySelector('.dropdown-content').classList.toggle('show-dropdown')">
                         <a href="javascript:void(0)" class="{% if '/security/' in request.path %}active{% endif %}">
