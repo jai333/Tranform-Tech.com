@@ -1,54 +1,79 @@
 {% extends 'tracking_app/base.html' %}
 {% block title %}{{ account.name }} | B2B Account{% endblock %}
 {% block content %}
+<style>
+    .enterprise-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem; }
+    .enterprise-title { font-size:2.2rem; font-weight:800; color:#fff; margin-bottom:0.25rem; }
+    
+    .glass-card { background:var(--apple-card-bg); border:1px solid rgba(255,255,255,0.05); border-radius:20px; padding:1.5rem; backdrop-filter:blur(20px); height:100%; display:flex; flex-direction:column; }
+    .glass-card-header { padding:1.25rem 1.5rem; background:rgba(255,255,255,0.02); border-bottom:1px solid rgba(255,255,255,0.05); font-weight:600; color:#fff; display:flex; align-items:center; font-size:1rem; }
+    
+    .list-item-glass { padding:16px; border-bottom:1px solid rgba(255,255,255,0.05); transition:background 0.2s; }
+    .list-item-glass:hover { background:rgba(255,255,255,0.02); }
+    
+    .badge-glass { background:rgba(255,255,255,0.1); color:#fff; padding:4px 10px; border-radius:12px; font-size:0.75rem; font-weight:600; }
+    
+    .modal-glass { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:9999; align-items:center; justify-content:center; backdrop-filter:blur(8px); }
+    .modal-content-glass { background:var(--apple-card-bg); border:1px solid rgba(255,255,255,0.1); border-radius:20px; width:90%; max-width:500px; padding:2rem; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5); }
+    .form-control-glass { background:rgba(0,0,0,0.2); border:1px solid rgba(255,255,255,0.1); color:#fff; border-radius:10px; padding:10px 14px; width:100%; margin-bottom:1rem; }
+    .form-control-glass:focus { outline:none; border-color:#0A84FF; box-shadow:0 0 0 3px rgba(10,132,255,0.2); }
+</style>
+
 <div class="container-fluid py-4" style="max-width:1400px;">
 
     <!-- Breadcrumb -->
-    <a href="{% url 'account-list' %}" class="text-muted small mb-3 d-inline-flex align-items-center gap-1"><i class="bx bx-arrow-back"></i> All Accounts</a>
+    <a href="{% url 'account-list' %}" class="text-muted small mb-3 d-inline-flex align-items-center gap-1" style="text-decoration:none; transition:color 0.2s;"><i class="bx bx-arrow-back"></i> Back to Accounts</a>
 
-    {% if messages %}{% for m in messages %}<div class="alert alert-{{ m.tags }} mt-2">{{ m }}</div>{% endfor %}{% endif %}
+    {% if messages %}{% for m in messages %}<div class="alert alert-{{ m.tags }} mt-2" style="background:rgba(50,215,75,0.1); color:#32d74b; border:1px solid rgba(50,215,75,0.2); border-radius:12px;">{{ m }}</div>{% endfor %}{% endif %}
 
     <!-- Account Header -->
-    <div class="card p-4 mb-4" style="background:var(--apple-card-bg);border:1px solid var(--apple-border);border-radius:14px;">
+    <div class="glass-card mb-4" style="height:auto;">
         <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
-            <div>
-                <h1 class="text-white fw-bold mb-1" style="font-size:1.75rem;">{{ account.name }}</h1>
-                <div class="d-flex flex-wrap gap-3 text-muted small">
-                    {% if account.industry %}<span><i class="bx bx-category"></i> {{ account.get_industry_display }}</span>{% endif %}
-                    {% if account.employee_count %}<span><i class="bx bx-group"></i> {{ account.get_employee_count_display }}</span>{% endif %}
-                    {% if account.phone %}<span><i class="bx bx-phone"></i> {{ account.phone }}</span>{% endif %}
-                    {% if account.website %}<a href="{{ account.website }}" target="_blank" class="text-info"><i class="bx bx-link-external"></i> {{ account.website }}</a>{% endif %}
+            <div style="display:flex; align-items:center; gap:20px;">
+                <div style="width:72px; height:72px; background:linear-gradient(135deg, #0A84FF, #00E5FF); border-radius:16px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:2rem; color:#fff; box-shadow:0 8px 20px rgba(0, 229, 255, 0.2);">
+                    {{ account.name|make_list|first|upper }}
                 </div>
-                {% if account.description %}<p class="text-muted small mt-2 mb-0">{{ account.description }}</p>{% endif %}
+                <div>
+                    <h1 class="enterprise-title">{{ account.name }}</h1>
+                    <div style="display:flex; flex-wrap:wrap; gap:16px; color:rgba(255,255,255,0.5); font-size:0.9rem;">
+                        {% if account.industry %}<span style="display:flex; align-items:center; gap:4px;"><i class="bx bx-category"></i> {{ account.get_industry_display }}</span>{% endif %}
+                        {% if account.employee_count %}<span style="display:flex; align-items:center; gap:4px;"><i class="bx bx-group"></i> {{ account.get_employee_count_display }}</span>{% endif %}
+                        {% if account.phone %}<span style="display:flex; align-items:center; gap:4px;"><i class="bx bx-phone"></i> {{ account.phone }}</span>{% endif %}
+                        {% if account.website %}<a href="{{ account.website }}" target="_blank" style="color:#00E5FF; text-decoration:none; display:flex; align-items:center; gap:4px;"><i class="bx bx-link-external"></i> Website</a>{% endif %}
+                    </div>
+                </div>
             </div>
-            <div class="d-flex gap-2">
-                <button class="btn btn-sm" style="border:1px solid var(--apple-border);color:var(--apple-text-secondary);border-radius:8px;" onclick="document.getElementById('activity-modal').style.display='flex'"><i class="bx bx-plus"></i> Log Activity</button>
-                <button class="btn btn-sm btn-primary" style="border-radius:8px;" onclick="document.getElementById('contact-modal').style.display='flex'"><i class="bx bx-user-plus"></i> Add Contact</button>
+            <div style="display:flex; gap:12px;">
+                <button class="btn" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#fff; border-radius:12px; padding:10px 16px; font-weight:600; display:flex; align-items:center; gap:6px;" onclick="document.getElementById('activity-modal').style.display='flex'"><i class="bx bx-history"></i> Log Activity</button>
+                <button class="btn btn-primary" style="background:linear-gradient(135deg, #0A84FF, #005bb5); border:none; color:#fff; border-radius:12px; padding:10px 16px; font-weight:600; display:flex; align-items:center; gap:6px;" onclick="document.getElementById('contact-modal').style.display='flex'"><i class="bx bx-user-plus"></i> Add Contact</button>
             </div>
         </div>
+        {% if account.description %}
+        <div style="margin-top:1.5rem; padding-top:1.5rem; border-top:1px solid rgba(255,255,255,0.05); color:rgba(255,255,255,0.6); font-size:0.95rem; line-height:1.6;">
+            {{ account.description }}
+        </div>
+        {% endif %}
     </div>
 
     <div class="row g-4">
         <!-- Contacts -->
         <div class="col-md-4">
-            <div class="card h-100" style="background:var(--apple-card-bg);border:1px solid var(--apple-border);border-radius:12px;overflow:hidden;">
-                <div class="card-header p-3" style="background:rgba(255,255,255,.02);border-bottom:1px solid var(--apple-border);">
-                    <h6 class="text-white mb-0"><i class="bx bx-group me-1"></i> Contacts ({{ contacts.count }})</h6>
-                </div>
-                <div class="list-group list-group-flush">
+            <div class="glass-card" style="padding:0;">
+                <div class="glass-card-header"><i class="bx bx-group" style="color:#0A84FF; margin-right:8px; font-size:1.2rem;"></i> Contacts ({{ contacts.count }})</div>
+                <div style="flex:1; overflow-y:auto;">
                     {% for c in contacts %}
-                    <div class="list-group-item bg-transparent p-3" style="border-bottom:1px solid var(--apple-border-subtle);">
-                        <div class="d-flex align-items-center gap-2">
-                            <div style="width:36px;height:36px;border-radius:50%;background:rgba(0,229,255,.1);display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:700;color:var(--brand-primary);">{{ c.first_name.0 }}{{ c.last_name.0 }}</div>
+                    <div class="list-item-glass">
+                        <div style="display:flex; align-items:center; gap:12px;">
+                            <div style="width:40px; height:40px; border-radius:50%; background:rgba(0,229,255,0.1); display:flex; align-items:center; justify-content:center; font-size:0.9rem; font-weight:700; color:#00E5FF;">{{ c.first_name.0 }}{{ c.last_name.0 }}</div>
                             <div>
-                                <div class="fw-bold text-white" style="font-size:.9rem;">{{ c.full_name }}</div>
-                                <div class="text-muted" style="font-size:.75rem;">{{ c.title|default:"—" }}</div>
-                                {% if c.email %}<div class="text-muted" style="font-size:.72rem;"><i class="bx bx-envelope"></i> {{ c.email }}</div>{% endif %}
+                                <div style="font-weight:700; color:#fff; font-size:0.95rem;">{{ c.full_name }}</div>
+                                <div style="color:rgba(255,255,255,0.5); font-size:0.8rem;">{{ c.title|default:"No title" }}</div>
+                                {% if c.email %}<div style="color:rgba(255,255,255,0.4); font-size:0.75rem; margin-top:2px;"><i class="bx bx-envelope"></i> {{ c.email }}</div>{% endif %}
                             </div>
                         </div>
                     </div>
                     {% empty %}
-                    <div class="p-4 text-center text-muted small">No contacts yet.</div>
+                    <div style="padding:2rem; text-align:center; color:rgba(255,255,255,0.3); font-size:0.9rem;">No contacts yet.</div>
                     {% endfor %}
                 </div>
             </div>
@@ -56,102 +81,93 @@
 
         <!-- Activity Timeline -->
         <div class="col-md-4">
-            <div class="card h-100" style="background:var(--apple-card-bg);border:1px solid var(--apple-border);border-radius:12px;overflow:hidden;">
-                <div class="card-header p-3" style="background:rgba(255,255,255,.02);border-bottom:1px solid var(--apple-border);">
-                    <h6 class="text-white mb-0"><i class="bx bx-history me-1"></i> Activity Timeline</h6>
-                </div>
-                <div style="max-height:400px;overflow-y:auto;">
+            <div class="glass-card" style="padding:0;">
+                <div class="glass-card-header"><i class="bx bx-history" style="color:#FF9F0A; margin-right:8px; font-size:1.2rem;"></i> Activity Timeline</div>
+                <div style="flex:1; overflow-y:auto; max-height:400px;">
                     {% for a in activities %}
-                    <div class="p-3" style="border-bottom:1px solid var(--apple-border-subtle);">
-                        <div class="d-flex gap-2 align-items-start">
-                            <div style="width:28px;height:28px;border-radius:50%;background:rgba(0,229,255,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;">
-                                {% if a.activity_type == 'call' %}<i class="bx bx-phone-call" style="color:var(--brand-primary);font-size:.8rem;"></i>
-                                {% elif a.activity_type == 'email' %}<i class="bx bx-envelope" style="color:#10b981;font-size:.8rem;"></i>
-                                {% elif a.activity_type == 'meeting' %}<i class="bx bx-video" style="color:#f59e0b;font-size:.8rem;"></i>
-                                {% else %}<i class="bx bx-note" style="color:rgba(255,255,255,.4);font-size:.8rem;"></i>{% endif %}
+                    <div class="list-item-glass">
+                        <div style="display:flex; gap:12px; align-items:flex-start;">
+                            <div style="width:32px; height:32px; border-radius:50%; background:rgba(255,255,255,0.05); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                                {% if a.activity_type == 'call' %}<i class="bx bx-phone-call" style="color:#0A84FF;"></i>
+                                {% elif a.activity_type == 'email' %}<i class="bx bx-envelope" style="color:#32D74B;"></i>
+                                {% elif a.activity_type == 'meeting' %}<i class="bx bx-video" style="color:#FF9F0A;"></i>
+                                {% else %}<i class="bx bx-note" style="color:#E5E5EA;"></i>{% endif %}
                             </div>
                             <div>
-                                <div class="fw-semibold text-white" style="font-size:.85rem;">{{ a.subject }}</div>
-                                <div class="text-muted" style="font-size:.72rem;">{{ a.get_activity_type_display }} · {{ a.performed_by.username|default:"—" }} · {{ a.created_at|date:"M d" }}</div>
-                                {% if a.notes %}<div class="text-muted small mt-1">{{ a.notes|truncatechars:80 }}</div>{% endif %}
+                                <div style="font-weight:600; color:#fff; font-size:0.9rem; margin-bottom:2px;">{{ a.subject }}</div>
+                                <div style="color:rgba(255,255,255,0.4); font-size:0.75rem;">{{ a.get_activity_type_display }} • {{ a.performed_by.username|default:"System" }} • {{ a.created_at|date:"M d" }}</div>
+                                {% if a.notes %}<div style="color:rgba(255,255,255,0.6); font-size:0.85rem; margin-top:6px; line-height:1.4;">{{ a.notes|truncatechars:80 }}</div>{% endif %}
                             </div>
                         </div>
                     </div>
                     {% empty %}
-                    <div class="p-4 text-center text-muted small">No activities logged.</div>
+                    <div style="padding:2rem; text-align:center; color:rgba(255,255,255,0.3); font-size:0.9rem;">No activities logged.</div>
                     {% endfor %}
                 </div>
             </div>
         </div>
 
-        <!-- Deals -->
+        <!-- Active Deals -->
         <div class="col-md-4">
-            <div class="card h-100" style="background:var(--apple-card-bg);border:1px solid var(--apple-border);border-radius:12px;overflow:hidden;">
-                <div class="card-header p-3" style="background:rgba(255,255,255,.02);border-bottom:1px solid var(--apple-border);">
-                    <h6 class="text-white mb-0"><i class="bx bx-dollar-circle me-1"></i> Deals ({{ deals|length }})</h6>
-                </div>
-                {% for d in deals %}
-                <div class="p-3" style="border-bottom:1px solid var(--apple-border-subtle);">
-                    <div class="fw-semibold text-white mb-1" style="font-size:.9rem;">{{ d.lead.company_name|default:d }}</div>
-                    <div class="d-flex justify-content-between">
-                        <span class="badge bg-secondary" style="font-size:.7rem;">{{ d.get_stage_display }}</span>
-                        <span class="text-success fw-bold" style="font-size:.85rem;">${{ d.deal_value_monthly|default:d.value|floatformat:0 }}/mo</span>
+            <div class="glass-card" style="padding:0;">
+                <div class="glass-card-header"><i class="bx bx-dollar-circle" style="color:#32D74B; margin-right:8px; font-size:1.2rem;"></i> Pipeline ({{ deals|length }})</div>
+                <div style="flex:1; overflow-y:auto;">
+                    {% for d in deals %}
+                    <div class="list-item-glass">
+                        <div style="font-weight:600; color:#fff; font-size:0.95rem; margin-bottom:6px;">{{ d.lead.company_name|default:d }}</div>
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <span class="badge-glass">{{ d.get_stage_display }}</span>
+                            <span style="color:#32D74B; font-weight:700; font-size:0.95rem;">${{ d.deal_value_monthly|default:d.value|floatformat:0 }}/mo</span>
+                        </div>
                     </div>
+                    {% empty %}
+                    <div style="padding:2rem; text-align:center; color:rgba(255,255,255,0.3); font-size:0.9rem;">No deals linked.</div>
+                    {% endfor %}
                 </div>
-                {% empty %}
-                <div class="p-4 text-center text-muted small">No deals linked.</div>
-                {% endfor %}
             </div>
         </div>
     </div>
 </div>
 
-<!-- Log Activity Modal -->
-<div id="activity-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;align-items:center;justify-content:center;backdrop-filter:blur(6px);">
-    <div class="card p-4" style="background:var(--apple-card-bg);border:1px solid var(--apple-border);border-radius:16px;width:90%;max-width:480px;">
-        <h5 class="text-white mb-4"><i class="bx bx-history text-info me-2"></i>Log Activity</h5>
+<!-- Modals -->
+<div id="activity-modal" class="modal-glass">
+    <div class="modal-content-glass">
+        <h3 style="color:#fff; margin-top:0; margin-bottom:1.5rem; display:flex; align-items:center; gap:8px;"><i class="bx bx-history" style="color:#0A84FF;"></i> Log Activity</h3>
         <form method="POST">{% csrf_token %}
             <input type="hidden" name="action" value="log_activity">
-            <div class="mb-3">
-                <select name="activity_type" class="form-select" style="background:rgba(0,0,0,.3);border:1px solid var(--apple-border);color:white;border-radius:8px;">
-                    <option value="call">📞 Phone Call</option>
-                    <option value="email">📧 Email</option>
-                    <option value="meeting">🎥 Meeting</option>
-                    <option value="demo">🖥️ Product Demo</option>
-                    <option value="follow_up">🔁 Follow-up</option>
-                    <option value="note">📝 Note</option>
-                </select>
-            </div>
-            <div class="mb-3">
-                <input type="text" name="subject" class="form-control" placeholder="Subject / Summary" required style="background:rgba(0,0,0,.3);border:1px solid var(--apple-border);color:white;border-radius:8px;">
-            </div>
-            <div class="mb-4">
-                <textarea name="notes" class="form-control" rows="3" placeholder="Notes..." style="background:rgba(0,0,0,.3);border:1px solid var(--apple-border);color:white;border-radius:8px;"></textarea>
-            </div>
-            <div class="d-flex gap-2">
-                <button type="submit" class="btn btn-primary flex-grow-1" style="border-radius:8px;">Save</button>
-                <button type="button" class="btn" style="border:1px solid var(--apple-border);color:var(--apple-text-secondary);border-radius:8px;" onclick="document.getElementById('activity-modal').style.display='none'">Cancel</button>
+            <select name="activity_type" class="form-control-glass">
+                <option value="call">📞 Phone Call</option>
+                <option value="email">📧 Email</option>
+                <option value="meeting">🎥 Meeting</option>
+                <option value="demo">🖥️ Product Demo</option>
+                <option value="follow_up">🔁 Follow-up</option>
+                <option value="note">📝 Note</option>
+            </select>
+            <input type="text" name="subject" class="form-control-glass" placeholder="Subject / Summary" required>
+            <textarea name="notes" class="form-control-glass" rows="4" placeholder="Notes..."></textarea>
+            <div style="display:flex; gap:12px; margin-top:1rem;">
+                <button type="submit" class="btn btn-primary" style="flex:1; background:#0A84FF; border:none; border-radius:10px; padding:12px; font-weight:600;">Save Activity</button>
+                <button type="button" class="btn" style="flex:1; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#fff; border-radius:10px; padding:12px; font-weight:600;" onclick="document.getElementById('activity-modal').style.display='none'">Cancel</button>
             </div>
         </form>
     </div>
 </div>
 
-<!-- Add Contact Modal -->
-<div id="contact-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;align-items:center;justify-content:center;backdrop-filter:blur(6px);">
-    <div class="card p-4" style="background:var(--apple-card-bg);border:1px solid var(--apple-border);border-radius:16px;width:90%;max-width:480px;">
-        <h5 class="text-white mb-4"><i class="bx bx-user-plus text-primary me-2"></i>Add Contact</h5>
+<div id="contact-modal" class="modal-glass">
+    <div class="modal-content-glass">
+        <h3 style="color:#fff; margin-top:0; margin-bottom:1.5rem; display:flex; align-items:center; gap:8px;"><i class="bx bx-user-plus" style="color:#00E5FF;"></i> Add Contact</h3>
         <form method="POST">{% csrf_token %}
             <input type="hidden" name="action" value="add_contact">
-            <div class="row g-3 mb-3">
-                <div class="col-6"><input type="text" name="first_name" class="form-control" placeholder="First Name" required style="background:rgba(0,0,0,.3);border:1px solid var(--apple-border);color:white;border-radius:8px;"></div>
-                <div class="col-6"><input type="text" name="last_name" class="form-control" placeholder="Last Name" required style="background:rgba(0,0,0,.3);border:1px solid var(--apple-border);color:white;border-radius:8px;"></div>
+            <div style="display:flex; gap:12px;">
+                <input type="text" name="first_name" class="form-control-glass" placeholder="First Name" required>
+                <input type="text" name="last_name" class="form-control-glass" placeholder="Last Name" required>
             </div>
-            <div class="mb-3"><input type="text" name="title" class="form-control" placeholder="Job Title" style="background:rgba(0,0,0,.3);border:1px solid var(--apple-border);color:white;border-radius:8px;"></div>
-            <div class="mb-3"><input type="email" name="email" class="form-control" placeholder="Email" style="background:rgba(0,0,0,.3);border:1px solid var(--apple-border);color:white;border-radius:8px;"></div>
-            <div class="mb-4"><input type="text" name="phone" class="form-control" placeholder="Phone" style="background:rgba(0,0,0,.3);border:1px solid var(--apple-border);color:white;border-radius:8px;"></div>
-            <div class="d-flex gap-2">
-                <button type="submit" class="btn btn-primary flex-grow-1" style="border-radius:8px;">Add Contact</button>
-                <button type="button" class="btn" style="border:1px solid var(--apple-border);color:var(--apple-text-secondary);border-radius:8px;" onclick="document.getElementById('contact-modal').style.display='none'">Cancel</button>
+            <input type="text" name="title" class="form-control-glass" placeholder="Job Title">
+            <input type="email" name="email" class="form-control-glass" placeholder="Email Address">
+            <input type="text" name="phone" class="form-control-glass" placeholder="Phone Number">
+            <div style="display:flex; gap:12px; margin-top:1rem;">
+                <button type="submit" class="btn btn-primary" style="flex:1; background:linear-gradient(135deg, #0A84FF, #005bb5); border:none; border-radius:10px; padding:12px; font-weight:600;">Add Contact</button>
+                <button type="button" class="btn" style="flex:1; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#fff; border-radius:10px; padding:12px; font-weight:600;" onclick="document.getElementById('contact-modal').style.display='none'">Cancel</button>
             </div>
         </form>
     </div>

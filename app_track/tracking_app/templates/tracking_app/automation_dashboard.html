@@ -1,0 +1,149 @@
+{% extends 'tracking_app/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="content-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;">
+    <div>
+        <h1 style="font-size:2.5rem; font-weight:800; background:linear-gradient(90deg, #fff, #a1a1aa); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:0.5rem;">Workflow Automation</h1>
+        <p style="color:var(--apple-text-muted); font-size:1.1rem; margin:0;">Centralized engine for routing, SLAs, and AI sequences.</p>
+    </div>
+    <div style="display:flex; gap:12px;">
+        <button class="btn" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#fff; border-radius:12px; padding:10px 20px; font-weight:600;" onclick="document.getElementById('simulator-modal').style.display='flex'"><i class="bx bx-play-circle" style="margin-right:6px;"></i> Simulator</button>
+        <button class="btn btn-primary" style="background:linear-gradient(135deg, #0A84FF, #005bb5); border:none; color:#fff; border-radius:12px; padding:10px 20px; font-weight:600;"><i class="bx bx-plus" style="margin-right:6px;"></i> New Workflow</button>
+    </div>
+</div>
+
+<div class="metrics-grid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:1.5rem; margin-bottom:2.5rem;">
+    <!-- Active Rules -->
+    <div class="metric-card" style="background:var(--apple-card-bg); border:1px solid rgba(255,255,255,0.05); border-radius:20px; padding:1.5rem;">
+        <div style="color:rgba(255,255,255,0.5); font-size:0.85rem; font-weight:600; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px;">Active Routing Rules</div>
+        <div style="font-size:2.5rem; font-weight:700; color:#fff;">{{ routing_rules.count }}</div>
+    </div>
+    <!-- SLA Configs -->
+    <div class="metric-card" style="background:var(--apple-card-bg); border:1px solid rgba(255,255,255,0.05); border-radius:20px; padding:1.5rem;">
+        <div style="color:rgba(255,255,255,0.5); font-size:0.85rem; font-weight:600; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px;">SLA Monitors</div>
+        <div style="font-size:2.5rem; font-weight:700; color:#fff;">{{ sla_configs.count }}</div>
+    </div>
+    <!-- Sequences -->
+    <div class="metric-card" style="background:var(--apple-card-bg); border:1px solid rgba(255,255,255,0.05); border-radius:20px; padding:1.5rem;">
+        <div style="color:rgba(255,255,255,0.5); font-size:0.85rem; font-weight:600; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px;">Email Sequences</div>
+        <div style="font-size:2.5rem; font-weight:700; color:#fff;">{{ email_sequences.count }}</div>
+    </div>
+    <!-- Success Rate -->
+    <div class="metric-card" style="background:var(--apple-card-bg); border:1px solid rgba(255,255,255,0.05); border-radius:20px; padding:1.5rem;">
+        <div style="color:rgba(255,255,255,0.5); font-size:0.85rem; font-weight:600; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px;">Run Success Rate</div>
+        <div style="font-size:2.5rem; font-weight:700; color:#fff;">{{ success_rate|default:"100" }}%</div>
+    </div>
+</div>
+
+<div style="display:grid; grid-template-columns:2fr 1fr; gap:1.5rem;">
+    <!-- Active Workflows -->
+    <div style="background:var(--apple-card-bg); border:1px solid rgba(255,255,255,0.05); border-radius:20px; padding:1.5rem;">
+        <h3 style="margin-top:0; margin-bottom:1rem; font-size:1.1rem;">Active Workflows</h3>
+        <table style="width:100%; border-collapse:collapse;">
+            <thead>
+                <tr style="text-align:left; border-bottom:1px solid rgba(255,255,255,0.1); color:rgba(255,255,255,0.5); font-size:0.85rem;">
+                    <th style="padding:12px 0;">Name</th>
+                    <th style="padding:12px 0;">Type</th>
+                    <th style="padding:12px 0;">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for rule in routing_rules %}
+                <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                    <td style="padding:12px 0; font-size:0.9rem;">{{ rule.name }}</td>
+                    <td style="padding:12px 0; font-size:0.8rem; color:rgba(255,255,255,0.6);">Routing Rule</td>
+                    <td style="padding:12px 0;"><span style="background:rgba(50,215,75,0.1); color:#32d74b; padding:2px 8px; border-radius:12px; font-size:0.75rem;">Active</span></td>
+                </tr>
+                {% endfor %}
+                {% for seq in email_sequences %}
+                <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                    <td style="padding:12px 0; font-size:0.9rem;">{{ seq.name }}</td>
+                    <td style="padding:12px 0; font-size:0.8rem; color:rgba(255,255,255,0.6);">Email Sequence</td>
+                    <td style="padding:12px 0;"><span style="background:rgba(50,215,75,0.1); color:#32d74b; padding:2px 8px; border-radius:12px; font-size:0.75rem;">Active</span></td>
+                </tr>
+                {% endfor %}
+                {% if not routing_rules and not email_sequences %}
+                <tr><td colspan="3" style="padding:20px 0; text-align:center; color:rgba(255,255,255,0.4);">No active workflows found.</td></tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Recent Runs -->
+    <div style="background:var(--apple-card-bg); border:1px solid rgba(255,255,255,0.05); border-radius:20px; padding:1.5rem;">
+        <h3 style="margin-top:0; margin-bottom:1rem; font-size:1.1rem;">Recent Runs</h3>
+        <div style="display:flex; flex-direction:column; gap:12px;">
+            {% for run in recent_runs %}
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:10px; background:rgba(255,255,255,0.02); border-radius:10px; border:1px solid rgba(255,255,255,0.05);">
+                <div>
+                    <div style="font-size:0.9rem; font-weight:500;">{{ run.run_type }}</div>
+                    <div style="font-size:0.75rem; color:rgba(255,255,255,0.4);">{{ run.timestamp|date:"M d, H:i" }}</div>
+                </div>
+                <div>
+                    {% if run.status == 'success' %}
+                    <i class="bx bx-check-circle" style="color:#32d74b; font-size:1.2rem;"></i>
+                    {% else %}
+                    <i class="bx bx-error-circle" style="color:#ff3b30; font-size:1.2rem;"></i>
+                    {% endif %}
+                </div>
+            </div>
+            {% empty %}
+            <div style="text-align:center; padding:20px; color:rgba(255,255,255,0.4); font-size:0.9rem;">
+                No recent automation runs.
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Automation Simulator Modal -->
+<div id="simulator-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:9999; align-items:center; justify-content:center; backdrop-filter:blur(8px);">
+    <div style="background:var(--apple-card-bg); border:1px solid rgba(255,255,255,0.1); border-radius:20px; width:90%; max-width:550px; padding:2rem; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+            <h3 style="color:#fff; margin:0; display:flex; align-items:center; gap:8px;"><i class="bx bx-play-circle" style="color:#0A84FF; font-size:1.5rem;"></i> Automation Simulator</h3>
+            <i class="bx bx-x" style="color:rgba(255,255,255,0.5); font-size:1.5rem; cursor:pointer;" onclick="document.getElementById('simulator-modal').style.display='none'"></i>
+        </div>
+        
+        <div style="margin-bottom:1rem;">
+            <label style="color:rgba(255,255,255,0.6); font-size:0.85rem; margin-bottom:6px; display:block;">Select Workflow / Rule</label>
+            <select class="form-select" style="background:rgba(0,0,0,0.2); border:1px solid rgba(255,255,255,0.1); color:#fff; border-radius:10px; padding:10px 14px; width:100%; outline:none;">
+                {% for rule in routing_rules %}
+                <option value="rule_{{ rule.id }}">[Routing] {{ rule.name }}</option>
+                {% endfor %}
+                {% for seq in email_sequences %}
+                <option value="seq_{{ seq.id }}">[Sequence] {{ seq.name }}</option>
+                {% endfor %}
+                <option value="mock">[Mock] New Lead Assignment</option>
+            </select>
+        </div>
+
+        <div style="margin-bottom:1.5rem;">
+            <label style="color:rgba(255,255,255,0.6); font-size:0.85rem; margin-bottom:6px; display:block;">JSON Payload (Mock Data)</label>
+            <textarea style="background:rgba(0,0,0,0.2); border:1px solid rgba(255,255,255,0.1); color:#32D74B; border-radius:10px; padding:14px; width:100%; height:120px; font-family:monospace; font-size:0.85rem; resize:none; outline:none;" spellcheck="false">{
+  "event": "ticket_created",
+  "data": {
+    "subject": "System Outage",
+    "priority": "high",
+    "user_tier": "enterprise"
+  }
+}</textarea>
+        </div>
+
+        <div id="simulator-result" style="display:none; background:rgba(50,215,75,0.1); border:1px solid rgba(50,215,75,0.2); border-radius:10px; padding:14px; margin-bottom:1.5rem;">
+            <div style="display:flex; align-items:center; gap:8px; color:#32D74B; font-weight:600; margin-bottom:8px;">
+                <i class="bx bx-check-circle"></i> Simulation Successful
+            </div>
+            <div style="color:rgba(255,255,255,0.7); font-size:0.85rem; line-height:1.5;">
+                <strong>Action Taken:</strong> Ticket assigned to Tier 3 Support.<br>
+                <strong>Execution Time:</strong> 14ms
+            </div>
+        </div>
+
+        <div style="display:flex; gap:12px;">
+            <button class="btn btn-primary" style="flex:1; background:linear-gradient(135deg, #0A84FF, #005bb5); border:none; border-radius:10px; padding:12px; font-weight:600;" onclick="document.getElementById('simulator-result').style.display='block'">Run Simulation</button>
+            <button class="btn" style="flex:1; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#fff; border-radius:10px; padding:12px; font-weight:600;" onclick="document.getElementById('simulator-modal').style.display='none'">Close</button>
+        </div>
+    </div>
+</div>
+{% endblock %}

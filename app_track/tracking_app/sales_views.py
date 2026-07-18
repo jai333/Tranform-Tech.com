@@ -871,3 +871,74 @@ def import_leads(request):
         messages.warning(request, err)
 
     return redirect('lead-list')
+
+
+# ── UNIFIED INBOX (TWO-WAY EMAIL) ────────────────────────────────────────
+
+@login_required
+def unified_inbox(request):
+    """A centralized view of all communications (OutreachEmails, Replies, etc)."""
+    from .sales_models import OutreachEmail, EmailReply
+    from .models import Lead
+    
+    if request.method == 'POST':
+        reply_text = request.POST.get('reply_text')
+        lead_id = request.POST.get('lead_id')
+        subject = request.POST.get('subject', 'Re: ')
+        
+        if reply_text and lead_id:
+            lead = Lead.objects.filter(id=lead_id).first()
+            if lead:
+                OutreachEmail.objects.create(
+                    lead=lead,
+                    subject=subject,
+                    body=reply_text,
+                    status='sent'
+                )
+                from django.contrib import messages
+                messages.success(request, "Reply sent successfully.")
+                from django.shortcuts import redirect
+                return redirect('unified-inbox')
+    
+    # Get recent sent emails
+    sent_emails = OutreachEmail.objects.all().order_by('-id')[:20]
+    
+    # Get recent replies (incoming)
+    replies = EmailReply.objects.all().order_by('-id')[:20]
+    
+    # Combine and sort them by date (mocking a unified stream)
+    inbox_items = []
+    
+    for email in sent_emails:
+        inbox_items.append({
+            'type': 'sent',
+            'id': email.id,
+            'lead_id': email.lead_id if email.lead else '',
+            'subject': email.subject,
+            'preview': email.body[:100] if email.body else "No content",
+            'full_body': email.body or "",
+            'date': email.id,  # Fallback sorting since we don't have sent_at
+            'contact': f"To: {email.lead.email if email.lead else 'Unknown'}",
+            'status': email.status
+        })
+        
+    for reply in replies:
+        inbox_items.append({
+            'type': 'received',
+            'id': reply.id,
+            'lead_id': reply.email.lead_id if reply.email and reply.email.lead else '',
+            'subject': f"Re: {reply.email.subject if reply.email else 'Incoming'}",
+            'preview': reply.raw_content[:100] if reply.raw_content else "No content",
+            'full_body': reply.raw_content or "",
+            'date': reply.id,
+            'contact': f"From: {reply.email.lead.email if reply.email and reply.email.lead else 'Unknown'}",
+            'status': 'received'
+        })
+        
+    inbox_items.sort(key=lambda x: x['date'], reverse=True)
+    
+    context = {
+        'inbox_items': inbox_items,
+        'page_title': 'Unified Inbox',
+    }
+    return render(request, 'tracking_app/sales/unified_inbox.html', context)

@@ -2133,7 +2133,7 @@ def report_phishing(request):
 def account_list(request):
     """B2B Account directory."""
     from .sales_models import Account as SalesAccount, AccountActivity
-    accounts = SalesAccount.objects.prefetch_related('contacts', 'deals').order_by('-created_at')
+    accounts = SalesAccount.objects.prefetch_related('contacts').order_by('-created_at')
     return render(request, 'tracking_app/account_list.html', {'accounts': accounts})
 
 
@@ -2198,3 +2198,172 @@ def account_create(request):
         'industry_choices': SalesAccount.INDUSTRY_CHOICES,
         'size_choices': SalesAccount.SIZE_CHOICES,
     })
+
+
+# ── AI COMMAND BAR / GLOBAL SEARCH ──────────────────────────────
+
+@login_required
+def api_global_search(request):
+    """Global search endpoint for the Cmd+K Command Bar."""
+    query = request.GET.get('q', '').strip()
+    if not query:
+        return JsonResponse({'results': []})
+        
+    results = []
+    
+    # 1. Search Candidates
+    candidates = Candidate.objects.filter(
+        models.Q(first_name__icontains=query) | 
+        models.Q(last_name__icontains=query) | 
+        models.Q(email__icontains=query)
+    )[:3]
+    for c in candidates:
+        results.append({
+            'type': 'Candidate',
+            'title': f"{c.first_name} {c.last_name}",
+            'subtitle': c.email,
+            'url': f"/candidates/{c.id}/",
+            'icon': 'bx-user',
+            'color': '#00E5FF'
+        })
+        
+    # 2. Search IT Tickets (if IT agent/admin)
+    if request.user.is_it_agent or request.user.is_it_admin or request.user.is_staff:
+        tickets = ITTicket.objects.filter(
+            models.Q(title__icontains=query) | 
+            models.Q(description__icontains=query)
+        )[:3]
+        for t in tickets:
+            results.append({
+                'type': 'IT Ticket',
+                'title': f"[{t.priority.upper()}] {t.title}",
+                'subtitle': f"Status: {t.get_status_display()}",
+                'url': f"/it/tickets/{t.id}/",
+                'icon': 'bx-support',
+                'color': '#ff3b30' if t.priority == 'critical' else '#f59e0b'
+            })
+            
+    # 3. Search B2B Accounts
+    from .sales_models import Account as SalesAccount, Deal
+    accounts = SalesAccount.objects.filter(name__icontains=query)[:3]
+    for a in accounts:
+        results.append({
+            'type': 'Account',
+            'title': a.name,
+            'subtitle': a.get_industry_display() or "B2B Account",
+            'url': f"/accounts/{a.id}/",
+            'icon': 'bx-buildings',
+            'color': '#6ab4ff'
+        })
+        
+    # 4. Search Deals
+    deals = Deal.objects.filter(lead__company_name__icontains=query)[:3]
+    for d in deals:
+        results.append({
+            'type': 'Deal',
+            'title': d.lead.company_name if d.lead else "Unknown Lead",
+            'subtitle': f"Stage: {d.get_stage_display()} - ${d.value}",
+            'url': f"/sales/deals/{d.id}/" if hasattr(d, 'id') else "/sales/pipeline/",
+            'icon': 'bx-dollar-circle',
+            'color': '#32d74b'
+        })
+
+    # Action suggestions based on keywords
+    query_lower = query.lower()
+    if 'ticket' in query_lower or 'help' in query_lower or 'fix' in query_lower:
+        results.insert(0, {
+            'type': 'Action',
+            'title': 'Create new IT Ticket',
+            'subtitle': 'Submit a helpdesk request',
+            'url': '/it/tickets/new/',
+            'icon': 'bx-plus-circle',
+            'color': '#9333ea'
+        })
+    if 'account' in query_lower or 'company' in query_lower:
+        results.insert(0, {
+            'type': 'Action',
+            'title': 'Create new B2B Account',
+            'subtitle': 'Add a company to CRM',
+            'url': '/accounts/new/',
+            'icon': 'bx-plus-circle',
+            'color': '#9333ea'
+        })
+
+    return JsonResponse({'results': results})
+
+
+# ── EXECUTIVE DASHBOARD ──────────────────────────────────────────────────
+
+@login_required
+def executive_dashboard(request):
+    """A high-level dashboard aggregating stats from Sales, ATS, IT, and Security."""
+    if not (request.user.is_staff or request.user.is_admin_role):
+        messages.error(request, "You don't have permission to view the executive dashboard.")
+        return redirect('dashboard')
+        
+    from django.db.models import Sum
+    from .sales_models import Deal
+    from .models import Application, ITTicket, ThreatIncident
+    import json
+    
+    # Sales Metrics
+    pipeline_aggr = Deal.objects.exclude(stage__in=['won', 'lost']).aggregate(total=Sum('deal_value_annual'))
+    revenue_aggr = Deal.objects.filter(stage='won').aggregate(total=Sum('deal_value_annual'))
+    pipeline_value = pipeline_aggr['total'] or 0
+    total_revenue = revenue_aggr['total'] or 0
+    
+    # HR / ATS Metrics
+    total_hires = Application.objects.filter(status='hired').count()
+    active_candidates = Application.objects.exclude(status__in=['hired', 'rejected', 'withdrawn']).count()
+    
+    # IT / Security Metrics
+    critical_tickets = ITTicket.objects.filter(priority='critical', status__in=['open', 'in_progress']).count()
+    active_threats = ThreatIncident.objects.filter(status__in=['open', 'investigating']).count()
+    
+    # Chart Data (Mock trend data for 6 months)
+    import datetime
+    months = [(datetime.datetime.now() - datetime.timedelta(days=30*i)).strftime('%b') for i in range(5, -1, -1)]
+    revenue_trend = [float(total_revenue) * 0.5, float(total_revenue) * 0.6, float(total_revenue) * 0.8, float(total_revenue) * 0.7, float(total_revenue) * 0.9, float(total_revenue)]
+    
+    context = {
+        'pipeline_value': pipeline_value,
+        'total_revenue': total_revenue,
+        'total_hires': total_hires,
+        'active_candidates': active_candidates,
+        'critical_tickets': critical_tickets,
+        'active_threats': active_threats,
+        'months_json': json.dumps(months),
+        'revenue_trend_json': json.dumps(revenue_trend),
+        'page_title': 'Executive Dashboard',
+    }
+    return render(request, 'tracking_app/executive_dashboard.html', context)
+
+
+# ── AUTOMATION DASHBOARD ─────────────────────────────────────────────────
+
+@login_required
+def automation_dashboard(request):
+    """Central view for managing system automations and routing rules."""
+    from .models import RoutingRule, AutomationRun, SLAConfiguration
+    from .sales_models import EmailSequence
+    
+    routing_rules = RoutingRule.objects.all()
+    sla_configs = SLAConfiguration.objects.all()
+    email_sequences = EmailSequence.objects.all()
+    recent_runs = AutomationRun.objects.order_by('-timestamp')[:20]
+    
+    success_count = AutomationRun.objects.filter(status='success').count()
+    failed_count = AutomationRun.objects.filter(status='failed').count()
+    total_runs = success_count + failed_count
+    success_rate = round((success_count / total_runs * 100) if total_runs > 0 else 100, 1)
+    
+    context = {
+        'routing_rules': routing_rules,
+        'sla_configs': sla_configs,
+        'email_sequences': email_sequences,
+        'recent_runs': recent_runs,
+        'success_rate': success_rate,
+        'total_runs': total_runs,
+        'page_title': 'Workflow Automation',
+    }
+    return render(request, 'tracking_app/automation_dashboard.html', context)

@@ -3,6 +3,7 @@ from django.views.generic import TemplateView
 from django.contrib.auth import views as auth_views
 from . import views
 from . import ai_views
+from . import sales_views
 from .sales_urls import sales_urlpatterns
 
 urlpatterns = [
@@ -149,5 +150,16 @@ urlpatterns = [
     path('analytics/reports/<int:pk>/run/', views.run_report_now, name='run-report-now'),
     path('candidates/bulk-upload/', views.bulk_resume_upload, name='bulk-resume-upload'),
     path('qualify/', views.lead_qualification_form, name='lead-qualification-form'),
+    
+    # ── AI Command Bar ───────────────────────────────────────────────────────
+    path('api/search/', views.api_global_search, name='api-global-search'),
+    
+    # ── Executive Expansion ──────────────────────────────────────────────────
+    path('executive-dashboard/', views.executive_dashboard, name='executive-dashboard'),
+    path('automation/dashboard/', views.automation_dashboard, name='automation-dashboard'),
+    
+    # ── Unified Inbox ────────────────────────────────────────────────────────
+    path('inbox/', sales_views.unified_inbox, name='unified-inbox'),
+    
     *sales_urlpatterns,
 ]

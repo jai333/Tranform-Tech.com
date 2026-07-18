@@ -1209,66 +1209,85 @@
             </a>
 
             <nav>
-                <ul>
-                    <li><a href="{% url 'home' %}" class="{% if request.path == '/' %}active{% endif %}"><i
-                                class="fas fa-home"></i> Home</a></li>
-                    <!-- Only show these options if the user is not a job seeker -->
-                    {% if user.is_authenticated and not user.is_jobseeker or user.is_admin_role or user.is_staff %}
-                    <li><a href="{% url 'candidate-list' %}"
-                            class="{% if '/candidates/' in request.path %}active{% endif %}"><i
-                                class="fas fa-user-tie"></i> Candidates</a></li>
-                    <li><a href="{% url 'application-list' %}"
-                            class="{% if '/applications/' in request.path %}active{% endif %}"><i
-                                class="fas fa-file-alt"></i> Applications</a></li>
-                    <li><a href="{% url 'job-applications-list' %}"
-                            class="{% if '/job-applications/' in request.path %}active{% endif %}"><i
-                                class="fas fa-clipboard-list"></i> Job Applications</a></li>
-                    <li><a href="{% url 'interview-list' %}"
-                            class="{% if '/interviews/' in request.path %}active{% endif %}"><i
-                                class="fas fa-handshake"></i> Interviews</a></li>
-                    <li><a href="{% url 'sales-dashboard' %}"
-                            class="{% if '/sales/' in request.path %}active{% endif %}"><i
-                                class="fas fa-chart-line"></i> Sales</a></li>
-                    {% endif %}
-                    <!-- Show my interviews option for job seekers -->
-                    {% if user.is_authenticated and user.is_jobseeker %}
-                    <li><a href="{% url 'interview-list' %}" class="{% if '/interviews/' in request.path %}active{% endif %}"><i class="fa-solid fa-calendar-check"></i> Interviews</a></li>
-                    <li><a href="{% url 'ai-pipeline-dashboard' %}" class="{% if '/ai-pipeline/' in request.path %}active{% endif %}"><i class="fa-solid fa-chart-network"></i> AI Pipeline</a></li>
-                    {% endif %}
+                <ul style="white-space: nowrap; display: flex; align-items: center;">
+                    <li><a href="{% url 'home' %}" class="{% if request.path == '/' %}active{% endif %}" style="white-space: nowrap;"><i class="fas fa-home"></i> Home</a></li>
+                    
                     {% if user.is_authenticated %}
-                    {% if user.is_it_agent or user.is_it_admin %}
-                    <li class="dropdown-nav" onclick="this.querySelector('.dropdown-content').classList.toggle('show-dropdown')">
-                        <a href="javascript:void(0)" class="{% if '/it/' in request.path %}active{% endif %}">
-                            <i class="fa-solid fa-desktop"></i> IT Dashboard <i class="fas fa-chevron-down" style="font-size: 0.7em; margin-left: 4px;"></i>
-                        </a>
-                        <ul class="dropdown-content">
-                            <li><a href="{% url 'it-helpdesk-list' %}"><i class="fa-solid fa-headset"></i> Tickets</a></li>
-                            {% if user.is_it_admin %}
-                            <li><a href="{% url 'it-admin-settings' %}"><i class="fa-solid fa-gear"></i> IT Admin Settings</a></li>
-                            {% endif %}
-                            {% if user.is_it_agent %}
-                            <li><a href="{% url 'it-reports' %}"><i class="fa-solid fa-chart-bar"></i> IT Reports</a></li>
-                            {% endif %}
-                        </ul>
-                    </li>
+                        
+                        <!-- C-SUITE DASHBOARDS -->
+                        {% if user.is_staff or user.is_admin_role %}
+                        <li class="dropdown-nav" onclick="this.querySelector('.dropdown-content').classList.toggle('show-dropdown')">
+                            <a href="javascript:void(0)" class="{% if '/executive-dashboard/' in request.path or '/automation/dashboard/' in request.path %}active{% endif %}" style="color:#00E5FF; white-space: nowrap;">
+                                <i class="fa-solid fa-crown"></i> C-Suite <i class="fas fa-chevron-down" style="font-size: 0.7em; margin-left: 4px;"></i>
+                            </a>
+                            <ul class="dropdown-content">
+                                <li><a href="{% url 'executive-dashboard' %}"><i class="fa-solid fa-chart-pie"></i> Executive Analytics</a></li>
+                                <li><a href="{% url 'automation-dashboard' %}"><i class="fa-solid fa-robot"></i> Workflow Automation</a></li>
+                            </ul>
+                        </li>
+                        {% endif %}
+
+                        <!-- IT DASHBOARD -->
+                        {% if user.is_it_agent or user.is_it_admin %}
+                        <li class="dropdown-nav" onclick="this.querySelector('.dropdown-content').classList.toggle('show-dropdown')">
+                            <a href="javascript:void(0)" class="{% if '/it/' in request.path %}active{% endif %}" style="white-space: nowrap;">
+                                <i class="fa-solid fa-desktop"></i> IT Dashboard <i class="fas fa-chevron-down" style="font-size: 0.7em; margin-left: 4px;"></i>
+                            </a>
+                            <ul class="dropdown-content">
+                                <li><a href="{% url 'it-helpdesk-list' %}"><i class="fa-solid fa-headset"></i> Tickets</a></li>
+                                {% if user.is_it_admin %}
+                                <li><a href="{% url 'it-admin-settings' %}"><i class="fa-solid fa-gear"></i> IT Admin Settings</a></li>
+                                {% endif %}
+                                {% if user.is_it_agent %}
+                                <li><a href="{% url 'it-reports' %}"><i class="fa-solid fa-chart-bar"></i> IT Reports</a></li>
+                                {% endif %}
+                            </ul>
+                        </li>
+                        {% endif %}
+
+                        <!-- SALES DASHBOARD & ATS for Non-Jobseekers -->
+                        {% if not user.is_jobseeker or user.is_admin_role or user.is_staff %}
+                        <li><a href="{% url 'sales-dashboard' %}" class="{% if '/sales/' in request.path %}active{% endif %}" style="white-space: nowrap;"><i class="fas fa-chart-line"></i> Sales</a></li>
+                        
+                        <li class="dropdown-nav" onclick="this.querySelector('.dropdown-content').classList.toggle('show-dropdown')">
+                            <a href="javascript:void(0)" class="{% if '/candidates/' in request.path or '/applications/' in request.path or '/job-applications/' in request.path or '/interviews/' in request.path or '/jobs/' in request.path %}active{% endif %}" style="white-space: nowrap;">
+                                <i class="fa-solid fa-users-viewfinder"></i> ATS <i class="fas fa-chevron-down" style="font-size: 0.7em; margin-left: 4px;"></i>
+                            </a>
+                            <ul class="dropdown-content">
+                                <li><a href="{% url 'candidate-list' %}"><i class="fas fa-user-tie"></i> Candidates</a></li>
+                                <li><a href="{% url 'application-list' %}"><i class="fas fa-file-alt"></i> Applications</a></li>
+                                <li><a href="{% url 'job-applications-list' %}"><i class="fas fa-clipboard-list"></i> Job Applications</a></li>
+                                <li><a href="{% url 'interview-list' %}"><i class="fas fa-handshake"></i> Interviews</a></li>
+                                <li><a href="{% url 'job-list' %}"><i class="fa-solid fa-briefcase"></i> Jobs</a></li>
+                            </ul>
+                        </li>
+
+                        <li><a href="{% url 'unified-inbox' %}" class="{% if '/inbox/' in request.path %}active{% endif %}" style="white-space: nowrap;"><i class="fas fa-inbox"></i> Inbox</a></li>
+                        {% endif %}
+
+                        <!-- Jobseeker Specific -->
+                        {% if user.is_jobseeker %}
+                        <li><a href="{% url 'interview-list' %}" class="{% if '/interviews/' in request.path %}active{% endif %}" style="white-space: nowrap;"><i class="fa-solid fa-calendar-check"></i> Interviews</a></li>
+                        <li><a href="{% url 'ai-pipeline-dashboard' %}" class="{% if '/ai-pipeline/' in request.path %}active{% endif %}" style="white-space: nowrap;"><i class="fa-solid fa-chart-network"></i> AI Pipeline</a></li>
+                        <li><a href="{% url 'job-list' %}" class="{% if '/jobs/' in request.path %}active{% endif %}" style="white-space: nowrap;"><i class="fas fa-briefcase"></i> Jobs</a></li>
+                        {% endif %}
+
+                        <!-- Common -->
+                        <li><a href="{% url 'account-list' %}" class="{% if '/accounts/' in request.path %}active{% endif %}" style="white-space: nowrap;"><i class="fa-solid fa-buildings"></i> Accounts</a></li>
+                        
+                        <li class="dropdown-nav" onclick="this.querySelector('.dropdown-content').classList.toggle('show-dropdown')">
+                            <a href="javascript:void(0)" class="{% if '/security/' in request.path %}active{% endif %}" style="white-space: nowrap;">
+                                <i class="fa-solid fa-shield-halved"></i> Security <i class="fas fa-chevron-down" style="font-size: 0.7em; margin-left: 4px;"></i>
+                            </a>
+                            <ul class="dropdown-content">
+                                <li><a href="{% url 'threat-dashboard' %}"><i class="fa-solid fa-triangle-exclamation"></i> Incidents</a></li>
+                                <li><a href="{% url 'vuln-list' %}"><i class="fa-solid fa-bug"></i> Vulnerabilities</a></li>
+                                <li><a href="{% url 'ip-blocklist' %}"><i class="fa-solid fa-ban"></i> IP Blocklist</a></li>
+                                <li><a href="{% url 'report-phishing' %}"><i class="fa-solid fa-fish"></i> Report Phishing</a></li>
+                            </ul>
+                        </li>
+
                     {% endif %}
-                    <li><a href="{% url 'service-addons' %}" class="{% if '/add-ons/' in request.path %}active{% endif %}"><i class="fa-solid fa-server"></i> Services</a></li>
-                    <li><a href="{% url 'account-list' %}" class="{% if '/accounts/' in request.path %}active{% endif %}"><i class="fa-solid fa-buildings"></i> Accounts</a></li>
-                    <li class="dropdown-nav" onclick="this.querySelector('.dropdown-content').classList.toggle('show-dropdown')">
-                        <a href="javascript:void(0)" class="{% if '/security/' in request.path %}active{% endif %}">
-                            <i class="fa-solid fa-shield-halved"></i> Security <i class="fas fa-chevron-down" style="font-size: 0.7em; margin-left: 4px;"></i>
-                        </a>
-                        <ul class="dropdown-content">
-                            <li><a href="{% url 'threat-dashboard' %}"><i class="fa-solid fa-triangle-exclamation"></i> Incidents</a></li>
-                            <li><a href="{% url 'vuln-list' %}"><i class="fa-solid fa-bug"></i> Vulnerabilities</a></li>
-                            <li><a href="{% url 'ip-blocklist' %}"><i class="fa-solid fa-ban"></i> IP Blocklist</a></li>
-                            <li><a href="{% url 'report-phishing' %}"><i class="fa-solid fa-fish"></i> Report Phishing</a></li>
-                        </ul>
-                    </li>
-                    {% endif %}
-                    <!-- All users can see jobs -->
-                    <li><a href="{% url 'job-list' %}" class="{% if '/jobs/' in request.path %}active{% endif %}"><i
-                                class="fas fa-briefcase"></i> Jobs</a></li>
                 </ul>
             </nav>
 
@@ -1630,6 +1649,182 @@
             }
         });
     </script>
+    </script>
+    
+    <!-- ── AI COMMAND BAR ────────────────────────────────────────────────── -->
+    {% if user.is_authenticated %}
+    <div id="cmd-k-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); backdrop-filter:blur(5px); z-index:999999; align-items:flex-start; justify-content:center; padding-top:12vh;">
+        <div id="cmd-k-modal" style="background:var(--apple-card-bg, #1a1a1a); width:100%; max-width:640px; border-radius:16px; border:1px solid rgba(255,255,255,0.1); box-shadow:0 25px 50px -12px rgba(0,0,0,0.5); overflow:hidden; transform:scale(0.95); opacity:0; transition:all 0.15s cubic-bezier(0.16, 1, 0.3, 1);">
+            <div style="display:flex; align-items:center; padding:16px 24px; border-bottom:1px solid rgba(255,255,255,0.08);">
+                <i class="bx bx-search" style="font-size:1.5rem; color:rgba(255,255,255,0.4); margin-right:12px;"></i>
+                <input type="text" id="cmd-k-input" placeholder="Search accounts, tickets, candidates, or type a command..." 
+                    style="flex:1; background:transparent; border:none; color:#fff; font-size:1.1rem; outline:none; padding:0;">
+                <div style="font-size:0.7rem; padding:4px 8px; border:1px solid rgba(255,255,255,0.15); border-radius:6px; color:rgba(255,255,255,0.4); font-family:monospace;">ESC</div>
+            </div>
+            
+            <div id="cmd-k-results" style="max-height:400px; overflow-y:auto; padding:8px;">
+                <!-- Initial State -->
+                <div class="cmd-k-empty" style="padding:40px 20px; text-align:center; color:rgba(255,255,255,0.3);">
+                    <i class="bx bx-command" style="font-size:2rem; margin-bottom:8px; opacity:0.5;"></i>
+                    <p style="margin:0; font-size:0.9rem;">What would you like to do?</p>
+                </div>
+            </div>
+            
+            <div style="padding:10px 24px; background:rgba(0,0,0,0.2); border-top:1px solid rgba(255,255,255,0.05); display:flex; align-items:center; gap:16px; font-size:0.75rem; color:rgba(255,255,255,0.4);">
+                <span><kbd style="font-family:inherit; background:rgba(255,255,255,0.1); padding:2px 6px; border-radius:4px;">↑</kbd> <kbd style="font-family:inherit; background:rgba(255,255,255,0.1); padding:2px 6px; border-radius:4px;">↓</kbd> to navigate</span>
+                <span><kbd style="font-family:inherit; background:rgba(255,255,255,0.1); padding:2px 6px; border-radius:4px;">↵</kbd> to select</span>
+            </div>
+        </div>
+    </div>
+    
+    <style>
+        .cmd-k-item { display:flex; align-items:center; padding:12px 16px; border-radius:10px; cursor:pointer; color:#fff; text-decoration:none; margin-bottom:2px; }
+        .cmd-k-item:hover, .cmd-k-item.active { background:rgba(255,255,255,0.06); text-decoration:none; color:#fff; }
+        .cmd-k-item-icon { width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center; margin-right:16px; font-size:1.2rem; }
+        .cmd-k-item-content { flex:1; display:flex; flex-direction:column; }
+        .cmd-k-item-title { font-size:0.95rem; font-weight:500; line-height:1.2; margin-bottom:4px; }
+        .cmd-k-item-subtitle { font-size:0.75rem; color:rgba(255,255,255,0.5); line-height:1; }
+        .cmd-k-item-type { font-size:0.65rem; text-transform:uppercase; letter-spacing:1px; font-weight:600; padding:4px 8px; border-radius:20px; background:rgba(255,255,255,0.1); }
+    </style>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const overlay = document.getElementById('cmd-k-overlay');
+            const modal = document.getElementById('cmd-k-modal');
+            const input = document.getElementById('cmd-k-input');
+            const results = document.getElementById('cmd-k-results');
+            
+            let isCmdKOpen = false;
+            let searchTimeout = null;
+            let currentSelectionIndex = -1;
+            
+            function toggleCmdK() {
+                isCmdKOpen = !isCmdKOpen;
+                if (isCmdKOpen) {
+                    overlay.style.display = 'flex';
+                    setTimeout(() => {
+                        modal.style.transform = 'scale(1)';
+                        modal.style.opacity = '1';
+                        input.focus();
+                        input.value = '';
+                        results.innerHTML = `
+                            <div class="cmd-k-empty" style="padding:40px 20px; text-align:center; color:rgba(255,255,255,0.3);">
+                                <i class="bx bx-command" style="font-size:2rem; margin-bottom:8px; opacity:0.5;"></i>
+                                <p style="margin:0; font-size:0.9rem;">What would you like to do?</p>
+                            </div>
+                        `;
+                    }, 10);
+                } else {
+                    modal.style.transform = 'scale(0.95)';
+                    modal.style.opacity = '0';
+                    setTimeout(() => {
+                        overlay.style.display = 'none';
+                    }, 150);
+                }
+            }
+            
+            // Listen for Cmd+K (Mac) or Ctrl+K (Windows)
+            document.addEventListener('keydown', (e) => {
+                if ((e.metaKey || e.ctrlKey) && (e.key.toLowerCase() === 'k' || e.code === 'KeyK')) {
+                    e.preventDefault();
+                    toggleCmdK();
+                }
+                if (e.key === 'Escape' && isCmdKOpen) {
+                    toggleCmdK();
+                }
+            });
+            
+            // Close on overlay click
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) toggleCmdK();
+            });
+            
+            // Handle search
+            input.addEventListener('input', (e) => {
+                const query = e.target.value;
+                clearTimeout(searchTimeout);
+                
+                if (!query.trim()) {
+                    results.innerHTML = `
+                        <div class="cmd-k-empty" style="padding:40px 20px; text-align:center; color:rgba(255,255,255,0.3);">
+                            <i class="bx bx-command" style="font-size:2rem; margin-bottom:8px; opacity:0.5;"></i>
+                            <p style="margin:0; font-size:0.9rem;">What would you like to do?</p>
+                        </div>
+                    `;
+                    currentSelectionIndex = -1;
+                    return;
+                }
+                
+                results.innerHTML = `<div style="padding:30px;text-align:center;color:rgba(255,255,255,0.3);"><i class="bx bx-loader-alt bx-spin" style="font-size:1.5rem"></i></div>`;
+                
+                searchTimeout = setTimeout(() => {
+                    fetch(`/api/search/?q=${encodeURIComponent(query)}`)
+                        .then(r => r.json())
+                        .then(data => {
+                            if (data.results.length === 0) {
+                                results.innerHTML = `
+                                    <div class="cmd-k-empty" style="padding:40px 20px; text-align:center; color:rgba(255,255,255,0.3);">
+                                        <p style="margin:0; font-size:0.9rem;">No results found for "${query}"</p>
+                                    </div>
+                                `;
+                            } else {
+                                results.innerHTML = data.results.map((item, index) => `
+                                    <a href="${item.url}" class="cmd-k-item" data-index="${index}">
+                                        <div class="cmd-k-item-icon" style="background:rgba(255,255,255,0.05); color:${item.color};">
+                                            <i class="bx ${item.icon}"></i>
+                                        </div>
+                                        <div class="cmd-k-item-content">
+                                            <div class="cmd-k-item-title">${item.title}</div>
+                                            <div class="cmd-k-item-subtitle">${item.subtitle}</div>
+                                        </div>
+                                        <div class="cmd-k-item-type" style="color:${item.color}; border:1px solid ${item.color}33;">${item.type}</div>
+                                    </a>
+                                `).join('');
+                                currentSelectionIndex = -1;
+                            }
+                        })
+                        .catch(err => {
+                            results.innerHTML = `<div style="padding:20px;text-align:center;color:#ff3b30;">Search error</div>`;
+                        });
+                }, 300);
+            });
+            
+            // Keyboard navigation
+            input.addEventListener('keydown', (e) => {
+                const items = results.querySelectorAll('.cmd-k-item');
+                if (!items.length) return;
+                
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    currentSelectionIndex = (currentSelectionIndex + 1) % items.length;
+                    updateSelection(items);
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    currentSelectionIndex = currentSelectionIndex <= 0 ? items.length - 1 : currentSelectionIndex - 1;
+                    updateSelection(items);
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (currentSelectionIndex >= 0) {
+                        window.location = items[currentSelectionIndex].getAttribute('href');
+                    } else if (items.length > 0) {
+                        window.location = items[0].getAttribute('href');
+                    }
+                }
+            });
+            
+            function updateSelection(items) {
+                items.forEach((item, index) => {
+                    if (index === currentSelectionIndex) {
+                        item.classList.add('active');
+                        item.scrollIntoView({ block: 'nearest' });
+                    } else {
+                        item.classList.remove('active');
+                    }
+                });
+            }
+        });
+    </script>
+    {% endif %}
     </body>
 
 
