@@ -2984,3 +2984,59 @@ def automation_dashboard(request):
         'page_title': 'Workflow Automation',
     }
     return render(request, 'tracking_app/automation_dashboard.html', context)
+
+# ── SAAS ADMIN DASHBOARD ─────────────────────────────────────────────────
+
+@login_required
+def saas_admin_dashboard(request):
+    """Super Admin view for managing all tenants and user permissions."""
+    from .models import Tenant, User
+    from django.contrib import messages
+    from django.shortcuts import redirect
+
+    if not request.user.is_superuser:
+        messages.error(request, "Access denied. Super Admin privileges required.")
+        return redirect('home')
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        
+        if action == 'update_tenant_plan':
+            tenant_id = request.POST.get('tenant_id')
+            new_plan = request.POST.get('subscription_plan')
+            try:
+                t = Tenant.objects.get(pk=tenant_id)
+                t.subscription_plan = new_plan
+                t.save()
+                messages.success(request, f"Successfully updated {t.name}'s plan to {new_plan.title()}.")
+            except Tenant.DoesNotExist:
+                messages.error(request, "Tenant not found.")
+                
+        elif action == 'update_user_access':
+            user_id = request.POST.get('user_id')
+            try:
+                u = User.objects.get(pk=user_id)
+                # Ensure we don't accidentally remove superuser status if it's someone else
+                if u.is_superuser and u != request.user:
+                    messages.warning(request, "Cannot modify another superuser.")
+                else:
+                    u.can_view_ats = request.POST.get('can_view_ats') == 'on'
+                    u.can_view_sales = request.POST.get('can_view_sales') == 'on'
+                    u.can_view_it = request.POST.get('can_view_it') == 'on'
+                    u.can_view_executive = request.POST.get('can_view_executive') == 'on'
+                    u.save()
+                    messages.success(request, f"Updated access for {u.username}.")
+            except User.DoesNotExist:
+                messages.error(request, "User not found.")
+        
+        return redirect('saas-admin')
+
+    tenants = Tenant.objects.all().order_by('-created_at')
+    users = User.objects.all().select_related('tenant').order_by('-date_joined')
+    
+    context = {
+        'tenants': tenants,
+        'users': users,
+        'page_title': 'SaaS Super Admin Panel'
+    }
+    return render(request, 'tracking_app/saas_admin.html', context)

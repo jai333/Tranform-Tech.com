@@ -1,0 +1,212 @@
+{% extends 'tracking_app/base.html' %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .admin-card {
+        background: linear-gradient(145deg, rgba(255,255,255,0.03) 0%, rgba(0,0,0,0.2) 100%);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 1.5rem;
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .admin-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0; height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(0, 229, 255, 0.3), transparent);
+    }
+
+    .table-glass {
+        color: white;
+        border-collapse: separate;
+        border-spacing: 0 8px;
+    }
+    .table-glass thead th {
+        border-bottom: none;
+        color: var(--text-gray);
+        font-weight: 500;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        letter-spacing: 1px;
+        padding-bottom: 1rem;
+    }
+    .table-glass tbody tr {
+        background: rgba(255, 255, 255, 0.02);
+        transition: all 0.2s ease;
+    }
+    .table-glass tbody tr:hover {
+        background: rgba(0, 229, 255, 0.05);
+        transform: translateY(-2px);
+    }
+    .table-glass td {
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        padding: 1rem;
+        vertical-align: middle;
+    }
+    .table-glass td:first-child {
+        border-left: 1px solid rgba(255, 255, 255, 0.05);
+        border-top-left-radius: 12px;
+        border-bottom-left-radius: 12px;
+    }
+    .table-glass td:last-child {
+        border-right: 1px solid rgba(255, 255, 255, 0.05);
+        border-top-right-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+
+    .form-select-glass {
+        background: rgba(0,0,0,0.3);
+        border: 1px solid rgba(255,255,255,0.1);
+        color: #00E5FF;
+        border-radius: 8px;
+        padding: 0.25rem 0.5rem;
+    }
+
+    .form-check-input:checked {
+        background-color: #00E5FF;
+        border-color: #00E5FF;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1"><i class="fa-solid fa-crown text-cyan"></i> SaaS Super Admin</h2>
+            <p class="text-secondary mb-0">Master Control Room for Subscriptions and Features</p>
+        </div>
+    </div>
+    
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert" style="background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); color:white;">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="row">
+        <!-- Tenants / Subscriptions -->
+        <div class="col-12 mb-4">
+            <div class="admin-card">
+                <h4 class="mb-4"><i class="fa-solid fa-buildings text-cyan"></i> Tenant Subscriptions</h4>
+                <div class="table-responsive">
+                    <table class="table table-glass w-100">
+                        <thead>
+                            <tr>
+                                <th>Company</th>
+                                <th>Domain</th>
+                                <th>Created</th>
+                                <th>Current Plan</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for t in tenants %}
+                            <tr>
+                                <td><strong class="text-white">{{ t.name }}</strong></td>
+                                <td>{{ t.domain|default:"-" }}</td>
+                                <td>{{ t.created_at|date:"M d, Y" }}</td>
+                                <td>
+                                    <form method="POST" class="d-flex gap-2">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="update_tenant_plan">
+                                        <input type="hidden" name="tenant_id" value="{{ t.id }}">
+                                        <select name="subscription_plan" class="form-select-glass form-select-sm">
+                                            <option value="free" {% if t.subscription_plan == 'free' %}selected{% endif %}>Free</option>
+                                            <option value="starter" {% if t.subscription_plan == 'starter' %}selected{% endif %}>Starter</option>
+                                            <option value="growth" {% if t.subscription_plan == 'growth' %}selected{% endif %}>Growth</option>
+                                            <option value="enterprise" {% if t.subscription_plan == 'enterprise' %}selected{% endif %}>Enterprise</option>
+                                        </select>
+                                        <button type="submit" class="btn btn-sm btn-outline-info">Save</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Users / Features -->
+        <div class="col-12">
+            <div class="admin-card">
+                <h4 class="mb-4"><i class="fa-solid fa-users text-cyan"></i> Global User Access</h4>
+                <div class="table-responsive">
+                    <table class="table table-glass w-100">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Role</th>
+                                <th>Tenant</th>
+                                <th>Dashboard Access</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for u in users %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div style="width: 35px; height: 35px; border-radius: 50%; background: rgba(0,229,255,0.1); color: #00E5FF; display: flex; align-items: center; justify-content: center; margin-right: 12px; font-weight: bold;">
+                                            {{ u.username|make_list|first|upper }}
+                                        </div>
+                                        <div>
+                                            <div class="text-white fw-bold">{{ u.username }} {% if u.is_superuser %}<span class="badge bg-danger ms-1">SuperAdmin</span>{% endif %}</div>
+                                            <div class="small text-secondary">{{ u.email }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><span class="badge" style="background:rgba(255,255,255,0.1);">{{ u.role|title }}</span></td>
+                                <td>{{ u.tenant.name|default:"No Tenant" }}</td>
+                                <td>
+                                    <form method="POST" id="form-user-{{ u.id }}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="update_user_access">
+                                        <input type="hidden" name="user_id" value="{{ u.id }}">
+                                        
+                                        <div class="d-flex gap-3 flex-wrap">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" name="can_view_ats" id="ats_{{ u.id }}" {% if u.can_view_ats %}checked{% endif %}>
+                                                <label class="form-check-label text-white small" for="ats_{{ u.id }}">ATS</label>
+                                            </div>
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" name="can_view_sales" id="sales_{{ u.id }}" {% if u.can_view_sales %}checked{% endif %}>
+                                                <label class="form-check-label text-white small" for="sales_{{ u.id }}">Sales</label>
+                                            </div>
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" name="can_view_it" id="it_{{ u.id }}" {% if u.can_view_it %}checked{% endif %}>
+                                                <label class="form-check-label text-white small" for="it_{{ u.id }}">IT</label>
+                                            </div>
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" name="can_view_executive" id="exec_{{ u.id }}" {% if u.can_view_executive %}checked{% endif %}>
+                                                <label class="form-check-label text-white small" for="exec_{{ u.id }}">C-Suite</label>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </td>
+                                <td>
+                                    <button type="submit" form="form-user-{{ u.id }}" class="btn btn-sm btn-outline-info">Save Access</button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

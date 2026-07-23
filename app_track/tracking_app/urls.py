@@ -179,5 +179,8 @@ urlpatterns = [
     path('billing/portal/', billing_views.billing_portal, name='billing-portal'),
     path('billing/webhook/', billing_views.stripe_webhook, name='stripe-webhook'),
 
+    # ── SaaS Admin Portal ────────────────────────────────────────────────────
+    path('saas-admin/', views.saas_admin_dashboard, name='saas-admin'),
+
     *sales_urlpatterns,
 ]
