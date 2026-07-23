@@ -64,7 +64,7 @@
             border-radius: 24px; 
             display: flex; 
             flex-direction: column; 
-            border: 1px solid {% if plan.popular %}var(--primary){% else %}var(--surface-border){% endif %};
+            border: 1px solid {% if plan.popular %}{{ plan.color }}{% else %}var(--surface-border){% endif %};
             {% if plan.popular %}
             transform: scale(1.02);
             box-shadow: 0 20px 50px rgba(0, 229, 255, 0.1);
@@ -74,7 +74,7 @@
             {% endif %}
         ">
             {% if plan.popular %}
-            <div style="position: absolute; top: 0; right: 0; background: var(--primary); color: #000; padding: 6px 16px; font-size: 0.75rem; font-weight: 700; border-bottom-left-radius: 12px; border-top-right-radius: 23px;">
+            <div style="position: absolute; top: 0; right: 0; background: {{ plan.color }}; color: #000; padding: 6px 16px; font-size: 0.75rem; font-weight: 700; border-bottom-left-radius: 12px; border-top-right-radius: 23px;">
                 MOST POPULAR
             </div>
             {% endif %}
@@ -104,9 +104,9 @@
                     {% csrf_token %}
                     <input type="hidden" name="plan" value="{{ plan_key }}">
                     <button type="submit" class="btn w-100 py-3 fw-bold shadow-sm" style="
-                        background: {% if plan.popular %}var(--primary){% else %}{{ plan.color }}1A{% endif %};
+                        background: {% if plan.popular %}{{ plan.color }}{% else %}{{ plan.color }}1A{% endif %};
                         color: {% if plan.popular %}#000{% else %}{{ plan.color }}{% endif %};
-                        border: 1px solid {% if plan.popular %}var(--primary){% else %}{{ plan.color }}{% endif %};
+                        border: 1px solid {{ plan.color }};
                         border-radius: 12px;
                         font-size: 1.1rem;
                         transition: all 0.2s;
