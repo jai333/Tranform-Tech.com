@@ -1,23 +1,75 @@
 {% extends 'tracking_app/base.html' %}
 {% block title %}New Account | B2B CRM{% endblock %}
-{% block content %}
-<div class="container py-5" style="max-width:680px;">
-    <a href="{% url 'account-list' %}" class="text-muted small mb-3 d-inline-flex align-items-center gap-1"><i class="bx bx-arrow-back"></i> Back to Accounts</a>
-    <h2 class="text-white fw-bold mb-4">Create New Account</h2>
+{% block extra_styles %}
+<style>
+    .premium-card {
+        background: linear-gradient(145deg, rgba(255,255,255,0.03) 0%, rgba(0,0,0,0.2) 100%);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        padding: 2.5rem !important;
+        margin-bottom: 2rem;
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .premium-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0; height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(0, 229, 255, 0.3), transparent);
+    }
+    
+    .premium-input {
+        background: rgba(0,0,0,0.3) !important;
+        border: 1px solid rgba(255,255,255,0.1) !important;
+        color: white !important;
+        border-radius: 12px !important;
+        padding: 0.8rem 1.2rem !important;
+        transition: all 0.3s ease;
+    }
+    
+    .premium-input:focus {
+        border-color: #00E5FF !important;
+        box-shadow: 0 0 15px rgba(0, 229, 255, 0.2) !important;
+        background: rgba(0, 229, 255, 0.02) !important;
+    }
+    
+    .premium-label {
+        color: var(--text-gray);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 8px;
+        font-weight: 600;
+    }
 
-    <div class="card p-4" style="background:var(--apple-card-bg);border:1px solid var(--apple-border);border-radius:14px; margin-bottom: 2rem;">
-        <h4 style="color:var(--apple-text); margin-bottom:1rem; font-size:1.1rem;"><i class="bx bx-buildings"></i> Company Details</h4>
+    .form-switch .form-check-input:checked {
+        background-color: #00E5FF;
+        border-color: #00E5FF;
+        box-shadow: 0 0 10px rgba(0, 229, 255, 0.3);
+    }
+</style>
+{% endblock %}
+{% block content %}
+<div class="container py-5" style="max-width:720px;">
+    <a href="{% url 'account-list' %}" class="text-muted small mb-3 d-inline-flex align-items-center gap-1 hover-glow"><i class="bx bx-arrow-back"></i> Back to Accounts</a>
+    <h2 class="text-white fw-bold mb-4" style="font-size: 2.2rem; text-shadow: 0 2px 10px rgba(255,255,255,0.1);">Create New Account</h2>
+
+    <div class="card p-4 premium-card">
+        <h4 style="color: #00E5FF; margin-bottom:1.5rem; font-size:1.2rem; font-weight: 700;"><i class="bx bx-buildings"></i> Company Details</h4>
         <form method="POST">
             {% csrf_token %}
-            <div class="mb-3">
-                <label class="form-label text-muted small text-uppercase">Company Name *</label>
-                <input type="text" name="name" class="form-control" placeholder="Acme Corp" required
-                    style="background:rgba(0,0,0,.3);border:1px solid var(--apple-border);color:white;border-radius:8px;padding:.65rem 1rem;">
+            <div class="mb-4">
+                <label class="form-label premium-label">Company Name *</label>
+                <input type="text" name="name" class="form-control premium-input" placeholder="Acme Corp" required>
             </div>
-            <div class="row g-3 mb-3">
+            <div class="row g-4 mb-4">
                 <div class="col-md-6">
-                    <label class="form-label text-muted small text-uppercase">Industry</label>
-                    <select name="industry" class="form-select" style="background:rgba(0,0,0,.3);border:1px solid var(--apple-border);color:white;border-radius:8px;">
+                    <label class="form-label premium-label">Industry</label>
+                    <select name="industry" class="form-select premium-input">
                         <option value="">Select industry...</option>
                         {% for val, label in industry_choices %}
                         <option value="{{ val }}">{{ label }}</option>
@@ -25,8 +77,8 @@
                     </select>
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label text-muted small text-uppercase">Company Size</label>
-                    <select name="employee_count" class="form-select" style="background:rgba(0,0,0,.3);border:1px solid var(--apple-border);color:white;border-radius:8px;">
+                    <label class="form-label premium-label">Company Size</label>
+                    <select name="employee_count" class="form-select premium-input">
                         <option value="">Select size...</option>
                         {% for val, label in size_choices %}
                         <option value="{{ val }}">{{ label }}</option>
@@ -34,49 +86,43 @@
                     </select>
                 </div>
             </div>
-            <div class="row g-3 mb-3">
+            <div class="row g-4 mb-4">
                 <div class="col-md-6">
-                    <label class="form-label text-muted small text-uppercase">Website / Domain</label>
-                    <input type="url" name="website" class="form-control" placeholder="https://acmecorp.com"
-                        style="background:rgba(0,0,0,.3);border:1px solid var(--apple-border);color:white;border-radius:8px;padding:.65rem 1rem;">
+                    <label class="form-label premium-label">Website / Domain</label>
+                    <input type="url" name="website" class="form-control premium-input" placeholder="https://acmecorp.com">
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label text-muted small text-uppercase">Phone</label>
-                    <input type="text" name="phone" class="form-control" placeholder="+1 555 000 0000"
-                        style="background:rgba(0,0,0,.3);border:1px solid var(--apple-border);color:white;border-radius:8px;padding:.65rem 1rem;">
+                    <label class="form-label premium-label">Phone</label>
+                    <input type="text" name="phone" class="form-control premium-input" placeholder="+1 555 000 0000">
                 </div>
             </div>
             <div class="mb-4">
-                <label class="form-label text-muted small text-uppercase">Description / Notes</label>
-                <textarea name="description" class="form-control" rows="3" placeholder="Brief description of the company and the opportunity..."
-                    style="background:rgba(0,0,0,.3);border:1px solid var(--apple-border);color:white;border-radius:8px;padding:.65rem 1rem;"></textarea>
+                <label class="form-label premium-label">Description / Notes</label>
+                <textarea name="description" class="form-control premium-input" rows="3" placeholder="Brief description of the company and the opportunity..."></textarea>
             </div>
             
-            <hr style="border-color:var(--apple-text-muted); margin:2rem 0;">
+            <hr style="border-color: rgba(255,255,255,0.1); margin: 3rem 0;">
             
-            <h4 style="color:var(--apple-text); margin-bottom:1rem; font-size:1.1rem;"><i class="bx bx-user-plus"></i> Provision Admin User (Optional)</h4>
-            <p style="color:var(--apple-text-secondary); font-size:0.9rem; margin-bottom:1.5rem;">Fill this out to generate a user account for the client. A secure password will be generated automatically.</p>
+            <h4 style="color: #00E5FF; margin-bottom:1rem; font-size:1.2rem; font-weight: 700;"><i class="bx bx-user-plus"></i> Provision Admin User (Optional)</h4>
+            <p style="color: #aaa; font-size:0.95rem; margin-bottom:2rem;">Fill this out to generate a user account for the client. A secure password will be generated automatically.</p>
             
-            <div class="row g-3 mb-3">
+            <div class="row g-4 mb-4">
                 <div class="col-md-6">
-                    <label class="form-label text-muted small text-uppercase">First Name</label>
-                    <input type="text" name="admin_first_name" class="form-control" placeholder="Jane"
-                        style="background:rgba(0,0,0,.3);border:1px solid var(--apple-border);color:white;border-radius:8px;padding:.65rem 1rem;">
+                    <label class="form-label premium-label">First Name</label>
+                    <input type="text" name="admin_first_name" class="form-control premium-input" placeholder="Jane">
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label text-muted small text-uppercase">Last Name</label>
-                    <input type="text" name="admin_last_name" class="form-control" placeholder="Doe"
-                        style="background:rgba(0,0,0,.3);border:1px solid var(--apple-border);color:white;border-radius:8px;padding:.65rem 1rem;">
+                    <label class="form-label premium-label">Last Name</label>
+                    <input type="text" name="admin_last_name" class="form-control premium-input" placeholder="Doe">
                 </div>
             </div>
-            <div class="mb-4">
-                <label class="form-label text-muted small text-uppercase">Admin Email Address</label>
-                <input type="email" name="admin_email" class="form-control" placeholder="jane@acmecorp.com"
-                    style="background:rgba(0,0,0,.3);border:1px solid var(--apple-border);color:white;border-radius:8px;padding:.65rem 1rem;">
+            <div class="mb-5">
+                <label class="form-label premium-label">Admin Email Address</label>
+                <input type="email" name="admin_email" class="form-control premium-input" placeholder="jane@acmecorp.com">
             </div>
 
-            <div class="mb-4 p-3" style="background:var(--apple-input-bg); border-radius:12px; border:1px solid var(--apple-border);">
-                <label class="form-label text-muted small text-uppercase mb-3 d-block"><i class="bx bx-shield"></i> Dashboard Permissions (RBAC)</label>
+            <div class="mb-5 p-4" style="background: rgba(255,255,255,0.02); border-radius:16px; border:1px solid rgba(255,255,255,0.05);">
+                <label class="form-label premium-label mb-4 d-block" style="color: #00E5FF;"><i class="bx bx-shield"></i> Dashboard Permissions (RBAC)</label>
                 <div class="row g-3">
                     <div class="col-md-6">
                         <div class="form-check form-switch">
@@ -105,7 +151,7 @@
                 </div>
             </div>
 
-            <button type="submit" class="btn btn-primary w-100" style="border-radius:8px;padding:.7rem;font-weight:600;">
+            <button type="submit" class="btn w-100 fw-bold shadow-sm" style="background: linear-gradient(90deg, #00E5FF, #00b3cc); color: #000; border: none; padding: 14px; border-radius: 12px; font-size: 1.1rem; box-shadow: 0 4px 20px rgba(0,229,255,0.3); transition: all 0.3s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
                 <i class="bx bx-buildings me-1"></i> Create Account & Provision User
             </button>
         </form>
