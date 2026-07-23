@@ -3028,6 +3028,63 @@ def saas_admin_dashboard(request):
                     messages.success(request, f"Updated access for {u.username}.")
             except User.DoesNotExist:
                 messages.error(request, "User not found.")
+                
+        elif action == 'edit_tenant':
+            tenant_id = request.POST.get('tenant_id')
+            try:
+                t = Tenant.objects.get(pk=tenant_id)
+                t.name = request.POST.get('name', t.name)
+                t.domain = request.POST.get('domain', t.domain)
+                t.save()
+                messages.success(request, f"Updated company details for {t.name}.")
+            except Tenant.DoesNotExist:
+                messages.error(request, "Tenant not found.")
+                
+        elif action == 'delete_tenant':
+            tenant_id = request.POST.get('tenant_id')
+            try:
+                t = Tenant.objects.get(pk=tenant_id)
+                name = t.name
+                t.delete()
+                messages.success(request, f"Permanently deleted company: {name}.")
+            except Tenant.DoesNotExist:
+                messages.error(request, "Tenant not found.")
+                
+        elif action == 'add_user':
+            username = request.POST.get('username')
+            email = request.POST.get('email')
+            password = request.POST.get('password')
+            role = request.POST.get('role', 'employee')
+            tenant_id = request.POST.get('tenant_id')
+            try:
+                if User.objects.filter(username=username).exists():
+                    messages.error(request, "Username already exists.")
+                else:
+                    new_user = User.objects.create_user(
+                        username=username,
+                        email=email,
+                        password=password,
+                        role=role
+                    )
+                    if tenant_id:
+                        new_user.tenant = Tenant.objects.get(pk=tenant_id)
+                        new_user.save()
+                    messages.success(request, f"Successfully created user {username}.")
+            except Exception as e:
+                messages.error(request, f"Error creating user: {str(e)}")
+                
+        elif action == 'delete_user':
+            user_id = request.POST.get('user_id')
+            try:
+                u = User.objects.get(pk=user_id)
+                if u.is_superuser:
+                    messages.error(request, "Cannot delete a superuser.")
+                else:
+                    uname = u.username
+                    u.delete()
+                    messages.success(request, f"Permanently deleted user: {uname}.")
+            except User.DoesNotExist:
+                messages.error(request, "User not found.")
         
         return redirect('saas-admin')
 
