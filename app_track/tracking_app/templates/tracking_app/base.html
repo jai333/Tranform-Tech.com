@@ -1307,6 +1307,7 @@
                         
                         <!-- C-SUITE DASHBOARDS -->
                         {% if user.is_staff or user.is_admin_role or user.can_view_executive %}
+                        {% if user.tenant.subscription_plan == 'enterprise' %}
                         <li class="dropdown-nav" onclick="this.querySelector('.dropdown-content').classList.toggle('show-dropdown')">
                             <a href="javascript:void(0)" class="{% if '/executive-dashboard/' in request.path or '/automation/dashboard/' in request.path or '/ai-pipeline/' in request.path %}active{% endif %}" style="color:#00E5FF; white-space: nowrap;">
                                 <i class="fa-solid fa-crown"></i> C-Suite <i class="fas fa-chevron-down" style="font-size: 0.7em; margin-left: 4px;"></i>
@@ -1318,9 +1319,11 @@
                             </ul>
                         </li>
                         {% endif %}
+                        {% endif %}
 
                         <!-- IT DASHBOARD -->
                         {% if user.is_it_agent or user.is_it_admin or user.can_view_it %}
+                        {% if user.tenant.subscription_plan in 'growth,enterprise' %}
                         <li class="dropdown-nav" onclick="this.querySelector('.dropdown-content').classList.toggle('show-dropdown')">
                             <a href="{% url 'it-helpdesk-list' %}" class="{% if '/it/' in request.path %}active{% endif %}" style="white-space: nowrap;">
                                 <i class="fa-solid fa-desktop"></i> IT Dashboard <i class="fas fa-chevron-down" style="font-size: 0.7em; margin-left: 4px;"></i>
@@ -1337,9 +1340,11 @@
                             </ul>
                         </li>
                         {% endif %}
+                        {% endif %}
 
                         <!-- SALES DASHBOARD & ATS for authorized users -->
                         {% if user.is_staff or user.is_admin_role or user.can_view_sales or user.can_view_ats %}
+                        {% if user.tenant.subscription_plan in 'starter,growth,enterprise' %}
                         {% if user.is_staff or user.is_admin_role or user.can_view_sales %}
                         <li><a href="{% url 'sales-dashboard' %}" class="{% if '/sales/' in request.path %}active{% endif %}" style="white-space: nowrap;"><i class="fas fa-chart-line"></i> Sales</a></li>
                         {% endif %}
@@ -1360,7 +1365,10 @@
                         {% endif %}
 
                         {% if user.is_staff or user.is_admin_role or user.can_view_sales %}
+                        {% if user.tenant.subscription_plan in 'growth,enterprise' %}
                         <li><a href="{% url 'unified-inbox' %}" class="{% if '/inbox/' in request.path %}active{% endif %}" style="white-space: nowrap;"><i class="fas fa-inbox"></i> Inbox</a></li>
+                        {% endif %}
+                        {% endif %}
                         {% endif %}
                         {% endif %}
 
@@ -1379,8 +1387,10 @@
                                 <i class="fa-solid fa-shield-halved"></i> Security <i class="fas fa-chevron-down" style="font-size: 0.7em; margin-left: 4px;"></i>
                             </a>
                             <ul class="dropdown-content">
+                                {% if user.tenant.subscription_plan == 'enterprise' %}
                                 <li><a href="{% url 'threat-dashboard' %}"><i class="fa-solid fa-triangle-exclamation"></i> Security Report</a></li>
                                 <li><a href="{% url 'vuln-list' %}"><i class="fa-solid fa-bug"></i> Vulnerabilities</a></li>
+                                {% endif %}
                                 <li><a href="{% url 'ip-blocklist' %}"><i class="fa-solid fa-ban"></i> IP Blocklist</a></li>
                                 <li><a href="{% url 'report-phishing' %}"><i class="fa-solid fa-fish"></i> Report Phishing</a></li>
                             </ul>

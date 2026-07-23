@@ -2265,7 +2265,41 @@ def company_data_manager(request):
     if request.method == 'POST':
         action = request.POST.get('action')
         
-        if action == 'generate_employee':
+        if action == 'update_company':
+            tenant.name = request.POST.get('name', tenant.name)
+            tenant.domain = request.POST.get('domain', tenant.domain)
+            tenant.save()
+            messages.success(request, "Company details updated successfully.")
+            return redirect('company-data-manager')
+            
+        elif action == 'export_assets':
+            import csv
+            from django.http import HttpResponse
+            response = HttpResponse(content_type='text/csv')
+            response['Content-Disposition'] = 'attachment; filename="assets_export.csv"'
+            writer = csv.writer(response)
+            writer.writerow(['Asset Tag', 'Name', 'Type', 'Status', 'Owner Email'])
+            assets = ITAsset.objects.filter(tenant=tenant)
+            for asset in assets:
+                owner_email = asset.owner.email if asset.owner else 'Unassigned'
+                writer.writerow([asset.asset_tag, asset.name, asset.asset_type, asset.status, owner_email])
+            return response
+            
+        elif action == 'export_tickets':
+            import csv
+            from django.http import HttpResponse
+            response = HttpResponse(content_type='text/csv')
+            response['Content-Disposition'] = 'attachment; filename="tickets_export.csv"'
+            writer = csv.writer(response)
+            writer.writerow(['ID', 'Title', 'Status', 'Priority', 'Creator', 'Assigned To'])
+            tickets = ITTicket.objects.filter(tenant=tenant)
+            for ticket in tickets:
+                creator = ticket.created_by.email if ticket.created_by else 'Unknown'
+                assignee = ticket.assigned_to.email if ticket.assigned_to else 'Unassigned'
+                writer.writerow([ticket.id, ticket.title, ticket.status, ticket.priority, creator, assignee])
+            return response
+
+        elif action == 'generate_employee':
             import secrets, string
             first_name = request.POST.get('first_name', '')
             last_name = request.POST.get('last_name', '')
