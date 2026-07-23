@@ -100,6 +100,41 @@
         margin-right: 1rem;
         font-weight: 600;
     }
+
+    /* Glow Effects */
+    .btn-glow {
+        box-shadow: 0 0 10px rgba(0, 229, 255, 0.2);
+        transition: all 0.3s ease;
+    }
+    .btn-glow:hover {
+        box-shadow: 0 0 20px rgba(0, 229, 255, 0.6);
+        transform: translateY(-2px);
+    }
+
+    /* Exotic Modals */
+    .modal-glass .modal-content {
+        background: rgba(10, 15, 30, 0.85);
+        backdrop-filter: blur(25px);
+        -webkit-backdrop-filter: blur(25px);
+        border: 1px solid rgba(0, 229, 255, 0.2);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.5), 0 0 40px rgba(0, 229, 255, 0.1);
+        color: white;
+    }
+    .modal-glass .modal-header {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .modal-glass .modal-footer {
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .modal-glass .form-control {
+        background: rgba(0,0,0,0.3);
+        border: 1px solid rgba(255,255,255,0.1);
+        color: #00E5FF;
+    }
+    .modal-glass .form-control:focus {
+        border-color: #00E5FF;
+        box-shadow: 0 0 10px rgba(0,229,255,0.2);
+    }
 </style>
 {% endblock %}
 
@@ -111,7 +146,7 @@
             <p class="text-secondary mb-0">Tenant: <strong class="text-white">{{ tenant.name }}</strong></p>
         </div>
         <div>
-            <button class="btn btn-primary me-2" style="background:var(--primary); border:none;" onclick="document.getElementById('update-company-modal').classList.add('active')">
+            <button class="btn btn-primary me-2 btn-glow" style="background:var(--primary); border:none;" data-bs-toggle="modal" data-bs-target="#updateCompanyModal">
                 <i class="fa-solid fa-pen-to-square"></i> Edit Details
             </button>
             <a href="{% url 'home' %}" class="btn btn-outline-light"><i class="fa-solid fa-arrow-left"></i> Back to Dashboard</a>
@@ -336,36 +371,33 @@
 </div>
 
 <!-- Update Company Details Modal -->
-<div id="update-company-modal" class="modal-glass" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:9999; align-items:center; justify-content:center; backdrop-filter:blur(8px);">
-    <div class="modal-content-glass" style="background:var(--apple-card-bg); border:1px solid var(--apple-border); border-radius:20px; width:90%; max-width:520px; padding:2rem; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5);">
-        <h3 style="color:white; margin-top:0; margin-bottom:1.5rem; display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-pen-to-square text-cyan"></i> Update Company Details</h3>
-        <form method="POST">{% csrf_token %}
-            <input type="hidden" name="action" value="update_company">
-            <div class="mb-3">
-                <label class="form-label text-secondary small">Company Name</label>
-                <input type="text" name="name" class="form-control" value="{{ tenant.name }}" style="background:var(--bg-surface); color:white; border:1px solid var(--secondary);" required>
-            </div>
-            <div class="mb-3">
-                <label class="form-label text-secondary small">Company Domain</label>
-                <input type="text" name="domain" class="form-control" value="{{ tenant.domain|default:'' }}" style="background:var(--bg-surface); color:white; border:1px solid var(--secondary);">
-            </div>
-            <div style="display:flex; gap:12px; margin-top:1rem;">
-                <button type="submit" class="btn btn-primary" style="flex:1; border:none; border-radius:10px; padding:12px; font-weight:600; background:#00E5FF; color:#000;">Save Details</button>
-                <button type="button" class="btn" style="flex:1; background:rgba(255,255,255,0.1); color:white; border-radius:10px; padding:12px; font-weight:600;" onclick="document.getElementById('update-company-modal').classList.remove('active')">Cancel</button>
-            </div>
-        </form>
+<div class="modal fade modal-glass" id="updateCompanyModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="update_company">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fa-solid fa-pen-to-square text-cyan"></i> Update Company Profile</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label text-secondary">Company Name</label>
+                        <input type="text" name="name" class="form-control" value="{{ tenant.name }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-secondary">Company Domain</label>
+                        <input type="text" name="domain" class="form-control" value="{{ tenant.domain|default:'' }}">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-info btn-glow">Save Profile</button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
-
-<script>
-    // Style toggle logic for modal
-    const modal = document.getElementById('update-company-modal');
-    modal.classList.add = function(className) {
-        if (className === 'active') this.style.display = 'flex';
-    };
-    modal.classList.remove = function(className) {
-        if (className === 'active') this.style.display = 'none';
-    };
-</script>
 
 {% endblock %}
