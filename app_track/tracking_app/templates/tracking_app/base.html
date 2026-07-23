@@ -1472,42 +1472,7 @@
         })();
 
         document.addEventListener('DOMContentLoaded', function () {
-            const themeToggles = document.querySelectorAll('#theme-toggle');
-            const themeIcons = document.querySelectorAll('#theme-icon');
-            const bodyElement = document.body;
-
-            function applyTheme(theme) {
-                if (theme === 'light') {
-                    bodyElement.classList.add('light-theme');
-                    themeIcons.forEach(icon => {
-                        icon.className = 'fas fa-sun';
-                        icon.style.color = '#f59e0b';
-                    });
-                    themeToggles.forEach(t => t.title = 'Switch to dark mode');
-                } else {
-                    bodyElement.classList.remove('light-theme');
-                    themeIcons.forEach(icon => {
-                        icon.className = 'fas fa-moon';
-                        icon.style.color = '';
-                    });
-                    themeToggles.forEach(t => t.title = 'Switch to light mode');
-                }
-            }
-
-            // Apply saved preference
-            applyTheme(localStorage.getItem('theme') || 'dark');
-
-            // Attach click listeners to all toggles
-            themeToggles.forEach(toggle => {
-                toggle.addEventListener('click', function () {
-                    const isLight = bodyElement.classList.contains('light-theme');
-                    const newTheme = isLight ? 'dark' : 'light';
-                    localStorage.setItem('theme', newTheme);
-                    applyTheme(newTheme);
-                    toggle.style.transform = 'scale(0.85) rotate(25deg)';
-                    setTimeout(() => { toggle.style.transform = ''; }, 250);
-                });
-            });
+            // Theme Toggle Logic is handled globally in transform.js
         });
 
         // Scroll effect for header

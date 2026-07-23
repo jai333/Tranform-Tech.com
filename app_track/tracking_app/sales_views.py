@@ -11,6 +11,7 @@ from datetime import timedelta
 from django.utils import timezone
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
+from .decorators import paid_required
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 import requests
@@ -41,6 +42,7 @@ logger = logging.getLogger(__name__)
 # ─────────────────────────────────────────────────────────────────
 
 @login_required
+@paid_required
 def sales_dashboard(request):
     """Main AI Sales Intelligence Dashboard."""
     # Pipeline stages list for visual rendering
@@ -372,9 +374,20 @@ def api_send_email(request, email_id):
 
         return JsonResponse({'success': True, 'sent_at': email.sent_at.isoformat()})
     except Exception as e:
+        email.status = 'failed'
+        email.save(update_fields=['status'])
         logger.error("Error sending email %s: %s", email_id, e)
+        
+        # Notify the user via SalesAlert
+        SalesAlert.objects.create(
+            user=request.user,
+            lead=email.lead,
+            title="Email Delivery Failed",
+            message=f"SMTP Error: {str(e)}",
+            alert_type="action_required",
+            tenant=request.user.tenant
+        )
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
-
 
 @csrf_exempt
 @require_GET

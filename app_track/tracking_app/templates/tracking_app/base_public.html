@@ -271,6 +271,7 @@
     }
     </style>
 
+    {% block extra_head %}{% endblock %}
 </head>
 <body>
 
@@ -444,7 +445,7 @@
         <div class="flex gap-sm">
             <button id="theme-toggle" class="btn btn-primary btn-sm" title="Toggle theme" style="width: 44px; height: 44px; padding: 0; display: flex; align-items: center; justify-content: center; margin-right: 0.5rem; border-radius: 50%;"><i id="theme-icon" class="fas fa-moon"></i></button>
             {% if user.is_authenticated %}
-            <a href="{% url 'candidate-list' %}" class="btn btn-cyan font-mono">/DASHBOARD</a>
+            <a href="{% url 'it-helpdesk-list' %}" class="btn btn-cyan font-mono">/DASHBOARD</a>
             {% else %}
             <a href="{% url 'login' %}" style="color:var(--text-gray); margin-right:16px; padding-top:10px;" class="font-mono text-sm">/LOGIN</a>
             <a href="{% url 'register' %}" class="btn btn-outline font-mono">/GET_STARTED</a>
@@ -560,42 +561,7 @@
 <div id="instant-loader"></div>
 <script>
     document.addEventListener("DOMContentLoaded", () => {
-    // --- Theme Toggle Logic ---
-    const themeToggles = document.querySelectorAll('#theme-toggle');
-    const themeIcons = document.querySelectorAll('#theme-icon');
-    const rootElement = document.documentElement;
-    const bodyElement = document.body;
-
-    function applyTheme(theme) {
-        if (theme === 'light') {
-            rootElement.classList.add('light-theme');
-            bodyElement.classList.add('light-theme');
-            themeIcons.forEach(icon => {
-                icon.className = 'fas fa-sun';
-                icon.style.color = '#00E5FF';
-            });
-        } else {
-            rootElement.classList.remove('light-theme');
-            bodyElement.classList.remove('light-theme');
-            themeIcons.forEach(icon => {
-                icon.className = 'fas fa-moon';
-                icon.style.color = '';
-            });
-        }
-    }
-
-    const savedTheme = localStorage.getItem('theme') || 'dark';
-    applyTheme(savedTheme);
-
-    themeToggles.forEach(toggle => {
-        toggle.addEventListener('click', (e) => {
-            e.preventDefault();
-            const currentTheme = bodyElement.classList.contains('light-theme') ? 'light' : 'dark';
-            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-            localStorage.setItem('theme', newTheme);
-            applyTheme(newTheme);
-        });
-    });
+    // Theme Toggle Logic is handled in transform.js
 
         const loader = document.getElementById("instant-loader");
         document.querySelectorAll('a[href]:not([href^="#"]):not([href^="javascript:"]):not([target="_blank"])').forEach(a => {

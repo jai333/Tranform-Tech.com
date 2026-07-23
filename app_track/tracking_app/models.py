@@ -203,11 +203,15 @@ class User(AbstractUser):
     # Role choices
     ROLE_JOBSEEKER = 'jobseeker'
     ROLE_RECRUITER = 'recruiter'
+    ROLE_SALES = 'sales'
+    ROLE_IT = 'it'
     ROLE_ADMIN = 'admin'
     
     ROLE_CHOICES = [
         (ROLE_JOBSEEKER, 'Job Seeker'),
-        (ROLE_RECRUITER, 'Recruiter'),
+        (ROLE_RECRUITER, 'Recruiter / HR'),
+        (ROLE_SALES, 'Sales Professional'),
+        (ROLE_IT, 'IT Helpdesk Agent'),
         (ROLE_ADMIN, 'Administrator'),
     ]
     
@@ -276,7 +280,7 @@ class User(AbstractUser):
     @property
     def is_it_agent(self):
         # Determine if the user is an IT agent based on their role or staff status
-        return self.is_staff or self.role == self.ROLE_ADMIN
+        return self.is_staff or self.role in [self.ROLE_ADMIN, self.ROLE_IT]
 
     @property
     def is_it_enduser(self):
@@ -687,6 +691,30 @@ class ITAsset(models.Model):
 
     def __str__(self):
         return f"{self.asset_tag} - {self.name}"
+
+    def auto_generate_credentials(self):
+        """Generate secure placeholder credentials for this asset."""
+        import string
+        import random
+        # Generate a standard secure password
+        chars = string.ascii_letters + string.digits + "!@#$%^&*"
+        password = ''.join(random.choice(chars) for _ in range(16))
+        # Ensure it has at least one of each required type
+        password = (
+            random.choice(string.ascii_uppercase) +
+            random.choice(string.ascii_lowercase) +
+            random.choice(string.digits) +
+            random.choice("!@#$%^&*") +
+            ''.join(random.choice(chars) for _ in range(12))
+        )
+        
+        # In a real system, you would store this securely (e.g. Hashicorp Vault)
+        # For this CRM, we append it to the asset notes or return it.
+        creds_note = f"\n\n[AUTO-PROVISIONED CREDENTIALS]\nGenerated: {self.updated_at.strftime('%Y-%m-%d %H:%M:%S')}\nUsername: admin\nPassword: {password}"
+        self.notes = (self.notes or "") + creds_note
+        self.save(update_fields=['notes'])
+        
+        return {"username": "admin", "password": password}
 
 class SLAConfiguration(models.Model):
     priority = models.CharField(max_length=10, unique=True, choices=[

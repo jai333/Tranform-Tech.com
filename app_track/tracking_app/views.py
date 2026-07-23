@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy, reverse
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
+from .decorators import paid_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth import login, authenticate
 from django.contrib import messages
@@ -46,6 +47,32 @@ def register(request):
         form = UserRegistrationForm(request.POST, request.FILES)
         if form.is_valid():
             user = form.save()
+            
+            # Set dashboard permissions based on role
+            user.can_view_ats = False
+            user.can_view_sales = False
+            user.can_view_it = False
+            user.can_view_executive = False
+            
+            if user.role in [User.ROLE_JOBSEEKER, User.ROLE_RECRUITER]:
+                user.can_view_ats = True
+            elif user.role == User.ROLE_SALES:
+                user.can_view_sales = True
+            elif user.role == User.ROLE_IT:
+                user.can_view_it = True
+            elif user.role == User.ROLE_ADMIN:
+                user.can_view_ats = True
+                user.can_view_sales = True
+                user.can_view_it = True
+                user.can_view_executive = True
+            
+            # Create a tenant for the user to isolate data
+            from .models import Tenant
+            tenant_name = f"{user.username}'s Workspace"
+            tenant = Tenant.objects.create(name=tenant_name, subscription_plan='free')
+            user.tenant = tenant
+            
+            user.save()
             username = form.cleaned_data.get('username')
             messages.success(request, f'Account created for {username}! You can now log in.')
             return redirect('login')
@@ -1083,6 +1110,7 @@ def api_update_pipeline_status(request):
 # ─────────────────────────────────────────────────────────────────────────────
 
 @login_required
+@paid_required
 def it_helpdesk_list(request):
     """Kanban-style view of all IT tickets grouped by status."""
     statuses = ['open', 'in_progress', 'on_hold', 'pending_user', 'resolved']
@@ -1393,6 +1421,7 @@ def it_ticket_update_status(request, pk):
 # ─────────────────────────────────────────────────────────────────────────────
 
 @login_required
+@paid_required
 def threat_dashboard(request):
     """Security operations center dashboard listing all threat incidents."""
     from django.db.models import Avg, Count
@@ -2235,9 +2264,59 @@ def company_data_manager(request):
     
     # Handle simple CSV upload simulation
     if request.method == 'POST' and request.FILES.get('data_file'):
+        import csv
+        import io
+        from .sales_models import Account
         upload_type = request.POST.get('upload_type')
-        # Here we would normally parse CSV, but we'll just show a success message for MVP
-        messages.success(request, f"Successfully processed {upload_type} data for {tenant.name}.")
+        data_file = request.FILES.get('data_file')
+        
+        try:
+            # Decode file as text
+            csv_file = io.StringIO(data_file.read().decode('utf-8-sig'))
+            reader = csv.DictReader(csv_file)
+            
+            created_count = 0
+            for row in reader:
+                try:
+                    if upload_type == 'assets':
+                        ITAsset.objects.create(
+                            tenant=tenant,
+                            name=row.get('name', 'Unnamed Asset'),
+                            asset_tag=row.get('asset_tag', f"TAG-{uuid.uuid4().hex[:6].upper()}"),
+                            asset_type=row.get('asset_type', 'hardware').lower()
+                        )
+                    elif upload_type == 'candidates':
+                        email = row.get('email')
+                        if not email:
+                            continue
+                        Candidate.objects.create(
+                            tenant=tenant,
+                            first_name=row.get('first_name', ''),
+                            last_name=row.get('last_name', ''),
+                            email=email,
+                            user=request.user
+                        )
+                    elif upload_type == 'accounts':
+                        name = row.get('name')
+                        if not name:
+                            continue
+                        Account.objects.create(
+                            tenant=tenant,
+                            name=name,
+                            industry=row.get('industry', ''),
+                            website=row.get('website', ''),
+                            owner=request.user
+                        )
+                    created_count += 1
+                except Exception as row_e:
+                    logger.warning(f"Skipped row in {upload_type} upload due to error: {row_e}")
+                    continue
+            
+            messages.success(request, f"Successfully processed {created_count} {upload_type} for {tenant.name}.")
+        except Exception as e:
+            logger.error(f"CSV upload failed: {e}")
+            messages.error(request, f"Failed to parse CSV: {e}")
+            
         return redirect('company-data-manager')
         
     context = {
@@ -2307,8 +2386,12 @@ def account_detail(request, pk):
                 if target_user:
                     asset.owner = target_user
                     asset.status = 'active'
+                    # Auto-generate credentials for the asset
+                    creds = asset.auto_generate_credentials()
                     asset.save()
-                    messages.success(request, f"✅ Asset '{asset.name}' authorized to {contact.full_name} ({target_user.username}).")
+                    
+                    msg = f"✅ Asset '{asset.name}' authorized to {contact.full_name} ({target_user.username}). Auto-provisioned Device Credentials: Username='{creds['username']}', Password='{creds['password']}'"
+                    messages.success(request, msg)
                 else:
                     messages.warning(request, f"⚠️ No platform user found for {contact.email}. Generate credentials first, then re-authorize the asset.")
             except (ITAsset.DoesNotExist, AccountContact.DoesNotExist):
@@ -2645,6 +2728,7 @@ Return JSON: {{"suggestions": [{{"title": "...", "url": "/...", "icon": "bx bx-.
 # ── EXECUTIVE DASHBOARD ──────────────────────────────────────────────────
 
 @login_required
+@paid_required
 def executive_dashboard(request):
     """A high-level dashboard aggregating stats from Sales, ATS, IT, and Security."""
     if not (request.user.is_staff or request.user.is_admin_role or request.user.can_view_executive):
@@ -2692,6 +2776,7 @@ def executive_dashboard(request):
 # ── AUTOMATION DASHBOARD ─────────────────────────────────────────────────
 
 @login_required
+@paid_required
 def automation_dashboard(request):
     """Central view for managing system automations and routing rules."""
     from .models import RoutingRule, AutomationRun, SLAConfiguration, Workflow

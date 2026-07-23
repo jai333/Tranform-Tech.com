@@ -15,13 +15,17 @@
     <div class="row g-4">
         <!-- Asset List -->
         <div class="col-12">
-            <div class="card shadow-sm border-glow" style="background: var(--apple-card-bg); border: 1px solid var(--apple-border); border-radius: 12px; overflow: hidden;">
-                <div class="card-header border-bottom py-3 d-flex justify-content-between align-items-center" style="background:var(--apple-bg); border-color: var(--apple-border-subtle) !important;">
+            <div class="card shadow-sm border-glow" style="background: var(--bg-elevated); border: 1px solid var(--secondary); border-radius: 12px; overflow: hidden;">
+                <div class="card-header border-bottom py-3 d-flex justify-content-between align-items-center" style="background:var(--bg-dark); border-color: var(--secondary) !important;">
                     <h5 class="mb-0 text-white fw-bold"><i class="bx bx-laptop me-2 text-info"></i> Asset Inventory</h5>
+                    <div style="position:relative; width:250px;">
+                        <i class="bx bx-search" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text-gray);"></i>
+                        <input type="text" id="assetSearch" placeholder="Search assets..." style="background:var(--bg-surface); border:1px solid var(--secondary); border-radius:8px; padding:6px 12px 6px 36px; color:var(--text-white); font-size:0.85rem; outline:none; width:100%;">
+                    </div>
                 </div>
                 <div class="table-responsive">
-                    <table class="table table-borderless table-hover mb-0 align-middle" style="color: var(--apple-text);">
-                        <thead style="background:var(--apple-row-hover); border-bottom: 1px solid var(--apple-border);">
+                    <table class="table table-borderless table-hover mb-0 align-middle" style="color: var(--text-white);">
+                        <thead style="background:var(--bg-hover); border-bottom: 1px solid var(--secondary);">
                             <tr>
                                 <th class="ps-4 py-3 text-uppercase text-muted" style="font-size: 0.75rem; letter-spacing: 1px;">Asset Name & Tag</th>
                                 <th class="py-3 text-uppercase text-muted" style="font-size: 0.75rem; letter-spacing: 1px;">Type</th>
@@ -32,7 +36,7 @@
                         </thead>
                         <tbody>
                             {% for asset in assets %}
-                            <tr style="border-bottom: 1px solid var(--apple-border-subtle); cursor: pointer;" onclick="window.location.href='{% url 'it-asset-detail' asset.id %}'">
+                            <tr class="asset-row" data-name="{{ asset.name|lower }} {{ asset.asset_tag|lower }}" style="border-bottom: 1px solid var(--secondary); cursor: pointer;" onclick="window.location.href='{% url 'it-asset-detail' asset.id %}'">
                                 <td class="ps-4 py-3">
                                     <div class="fw-bold text-white" style="font-size: 0.95rem;">{{ asset.name|truncatechars:40 }}</div>
                                     <small class="text-muted" style="font-family: monospace;">{{ asset.asset_tag }}</small>
@@ -77,13 +81,13 @@
 
         <!-- Vendor List -->
         <div class="col-12 mt-4">
-            <div class="card shadow-sm border-glow" style="background: var(--apple-card-bg); border: 1px solid var(--apple-border); border-radius: 12px; overflow: hidden;">
-                <div class="card-header border-bottom py-3 d-flex justify-content-between align-items-center" style="background:var(--apple-bg); border-color: var(--apple-border-subtle) !important;">
+            <div class="card shadow-sm border-glow" style="background: var(--bg-elevated); border: 1px solid var(--secondary); border-radius: 12px; overflow: hidden;">
+                <div class="card-header border-bottom py-3 d-flex justify-content-between align-items-center" style="background:var(--bg-dark); border-color: var(--secondary-subtle) !important;">
                     <h5 class="mb-0 text-white fw-bold"><i class="bx bx-store-alt me-2 text-primary"></i> Registered Vendors</h5>
                 </div>
                 <div class="table-responsive">
-                    <table class="table table-borderless table-hover mb-0 align-middle" style="color: var(--apple-text);">
-                        <thead style="background:var(--apple-row-hover); border-bottom: 1px solid var(--apple-border);">
+                    <table class="table table-borderless table-hover mb-0 align-middle" style="color: var(--text-white);">
+                        <thead style="background:var(--bg-hover); border-bottom: 1px solid var(--secondary);">
                             <tr>
                                 <th class="ps-4 py-3 text-uppercase text-muted" style="font-size: 0.75rem; letter-spacing: 1px;">Vendor Name</th>
                                 <th class="py-3 text-uppercase text-muted" style="font-size: 0.75rem; letter-spacing: 1px;">Contact Person</th>
@@ -93,7 +97,7 @@
                         </thead>
                         <tbody>
                             {% for vendor in vendors %}
-                            <tr style="border-bottom: 1px solid var(--apple-border-subtle);">
+                            <tr style="border-bottom: 1px solid var(--secondary-subtle);">
                                 <td class="ps-4 py-3">
                                     <div class="fw-bold text-white" style="font-size: 1rem;">{{ vendor.name }}</div>
                                 </td>
@@ -132,10 +136,10 @@
 
 <!-- Modals for Creation -->
 <style>
-.modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background:var(--apple-input-bg); z-index: 1050; align-items: center; justify-content: center; }
+.modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background:var(--bg-surface); z-index: 1050; align-items: center; justify-content: center; }
 .modal-overlay.active { display: flex; }
-.modal-box { background: var(--apple-card-bg); padding: 2rem; border-radius: 12px; border: 1px solid var(--apple-border); width: 400px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
-.modal-box input, .modal-box select { width: 100%; padding: 0.5rem; margin-top: 0.5rem; margin-bottom: 1rem; border-radius: 6px; border: 1px solid var(--apple-border); background: var(--apple-input-bg); color: var(--apple-text); }
+.modal-box { background: var(--bg-elevated); padding: 2rem; border-radius: 12px; border: 1px solid var(--secondary); width: 400px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+.modal-box input, .modal-box select { width: 100%; padding: 0.5rem; margin-top: 0.5rem; margin-bottom: 1rem; border-radius: 6px; border: 1px solid var(--secondary); background: var(--bg-surface); color: var(--text-white); }
 </style>
 
 <!-- Vendor Modal -->
@@ -193,4 +197,18 @@
     </div>
 </div>
 
+<script>
+document.getElementById('assetSearch').addEventListener('input', function(e) {
+    const term = e.target.value.toLowerCase();
+    const rows = document.querySelectorAll('.asset-row');
+    rows.forEach(row => {
+        const name = row.getAttribute('data-name');
+        if (name.includes(term)) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+});
+</script>
 {% endblock %}

@@ -51,3 +51,11 @@ django-celery-results
 # Initiative D — Billing & Stripe
 stripe
 dj-stripe
+
+# Production Database
+dj-database-url
+psycopg2-binary
+
+# Environment Variables
+python-dotenv
+uvicorn[standard]

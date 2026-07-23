@@ -5,8 +5,8 @@
 {% block extra_styles %}
 <style>
     .data-card {
-        background: var(--apple-card-bg);
-        border: 1px solid var(--apple-border);
+        background: var(--bg-elevated);
+        border: 1px solid var(--secondary);
         border-radius: 16px;
         padding: 1.5rem;
         margin-bottom: 1.5rem;
@@ -15,8 +15,8 @@
     }
     
     .data-stat-box {
-        background:var(--apple-row-hover);
-        border: 1px solid var(--apple-border);
+        background:var(--bg-hover);
+        border: 1px solid var(--secondary);
         border-radius: 12px;
         padding: 1rem;
         text-align: center;
@@ -25,7 +25,7 @@
     
     .data-stat-box:hover {
         transform: translateY(-5px);
-        background:var(--apple-border);
+        background:var(--secondary);
     }
     
     .stat-value {
@@ -37,7 +37,7 @@
     
     .stat-label {
         font-size: 0.85rem;
-        color: var(--apple-text-secondary);
+        color: var(--text-gray);
         text-transform: uppercase;
         letter-spacing: 1px;
     }
@@ -47,7 +47,7 @@
         border-radius: 12px;
         padding: 2rem;
         text-align: center;
-        background:var(--apple-input-bg);
+        background:var(--bg-surface);
         cursor: pointer;
         transition: all 0.3s ease;
     }
@@ -67,7 +67,7 @@
         display: flex;
         align-items: center;
         padding: 1rem;
-        border-bottom: 1px solid var(--apple-border);
+        border-bottom: 1px solid var(--secondary);
     }
     
     .user-item:last-child {
@@ -155,7 +155,7 @@
                     {% csrf_token %}
                     <div class="mb-3">
                         <label class="form-label text-secondary">Data Type</label>
-                        <select name="upload_type" class="form-select" style="background:var(--apple-input-bg); color: white; border: 1px solid var(--apple-border);">
+                        <select name="upload_type" class="form-select" style="background:var(--bg-surface); color: white; border: 1px solid var(--secondary);">
                             <option value="assets">IT Assets Inventory</option>
                             <option value="candidates">Candidate List</option>
                             <option value="contacts">Account Contacts</option>
@@ -170,8 +170,17 @@
                         <div id="file-name" class="mt-2 text-cyan fw-bold"></div>
                     </div>
                     
-                    <button type="submit" class="btn btn-primary w-100" style="background: var(--apple-accent); border: none;"><i class="fa-solid fa-upload"></i> Process Import</button>
+                    <button type="submit" class="btn btn-primary w-100" style="background: var(--primary); border: none;"><i class="fa-solid fa-upload"></i> Process Import</button>
                 </form>
+
+                <div class="mt-4 pt-3" style="border-top: 1px solid var(--secondary);">
+                    <h5 class="text-white mb-3" style="font-size: 0.9rem;"><i class="fa-solid fa-file-excel text-cyan"></i> Download CSV Templates</h5>
+                    <div class="d-flex flex-wrap gap-2">
+                        <a href="data:text/csv;charset=utf-8,name,asset_tag,asset_type" download="assets_template.csv" class="btn btn-sm btn-outline-info" style="font-size: 0.8rem;">Assets Template</a>
+                        <a href="data:text/csv;charset=utf-8,first_name,last_name,email" download="candidates_template.csv" class="btn btn-sm btn-outline-info" style="font-size: 0.8rem;">Candidates Template</a>
+                        <a href="data:text/csv;charset=utf-8,name,industry,website" download="accounts_template.csv" class="btn btn-sm btn-outline-info" style="font-size: 0.8rem;">Accounts Template</a>
+                    </div>
+                </div>
             </div>
             
             <div class="data-card">
