@@ -2289,10 +2289,14 @@ def company_data_manager(request):
                 username = f"{base_username}{counter}"
                 counter += 1
                 
-            can_view_ats = role in ['jobseeker', 'recruiter', 'admin']
-            can_view_sales = role in ['sales', 'admin']
-            can_view_it = role in ['it', 'admin']
-            can_view_executive = role == 'admin'
+            grant_dashboard = request.POST.get('grant_dashboard') == 'on'
+            if tenant.subscription_plan not in ['growth', 'enterprise']:
+                grant_dashboard = False
+                
+            can_view_ats = grant_dashboard and role in ['jobseeker', 'recruiter', 'admin']
+            can_view_sales = grant_dashboard and role in ['sales', 'admin']
+            can_view_it = grant_dashboard and role in ['it', 'admin']
+            can_view_executive = grant_dashboard and role == 'admin'
             
             User.objects.create_user(
                 username=username,

@@ -103,10 +103,15 @@ def billing_page(request):
         except AttributeError:
             current_plan = "free"
 
+    active_plan_obj = None
+    if current_plan != "free" and current_plan in PLANS:
+        active_plan_obj = PLANS[current_plan]
+
     context = {
         "page_title": "Billing & Subscription",
         "plans": PLANS,
         "current_plan": current_plan,
+        "active_plan": active_plan_obj,
         "tenant": tenant,
         "stripe_pub_key": getattr(settings, "STRIPE_PUBLISHABLE_KEY", ""),
     }

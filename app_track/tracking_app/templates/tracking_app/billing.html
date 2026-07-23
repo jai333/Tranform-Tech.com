@@ -21,33 +21,51 @@
     </div>
 
     <!-- Current Plan Banner -->
+    {% if active_plan %}
+    <div style="background: linear-gradient(135deg, {{ active_plan.color }}11 0%, rgba(0,0,0,0.3) 100%); border: 1px solid {{ active_plan.color }}; border-radius: 20px; padding: 40px; margin-bottom: 60px; box-shadow: 0 10px 40px {{ active_plan.color }}20; position: relative; overflow: hidden;">
+        <!-- Glowing accent -->
+        <div style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: {{ active_plan.color }}; filter: blur(100px); opacity: 0.15; border-radius: 50%;"></div>
+        
+        <div class="d-flex justify-content-between align-items-start mb-4">
+            <div>
+                <div style="font-family: var(--font-mono); font-size: 0.85rem; color: {{ active_plan.color }}; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 12px; font-weight: 700;">
+                    <i class="fa-solid fa-bolt"></i> Upgraded Plan Active
+                </div>
+                <h3 style="margin: 0; font-size: 2.5rem; font-weight: 800; color: #fff; text-shadow: 0 2px 10px rgba(255,255,255,0.1);">
+                    {{ active_plan.name }}
+                </h3>
+            </div>
+            <div style="background: {{ active_plan.color }}22; border: 1px solid {{ active_plan.color }}; color: {{ active_plan.color }}; padding: 10px 24px; border-radius: 30px; font-size: 1rem; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-circle-check"></i> Active
+            </div>
+        </div>
+
+        <p style="color: #ccc; font-size: 1.1rem; margin-bottom: 25px;">You have successfully upgraded your infrastructure. Your workspace currently includes the following capabilities:</p>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px;">
+            {% for feature in active_plan.features %}
+            <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; display: flex; align-items: center; gap: 12px; color: #fff;">
+                <i class="bx bx-check" style="color: {{ active_plan.color }}; font-size: 1.5rem; background: {{ active_plan.color }}22; border-radius: 50%; padding: 2px;"></i>
+                <span style="font-size: 0.95rem; font-weight: 500;">{{ feature }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% else %}
     <div style="background: linear-gradient(145deg, rgba(255,255,255,0.03) 0%, rgba(0,0,0,0.1) 100%); border: 1px solid var(--surface-border); border-radius: 20px; padding: 30px; margin-bottom: 60px; display: flex; align-items: center; justify-content: space-between; backdrop-filter: blur(12px);">
         <div>
             <div style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-dark-gray); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px;">Active Workspace Plan</div>
             <h3 style="margin: 0; font-size: 2rem; font-weight: 800; display: flex; align-items: center; gap: 12px;">
-                {% if current_plan == 'enterprise' %}
-                    <span style="color: #8b5cf6;"><i class='bx bx-building-house'></i> Enterprise</span>
-                {% elif current_plan == 'growth' or current_plan == 'pro' %}
-                    <span style="color: #00E5FF;"><i class='bx bx-rocket'></i> Pro Plan</span>
-                {% elif current_plan == 'starter' %}
-                    <span style="color: #10b981;"><i class='bx bx-play-circle'></i> Starter</span>
-                {% else %}
-                    <span style="color: var(--text-white);">Free Tier</span>
-                {% endif %}
+                <span style="color: var(--text-white);">Free Tier</span>
             </h3>
         </div>
         <div>
-            {% if current_plan == 'free' %}
             <div style="background: rgba(255,255,255,0.05); border: 1px solid var(--surface-border); color: var(--text-gray); padding: 8px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">
                 No active subscription
             </div>
-            {% else %}
-            <div style="background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); color: #10b981; padding: 10px 20px; border-radius: 20px; font-size: 0.95rem; font-weight: 600; display: flex; align-items: center; gap: 8px;">
-                <i class="bx bx-check-circle" style="font-size: 1.2rem;"></i> Subscription Active
-            </div>
-            {% endif %}
         </div>
     </div>
+    {% endif %}
 
     <!-- Pricing Tables -->
     <div style="text-align: center; margin-bottom: 40px;">

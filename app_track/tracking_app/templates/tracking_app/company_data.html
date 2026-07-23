@@ -5,27 +5,40 @@
 {% block extra_styles %}
 <style>
     .data-card {
-        background: var(--bg-elevated);
-        border: 1px solid var(--secondary);
-        border-radius: 16px;
-        padding: 1.5rem;
+        background: linear-gradient(145deg, rgba(255,255,255,0.03) 0%, rgba(0,0,0,0.2) 100%);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        padding: 2rem;
         margin-bottom: 1.5rem;
-        backdrop-filter: blur(var(--apple-blur));
-        -webkit-backdrop-filter: blur(var(--apple-blur));
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .data-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0; height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(0, 229, 255, 0.3), transparent);
     }
     
     .data-stat-box {
-        background:var(--bg-hover);
-        border: 1px solid var(--secondary);
-        border-radius: 12px;
-        padding: 1rem;
+        background: linear-gradient(135deg, rgba(255,255,255,0.02), rgba(255,255,255,0.05));
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 16px;
+        padding: 1.5rem;
         text-align: center;
-        transition: transform 0.3s ease;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     }
     
     .data-stat-box:hover {
-        transform: translateY(-5px);
-        background:var(--secondary);
+        transform: translateY(-5px) scale(1.02);
+        background: linear-gradient(135deg, rgba(0, 229, 255, 0.05), rgba(0, 229, 255, 0.1));
+        border-color: rgba(0, 229, 255, 0.3);
+        box-shadow: 0 10px 25px rgba(0, 229, 255, 0.15);
     }
     
     .stat-value {
@@ -43,18 +56,19 @@
     }
     
     .upload-zone {
-        border: 2px dashed rgba(255, 255, 255, 0.2);
-        border-radius: 12px;
-        padding: 2rem;
+        border: 2px dashed rgba(0, 229, 255, 0.3);
+        border-radius: 16px;
+        padding: 2.5rem;
         text-align: center;
-        background:var(--bg-surface);
+        background: rgba(0, 229, 255, 0.02);
         cursor: pointer;
         transition: all 0.3s ease;
     }
     
     .upload-zone:hover {
         border-color: #00E5FF;
-        background: rgba(0, 229, 255, 0.05);
+        background: rgba(0, 229, 255, 0.08);
+        box-shadow: 0 0 20px rgba(0, 229, 255, 0.1);
     }
     
     .user-list {
@@ -251,7 +265,31 @@
                             <option value="admin">Company Admin</option>
                         </select>
                     </div>
-                    <button type="submit" class="btn btn-success w-100" style="border:none;"><i class="fa-solid fa-key"></i> Generate Credentials</button>
+                    
+                    <div class="mb-4">
+                        <div class="form-check form-switch" style="padding: 15px; border-radius: 12px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05);">
+                            <input class="form-check-input" type="checkbox" name="grant_dashboard" id="grantDashboard" {% if tenant.subscription_plan not in 'growth,enterprise' %}disabled{% endif %}>
+                            <label class="form-check-label ms-2 d-flex flex-column" for="grantDashboard">
+                                <span class="text-white fw-bold d-flex align-items-center gap-2">
+                                    Premium Dashboard Access
+                                    {% if tenant.subscription_plan not in 'growth,enterprise' %}
+                                        <i class="fa-solid fa-lock text-warning" title="Requires Pro or Enterprise Plan"></i>
+                                    {% else %}
+                                        <i class="fa-solid fa-unlock-keyhole text-success"></i>
+                                    {% endif %}
+                                </span>
+                                <span class="text-secondary small mt-1">
+                                    {% if tenant.subscription_plan not in 'growth,enterprise' %}
+                                        <span class="text-warning">Requires Pro or Enterprise plan.</span> Upgrade to grant employees access to AI dashboards.
+                                    {% else %}
+                                        Allows employee to view interactive AI dashboards corresponding to their role.
+                                    {% endif %}
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn w-100 fw-bold" style="background: linear-gradient(90deg, #00E5FF, #00b3cc); color: #000; border: none; padding: 12px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,229,255,0.3);"><i class="fa-solid fa-key"></i> Generate Secure Credentials</button>
                 </form>
             </div>
 
