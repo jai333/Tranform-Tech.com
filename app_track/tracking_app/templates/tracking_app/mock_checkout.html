@@ -1,0 +1,44 @@
+{% extends 'tracking_app/base.html' %}
+{% block title %}Checkout | Transform.io{% endblock %}
+{% block content %}
+<div style="min-height: 80vh; display: flex; align-items: center; justify-content: center; padding: 2rem;">
+    <div style="background: var(--apple-card-bg); border: 1px solid var(--apple-border); border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.5); max-width: 500px; width: 100%; padding: 3rem; text-align: center; backdrop-filter: blur(20px);">
+        <i class="fa-solid fa-credit-card" style="font-size: 3rem; color: var(--primary); margin-bottom: 1.5rem;"></i>
+        <h2 style="font-family: var(--font-mono); font-size: 1.8rem; margin-bottom: 0.5rem; color: white;">Secure Checkout</h2>
+        <p style="color: var(--text-gray); margin-bottom: 2.5rem; font-size: 1.1rem;">You are upgrading to the <span style="color: white; font-weight: bold; text-transform: uppercase;">{{ plan_key }}</span> plan.</p>
+        
+        <div style="background: rgba(0,0,0,0.3); border-radius: 12px; padding: 1.5rem; margin-bottom: 2.5rem; border: 1px solid rgba(255,255,255,0.05); text-align: left;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                <span style="color: var(--text-gray);">Plan</span>
+                <span style="color: white; font-weight: bold; text-transform: capitalize;">{{ plan_key }}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                <span style="color: var(--text-gray);">Billing Cycle</span>
+                <span style="color: white;">Monthly</span>
+            </div>
+            <hr style="border-color: rgba(255,255,255,0.1); margin: 1rem 0;">
+            <div style="display: flex; justify-content: space-between; font-size: 1.2rem;">
+                <span style="color: white; font-weight: bold;">Total due today</span>
+                <span style="color: var(--primary); font-weight: bold;">
+                    {% if plan_key == 'starter' %}$99{% elif plan_key == 'growth' %}$299{% else %}$999{% endif %}
+                </span>
+            </div>
+        </div>
+
+        <div class="alert" style="background: rgba(0, 229, 255, 0.1); border: 1px solid rgba(0, 229, 255, 0.3); color: #00E5FF; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; font-size: 0.9rem; text-align: left;">
+            <i class="fa-solid fa-info-circle"></i> <b>Test Environment:</b> Stripe API keys are not configured. This is a simulated checkout gateway.
+        </div>
+
+        <form method="post" action="{% url 'mock-checkout-process' %}">
+            {% csrf_token %}
+            <input type="hidden" name="plan_key" value="{{ plan_key }}">
+            <button type="submit" class="btn btn-cyan" style="width: 100%; padding: 1.2rem; font-size: 1.1rem; font-family: var(--font-mono); font-weight: bold; text-transform: uppercase; letter-spacing: 1px; border-radius: 12px; background: linear-gradient(135deg, var(--apple-primary), #00c6ff); color: white; border: none; cursor: pointer;">
+                Confirm Payment Simulation
+            </button>
+        </form>
+        <div style="margin-top: 1.5rem;">
+            <a href="{% url 'billing-page' %}" style="color: var(--text-gray); text-decoration: none; font-size: 0.9rem; transition: color 0.3s;" onmouseover="this.style.color='white'" onmouseout="this.style.color='var(--text-gray)'"><i class="fa-solid fa-arrow-left"></i> Return to Billing</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

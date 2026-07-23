@@ -12,6 +12,7 @@ Endpoints:
 """
 
 import json
+from django.views.decorators.http import require_POST
 import logging
 import stripe
 from django.conf import settings
@@ -132,44 +133,21 @@ def create_checkout_session(request, plan_key=None):
         return JsonResponse({"error": "Invalid plan."}, status=400)
 
     plan = PLANS[plan_key]
-    
-    # Fetch price ID dynamically to ensure it picks up changes in settings/.env
-    if plan_key == "starter":
-        price_id = getattr(settings, "STRIPE_PRICE_STARTER", "")
-    elif plan_key == "growth":
-        price_id = getattr(settings, "STRIPE_PRICE_GROWTH", "")
-    elif plan_key == "enterprise":
-        price_id = getattr(settings, "STRIPE_PRICE_ENTERPRISE", "")
-    else:
-        price_id = ""
-        
-    if not price_id:
-        return JsonResponse({
-            "error": "Stripe not configured yet. Add STRIPE_PRICE_* to settings."
-        }, status=400)
+    # Mock checkout instead of Stripe API
+    return render(request, "tracking_app/mock_checkout.html", {
+        "plan_key": plan_key
+    })
 
-    stripe_module = _get_stripe()
-    if not stripe_module:
-        return JsonResponse({"error": "Stripe API key not configured."}, status=400)
-
-    try:
-        tenant = getattr(request.user, "tenant", None)
-        checkout_session = stripe_module.checkout.Session.create(
-            customer_email=request.user.email,
-            line_items=[{"price": price_id, "quantity": 1}],
-            mode="subscription",
-            success_url=request.build_absolute_uri("/billing/success/?session_id={CHECKOUT_SESSION_ID}"),
-            cancel_url=request.build_absolute_uri("/billing/"),
-            metadata={
-                "tenant_id": str(tenant.id) if tenant else "",
-                "plan": plan_key,
-                "user_id": str(request.user.id),
-            },
-        )
-        return redirect(checkout_session.url, permanent=False)
-    except Exception as e:
-        logger.error("Stripe checkout error: %s", e)
-        return JsonResponse({"error": str(e)}, status=500)
+@login_required
+@require_POST
+def mock_checkout_process(request):
+    plan_key = request.POST.get("plan_key")
+    if plan_key in PLANS:
+        tenant = request.user.tenant
+        if tenant:
+            tenant.subscription_plan = plan_key
+            tenant.save()
+    return redirect(f"/billing/success/?session_id=mock_session_{plan_key}")
 
 
 # ─────────────────────────────────────────────────────────────
