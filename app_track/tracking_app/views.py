@@ -2262,62 +2262,124 @@ def company_data_manager(request):
         
     tenant = request.user.tenant
     
-    # Handle simple CSV upload simulation
-    if request.method == 'POST' and request.FILES.get('data_file'):
-        import csv
-        import io
-        from .sales_models import Account
-        upload_type = request.POST.get('upload_type')
-        data_file = request.FILES.get('data_file')
+    if request.method == 'POST':
+        action = request.POST.get('action')
         
-        try:
-            # Decode file as text
-            csv_file = io.StringIO(data_file.read().decode('utf-8-sig'))
-            reader = csv.DictReader(csv_file)
+        if action == 'generate_employee':
+            import secrets, string
+            first_name = request.POST.get('first_name', '')
+            last_name = request.POST.get('last_name', '')
+            email = request.POST.get('email', '')
+            role = request.POST.get('role', 'jobseeker')
             
-            created_count = 0
-            for row in reader:
-                try:
-                    if upload_type == 'assets':
-                        ITAsset.objects.create(
-                            tenant=tenant,
-                            name=row.get('name', 'Unnamed Asset'),
-                            asset_tag=row.get('asset_tag', f"TAG-{uuid.uuid4().hex[:6].upper()}"),
-                            asset_type=row.get('asset_type', 'hardware').lower()
-                        )
-                    elif upload_type == 'candidates':
-                        email = row.get('email')
-                        if not email:
-                            continue
-                        Candidate.objects.create(
-                            tenant=tenant,
-                            first_name=row.get('first_name', ''),
-                            last_name=row.get('last_name', ''),
-                            email=email,
-                            user=request.user
-                        )
-                    elif upload_type == 'accounts':
-                        name = row.get('name')
-                        if not name:
-                            continue
-                        Account.objects.create(
-                            tenant=tenant,
-                            name=name,
-                            industry=row.get('industry', ''),
-                            website=row.get('website', ''),
-                            owner=request.user
-                        )
-                    created_count += 1
-                except Exception as row_e:
-                    logger.warning(f"Skipped row in {upload_type} upload due to error: {row_e}")
-                    continue
+            if not email:
+                messages.error(request, "Email is required.")
+                return redirect('company-data-manager')
+                
+            if User.objects.filter(email=email).exists():
+                messages.error(request, f"User with email {email} already exists.")
+                return redirect('company-data-manager')
+                
+            alphabet = string.ascii_letters + string.digits + "!@#$%^&*"
+            password = ''.join(secrets.choice(alphabet) for _ in range(14))
+            base_username = email.split('@')[0].lower().replace('.', '_')
+            username = base_username
+            counter = 1
+            while User.objects.filter(username=username).exists():
+                username = f"{base_username}{counter}"
+                counter += 1
+                
+            can_view_ats = role in ['jobseeker', 'recruiter', 'admin']
+            can_view_sales = role in ['sales', 'admin']
+            can_view_it = role in ['it', 'admin']
+            can_view_executive = role == 'admin'
             
-            messages.success(request, f"Successfully processed {created_count} {upload_type} for {tenant.name}.")
-        except Exception as e:
-            logger.error(f"CSV upload failed: {e}")
-            messages.error(request, f"Failed to parse CSV: {e}")
+            User.objects.create_user(
+                username=username,
+                email=email,
+                password=password,
+                first_name=first_name,
+                last_name=last_name,
+                tenant=tenant,
+                role=role,
+                can_view_ats=can_view_ats,
+                can_view_sales=can_view_sales,
+                can_view_it=can_view_it,
+                can_view_executive=can_view_executive
+            )
+            messages.success(request, f"Employee {first_name} added. Credentials: {username} / {password}")
+            return redirect('company-data-manager')
             
-        return redirect('company-data-manager')
+        elif action == 'assign_asset':
+            asset_id = request.POST.get('asset_id')
+            user_id = request.POST.get('user_id')
+            try:
+                asset = ITAsset.objects.get(pk=asset_id, tenant=tenant)
+                user = User.objects.get(pk=user_id, tenant=tenant)
+                asset.owner = user
+                asset.status = 'active'
+                asset.save()
+                messages.success(request, f"Asset {asset.name} assigned to {user.username}.")
+            except (ITAsset.DoesNotExist, User.DoesNotExist):
+                messages.error(request, "Invalid asset or user selection.")
+            return redirect('company-data-manager')
+            
+        elif request.FILES.get('data_file'):
+            # Handle simple CSV upload simulation
+            import csv
+            import io
+            from .sales_models import Account
+            upload_type = request.POST.get('upload_type')
+            data_file = request.FILES.get('data_file')
+            
+            try:
+                # Decode file as text
+                csv_file = io.StringIO(data_file.read().decode('utf-8-sig'))
+                reader = csv.DictReader(csv_file)
+                
+                created_count = 0
+                for row in reader:
+                    try:
+                        if upload_type == 'assets':
+                            ITAsset.objects.create(
+                                tenant=tenant,
+                                name=row.get('name', 'Unnamed Asset'),
+                                asset_tag=row.get('asset_tag', f"TAG-{uuid.uuid4().hex[:6].upper()}"),
+                                asset_type=row.get('asset_type', 'hardware').lower()
+                            )
+                        elif upload_type == 'candidates':
+                            email = row.get('email')
+                            if not email:
+                                continue
+                            Candidate.objects.create(
+                                tenant=tenant,
+                                first_name=row.get('first_name', ''),
+                                last_name=row.get('last_name', ''),
+                                email=email,
+                                user=request.user
+                            )
+                        elif upload_type == 'accounts':
+                            name = row.get('name')
+                            if not name:
+                                continue
+                            Account.objects.create(
+                                tenant=tenant,
+                                name=name,
+                                industry=row.get('industry', ''),
+                                website=row.get('website', ''),
+                                owner=request.user
+                            )
+                        created_count += 1
+                    except Exception as row_e:
+                        logger.warning(f"Skipped row in {upload_type} upload due to error: {row_e}")
+                        continue
+                
+                messages.success(request, f"Successfully processed {created_count} {upload_type} for {tenant.name}.")
+            except Exception as e:
+                logger.error(f"CSV upload failed: {e}")
+                messages.error(request, f"Failed to parse CSV: {e}")
+                
+            return redirect('company-data-manager')
         
     context = {
         'page_title': 'Company Data Manager',
@@ -2328,7 +2390,8 @@ def company_data_manager(request):
             'candidates': Candidate.objects.filter(tenant=tenant).count(),
             'jobs': Job.objects.filter(tenant=tenant).count(),
         },
-        'users': User.objects.filter(tenant=tenant)
+        'users': User.objects.filter(tenant=tenant),
+        'unassigned_assets': ITAsset.objects.filter(tenant=tenant, owner__isnull=True)
     }
     return render(request, 'tracking_app/company_data.html', context)
 
