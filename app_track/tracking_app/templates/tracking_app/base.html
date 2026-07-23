@@ -1306,7 +1306,6 @@
                     {% if user.is_authenticated %}
                         
                         <!-- C-SUITE DASHBOARDS -->
-                        {% if user.is_staff or user.is_admin_role or user.can_view_executive or user.is_superuser %}
                         {% if user.is_superuser or user.tenant.subscription_plan == 'enterprise' %}
                         <li class="dropdown-nav" onclick="this.querySelector('.dropdown-content').classList.toggle('show-dropdown')">
                             <a href="javascript:void(0)" class="{% if '/executive-dashboard/' in request.path or '/automation/dashboard/' in request.path or '/ai-pipeline/' in request.path %}active{% endif %}" style="color:#00E5FF; white-space: nowrap;">
@@ -1319,10 +1318,8 @@
                             </ul>
                         </li>
                         {% endif %}
-                        {% endif %}
 
                         <!-- IT DASHBOARD -->
-                        {% if user.is_it_agent or user.is_it_admin or user.can_view_it or user.is_superuser %}
                         {% if user.is_superuser or user.tenant.subscription_plan in 'growth,enterprise' %}
                         <li class="dropdown-nav" onclick="this.querySelector('.dropdown-content').classList.toggle('show-dropdown')">
                             <a href="{% url 'it-helpdesk-list' %}" class="{% if '/it/' in request.path %}active{% endif %}" style="white-space: nowrap;">
@@ -1340,16 +1337,11 @@
                             </ul>
                         </li>
                         {% endif %}
-                        {% endif %}
 
-                        <!-- SALES DASHBOARD & ATS for authorized users -->
-                        {% if user.is_staff or user.is_admin_role or user.can_view_sales or user.can_view_ats or user.is_superuser %}
+                        <!-- SALES DASHBOARD & ATS -->
                         {% if user.is_superuser or user.tenant.subscription_plan in 'starter,growth,enterprise' %}
-                        {% if user.is_staff or user.is_admin_role or user.can_view_sales or user.is_superuser %}
                         <li><a href="{% url 'sales-dashboard' %}" class="{% if '/sales/' in request.path %}active{% endif %}" style="white-space: nowrap;"><i class="fas fa-chart-line"></i> Sales</a></li>
-                        {% endif %}
                         
-                        {% if user.is_staff or user.is_admin_role or user.can_view_ats or user.is_superuser %}
                         <li class="dropdown-nav" onclick="this.querySelector('.dropdown-content').classList.toggle('show-dropdown')">
                             <a href="javascript:void(0)" class="{% if '/candidates/' in request.path or '/applications/' in request.path or '/job-applications/' in request.path or '/interviews/' in request.path or '/jobs/' in request.path %}active{% endif %}" style="white-space: nowrap;">
                                 <i class="fa-solid fa-users-viewfinder"></i> ATS <i class="fas fa-chevron-down" style="font-size: 0.7em; margin-left: 4px;"></i>
@@ -1364,11 +1356,8 @@
                         </li>
                         {% endif %}
 
-                        {% if user.is_staff or user.is_admin_role or user.can_view_sales or user.is_superuser %}
                         {% if user.is_superuser or user.tenant.subscription_plan in 'growth,enterprise' %}
                         <li><a href="{% url 'unified-inbox' %}" class="{% if '/inbox/' in request.path %}active{% endif %}" style="white-space: nowrap;"><i class="fas fa-inbox"></i> Inbox</a></li>
-                        {% endif %}
-                        {% endif %}
                         {% endif %}
                         {% endif %}
 
@@ -1997,7 +1986,7 @@
     <div id="ai-chat-widget" style="position:fixed;bottom:20px;right:20px;z-index:9999;font-family:-apple-system,BlinkMacSystemFont,sans-serif;">
         <!-- Chat Toggle Button -->
         <button id="chat-toggle-btn" style="width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,var(--apple-primary),#00c6ff);color:white;border:none;box-shadow:0 10px 25px rgba(0,229,255,0.3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:28px;transition:transform 0.3s ease;">
-            <i class="bx bx-message-rounded-dots"></i>
+            <i class="fa-solid fa-message"></i>
         </button>
 
         <!-- Chat Window -->
@@ -2011,7 +2000,7 @@
                         <small style="color:var(--apple-text-secondary);font-size:0.75rem;">Transform.io Assistant</small>
                     </div>
                 </div>
-                <button id="chat-close-btn" style="background:none;border:none;color:var(--apple-text-secondary);cursor:pointer;font-size:20px;"><i class="bx bx-x"></i></button>
+                <button id="chat-close-btn" style="background:none;border:none;color:var(--apple-text-secondary);cursor:pointer;font-size:20px;"><i class="fa-solid fa-xmark"></i></button>
             </div>
 
             <!-- Messages Area -->
@@ -2135,6 +2124,39 @@
             }
         });
     </script>
+    
+    <!-- Theme Toggle Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const themeToggle = document.getElementById('theme-toggle');
+            const themeIcon = document.getElementById('theme-icon');
+            
+            // Check for saved theme preference or use default (dark)
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateIcon(savedTheme);
+
+            if (themeToggle) {
+                themeToggle.addEventListener('click', function() {
+                    const currentTheme = document.documentElement.getAttribute('data-theme');
+                    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+                    
+                    document.documentElement.setAttribute('data-theme', newTheme);
+                    localStorage.setItem('theme', newTheme);
+                    updateIcon(newTheme);
+                });
+            }
+
+            function updateIcon(theme) {
+                if(theme === 'light') {
+                    themeIcon.className = 'fas fa-sun';
+                } else {
+                    themeIcon.className = 'fas fa-moon';
+                }
+            }
+        });
+    </script>
+    {% endif %}
     </body>
 
 
