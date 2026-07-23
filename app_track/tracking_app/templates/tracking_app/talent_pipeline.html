@@ -32,7 +32,7 @@
 <div class="kanban-board animate-slide-up" style="display: flex; gap: 20px; overflow-x: auto; padding-bottom: 20px; min-height: 70vh;">
     
     <!-- Stage: Pending -->
-    <div class="kanban-column border-glow" data-status="pending" style="flex: 1; min-width: 300px; background: rgba(0,0,0,0.4); border-radius: 8px; padding: 16px; display: flex; flex-direction: column;">
+    <div class="kanban-column border-glow" data-status="pending" style="flex: 1; min-width: 300px; background:var(--apple-input-bg); border-radius: 8px; padding: 16px; display: flex; flex-direction: column;">
         <h3 class="font-mono text-sm text-warning mb-md" style="letter-spacing: 1px; border-bottom: 1px solid var(--apple-border); padding-bottom: 8px;">
             PENDING REVIEW <span class="badge badge-secondary float-right">{{ pipeline_data.pending|length }}</span>
         </h3>
@@ -44,7 +44,7 @@
     </div>
 
     <!-- Stage: Reviewed -->
-    <div class="kanban-column border-glow" data-status="reviewed" style="flex: 1; min-width: 300px; background: rgba(0,0,0,0.4); border-radius: 8px; padding: 16px; display: flex; flex-direction: column;">
+    <div class="kanban-column border-glow" data-status="reviewed" style="flex: 1; min-width: 300px; background:var(--apple-input-bg); border-radius: 8px; padding: 16px; display: flex; flex-direction: column;">
         <h3 class="font-mono text-sm text-info mb-md" style="letter-spacing: 1px; border-bottom: 1px solid var(--apple-border); padding-bottom: 8px;">
             REVIEWED / SCREENING <span class="badge badge-secondary float-right">{{ pipeline_data.reviewed|length }}</span>
         </h3>
@@ -56,7 +56,7 @@
     </div>
 
     <!-- Stage: Accepted / Offer -->
-    <div class="kanban-column border-glow" data-status="accepted" style="flex: 1; min-width: 300px; background: rgba(0,0,0,0.4); border-radius: 8px; padding: 16px; display: flex; flex-direction: column;">
+    <div class="kanban-column border-glow" data-status="accepted" style="flex: 1; min-width: 300px; background:var(--apple-input-bg); border-radius: 8px; padding: 16px; display: flex; flex-direction: column;">
         <h3 class="font-mono text-sm text-success mb-md" style="letter-spacing: 1px; border-bottom: 1px solid var(--apple-border); padding-bottom: 8px;">
             ACCEPTED / INTERVIEW <span class="badge badge-secondary float-right">{{ pipeline_data.accepted|length }}</span>
         </h3>
@@ -68,7 +68,7 @@
     </div>
 
     <!-- Stage: Rejected -->
-    <div class="kanban-column border-glow" data-status="rejected" style="flex: 1; min-width: 300px; background: rgba(0,0,0,0.4); border-radius: 8px; padding: 16px; display: flex; flex-direction: column; opacity: 0.8;">
+    <div class="kanban-column border-glow" data-status="rejected" style="flex: 1; min-width: 300px; background:var(--apple-input-bg); border-radius: 8px; padding: 16px; display: flex; flex-direction: column; opacity: 0.8;">
         <h3 class="font-mono text-sm text-danger mb-md" style="letter-spacing: 1px; border-bottom: 1px solid var(--apple-border); padding-bottom: 8px;">
             REJECTED <span class="badge badge-secondary float-right">{{ pipeline_data.rejected|length }}</span>
         </h3>

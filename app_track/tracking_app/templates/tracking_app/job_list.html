@@ -143,14 +143,14 @@
     .reset-btn {
         background-color: rgba(255, 255, 255, 0.05);
         color: var(--apple-text);
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        border:1px solid var(--apple-border);
         backdrop-filter: blur(5px);
         -webkit-backdrop-filter: blur(5px);
     }
     
     .reset-btn:hover {
-        background-color: rgba(255, 255, 255, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.15);
+        background-color:var(--apple-text-muted);
+        border:1px solid var(--apple-border);
     }
     
     /* Job grid */
@@ -180,7 +180,7 @@
     .job-card:hover {
         transform: translateY(-5px);
         box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25);
-        border-color: rgba(255, 255, 255, 0.15);
+        border-color:var(--apple-text-muted);
     }
     
     @keyframes card-fade-in {
@@ -366,7 +366,7 @@
         border-radius: 16px;
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.05);
+        border:1px solid var(--apple-border);
     }
     
     .page-item {
@@ -381,7 +381,7 @@
         height: 40px;
         padding: 0 0.75rem;
         border-radius: 10px;
-        background: rgba(255, 255, 255, 0.05);
+        background:var(--apple-row-hover);
         color: var(--apple-text);
         text-decoration: none;
         transition: all 0.2s ease;
@@ -391,7 +391,7 @@
     }
     
     .page-link:hover {
-        background: rgba(255, 255, 255, 0.1);
+        background:var(--apple-border);
         transform: translateY(-2px);
     }
     

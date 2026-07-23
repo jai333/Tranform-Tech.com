@@ -6,16 +6,16 @@
     .enterprise-title { font-size:2.5rem; font-weight:800; background:linear-gradient(90deg, #fff, #a1a1aa); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:0.5rem; }
     .enterprise-subtitle { color:var(--apple-text-muted); font-size:1.1rem; margin:0; }
     
-    .glass-card { background:var(--apple-card-bg); border:1px solid rgba(255,255,255,0.05); border-radius:20px; padding:1.5rem; backdrop-filter:blur(20px); }
+    .glass-card { background:var(--apple-card-bg); border:1px solid var(--apple-border); border-radius:20px; padding:1.5rem; backdrop-filter:blur(20px); }
     .glass-table { width:100%; border-collapse:collapse; }
-    .glass-table th { padding:16px; text-align:left; color:rgba(255,255,255,0.5); font-size:0.85rem; font-weight:600; text-transform:uppercase; letter-spacing:1px; border-bottom:1px solid rgba(255,255,255,0.1); }
-    .glass-table td { padding:16px; border-bottom:1px solid rgba(255,255,255,0.05); font-size:0.95rem; }
-    .glass-table tr:hover td { background:rgba(255,255,255,0.02); }
+    .glass-table th { padding:16px; text-align:left; color:var(--apple-text-secondary); font-size:0.85rem; font-weight:600; text-transform:uppercase; letter-spacing:1px; border-bottom:1px solid var(--apple-border); }
+    .glass-table td { padding:16px; border-bottom:1px solid var(--apple-border); font-size:0.95rem; }
+    .glass-table tr:hover td { background:var(--apple-bg); }
     .glass-table tr { cursor:pointer; transition:all 0.2s; }
     
-    .company-logo-placeholder { width:40px; height:40px; background:linear-gradient(135deg, #0A84FF, #00E5FF); border-radius:10px; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:1.2rem; color:#fff; margin-right:16px; box-shadow:0 4px 10px rgba(0, 229, 255, 0.2); }
+    .company-logo-placeholder { width:40px; height:40px; background:linear-gradient(135deg, #0A84FF, #00E5FF); border-radius:10px; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:1.2rem; color:var(--apple-text); margin-right:16px; box-shadow:0 4px 10px rgba(0, 229, 255, 0.2); }
     .metric-badge { background:rgba(0,229,255,0.1); color:#00E5FF; padding:4px 12px; border-radius:12px; font-size:0.8rem; font-weight:600; border:1px solid rgba(0,229,255,0.2); }
-    .contact-badge { background:rgba(255,255,255,0.1); color:#fff; padding:4px 12px; border-radius:12px; font-size:0.8rem; font-weight:600; }
+    .contact-badge { background:var(--apple-border); color:var(--apple-text); padding:4px 12px; border-radius:12px; font-size:0.8rem; font-weight:600; }
 </style>
 
 <div class="content-header enterprise-header">
@@ -25,10 +25,10 @@
     </div>
     <div style="display:flex; gap:12px;">
         <div style="position:relative;">
-            <i class="bx bx-search" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:rgba(255,255,255,0.4);"></i>
-            <input type="text" placeholder="Search accounts..." style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:10px 12px 10px 36px; color:#fff; font-size:0.95rem; outline:none; width:250px;">
+            <i class="bx bx-search" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--apple-text-secondary);"></i>
+            <input type="text" placeholder="Search accounts..." style="background:var(--apple-row-hover); border:1px solid var(--apple-border); border-radius:12px; padding:10px 12px 10px 36px; color:var(--apple-text); font-size:0.95rem; outline:none; width:250px;">
         </div>
-        <a href="{% url 'account-create' %}" class="btn btn-primary" style="background:linear-gradient(135deg, #0A84FF, #005bb5); border:none; color:#fff; border-radius:12px; padding:10px 20px; display:flex; align-items:center; font-weight:600;"><i class="bx bx-plus" style="margin-right:6px; font-size:1.2rem;"></i> New Account</a>
+        <a href="{% url 'account-create' %}" class="btn btn-primary" style="background:linear-gradient(135deg, #0A84FF, #005bb5); border:none; color:var(--apple-text); border-radius:12px; padding:10px 20px; display:flex; align-items:center; font-weight:600;"><i class="bx bx-plus" style="margin-right:6px; font-size:1.2rem;"></i> New Account</a>
     </div>
 </div>
 
@@ -36,24 +36,24 @@
     <div class="glass-card" style="display:flex; align-items:center; gap:16px;">
         <div style="width:50px; height:50px; border-radius:12px; background:rgba(10, 132, 255, 0.1); display:flex; align-items:center; justify-content:center; color:#0A84FF; font-size:1.5rem;"><i class="bx bx-building"></i></div>
         <div>
-            <div style="color:rgba(255,255,255,0.5); font-size:0.85rem; font-weight:600; text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">Total Accounts</div>
-            <div style="font-size:2rem; font-weight:800; color:#fff; line-height:1;">{{ accounts.count }}</div>
+            <div style="color:var(--apple-text-secondary); font-size:0.85rem; font-weight:600; text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">Total Accounts</div>
+            <div style="font-size:2rem; font-weight:800; color:var(--apple-text); line-height:1;">{{ accounts.count }}</div>
         </div>
     </div>
     
     <div class="glass-card" style="display:flex; align-items:center; gap:16px;">
         <div style="width:50px; height:50px; border-radius:12px; background:rgba(50, 215, 75, 0.1); display:flex; align-items:center; justify-content:center; color:#32D74B; font-size:1.5rem;"><i class="bx bx-line-chart"></i></div>
         <div>
-            <div style="color:rgba(255,255,255,0.5); font-size:0.85rem; font-weight:600; text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">Pipeline Health</div>
-            <div style="font-size:2rem; font-weight:800; color:#fff; line-height:1;">Strong</div>
+            <div style="color:var(--apple-text-secondary); font-size:0.85rem; font-weight:600; text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">Pipeline Health</div>
+            <div style="font-size:2rem; font-weight:800; color:var(--apple-text); line-height:1;">Strong</div>
         </div>
     </div>
 </div>
 
 <form method="GET" class="glass-card" style="display:flex; gap:1rem; margin-bottom:1.5rem; align-items:flex-end;">
     <div style="flex:1;">
-        <label style="color:rgba(255,255,255,0.6); font-size:0.8rem; margin-bottom:6px; display:block; text-transform:uppercase; letter-spacing:1px;">Filter by Industry</label>
-        <select name="industry" style="background:rgba(0,0,0,0.2); border:1px solid rgba(255,255,255,0.1); color:#fff; border-radius:8px; padding:10px; width:100%; outline:none;">
+        <label style="color:var(--apple-text-muted); font-size:0.8rem; margin-bottom:6px; display:block; text-transform:uppercase; letter-spacing:1px;">Filter by Industry</label>
+        <select name="industry" style="background:var(--apple-input-bg); border:1px solid var(--apple-border); color:var(--apple-text); border-radius:8px; padding:10px; width:100%; outline:none;">
             <option value="">All Industries</option>
             {% for val, label in industry_choices %}
             <option value="{{ val }}" {% if selected_industry == val %}selected{% endif %}>{{ label }}</option>
@@ -61,20 +61,20 @@
         </select>
     </div>
     <div style="flex:1;">
-        <label style="color:rgba(255,255,255,0.6); font-size:0.8rem; margin-bottom:6px; display:block; text-transform:uppercase; letter-spacing:1px;">Filter by Size</label>
-        <select name="size" style="background:rgba(0,0,0,0.2); border:1px solid rgba(255,255,255,0.1); color:#fff; border-radius:8px; padding:10px; width:100%; outline:none;">
+        <label style="color:var(--apple-text-muted); font-size:0.8rem; margin-bottom:6px; display:block; text-transform:uppercase; letter-spacing:1px;">Filter by Size</label>
+        <select name="size" style="background:var(--apple-input-bg); border:1px solid var(--apple-border); color:var(--apple-text); border-radius:8px; padding:10px; width:100%; outline:none;">
             <option value="">All Sizes</option>
             {% for val, label in size_choices %}
             <option value="{{ val }}" {% if selected_size == val %}selected{% endif %}>{{ label }}</option>
             {% endfor %}
         </select>
     </div>
-    <button type="submit" class="btn btn-primary" style="background:linear-gradient(135deg, #0A84FF, #005bb5); border:none; color:#fff; border-radius:8px; padding:10px 20px; font-weight:600; height:42px;">Filter Results</button>
+    <button type="submit" class="btn btn-primary" style="background:linear-gradient(135deg, #0A84FF, #005bb5); border:none; color:var(--apple-text); border-radius:8px; padding:10px 20px; font-weight:600; height:42px;">Filter Results</button>
 </form>
 
 <div class="glass-card" style="padding:0; overflow:hidden;">
     <table class="glass-table">
-        <thead style="background:rgba(0,0,0,0.2);">
+        <thead style="background:var(--apple-input-bg);">
             <tr>
                 <th style="padding-left:24px;">Company</th>
                 <th>Industry</th>
@@ -91,32 +91,32 @@
                     <div style="display:flex; align-items:center;">
                         <div class="company-logo-placeholder">{{ acc.name|make_list|first|upper }}</div>
                         <div>
-                            <div style="font-weight:700; color:#fff; font-size:1rem;">{{ acc.name }}</div>
+                            <div style="font-weight:700; color:var(--apple-text); font-size:1rem;">{{ acc.name }}</div>
                             {% if acc.website %}
-                            <div style="color:rgba(255,255,255,0.4); font-size:0.8rem; margin-top:2px;">
+                            <div style="color:var(--apple-text-secondary); font-size:0.8rem; margin-top:2px;">
                                 <i class="bx bx-link" style="margin-right:4px;"></i>{{ acc.website|truncatechars:35 }}
                             </div>
                             {% endif %}
                         </div>
                     </div>
                 </td>
-                <td style="color:rgba(255,255,255,0.7);">{{ acc.get_industry_display|default:"—" }}</td>
-                <td style="color:rgba(255,255,255,0.7);">{{ acc.get_employee_count_display|default:"—" }}</td>
+                <td style="color:var(--apple-text-secondary);">{{ acc.get_industry_display|default:"—" }}</td>
+                <td style="color:var(--apple-text-secondary);">{{ acc.get_employee_count_display|default:"—" }}</td>
                 <td><span class="contact-badge"><i class="bx bx-user" style="margin-right:4px;"></i>{{ acc.contacts.count }}</span></td>
                 <td>
                     {% if acc.deals.count > 0 %}
                     <span class="metric-badge"><i class="bx bx-dollar-circle" style="margin-right:4px;"></i>{{ acc.deals.count }} Pipeline</span>
                     {% else %}
-                    <span style="color:rgba(255,255,255,0.3); font-size:0.85rem;">No active deals</span>
+                    <span style="color:var(--apple-text-muted); font-size:0.85rem;">No active deals</span>
                     {% endif %}
                 </td>
-                <td style="text-align:right; padding-right:24px; color:rgba(255,255,255,0.5); font-size:0.85rem;">{{ acc.created_at|date:"M d, Y" }}</td>
+                <td style="text-align:right; padding-right:24px; color:var(--apple-text-secondary); font-size:0.85rem;">{{ acc.created_at|date:"M d, Y" }}</td>
             </tr>
             {% empty %}
             <tr>
-                <td colspan="6" style="text-align:center; padding:60px 20px; color:rgba(255,255,255,0.3);">
+                <td colspan="6" style="text-align:center; padding:60px 20px; color:var(--apple-text-muted);">
                     <i class="bx bx-buildings" style="font-size:3rem; margin-bottom:16px; opacity:0.5; display:block;"></i>
-                    <h3 style="margin:0 0 8px 0; color:#fff; font-size:1.2rem;">No accounts found</h3>
+                    <h3 style="margin:0 0 8px 0; color:var(--apple-text); font-size:1.2rem;">No accounts found</h3>
                     <p style="margin:0; font-size:0.95rem;">You haven't added any enterprise accounts yet.</p>
                 </td>
             </tr>

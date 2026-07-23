@@ -6,28 +6,28 @@
     <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom: 2rem;">
         <div>
             <h1 class="page-title"><i class="bx bx-bar-chart-alt-2" style="color:var(--it-blue)"></i> IT Analytics & Reports</h1>
-            <p style="color: rgba(255,255,255,0.5); font-size: 0.9rem;">Performance metrics for the last {{ days }} days.</p>
+            <p style="color:var(--apple-text-secondary); font-size: 0.9rem;">Performance metrics for the last {{ days }} days.</p>
         </div>
         <div style="display:flex; gap: 10px;">
             <a href="{% url 'it-reports' %}?days=7" class="btn {% if days == 7 %}btn-primary{% else %}btn-secondary{% endif %}">7 Days</a>
             <a href="{% url 'it-reports' %}?days=30" class="btn {% if days == 30 %}btn-primary{% else %}btn-secondary{% endif %}">30 Days</a>
-            <a href="{% url 'it-helpdesk-list' %}" class="btn-primary" style="background: rgba(255,255,255,0.1); color: #fff;"><i class="bx bx-arrow-back"></i> Kanban Board</a>
+            <a href="{% url 'it-helpdesk-list' %}" class="btn-primary" style="background:var(--apple-border); color:var(--apple-text);"><i class="bx bx-arrow-back"></i> Kanban Board</a>
         </div>
     </div>
 
     <!-- Top Stats -->
     <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 2rem;">
         <div class="card" style="text-align:center;">
-            <div style="font-size: 2.5rem; font-weight: 700; color: #fff;">{{ total_tickets }}</div>
-            <div style="color: rgba(255,255,255,0.5); font-size: 0.9rem;">Total Tickets</div>
+            <div style="font-size: 2.5rem; font-weight: 700; color:var(--apple-text);">{{ total_tickets }}</div>
+            <div style="color:var(--apple-text-secondary); font-size: 0.9rem;">Total Tickets</div>
         </div>
         <div class="card" style="text-align:center;">
             <div style="font-size: 2.5rem; font-weight: 700; color: #3b82f6;">{{ overall_mttr }}h</div>
-            <div style="color: rgba(255,255,255,0.5); font-size: 0.9rem;">Average MTTR</div>
+            <div style="color:var(--apple-text-secondary); font-size: 0.9rem;">Average MTTR</div>
         </div>
         <div class="card" style="text-align:center;">
             <div style="font-size: 2.5rem; font-weight: 700; color: {% if compliance_rate >= 90 %}#10b981{% else %}#ef4444{% endif %};">{{ compliance_rate }}%</div>
-            <div style="color: rgba(255,255,255,0.5); font-size: 0.9rem;">SLA Compliance</div>
+            <div style="color:var(--apple-text-secondary); font-size: 0.9rem;">SLA Compliance</div>
         </div>
     </div>
 
@@ -48,7 +48,7 @@
         <div class="card-title">Agent Performance (Resolved Tickets)</div>
         <table style="width:100%; border-collapse:collapse; font-size:0.9rem;">
             <thead>
-                <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); text-align: left; color: rgba(255,255,255,0.5);">
+                <tr style="border-bottom:1px solid var(--apple-border); text-align: left; color:var(--apple-text-secondary);">
                     <th style="padding: 12px;">Agent Name</th>
                     <th style="padding: 12px;">Tickets Resolved</th>
                     <th style="padding: 12px;">Agent MTTR (Hours)</th>
@@ -56,13 +56,13 @@
             </thead>
             <tbody>
                 {% for agent in agent_data %}
-                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                    <td style="padding: 12px; color: #fff;">{{ agent.name }}</td>
+                <tr style="border-bottom:1px solid var(--apple-border);">
+                    <td style="padding: 12px; color:var(--apple-text);">{{ agent.name }}</td>
                     <td style="padding: 12px; color: #3b82f6; font-weight: 600;">{{ agent.resolved_count }}</td>
                     <td style="padding: 12px;">{{ agent.mttr }}</td>
                 </tr>
                 {% empty %}
-                <tr><td colspan="3" style="padding: 12px; text-align:center; color:rgba(255,255,255,0.3);">No resolved tickets in this period.</td></tr>
+                <tr><td colspan="3" style="padding: 12px; text-align:center; color:var(--apple-text-muted);">No resolved tickets in this period.</td></tr>
                 {% endfor %}
             </tbody>
         </table>

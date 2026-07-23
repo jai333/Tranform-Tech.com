@@ -3,7 +3,7 @@ asgiref
 sqlparse
 tzdata
 
-# Django channels for WebSockets
+# Django channels for WebSockets (Phase 2 — Initiative B)
 channels
 channels-redis
 daphne
@@ -22,7 +22,7 @@ service-identity
 # Image handling
 Pillow
 
-# Document parsing
+# Document parsing (resume AI — Initiative A)
 python-docx
 pypdf
 
@@ -37,3 +37,17 @@ django-debug-toolbar
 
 # Production ready
 gunicorn
+
+# ── Phase 2 additions ────────────────────────────────────────
+
+# Initiative A — AI Integration
+openai>=1.0.0
+
+# Initiative C — Background Workers
+celery>=5.0
+django-celery-beat
+django-celery-results
+
+# Initiative D — Billing & Stripe
+stripe
+dj-stripe

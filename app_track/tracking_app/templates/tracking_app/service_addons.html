@@ -23,23 +23,23 @@
             
             <!-- LEFT NAVIGATION -->
             <div style="display: flex; flex-direction: column; gap: 12px;">
-                <button class="addon-tab active card border-glow" onclick="showAddon('cybersec', this)" style="padding: 16px; text-align: left; background: rgba(0, 229, 255, 0.08); border-left: 4px solid var(--primary, #00E5FF); cursor: pointer; transition: all 0.3s ease; color: #FFFFFF; font-family: inherit; font-size: inherit; outline: none; backdrop-filter: blur(8px);">
-                    <div style="font-family: 'Fira Code', monospace; color: #FFFFFF; font-size: 1.1rem; margin-bottom: 4px;"><i class="fa-solid fa-shield-halved" style="color: #00E5FF; margin-right: 8px;"></i> Defense Matrix</div>
+                <button class="addon-tab active card border-glow" onclick="showAddon('cybersec', this)" style="padding: 16px; text-align: left; background: rgba(0, 229, 255, 0.08); border-left: 4px solid var(--primary, #00E5FF); cursor: pointer; transition: all 0.3s ease; color:var(--apple-text); font-family: inherit; font-size: inherit; outline: none; backdrop-filter: blur(8px);">
+                    <div style="font-family: 'Fira Code', monospace; color:var(--apple-text); font-size: 1.1rem; margin-bottom: 4px;"><i class="fa-solid fa-shield-halved" style="color: #00E5FF; margin-right: 8px;"></i> Defense Matrix</div>
                     <div style="font-family: 'Fira Code', monospace; font-size: 0.75rem; color: #888888;">Cybersecurity & Endpoint</div>
                 </button>
                 
-                <button class="addon-tab card border-glow" onclick="showAddon('automation', this)" style="padding: 16px; text-align: left; background: rgba(255, 255, 255, 0.04); border-left: 4px solid transparent; cursor: pointer; transition: all 0.3s ease; color: #FFFFFF; font-family: inherit; font-size: inherit; outline: none; backdrop-filter: blur(8px);">
-                    <div style="font-family: 'Fira Code', monospace; color: #FFFFFF; font-size: 1.1rem; margin-bottom: 4px;"><i class="fa-solid fa-network-wired" style="color: #00E5FF; margin-right: 8px;"></i> Autonomous Ops</div>
+                <button class="addon-tab card border-glow" onclick="showAddon('automation', this)" style="padding: 16px; text-align: left; background:var(--apple-bg); border-left: 4px solid transparent; cursor: pointer; transition: all 0.3s ease; color:var(--apple-text); font-family: inherit; font-size: inherit; outline: none; backdrop-filter: blur(8px);">
+                    <div style="font-family: 'Fira Code', monospace; color:var(--apple-text); font-size: 1.1rem; margin-bottom: 4px;"><i class="fa-solid fa-network-wired" style="color: #00E5FF; margin-right: 8px;"></i> Autonomous Ops</div>
                     <div style="font-family: 'Fira Code', monospace; font-size: 0.75rem; color: #888888;">Hyper-Automation & Data</div>
                 </button>
                 
-                <button class="addon-tab card border-glow" onclick="showAddon('appdev', this)" style="padding: 16px; text-align: left; background: rgba(255, 255, 255, 0.04); border-left: 4px solid transparent; cursor: pointer; transition: all 0.3s ease; color: #FFFFFF; font-family: inherit; font-size: inherit; outline: none; backdrop-filter: blur(8px);">
-                    <div style="font-family: 'Fira Code', monospace; color: #FFFFFF; font-size: 1.1rem; margin-bottom: 4px;"><i class="fa-solid fa-code" style="color: #00E5FF; margin-right: 8px;"></i> App Engineering</div>
+                <button class="addon-tab card border-glow" onclick="showAddon('appdev', this)" style="padding: 16px; text-align: left; background:var(--apple-bg); border-left: 4px solid transparent; cursor: pointer; transition: all 0.3s ease; color:var(--apple-text); font-family: inherit; font-size: inherit; outline: none; backdrop-filter: blur(8px);">
+                    <div style="font-family: 'Fira Code', monospace; color:var(--apple-text); font-size: 1.1rem; margin-bottom: 4px;"><i class="fa-solid fa-code" style="color: #00E5FF; margin-right: 8px;"></i> App Engineering</div>
                     <div style="font-family: 'Fira Code', monospace; font-size: 0.75rem; color: #888888;">Custom Software & API</div>
                 </button>
 
-                <button class="addon-tab card border-glow" onclick="showAddon('itops', this)" style="padding: 16px; text-align: left; background: rgba(255, 255, 255, 0.04); border-left: 4px solid transparent; cursor: pointer; transition: all 0.3s ease; color: #FFFFFF; font-family: inherit; font-size: inherit; outline: none; backdrop-filter: blur(8px);">
-                    <div style="font-family: 'Fira Code', monospace; color: #FFFFFF; font-size: 1.1rem; margin-bottom: 4px;"><i class="fa-solid fa-server" style="color: #00E5FF; margin-right: 8px;"></i> IT Ops Fleet</div>
+                <button class="addon-tab card border-glow" onclick="showAddon('itops', this)" style="padding: 16px; text-align: left; background:var(--apple-bg); border-left: 4px solid transparent; cursor: pointer; transition: all 0.3s ease; color:var(--apple-text); font-family: inherit; font-size: inherit; outline: none; backdrop-filter: blur(8px);">
+                    <div style="font-family: 'Fira Code', monospace; color:var(--apple-text); font-size: 1.1rem; margin-bottom: 4px;"><i class="fa-solid fa-server" style="color: #00E5FF; margin-right: 8px;"></i> IT Ops Fleet</div>
                     <div style="font-family: 'Fira Code', monospace; font-size: 0.75rem; color: #888888;">IT Management & DevOps</div>
                 </button>
             </div>
@@ -177,7 +177,7 @@
                             
                             <a href="#" class="btn mt-lg">REQUEST UPGRADE</a>
                         </div>
-                        <div style="border-radius: 8px; overflow: hidden; border: 1px solid var(--apple-border); background: #0c0d12; display: flex; align-items: center; justify-content: center; padding: 20px;">
+                        <div style="border-radius: 8px; overflow: hidden; border: 1px solid var(--apple-border); background:var(--apple-card-bg); display: flex; align-items: center; justify-content: center; padding: 20px;">
                             <div style="font-family: 'Fira Code', monospace; font-size: 0.8rem; color: #888; width: 100%;">
                                 <div style="color: #00E5FF; border-bottom: 1px solid #222; padding-bottom: 8px; margin-bottom: 12px; font-weight: bold;">[SYS_MONITOR — ACTIVE NODES]</div>
                                 <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
@@ -189,8 +189,8 @@
                                 <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
                                     <span>db-primary-replica</span> <span style="color: #34d399;">● SYNCED (0ms lag)</span>
                                 </div>
-                                <div style="color: #888; font-size: 0.75rem; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 4px; border: 1px solid #1e1e1e;">
-                                    <span style="color: #FFF;">root@sysops:~$</span> status --fleet<br>
+                                <div style="color: #888; font-size: 0.75rem; background:var(--apple-input-bg); padding: 10px; border-radius: 4px; border:1px solid var(--apple-border-subtle);">
+                                    <span style="color:var(--apple-text);">root@sysops:~$</span> status --fleet<br>
                                     <span style="color: #a78bfa;">[INFO]</span> Container orchestration scale: OK<br>
                                     <span style="color: #a78bfa;">[INFO]</span> Traffic threshold: 14.2k req/sec<br>
                                     <span style="color: #34d399;">[OK]</span> Backup snapshot created successfully.

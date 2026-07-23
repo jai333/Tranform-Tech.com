@@ -101,6 +101,7 @@ class Application(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_APPLIED)
     notes = models.TextField(blank=True, null=True)
     user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='applications', null=True)
+    tenant = models.ForeignKey('Tenant', on_delete=models.SET_NULL, null=True, blank=True, related_name='applications')
     
     def __str__(self):
         return f"{self.candidate} application for {self.job}"
@@ -155,6 +156,7 @@ class Interview(models.Model):
     feedback = models.TextField(blank=True, null=True)
     meeting_url = models.URLField(blank=True, null=True, help_text="URL for video conference meeting")
     user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='interviews', null=True)
+    tenant = models.ForeignKey('Tenant', on_delete=models.SET_NULL, null=True, blank=True, related_name='interviews')
 
     def __str__(self):
         return f"Interview for {self.candidate} for {self.job}"
@@ -173,12 +175,27 @@ class Interview(models.Model):
 # allows leveraging Django's auth system while adding custom fields if needed.
 class Tenant(models.Model):
     """Represents a company or organization using the platform (Multi-Tenancy)."""
+    PLAN_CHOICES = [
+        ('free', 'Free'),
+        ('starter', 'Starter — $49/mo'),
+        ('growth', 'Growth — $149/mo'),
+        ('enterprise', 'Enterprise — $399/mo'),
+    ]
+
     name = models.CharField(max_length=255)
     domain = models.CharField(max_length=255, unique=True, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    # Phase 2 — Billing
+    subscription_plan = models.CharField(max_length=32, choices=PLAN_CHOICES, default='enterprise')
+    stripe_customer_id = models.CharField(max_length=128, blank=True, null=True)
+
     def __str__(self):
         return self.name
+
+    @property
+    def is_paid(self):
+        return self.subscription_plan != 'free'
 
 # For this prototype, we'll primarily use the fields from AbstractUser 
 # that match the plan's User table.
@@ -632,6 +649,7 @@ class ITVendor(models.Model):
     contact_phone = models.CharField(max_length=50, null=True, blank=True)
     support_portal_url = models.URLField(null=True, blank=True)
     notes = models.TextField(null=True, blank=True)
+    tenant = models.ForeignKey('Tenant', on_delete=models.SET_NULL, null=True, blank=True, related_name='vendors')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -663,6 +681,7 @@ class ITAsset(models.Model):
     purchase_cost = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     purchase_date = models.DateField(null=True, blank=True)
     warranty_expiry = models.DateField(null=True, blank=True)
+    tenant = models.ForeignKey('Tenant', on_delete=models.SET_NULL, null=True, blank=True, related_name='assets')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -722,6 +741,7 @@ class ITTicket(models.Model):
     assigned_to = models.ForeignKey('User', on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_tickets')
     resolution_notes = models.TextField(blank=True, null=True)
     asset = models.ForeignKey(ITAsset, on_delete=models.SET_NULL, null=True, blank=True, related_name='tickets')
+    tenant = models.ForeignKey('Tenant', on_delete=models.SET_NULL, null=True, blank=True, related_name='tickets')
     device_asset_tag = models.CharField(max_length=100, null=True, blank=True)
     tags = models.CharField(max_length=255, blank=True, null=True)
     attachment = models.FileField(upload_to='it_tickets/', blank=True, null=True)
@@ -899,6 +919,7 @@ class ThreatIncident(models.Model):
     severity = models.CharField(max_length=20, choices=SEVERITY_CHOICES, default='medium')
     category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, default='other')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='open')
+    tenant = models.ForeignKey('Tenant', on_delete=models.SET_NULL, null=True, blank=True, related_name='incidents')
     reported_by = models.ForeignKey('User', on_delete=models.SET_NULL, null=True, blank=True, related_name='reported_incidents')
     assigned_to = models.ForeignKey('User', on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_incidents')
     detection_source = models.CharField(max_length=150, blank=True, null=True)

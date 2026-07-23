@@ -23,8 +23,8 @@
 .auto-subtitle { font-size: 0.8rem; color: var(--auto-cyan); font-family: 'Fira Code', monospace; margin-top: 4px; display: flex; align-items: center; gap: 6px; letter-spacing: 0.05em; }
 .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--auto-cyan); box-shadow: 0 0 8px var(--auto-cyan); animation: pulse-cyan 2s infinite; }
 @keyframes pulse-cyan { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.2); } 100% { opacity: 1; transform: scale(1); } }
-.btn-new { background: linear-gradient(135deg, var(--auto-cyan), #0088cc); color: #fff; border: none; border-radius: 10px; padding: 12px 24px; font-size: 0.95rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: opacity 0.2s, transform 0.2s; box-shadow: 0 4px 15px rgba(0,229,255,0.3); text-decoration: none; }
-.btn-new:hover { opacity: 0.9; transform: translateY(-1px); color: #fff; }
+.btn-new { background: linear-gradient(135deg, var(--auto-cyan), #0088cc); color:var(--apple-text); border: none; border-radius: 10px; padding: 12px 24px; font-size: 0.95rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: opacity 0.2s, transform 0.2s; box-shadow: 0 4px 15px rgba(0,229,255,0.3); text-decoration: none; }
+.btn-new:hover { opacity: 0.9; transform: translateY(-1px); color:var(--apple-text); }
 
 /* Stats Row */
 .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem; margin-bottom: 2.5rem; }
@@ -72,7 +72,7 @@
 .active-dot.on { background: var(--auto-green); box-shadow: 0 0 5px var(--auto-green); }
 .active-dot.off { background: var(--auto-gray); }
 .btn-run { background: rgba(0,229,255,0.1); color: var(--auto-cyan); border: 1px solid rgba(0,229,255,0.3); border-radius: 8px; padding: 6px 14px; font-size: 0.8rem; cursor: pointer; font-family: inherit; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s; }
-.btn-run:hover { background: var(--auto-cyan); color: #fff; }
+.btn-run:hover { background: var(--auto-cyan); color:var(--apple-text); }
 
 /* Log Panel */
 .log-panel { background: var(--apple-card-bg); border: 1px solid var(--apple-border); border-radius: 16px; padding: 1.5rem; }
@@ -102,13 +102,13 @@
 /* Modal tweaks */
 .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; z-index: 1000; opacity: 0; visibility: hidden; transition: all 0.3s; }
 .modal-overlay.active { opacity: 1; visibility: visible; }
-.modal-box { background: #111; border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 2rem; width: 100%; max-width: 600px; transform: translateY(20px); transition: all 0.3s; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+.modal-box { background:var(--apple-card-bg); border:1px solid var(--apple-border); border-radius: 16px; padding: 2rem; width: 100%; max-width: 600px; transform: translateY(20px); transition: all 0.3s; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
 .modal-overlay.active .modal-box { transform: translateY(0); }
-.form-group label { display: block; font-size: 0.75rem; color: rgba(255,255,255,0.5); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
-.form-group input, .form-group select, .form-group textarea { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 10px 14px; color: #fff; font-size: 0.9rem; margin-bottom: 1rem; outline: none; transition: border-color 0.2s; font-family: inherit; }
+.form-group label { display: block; font-size: 0.75rem; color:var(--apple-text-secondary); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+.form-group input, .form-group select, .form-group textarea { width: 100%; background:var(--apple-row-hover); border:1px solid var(--apple-border); border-radius: 8px; padding: 10px 14px; color:var(--apple-text); font-size: 0.9rem; margin-bottom: 1rem; outline: none; transition: border-color 0.2s; font-family: inherit; }
 .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--auto-cyan); }
 .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 1.5rem; }
-.btn-cancel { background: transparent; border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 8px; padding: 10px 20px; cursor: pointer; }
+.btn-cancel { background: transparent; border:1px solid var(--apple-border); color:var(--apple-text); border-radius: 8px; padding: 10px 20px; cursor: pointer; }
 .btn-submit { background: var(--auto-cyan); color: #000; border: none; border-radius: 8px; padding: 10px 20px; font-weight: 600; cursor: pointer; }
 </style>
 
@@ -217,7 +217,7 @@
                     </div>
                 </div>
                 {% empty %}
-                <div style="grid-column:1/-1; padding:3rem; text-align:center; color:rgba(255,255,255,0.3); border:1px dashed rgba(255,255,255,0.1); border-radius:16px;">
+                <div style="grid-column:1/-1; padding:3rem; text-align:center; color:var(--apple-text-muted); border:1px dashed rgba(255,255,255,0.1); border-radius:16px;">
                     <i class="bx bx-bot" style="font-size:3rem; margin-bottom:1rem; opacity:0.5;"></i>
                     <p>No automations configured yet.</p>
                 </div>
@@ -245,14 +245,14 @@
                                     </div>
                                 </div>
                             </div>
-                            <i class="bx bx-chevron-down" style="color:rgba(255,255,255,0.3)"></i>
+                            <i class="bx bx-chevron-down" style="color:var(--apple-text-muted)"></i>
                         </div>
                         <div class="log-body">
                             <div class="log-output {% if run.status == 'failed' %}log-output-err{% endif %}">{{ run.output_log|default:"No output captured." }}</div>
                         </div>
                     </div>
                     {% empty %}
-                    <div style="text-align:center; padding:2rem; color:rgba(255,255,255,0.2); font-size:0.8rem;">
+                    <div style="text-align:center; padding:2rem; color:var(--apple-text-muted); font-size:0.8rem;">
                         No recent activity.
                     </div>
                     {% endfor %}
@@ -265,7 +265,7 @@
 <!-- Modal -->
 <div class="modal-overlay" id="newReportModal">
     <div class="modal-box">
-        <h3 style="margin-bottom:1.5rem; color:#fff; display:flex; align-items:center; gap:8px;"><i class="bx bx-plus-circle" style="color:var(--auto-cyan)"></i> Create Automation</h3>
+        <h3 style="margin-bottom:1.5rem; color:var(--apple-text); display:flex; align-items:center; gap:8px;"><i class="bx bx-plus-circle" style="color:var(--auto-cyan)"></i> Create Automation</h3>
         <form method="POST" action="{% url 'scheduled-report-create' %}">
             {% csrf_token %}
             <div class="form-group">
@@ -310,7 +310,7 @@
             </div>
             <div style="display:flex; align-items:center; gap:8px; margin-top:1rem;">
                 <input type="checkbox" name="is_active" id="isActive" checked style="accent-color:var(--auto-cyan); width:16px; height:16px;">
-                <label for="isActive" style="margin:0; color:#fff; cursor:pointer;">Enable immediately</label>
+                <label for="isActive" style="margin:0; color:var(--apple-text); cursor:pointer;">Enable immediately</label>
             </div>
             <div class="modal-actions">
                 <button type="button" class="btn-cancel" onclick="document.getElementById('newReportModal').classList.remove('active')">Cancel</button>

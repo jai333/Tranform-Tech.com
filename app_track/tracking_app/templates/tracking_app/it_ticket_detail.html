@@ -5,7 +5,7 @@
 <style>
 :root { --it-blue: #00a6fb; --it-blue-glow: rgba(0,166,251,0.18); }
 .detail-page { padding: 2rem; max-width: 1100px; margin: 0 auto; }
-.back-link { display: inline-flex; align-items: center; gap: 6px; color: rgba(255,255,255,0.5); font-size: 0.8rem; text-decoration: none; margin-bottom: 1.5rem; transition: color 0.2s; }
+.back-link { display: inline-flex; align-items: center; gap: 6px; color:var(--apple-text-secondary); font-size: 0.8rem; text-decoration: none; margin-bottom: 1.5rem; transition: color 0.2s; }
 .back-link:hover { color: var(--it-blue); }
 
 /* Header */
@@ -58,7 +58,7 @@
 .thread { display: flex; flex-direction: column; gap: 14px; margin-bottom: 1.25rem; }
 .comment-bubble { display: flex; gap: 12px; }
 .comment-bubble.internal .bubble-body { border-left: 3px solid rgba(168,85,247,0.5); background: rgba(168,85,247,0.04); }
-.avatar { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, var(--it-blue), #0077cc); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; color: #fff; flex-shrink: 0; }
+.avatar { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, var(--it-blue), #0077cc); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; color:var(--apple-text); flex-shrink: 0; }
 .bubble-body { flex: 1; background: var(--apple-input-bg); border: 1px solid var(--apple-border); border-radius: 10px; padding: 12px 14px; }
 .bubble-meta { font-size: 0.72rem; color: var(--apple-text-muted); margin-bottom: 6px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .bubble-meta strong { color: var(--apple-text); }
@@ -70,7 +70,7 @@
 .comment-actions { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; flex-wrap: wrap; gap: 8px; }
 .internal-toggle { display: flex; align-items: center; gap: 6px; font-size: 0.78rem; color: var(--apple-text-secondary); cursor: pointer; }
 .internal-toggle input { accent-color: #a855f7; }
-.btn-comment { background: linear-gradient(135deg, var(--it-blue), #0077cc); color: #fff; border: none; border-radius: 8px; padding: 8px 18px; font-size: 0.875rem; font-weight: 600; cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 6px; transition: opacity 0.2s; }
+.btn-comment { background: linear-gradient(135deg, var(--it-blue), #0077cc); color:var(--apple-text); border: none; border-radius: 8px; padding: 8px 18px; font-size: 0.875rem; font-weight: 600; cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 6px; transition: opacity 0.2s; }
 .btn-comment:hover { opacity: 0.88; }
 
 /* Right panel */
@@ -85,7 +85,7 @@
 .update-form select option { background: var(--apple-card-bg); color: var(--apple-text); }
 .update-form textarea { width: 100%; background: var(--apple-input-bg); border: 1px solid var(--apple-border); border-radius: 8px; padding: 9px 12px; color: var(--apple-text); font-size: 0.875rem; outline: none; font-family: inherit; resize: vertical; }
 .update-form textarea:focus { border-color: var(--it-blue); }
-.btn-update { margin-top: 1.25rem; width: 100%; background: linear-gradient(135deg, var(--it-blue), #0077cc); color: #fff; border: none; border-radius: 8px; padding: 11px; font-weight: 600; cursor: pointer; font-family: inherit; font-size: 0.875rem; transition: opacity 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px; }
+.btn-update { margin-top: 1.25rem; width: 100%; background: linear-gradient(135deg, var(--it-blue), #0077cc); color:var(--apple-text); border: none; border-radius: 8px; padding: 11px; font-weight: 600; cursor: pointer; font-family: inherit; font-size: 0.875rem; transition: opacity 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px; }
 .btn-update:hover { opacity: 0.88; }
 .resolution-required-hint { font-size: 0.72rem; color: #f87171; display: none; margin-top: 6px; }
 
@@ -134,7 +134,7 @@
                 <span class="tag-pill">{{ tag|cut:"," }}</span>
                 {% endfor %}
             {% endif %}
-            <span class="badge" style="background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.5);border-color:rgba(255,255,255,0.1)"><i class="bx bx-chat"></i>{{ ticket.get_comment_count }} comments</span>
+            <span class="badge" style="background:var(--apple-row-hover);color:var(--apple-text-secondary);border-color:var(--apple-text-muted)"><i class="bx bx-chat"></i>{{ ticket.get_comment_count }} comments</span>
         </div>
     </div>
 
@@ -152,7 +152,7 @@
                  style="width: 100%; background: {% if ticket.is_sla_breached %}#ef4444{% elif ticket.sla_remaining_minutes < 120 %}#f59e0b{% else %}#10b981{% endif %}">
             </div>
         </div>
-        <div style="font-size:0.75rem; color:rgba(255,255,255,0.4);">
+        <div style="font-size:0.75rem; color:var(--apple-text-secondary);">
             {% if ticket.is_sla_breached %}
                 <span style="color:#ef4444"><i class="bx bx-error"></i> Overdue</span>
             {% else %}
@@ -213,7 +213,7 @@
                     {% endfor %}
                 </div>
                 {% else %}
-                <div style="text-align:center; padding: 1.5rem 0; color: rgba(255,255,255,0.25); font-size: 0.85rem;">
+                <div style="text-align:center; padding: 1.5rem 0; color:var(--apple-text-muted); font-size: 0.85rem;">
                     <i class="bx bx-chat" style="font-size:1.5rem; display:block; margin-bottom:6px;"></i>
                     No comments yet. Be the first to respond.
                 </div>
@@ -247,9 +247,9 @@
                 {% if user.is_it_agent and audit_logs %}
                 <div class="card" style="margin-top: 2rem; border-top: 3px solid #8b5cf6;">
                     <div class="card-title"><i class="bx bx-history"></i> System Audit Log</div>
-                    <table style="width:100%; border-collapse:collapse; font-size:0.8rem; color: rgba(255,255,255,0.6);">
+                    <table style="width:100%; border-collapse:collapse; font-size:0.8rem; color:var(--apple-text-muted);">
                         <thead>
-                            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); text-align: left;">
+                            <tr style="border-bottom:1px solid var(--apple-border); text-align: left;">
                                 <th style="padding: 8px;">Time</th>
                                 <th style="padding: 8px;">Actor</th>
                                 <th style="padding: 8px;">Action</th>
@@ -258,15 +258,15 @@
                         </thead>
                         <tbody>
                             {% for log in audit_logs %}
-                            <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <tr style="border-bottom:1px solid var(--apple-border);">
                                 <td style="padding: 8px;">{{ log.timestamp|date:"M d, H:i:s" }}</td>
                                 <td style="padding: 8px;">{{ log.actor.username|default:"System" }}</td>
                                 <td style="padding: 8px;">Updated {{ log.field_changed }}</td>
                                 <td style="padding: 8px;">
                                     {% if log.old_value %}
-                                        <span style="text-decoration:line-through; color:rgba(255,255,255,0.4)">{{ log.old_value }}</span> &rarr;
+                                        <span style="text-decoration:line-through; color:var(--apple-text-secondary)">{{ log.old_value }}</span> &rarr;
                                     {% endif %}
-                                    <span style="color: #fff">{{ log.new_value }}</span>
+                                    <span style="color:var(--apple-text)">{{ log.new_value }}</span>
                                 </td>
                             </tr>
                             {% endfor %}
@@ -402,15 +402,15 @@
                     <span style="color: #10b981; font-weight:600;">Total: {{ total_time }} min</span>
                 </div>
                 
-                <div class="worklogs-list" style="max-height: 150px; overflow-y: auto; margin-bottom: 1rem; font-size: 0.8rem; color: rgba(255,255,255,0.6);">
+                <div class="worklogs-list" style="max-height: 150px; overflow-y: auto; margin-bottom: 1rem; font-size: 0.8rem; color:var(--apple-text-muted);">
                     {% for log in work_logs %}
-                    <div style="border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 5px; margin-bottom: 5px;">
+                    <div style="border-bottom:1px solid var(--apple-border); padding-bottom: 5px; margin-bottom: 5px;">
                         <div style="display:flex; justify-content:space-between;">
-                            <strong style="color: #fff">{{ log.agent.username }}</strong>
+                            <strong style="color:var(--apple-text)">{{ log.agent.username }}</strong>
                             <span style="color: #3b82f6">{{ log.time_spent_minutes }} min</span>
                         </div>
                         <div style="font-size: 0.75rem;">{{ log.description|default:"No description" }}</div>
-                        <div style="font-size: 0.7rem; color: rgba(255,255,255,0.3);">{{ log.date }}</div>
+                        <div style="font-size: 0.7rem; color:var(--apple-text-muted);">{{ log.date }}</div>
                     </div>
                     {% empty %}
                     <div style="text-align:center; padding: 10px;">No time logged yet.</div>

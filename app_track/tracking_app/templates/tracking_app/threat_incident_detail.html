@@ -50,7 +50,7 @@
 .form-group input, .form-group select, .form-group textarea { width: 100%; background: var(--apple-input-bg); border: 1px solid var(--apple-border); border-radius: 8px; padding: 10px 14px; color: var(--apple-text); font-size: 0.9rem; outline: none; transition: border-color 0.2s; font-family: inherit; }
 .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--cyber-red); }
 .btn-save { background: rgba(255,59,48,0.1); color: var(--cyber-red); border: 1px solid rgba(255,59,48,0.3); border-radius: 8px; padding: 10px 20px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s; width: 100%; justify-content: center; }
-.btn-save:hover { background: var(--cyber-red); color: #fff; }
+.btn-save:hover { background: var(--cyber-red); color:var(--apple-text); }
 
 .ioc-box { background: var(--apple-input-bg); border: 1px dashed var(--apple-border); padding: 12px; border-radius: 8px; font-family: 'Fira Code', monospace; font-size: 0.8rem; color: var(--cyber-orange); white-space: pre-wrap; word-break: break-all; }
 .desc-box { line-height: 1.6; color: var(--apple-text); font-size: 0.95rem; }
@@ -122,14 +122,14 @@
                         <div class="tl-dot red"></div>
                         <div class="tl-time">{{ incident.detected_at|date:"M d, Y H:i" }}</div>
                         <div class="tl-title">Threat Detected</div>
-                        <div style="font-size:0.75rem;color:rgba(255,255,255,0.5);margin-top:4px;">Initial alert triggered and logged by {{ incident.reported_by.get_full_name }}.</div>
+                        <div style="font-size:0.75rem;color:var(--apple-text-secondary);margin-top:4px;">Initial alert triggered and logged by {{ incident.reported_by.get_full_name }}.</div>
                     </div>
                     {% if incident.assigned_to %}
                     <div class="tl-item">
                         <div class="tl-dot"></div>
                         <div class="tl-time">Shortly after</div>
                         <div class="tl-title">Investigation Started</div>
-                        <div style="font-size:0.75rem;color:rgba(255,255,255,0.5);margin-top:4px;">Assigned to {{ incident.assigned_to.get_full_name }}.</div>
+                        <div style="font-size:0.75rem;color:var(--apple-text-secondary);margin-top:4px;">Assigned to {{ incident.assigned_to.get_full_name }}.</div>
                     </div>
                     {% endif %}
                     {% if incident.containment_deadline %}
@@ -137,7 +137,7 @@
                         <div class="tl-dot {% if incident.is_deadline_breached %}red{% else %}green{% endif %}"></div>
                         <div class="tl-time">{{ incident.containment_deadline|date:"M d, Y H:i" }}</div>
                         <div class="tl-title">Containment Deadline</div>
-                        <div style="font-size:0.75rem;color:rgba(255,255,255,0.5);margin-top:4px;">Required containment SLA based on {{ incident.severity }} severity.</div>
+                        <div style="font-size:0.75rem;color:var(--apple-text-secondary);margin-top:4px;">Required containment SLA based on {{ incident.severity }} severity.</div>
                     </div>
                     {% endif %}
                     {% if incident.resolved_at %}
@@ -145,7 +145,7 @@
                         <div class="tl-dot green"></div>
                         <div class="tl-time">{{ incident.resolved_at|date:"M d, Y H:i" }}</div>
                         <div class="tl-title">Incident Resolved</div>
-                        <div style="font-size:0.75rem;color:rgba(255,255,255,0.5);margin-top:4px;">Status marked as resolved/contained.</div>
+                        <div style="font-size:0.75rem;color:var(--apple-text-secondary);margin-top:4px;">Status marked as resolved/contained.</div>
                     </div>
                     {% endif %}
                 </div>

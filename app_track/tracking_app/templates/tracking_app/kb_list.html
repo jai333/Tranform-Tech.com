@@ -7,7 +7,7 @@
             <p class="text-muted">Find answers to common questions and self-service guides</p>
             
             <form action="{% url 'kb-article-list' %}" method="GET" class="d-flex justify-content-center mt-4 mb-3">
-                <input type="text" name="q" value="{{ search_query|default:'' }}" class="form-control me-2 w-50" placeholder="Search..." style="background: rgba(0,0,0,0.2); border: 1px solid var(--apple-border); color: white; border-radius: 8px; padding: 12px 20px;">
+                <input type="text" name="q" value="{{ search_query|default:'' }}" class="form-control me-2 w-50" placeholder="Search..." style="background:var(--apple-input-bg); border: 1px solid var(--apple-border); color: white; border-radius: 8px; padding: 12px 20px;">
                 <button type="submit" class="btn btn-primary" style="border-radius: 8px;">Search</button>
             </form>
         </div>
@@ -18,11 +18,11 @@
         <div class="col-lg-3 mb-4">
             <h5 class="text-muted fw-bold mb-3">Categories</h5>
             <div class="list-group" style="border-radius: 12px;">
-                <a href="{% url 'kb-article-list' %}" class="list-group-item list-group-item-action {% if not current_category %}active{% endif %}" style="background: rgba(255,255,255,0.05); color: var(--apple-text); border: 1px solid var(--apple-border);">
+                <a href="{% url 'kb-article-list' %}" class="list-group-item list-group-item-action {% if not current_category %}active{% endif %}" style="background:var(--apple-row-hover); color: var(--apple-text); border: 1px solid var(--apple-border);">
                     All Articles
                 </a>
                 {% for cat in categories %}
-                <a href="{% url 'kb-article-list' %}?category={{ cat }}" class="list-group-item list-group-item-action {% if current_category == cat %}active{% endif %}" style="background: rgba(255,255,255,0.05); color: var(--apple-text); border: 1px solid var(--apple-border); border-top: none;">
+                <a href="{% url 'kb-article-list' %}?category={{ cat }}" class="list-group-item list-group-item-action {% if current_category == cat %}active{% endif %}" style="background:var(--apple-row-hover); color: var(--apple-text); border: 1px solid var(--apple-border); border-top: none;">
                     {{ cat|title }}
                 </a>
                 {% endfor %}
@@ -46,7 +46,7 @@
             <div class="row">
                 {% for article in articles %}
                 <div class="col-md-6 mb-4">
-                    <div class="card shadow-sm h-100" style="background: rgba(255,255,255,0.05); border: 1px solid var(--apple-border); border-radius: 12px; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
+                    <div class="card shadow-sm h-100" style="background:var(--apple-row-hover); border: 1px solid var(--apple-border); border-radius: 12px; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
                         <div class="card-body p-4 d-flex flex-column">
                             <span class="badge bg-secondary mb-3 align-self-start">{{ article.get_category_display }}</span>
                             <h5 class="card-title text-white mb-3">

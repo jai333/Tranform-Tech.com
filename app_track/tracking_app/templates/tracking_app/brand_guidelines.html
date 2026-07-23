@@ -9,7 +9,7 @@
 .brand-section { margin: 2rem 0; }
 .brand-logo { display: flex; gap: 1rem; align-items: center; }
 .brand-logo img { height: 64px; }
-.brand-usage { background: rgba(255,255,255,0.02); padding: 1rem; border-radius: 12px; }
+.brand-usage { background:var(--apple-bg); padding: 1rem; border-radius: 12px; }
 .example-button { margin-top: 1rem; }
 </style>
 {% endblock %}
@@ -24,7 +24,7 @@
     <section class="brand-section">
       <h2>Logo</h2>
       <div class="brand-logo">
-        <div style="font-family: 'Fira Code', monospace; font-size: 2rem; color: #FFF;">
+        <div style="font-family: 'Fira Code', monospace; font-size: 2rem; color:var(--apple-text);">
           <i class="fas fa-network-wired" style="color: #00E5FF;"></i> TRANSFORM.IO
         </div>
         <div>
@@ -92,7 +92,7 @@
       <div class="brand-usage">
         <p style="color:var(--apple-text); font-weight:600;">Card with accent</p>
         <div style="background:var(--apple-card-bg); padding:1rem; border-radius:12px; margin-top:0.5rem; display:flex; align-items:center; gap:1rem;">
-          <div style="font-family: 'Fira Code', monospace; font-size: 1.5rem; color: #FFF;">
+          <div style="font-family: 'Fira Code', monospace; font-size: 1.5rem; color:var(--apple-text);">
              <i class="fas fa-network-wired" style="color: #00E5FF;"></i> TRANSFORM.IO
           </div>
           <div>

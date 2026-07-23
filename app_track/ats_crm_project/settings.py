@@ -12,6 +12,9 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -42,6 +45,10 @@ INSTALLED_APPS = [
     'tracking_app',
     'video',
     'channels',
+    # Phase 2 — Celery + Billing
+    'django_celery_beat',
+    'django_celery_results',
+    'djstripe',
 ]
 
 MIDDLEWARE = [
@@ -52,6 +59,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # Phase 2 — SaaS Feature Gating
+    'tracking_app.middleware.FeatureGatingMiddleware',
 ]
 
 ROOT_URLCONF = 'ats_crm_project.urls'
@@ -73,111 +82,137 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'ats_crm_project.wsgi.application'
+ASGI_APPLICATION = 'ats_crm_project.asgi.application'
 
-
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
+# ── Database ─────────────────────────────────────────────────
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
-        'CONN_MAX_AGE': 600,  # Connection pooling for better performance
+        'CONN_MAX_AGE': 600,
     }
 }
 
-
-# Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
-
+# ── Password Validation ───────────────────────────────────────
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-
-# Internationalization
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
-
+# ── Internationalisation ──────────────────────────────────────
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_TZ = True
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
-
+# ── Static / Media ────────────────────────────────────────────
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-
-# Media files (User uploads)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'tracking_app.User'
-
-# Authentication settings
 LOGIN_REDIRECT_URL = 'home'
 LOGIN_URL = 'login'
 
-# CSRF Trusted Origins for ngrok
-CSRF_TRUSTED_ORIGINS = ['https://26464c660ea8.ngrok-free.app', 'https://preview-jaisu-8000.loca.lt', 'https://campsite-december-flatly.ngrok-free.dev']
+ALLOWED_HOSTS = ['*']
+CSRF_TRUSTED_ORIGINS = [
+    'https://26464c660ea8.ngrok-free.app',
+    'https://preview-jaisu-8000.loca.lt',
+    'https://campsite-december-flatly.ngrok-free.dev',
+]
 
-# Database connection pooling for better performance
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-        'CONN_MAX_AGE': 600,  # Connection pooling
-    }
-}
+# ── WebSocket Channel Layers ──────────────────────────────────
+# Uses Redis when REDIS_URL is set, otherwise InMemory (dev fallback)
+_REDIS_URL = os.getenv('REDIS_URL', 'redis://127.0.0.1:6379/0')
+_USE_REDIS = False
+try:
+    import redis as _redis_module
+    _r = _redis_module.from_url(_REDIS_URL, socket_connect_timeout=1)
+    _r.ping()
+    _USE_REDIS = True
+except Exception:
+    pass  # Redis not available — use InMemory
 
-# Channels settings
-CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels.layers.InMemoryChannelLayer',
-    }
-}
-
-# Development convenience: allow running without Redis
-if DEBUG and os.getenv('USE_INMEM_CHANNELS', 'false').lower() == 'true':
+if _USE_REDIS:
     CHANNEL_LAYERS = {
         'default': {
-            'BACKEND': 'channels.layers.InMemoryChannelLayer',
+            'BACKEND': 'channels_redis.core.RedisChannelLayer',
+            'CONFIG': {'hosts': [_REDIS_URL]},
         }
     }
+else:
+    CHANNEL_LAYERS = {
+        'default': {'BACKEND': 'channels.layers.InMemoryChannelLayer'}
+    }
 
-
-ASGI_APPLICATION = 'ats_crm_project.asgi.application'
-
-
-# ── Email Settings (Gmail SMTP Configuration) ─────────────────
+# ── Email (Gmail SMTP) ────────────────────────────────────────
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'jaisukhwal41@gmail.com'
-EMAIL_HOST_PASSWORD = 'zgihpkfvtwliixrg' # App password
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', 'jaisukhwal41@gmail.com')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', 'zgihpkfvtwliixrg')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+# ── AI / OpenAI ───────────────────────────────────────────────
+# Set OPENAI_API_KEY in your environment (never hardcode keys)
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY', '')
+
+# ── Celery Configuration ──────────────────────────────────────
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', _REDIS_URL)
+CELERY_RESULT_BACKEND = 'django-db'           # via django-celery-results
+CELERY_CACHE_BACKEND = 'default'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = TIME_ZONE
+CELERY_TASK_TRACK_STARTED = True
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+
+# ── Celery Beat Schedule (periodic tasks) ────────────────────
+from celery.schedules import crontab
+CELERY_BEAT_SCHEDULE = {
+    'scan-sla-breaches': {
+        'task': 'tracking_app.tasks.scan_sla_breaches',
+        'schedule': 900.0,  # every 15 minutes
+    },
+    'run-sales-alerts': {
+        'task': 'tracking_app.tasks.run_sales_alerts',
+        'schedule': 3600.0,  # every hour
+    },
+    'sync-imap-inbox': {
+        'task': 'tracking_app.tasks.sync_imap_inbox',
+        'schedule': 600.0,  # every 10 minutes
+    },
+    'send-weekly-digest': {
+        'task': 'tracking_app.tasks.send_weekly_digest',
+        'schedule': crontab(hour=8, minute=0, day_of_week='monday'),
+    },
+    'cleanup-old-data': {
+        'task': 'tracking_app.tasks.cleanup_old_data',
+        'schedule': crontab(hour=0, minute=30),  # daily at 00:30 UTC
+    },
+}
+
+# ── Stripe Configuration ──────────────────────────────────────
+STRIPE_LIVE_MODE = False  # Set True in production
+STRIPE_PUBLISHABLE_KEY = os.getenv('STRIPE_PUBLISHABLE_KEY', '')
+STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY', '')
+STRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET', '')
+
+# Stripe Price IDs — create these in your Stripe dashboard
+STRIPE_PRICE_STARTER = os.getenv('STRIPE_PRICE_STARTER', '')
+STRIPE_PRICE_GROWTH = os.getenv('STRIPE_PRICE_GROWTH', '')
+STRIPE_PRICE_ENTERPRISE = os.getenv('STRIPE_PRICE_ENTERPRISE', '')
+
+DJSTRIPE_WEBHOOK_SECRET = STRIPE_WEBHOOK_SECRET
+DJSTRIPE_FOREIGN_KEY_TO_FIELD = 'id'
+
 
 
 

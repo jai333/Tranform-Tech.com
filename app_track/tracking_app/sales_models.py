@@ -304,6 +304,7 @@ class Deal(models.Model):
     ai_risk_flag = models.CharField(max_length=200, blank=True, null=True, help_text="AI-detected risk")
 
     last_activity_at = models.DateTimeField(null=True, blank=True)
+    tenant = models.ForeignKey('tracking_app.Tenant', on_delete=models.SET_NULL, null=True, blank=True, related_name='deals')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -543,6 +544,7 @@ class AccountContact(models.Model):
     linkedin   = models.URLField(blank=True, null=True)
     is_primary = models.BooleanField(default=False)
     notes      = models.TextField(blank=True)
+    tenant     = models.ForeignKey('tracking_app.Tenant', on_delete=models.SET_NULL, null=True, blank=True, related_name='account_contacts')
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -572,6 +574,7 @@ class AccountActivity(models.Model):
     created_at    = models.DateTimeField(auto_now_add=True)
     due_date      = models.DateField(null=True, blank=True)
     completed     = models.BooleanField(default=False)
+    tenant        = models.ForeignKey('tracking_app.Tenant', on_delete=models.SET_NULL, null=True, blank=True, related_name='account_activities_log')
 
     def __str__(self):
         return f"{self.get_activity_type_display()} – {self.subject}"

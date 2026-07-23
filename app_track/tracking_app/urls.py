@@ -4,6 +4,7 @@ from django.contrib.auth import views as auth_views
 from . import views
 from . import ai_views
 from . import sales_views
+from . import billing_views
 from .sales_urls import sales_urlpatterns
 
 urlpatterns = [
@@ -137,6 +138,9 @@ urlpatterns = [
     path('accounts/', views.account_list, name='account-list'),
     path('accounts/new/', views.account_create, name='account-create'),
     path('accounts/<int:pk>/', views.account_detail, name='account-detail'),
+    
+    # ── Company Data Management ──────────────────────────────────────────────
+    path('company/data/', views.company_data_manager, name='company-data-manager'),
 
     # ── Dev Project Request Portal ───────────────────────────────────────────
     path('services/dev-request/', views.dev_project_request, name='dev-project-request'),
@@ -153,15 +157,27 @@ urlpatterns = [
     path('candidates/bulk-upload/', views.bulk_resume_upload, name='bulk-resume-upload'),
     path('qualify/', views.lead_qualification_form, name='lead-qualification-form'),
     
-    # ── AI Command Bar ───────────────────────────────────────────────────────
+    # ── AI Command Bar (Phase 2 — enhanced with AI) ──────────────────────────
     path('api/search/', views.api_global_search, name='api-global-search'),
-    
+    path('api/ai/search/', views.api_global_search, name='api-ai-search'),
+
     # ── Executive Expansion ──────────────────────────────────────────────────
     path('executive-dashboard/', views.executive_dashboard, name='executive-dashboard'),
     path('automation/dashboard/', views.automation_dashboard, name='automation-dashboard'),
-    
+
     # ── Unified Inbox ────────────────────────────────────────────────────────
     path('inbox/', sales_views.unified_inbox, name='unified-inbox'),
-    
+
+    # ── Company Data Manager ─────────────────────────────────────────────────
+    path('company/data/', views.company_data_manager, name='company-data-manager'),
+
+    # ── Billing & Stripe (Phase 2 — Initiative D) ────────────────────────────
+    path('billing/', billing_views.billing_page, name='billing-page'),
+    path('billing/checkout/', billing_views.create_checkout_session, name='billing-checkout'),
+    path('billing/checkout/<str:plan_key>/', billing_views.create_checkout_session, name='billing-checkout-plan'),
+    path('billing/success/', billing_views.billing_success, name='billing-success'),
+    path('billing/portal/', billing_views.billing_portal, name='billing-portal'),
+    path('billing/webhook/', billing_views.stripe_webhook, name='stripe-webhook'),
+
     *sales_urlpatterns,
 ]

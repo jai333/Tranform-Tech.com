@@ -8,40 +8,40 @@
         <p style="color:var(--apple-text-muted); font-size:1.1rem; margin:0;">Cross-module performance and system health.</p>
     </div>
     <div style="display:flex; gap:12px;">
-        <button class="btn btn-primary" style="background:var(--cyber-bg); border:1px solid rgba(255,255,255,0.1); color:#fff; border-radius:12px; padding:10px 20px;"><i class="bx bx-download"></i> Export PDF</button>
+        <button class="btn btn-primary" style="background:var(--cyber-bg); border:1px solid var(--apple-border); color:var(--apple-text); border-radius:12px; padding:10px 20px;"><i class="bx bx-download"></i> Export PDF</button>
     </div>
 </div>
 
 <div class="metrics-grid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:1.5rem; margin-bottom:2.5rem;">
     <!-- Revenue -->
-    <div class="metric-card" style="background:var(--apple-card-bg); border:1px solid rgba(255,255,255,0.05); border-radius:20px; padding:1.5rem; position:relative; overflow:hidden;">
+    <div class="metric-card" style="background:var(--apple-card-bg); border:1px solid var(--apple-border); border-radius:20px; padding:1.5rem; position:relative; overflow:hidden;">
         <div style="position:absolute; top:-20px; right:-20px; width:100px; height:100px; background:radial-gradient(circle, rgba(50,215,75,0.2) 0%, transparent 70%);"></div>
-        <div style="color:rgba(255,255,255,0.5); font-size:0.85rem; font-weight:600; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px;">Total Revenue (YTD)</div>
-        <div style="font-size:2.5rem; font-weight:700; color:#fff;">${{ total_revenue|floatformat:"0" }}</div>
+        <div style="color:var(--apple-text-secondary); font-size:0.85rem; font-weight:600; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px;">Total Revenue (YTD)</div>
+        <div style="font-size:2.5rem; font-weight:700; color:var(--apple-text);">${{ total_revenue|floatformat:"0" }}</div>
         <div style="color:#32d74b; font-size:0.85rem; margin-top:8px; display:flex; align-items:center;"><i class="bx bx-trending-up" style="margin-right:4px;"></i> +14.5% vs last year</div>
     </div>
     
     <!-- Pipeline -->
-    <div class="metric-card" style="background:var(--apple-card-bg); border:1px solid rgba(255,255,255,0.05); border-radius:20px; padding:1.5rem; position:relative; overflow:hidden;">
+    <div class="metric-card" style="background:var(--apple-card-bg); border:1px solid var(--apple-border); border-radius:20px; padding:1.5rem; position:relative; overflow:hidden;">
         <div style="position:absolute; top:-20px; right:-20px; width:100px; height:100px; background:radial-gradient(circle, rgba(10,132,255,0.2) 0%, transparent 70%);"></div>
-        <div style="color:rgba(255,255,255,0.5); font-size:0.85rem; font-weight:600; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px;">Active Pipeline</div>
-        <div style="font-size:2.5rem; font-weight:700; color:#fff;">${{ pipeline_value|floatformat:"0" }}</div>
+        <div style="color:var(--apple-text-secondary); font-size:0.85rem; font-weight:600; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px;">Active Pipeline</div>
+        <div style="font-size:2.5rem; font-weight:700; color:var(--apple-text);">${{ pipeline_value|floatformat:"0" }}</div>
         <div style="color:var(--apple-text-muted); font-size:0.85rem; margin-top:8px;">Across all open deals</div>
     </div>
     
     <!-- ATS -->
-    <div class="metric-card" style="background:var(--apple-card-bg); border:1px solid rgba(255,255,255,0.05); border-radius:20px; padding:1.5rem; position:relative; overflow:hidden;">
+    <div class="metric-card" style="background:var(--apple-card-bg); border:1px solid var(--apple-border); border-radius:20px; padding:1.5rem; position:relative; overflow:hidden;">
         <div style="position:absolute; top:-20px; right:-20px; width:100px; height:100px; background:radial-gradient(circle, rgba(147,51,234,0.2) 0%, transparent 70%);"></div>
-        <div style="color:rgba(255,255,255,0.5); font-size:0.85rem; font-weight:600; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px;">Placements / Hires</div>
-        <div style="font-size:2.5rem; font-weight:700; color:#fff;">{{ total_hires }}</div>
+        <div style="color:var(--apple-text-secondary); font-size:0.85rem; font-weight:600; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px;">Placements / Hires</div>
+        <div style="font-size:2.5rem; font-weight:700; color:var(--apple-text);">{{ total_hires }}</div>
         <div style="color:var(--apple-text-muted); font-size:0.85rem; margin-top:8px;">{{ active_candidates }} active candidates</div>
     </div>
     
     <!-- IT/Security -->
-    <div class="metric-card" style="background:var(--apple-card-bg); border:1px solid rgba(255,255,255,0.05); border-radius:20px; padding:1.5rem; position:relative; overflow:hidden;">
+    <div class="metric-card" style="background:var(--apple-card-bg); border:1px solid var(--apple-border); border-radius:20px; padding:1.5rem; position:relative; overflow:hidden;">
         <div style="position:absolute; top:-20px; right:-20px; width:100px; height:100px; background:radial-gradient(circle, rgba(255,59,48,0.2) 0%, transparent 70%);"></div>
-        <div style="color:rgba(255,255,255,0.5); font-size:0.85rem; font-weight:600; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px;">System Health Alerts</div>
-        <div style="font-size:2.5rem; font-weight:700; color:#fff;">{{ critical_tickets|add:active_threats }}</div>
+        <div style="color:var(--apple-text-secondary); font-size:0.85rem; font-weight:600; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px;">System Health Alerts</div>
+        <div style="font-size:2.5rem; font-weight:700; color:var(--apple-text);">{{ critical_tickets|add:active_threats }}</div>
         <div style="color:var(--cyber-red, #ff3b30); font-size:0.85rem; margin-top:8px; display:flex; align-items:center;">
             <i class="bx bx-error-circle" style="margin-right:4px;"></i> {{ active_threats }} Security, {{ critical_tickets }} IT Critical
         </div>
@@ -50,16 +50,16 @@
 
 <div class="charts-grid" style="display:grid; grid-template-columns:2fr 1fr; gap:1.5rem; margin-bottom:2.5rem;">
     <!-- Revenue Trend Chart -->
-    <div class="chart-container" style="background:var(--apple-card-bg); border:1px solid rgba(255,255,255,0.05); border-radius:20px; padding:1.5rem;">
-        <h3 style="margin-top:0; color:#fff; font-size:1.1rem; margin-bottom:1.5rem;">Revenue Growth</h3>
+    <div class="chart-container" style="background:var(--apple-card-bg); border:1px solid var(--apple-border); border-radius:20px; padding:1.5rem;">
+        <h3 style="margin-top:0; color:var(--apple-text); font-size:1.1rem; margin-bottom:1.5rem;">Revenue Growth</h3>
         <div style="height:300px; width:100%;">
             <canvas id="revenueChart"></canvas>
         </div>
     </div>
     
     <!-- Platform Distribution -->
-    <div class="chart-container" style="background:var(--apple-card-bg); border:1px solid rgba(255,255,255,0.05); border-radius:20px; padding:1.5rem;">
-        <h3 style="margin-top:0; color:#fff; font-size:1.1rem; margin-bottom:1.5rem;">System Usage</h3>
+    <div class="chart-container" style="background:var(--apple-card-bg); border:1px solid var(--apple-border); border-radius:20px; padding:1.5rem;">
+        <h3 style="margin-top:0; color:var(--apple-text); font-size:1.1rem; margin-bottom:1.5rem;">System Usage</h3>
         <div style="height:300px; width:100%; display:flex; align-items:center; justify-content:center;">
             <canvas id="usageChart"></canvas>
         </div>

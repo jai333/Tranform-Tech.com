@@ -1,0 +1,122 @@
+{% extends 'tracking_app/base.html' %}
+
+{% block title %}Billing & Subscription - Transform.io{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mb-5 pb-5">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-5" style="border-bottom: 1px solid var(--surface-border); padding-bottom: 20px;">
+        <div>
+            <h2 style="font-family: var(--font-mono); font-weight: 800; letter-spacing: -0.5px; color: var(--text-white);"><i class="bx bx-credit-card" style="color: var(--primary);"></i> Billing & Subscription</h2>
+            <p style="color: var(--text-gray); font-size: 1.1rem; margin-top: 5px;">Manage your organization's infrastructure plan and capacity.</p>
+        </div>
+        {% if current_plan != 'free' %}
+        <form method="post" action="{% url 'billing-portal' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn" style="background: var(--bg-surface); border: 1px solid var(--surface-border); color: var(--text-white); padding: 10px 20px; border-radius: 8px; font-weight: 600; display: flex; align-items: center; gap: 8px; transition: all 0.2s;">
+                <i class="bx bx-cog"></i> Stripe Customer Portal
+            </button>
+        </form>
+        {% endif %}
+    </div>
+
+    <!-- Current Plan Banner -->
+    <div style="background: linear-gradient(145deg, rgba(255,255,255,0.03) 0%, rgba(0,0,0,0.1) 100%); border: 1px solid var(--surface-border); border-radius: 20px; padding: 30px; margin-bottom: 60px; display: flex; align-items: center; justify-content: space-between; backdrop-filter: blur(12px);">
+        <div>
+            <div style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-dark-gray); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px;">Active Workspace Plan</div>
+            <h3 style="margin: 0; font-size: 2rem; font-weight: 800; display: flex; align-items: center; gap: 12px;">
+                {% if current_plan == 'enterprise' %}
+                    <span style="color: #8b5cf6;"><i class='bx bx-building-house'></i> Enterprise</span>
+                {% elif current_plan == 'growth' or current_plan == 'pro' %}
+                    <span style="color: #00E5FF;"><i class='bx bx-rocket'></i> Pro Plan</span>
+                {% elif current_plan == 'starter' %}
+                    <span style="color: #10b981;"><i class='bx bx-play-circle'></i> Starter</span>
+                {% else %}
+                    <span style="color: var(--text-white);">Free Tier</span>
+                {% endif %}
+            </h3>
+        </div>
+        <div>
+            {% if current_plan == 'free' %}
+            <div style="background: rgba(255,255,255,0.05); border: 1px solid var(--surface-border); color: var(--text-gray); padding: 8px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">
+                No active subscription
+            </div>
+            {% else %}
+            <div style="background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); color: #10b981; padding: 10px 20px; border-radius: 20px; font-size: 0.95rem; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                <i class="bx bx-check-circle" style="font-size: 1.2rem;"></i> Subscription Active
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Pricing Tables -->
+    <div style="text-align: center; margin-bottom: 40px;">
+        <h3 style="font-size: 1.8rem; font-weight: 800; color: var(--text-white); margin-bottom: 10px;">Upgrade Your Infrastructure</h3>
+        <p style="color: var(--text-gray); font-size: 1.1rem; max-width: 600px; margin: 0 auto;">Select the tier that fits your team's size and data processing needs.</p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px; max-width: 1200px; margin: 0 auto;">
+        {% for plan_key, plan in plans.items %}
+        <div style="
+            position: relative; 
+            padding: 40px; 
+            background: var(--bg-elevated); 
+            border-radius: 24px; 
+            display: flex; 
+            flex-direction: column; 
+            border: 1px solid {% if plan.popular %}var(--primary){% else %}var(--surface-border){% endif %};
+            {% if plan.popular %}
+            transform: scale(1.02);
+            box-shadow: 0 20px 50px rgba(0, 229, 255, 0.1);
+            z-index: 2;
+            {% else %}
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            {% endif %}
+        ">
+            {% if plan.popular %}
+            <div style="position: absolute; top: 0; right: 0; background: var(--primary); color: #000; padding: 6px 16px; font-size: 0.75rem; font-weight: 700; border-bottom-left-radius: 12px; border-top-right-radius: 23px;">
+                MOST POPULAR
+            </div>
+            {% endif %}
+
+            <h3 style="color: {{ plan.color }}; font-size: 1.6rem; margin-bottom: 15px; font-weight: 800;">{{ plan.name }}</h3>
+            
+            <div style="margin-bottom: 30px; padding-bottom: 30px; border-bottom: 1px solid var(--surface-border);">
+                <span style="font-size: 3.5rem; font-weight: 800; color: var(--text-white); line-height: 1;">{{ plan.price }}</span>
+                <span style="color: var(--text-dark-gray); font-size: 1.1rem;">{{ plan.period }}</span>
+            </div>
+
+            <ul style="list-style: none; padding: 0; margin-bottom: 40px; flex-grow: 1; color: var(--text-gray);">
+                {% for feature in plan.features %}
+                <li style="margin-bottom: 18px; display: flex; gap: 12px; font-size: 1.05rem; align-items: flex-start;">
+                    <i class="bx bx-check-circle" style="color: {{ plan.color }}; font-size: 1.4rem; margin-top: 2px;"></i>
+                    <span>{{ feature }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+
+            {% if current_plan == plan_key %}
+                <button class="btn w-100 py-3 fw-bold" style="background: var(--bg-surface); border: 1px solid var(--surface-border); color: var(--text-dark-gray); border-radius: 12px; cursor: default;" disabled>
+                    Current Plan
+                </button>
+            {% else %}
+                <form method="post" action="{% url 'billing-checkout' %}" style="margin: 0;">
+                    {% csrf_token %}
+                    <input type="hidden" name="plan" value="{{ plan_key }}">
+                    <button type="submit" class="btn w-100 py-3 fw-bold shadow-sm" style="
+                        background: {% if plan.popular %}var(--primary){% else %}{{ plan.color }}1A{% endif %};
+                        color: {% if plan.popular %}#000{% else %}{{ plan.color }}{% endif %};
+                        border: 1px solid {% if plan.popular %}var(--primary){% else %}{{ plan.color }}{% endif %};
+                        border-radius: 12px;
+                        font-size: 1.1rem;
+                        transition: all 0.2s;
+                    " onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                        Upgrade to {{ plan.name }}
+                    </button>
+                </form>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

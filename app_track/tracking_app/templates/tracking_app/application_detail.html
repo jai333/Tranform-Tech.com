@@ -419,11 +419,11 @@
     }
     
     .scheduler-card {
-        background: rgba(255, 255, 255, 0.05);
+        background:var(--apple-row-hover);
         backdrop-filter: blur(10px);
         border-radius: 16px;
         overflow: hidden;
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        border:1px solid var(--apple-border);
         box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
         transition: all 0.3s ease;
     }
@@ -473,8 +473,8 @@
     }
     
     .input-group-text.glass-input-icon {
-        background: rgba(255, 255, 255, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.2);
+        background:var(--apple-border);
+        border:1px solid var(--apple-border);
         color: var(--accent-color);
         border-right: none;
         border-top-right-radius: 0;
@@ -483,8 +483,8 @@
     
     /* Custom datetime input styling */
     input[type="datetime-local"] {
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        background: rgba(255, 255, 255, 0.05);
+        border:1px solid var(--apple-border);
+        background:var(--apple-row-hover);
         color: var(--text-color);
         border-radius: 8px;
         padding: 0.75rem 1rem;
@@ -505,8 +505,8 @@
     }
     
     textarea.glass-input {
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        background: rgba(255, 255, 255, 0.05);
+        border:1px solid var(--apple-border);
+        background:var(--apple-row-hover);
         color: var(--text-color);
         border-radius: 8px;
         padding: 0.75rem 1rem;
@@ -549,8 +549,8 @@
         align-items: center;
         justify-content: center;
         padding: 1rem;
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        background:var(--apple-row-hover);
+        border:1px solid var(--apple-border);
         border-radius: 12px;
         cursor: pointer;
         transition: all 0.2s ease;
@@ -579,7 +579,7 @@
     }
     
     .type-label:hover {
-        background: rgba(255, 255, 255, 0.1);
+        background:var(--apple-border);
         transform: translateY(-2px);
     }
     

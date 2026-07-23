@@ -5,14 +5,14 @@
 <style>
 :root { --sc-purple: #8b5cf6; --sc-gold: #f59e0b; }
 .sc-page { padding: 2rem; max-width: 860px; margin: 0 auto; }
-.back-link { display: inline-flex; align-items: center; gap: 6px; color: rgba(255,255,255,0.5); font-size: 0.8rem; text-decoration: none; margin-bottom: 1.5rem; transition: color 0.2s; }
+.back-link { display: inline-flex; align-items: center; gap: 6px; color:var(--apple-text-secondary); font-size: 0.8rem; text-decoration: none; margin-bottom: 1.5rem; transition: color 0.2s; }
 .back-link:hover { color: var(--sc-purple); }
-.sc-header { background: rgba(255,255,255,0.02); border: 1px solid rgba(139,92,246,0.2); border-radius: 16px; padding: 1.75rem 2rem; margin-bottom: 1.5rem; position: relative; overflow: hidden; }
+.sc-header { background:var(--apple-bg); border: 1px solid rgba(139,92,246,0.2); border-radius: 16px; padding: 1.75rem 2rem; margin-bottom: 1.5rem; position: relative; overflow: hidden; }
 .sc-header::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--sc-purple), #c084fc, var(--sc-gold)); }
 .sc-label { font-size: 0.72rem; color: var(--sc-purple); font-family: 'Fira Code', monospace; letter-spacing: 0.05em; margin-bottom: 6px; }
-.sc-title { font-size: 1.3rem; font-weight: 700; color: #fff; margin-bottom: 8px; }
+.sc-title { font-size: 1.3rem; font-weight: 700; color:var(--apple-text); margin-bottom: 8px; }
 .sc-meta { display: flex; flex-wrap: wrap; gap: 10px; }
-.sc-meta-item { background: rgba(255,255,255,0.05); border-radius: 6px; padding: 4px 10px; font-size: 0.75rem; color: rgba(255,255,255,0.6); display: flex; align-items: center; gap: 5px; }
+.sc-meta-item { background:var(--apple-row-hover); border-radius: 6px; padding: 4px 10px; font-size: 0.75rem; color:var(--apple-text-muted); display: flex; align-items: center; gap: 5px; }
 .messages-area { margin-bottom: 1.25rem; }
 .alert { border-radius: 10px; padding: 12px 16px; font-size: 0.875rem; }
 .alert-success { background: rgba(139,92,246,0.1); border: 1px solid rgba(139,92,246,0.3); color: #c4b5fd; }
@@ -21,62 +21,62 @@
 /* ── VIEW MODE ───────────────────────────────────────── */
 .scorecard-view { }
 .avg-badge { display: flex; align-items: center; justify-content: center; flex-direction: column; width: 90px; height: 90px; border-radius: 50%; border: 3px solid var(--sc-purple); background: rgba(139,92,246,0.1); margin: 0 auto 1.5rem; }
-.avg-num { font-size: 2rem; font-weight: 900; color: #fff; line-height: 1; }
-.avg-label { font-size: 0.6rem; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.05em; }
+.avg-num { font-size: 2rem; font-weight: 900; color:var(--apple-text); line-height: 1; }
+.avg-label { font-size: 0.6rem; color:var(--apple-text-secondary); text-transform: uppercase; letter-spacing: 0.05em; }
 .scores-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
 @media (max-width: 540px) { .scores-grid { grid-template-columns: 1fr; } }
-.score-item { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; padding: 1rem; }
-.score-name { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: rgba(255,255,255,0.4); margin-bottom: 10px; }
+.score-item { background:var(--apple-bg); border:1px solid var(--apple-border); border-radius: 12px; padding: 1rem; }
+.score-name { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color:var(--apple-text-secondary); margin-bottom: 10px; }
 .star-row { display: flex; gap: 4px; }
 .star { font-size: 1.2rem; }
 .star.filled { color: var(--sc-gold); }
-.star.empty { color: rgba(255,255,255,0.1); }
-.score-num { font-size: 0.75rem; color: rgba(255,255,255,0.3); margin-top: 4px; }
+.star.empty { color:var(--apple-text-muted); }
+.score-num { font-size: 0.75rem; color:var(--apple-text-muted); margin-top: 4px; }
 .reco-badge { display: inline-flex; align-items: center; gap: 6px; border-radius: 8px; padding: 8px 18px; font-size: 0.8rem; font-weight: 700; margin-top: 1rem; }
 .reco-strong_yes { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
 .reco-yes { background: rgba(16,185,129,0.08); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.2); }
 .reco-maybe { background: rgba(245,158,11,0.1); color: #fcd34d; border: 1px solid rgba(245,158,11,0.25); }
 .reco-no { background: rgba(239,68,68,0.08); color: #fca5a5; border: 1px solid rgba(239,68,68,0.2); }
 .reco-strong_no { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
-.note-block { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; padding: 1.25rem; margin-top: 1rem; }
-.note-block h4 { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: rgba(255,255,255,0.4); margin-bottom: 8px; }
+.note-block { background:var(--apple-bg); border:1px solid var(--apple-border); border-radius: 12px; padding: 1.25rem; margin-top: 1rem; }
+.note-block h4 { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color:var(--apple-text-secondary); margin-bottom: 8px; }
 .note-block p { font-size: 0.875rem; color: rgba(255,255,255,0.75); line-height: 1.6; }
 .view-actions { display: flex; gap: 10px; margin-top: 1.5rem; }
 .btn-edit { background: rgba(139,92,246,0.1); border: 1px solid rgba(139,92,246,0.3); color: var(--sc-purple); border-radius: 8px; padding: 9px 18px; font-size: 0.875rem; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: background 0.2s; }
 .btn-edit:hover { background: rgba(139,92,246,0.2); color: var(--sc-purple); }
-.btn-back-int { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.6); border-radius: 8px; padding: 9px 18px; font-size: 0.875rem; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+.btn-back-int { background:var(--apple-bg); border:1px solid var(--apple-border); color:var(--apple-text-muted); border-radius: 8px; padding: 9px 18px; font-size: 0.875rem; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
 
 /* ── FORM MODE ───────────────────────────────────────── */
 .scorecard-form { }
-.score-section { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; padding: 1.75rem; margin-bottom: 1.25rem; }
-.section-heading { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255,255,255,0.4); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 6px; }
+.score-section { background:var(--apple-bg); border:1px solid var(--apple-border); border-radius: 14px; padding: 1.75rem; margin-bottom: 1.25rem; }
+.section-heading { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color:var(--apple-text-secondary); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 6px; }
 .slider-row { display: flex; align-items: center; gap: 16px; margin-bottom: 1.25rem; flex-wrap: wrap; }
-.slider-label { font-size: 0.82rem; color: rgba(255,255,255,0.7); min-width: 180px; }
+.slider-label { font-size: 0.82rem; color:var(--apple-text-secondary); min-width: 180px; }
 .slider-label strong { display: block; font-weight: 600; }
 .slider-label small { color: rgba(255,255,255,0.35); font-size: 0.72rem; }
 .star-input { display: flex; gap: 6px; flex-direction: row-reverse; }
 .star-input input { display: none; }
-.star-input label { font-size: 1.8rem; cursor: pointer; color: rgba(255,255,255,0.12); transition: color 0.15s, transform 0.1s; }
+.star-input label { font-size: 1.8rem; cursor: pointer; color:var(--apple-text-muted); transition: color 0.15s, transform 0.1s; }
 .star-input label:hover, .star-input label:hover ~ label, .star-input input:checked ~ label { color: var(--sc-gold); }
 .star-input label:hover { transform: scale(1.15); }
-.score-display { font-size: 0.72rem; color: rgba(255,255,255,0.3); min-width: 30px; }
+.score-display { font-size: 0.72rem; color:var(--apple-text-muted); min-width: 30px; }
 
-.text-section { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; padding: 1.75rem; margin-bottom: 1.25rem; }
+.text-section { background:var(--apple-bg); border:1px solid var(--apple-border); border-radius: 14px; padding: 1.75rem; margin-bottom: 1.25rem; }
 .form-group-sc { margin-bottom: 1.25rem; }
 .form-group-sc:last-child { margin-bottom: 0; }
-.form-group-sc label { display: block; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255,255,255,0.4); margin-bottom: 7px; }
-.form-group-sc textarea { width: 100%; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 9px; padding: 11px 14px; color: #fff; font-size: 0.875rem; outline: none; font-family: inherit; transition: border-color 0.2s; box-sizing: border-box; }
+.form-group-sc label { display: block; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color:var(--apple-text-secondary); margin-bottom: 7px; }
+.form-group-sc textarea { width: 100%; background:var(--apple-bg); border:1px solid var(--apple-border); border-radius: 9px; padding: 11px 14px; color:var(--apple-text); font-size: 0.875rem; outline: none; font-family: inherit; transition: border-color 0.2s; box-sizing: border-box; }
 .form-group-sc textarea:focus { border-color: var(--sc-purple); }
 
 .recommendation-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
 @media (max-width: 560px) { .recommendation-grid { grid-template-columns: repeat(2, 1fr); } }
-.reco-option { border-radius: 8px; padding: 10px 8px; text-align: center; cursor: pointer; border: 2px solid rgba(255,255,255,0.07); background: rgba(255,255,255,0.02); transition: all 0.2s; }
-.reco-option:hover { border-color: rgba(255,255,255,0.2); }
+.reco-option { border-radius: 8px; padding: 10px 8px; text-align: center; cursor: pointer; border: 2px solid rgba(255,255,255,0.07); background:var(--apple-bg); transition: all 0.2s; }
+.reco-option:hover { border-color:var(--apple-text-muted); }
 .reco-option.selected-reco { border-color: var(--sc-purple); background: rgba(139,92,246,0.15); }
 .reco-option span { font-size: 0.72rem; font-weight: 600; display: block; }
 .reco-option i { font-size: 1.2rem; display: block; margin-bottom: 4px; }
 .reco-hidden { /* hidden input */ }
-.btn-submit-sc { background: linear-gradient(135deg, var(--sc-purple), #7c3aed); color: #fff; border: none; border-radius: 10px; padding: 13px 28px; font-size: 0.9rem; font-weight: 700; cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 8px; transition: opacity 0.2s, transform 0.2s; }
+.btn-submit-sc { background: linear-gradient(135deg, var(--sc-purple), #7c3aed); color:var(--apple-text); border: none; border-radius: 10px; padding: 13px 28px; font-size: 0.9rem; font-weight: 700; cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 8px; transition: opacity 0.2s, transform 0.2s; }
 .btn-submit-sc:hover { opacity: 0.9; transform: translateY(-1px); }
 </style>
 
@@ -108,13 +108,13 @@
     {% if scorecard and page_title == 'Scorecard Results' %}
     <!-- ──── VIEW MODE ──────────────────────────────────────────────── -->
     <div class="scorecard-view">
-        <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:2rem;margin-bottom:1.25rem">
+        <div style="background:var(--apple-bg);border:1px solid var(--apple-border);border-radius:14px;padding:2rem;margin-bottom:1.25rem">
             <div style="text-align:center;margin-bottom:2rem">
                 <div class="avg-badge">
                     <div class="avg-num">{{ scorecard.average_score }}</div>
                     <div class="avg-label">/ 5.0</div>
                 </div>
-                <div style="font-size:0.8rem;color:rgba(255,255,255,0.4)">Average Score by {{ scorecard.interviewer.get_full_name|default:scorecard.interviewer.username }}</div>
+                <div style="font-size:0.8rem;color:var(--apple-text-secondary)">Average Score by {{ scorecard.interviewer.get_full_name|default:scorecard.interviewer.username }}</div>
                 <div>
                     <span class="reco-badge reco-{{ scorecard.recommendation }}">
                         {% if scorecard.recommendation == 'strong_yes' %}<i class="bx bx-star"></i> Strong Yes
@@ -247,7 +247,7 @@
                         <input type="radio" id="ps-1" name="problem_solving_score" value="1" {% if scorecard and scorecard.problem_solving_score == 1 %}checked{% endif %}><label for="ps-1">★</label>
                     </div>
                 </div>
-                <div class="slider-row" style="margin-top:1rem;padding-top:1rem;border-top:1px solid rgba(255,255,255,0.06)">
+                <div class="slider-row" style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--apple-border)">
                     <div class="slider-label"><strong>Overall Rating</strong><small>Holistic assessment</small></div>
                     <div class="star-input">
                         <input type="radio" id="or-5" name="overall_rating" value="5" {% if scorecard and scorecard.overall_rating == 5 %}checked{% endif %}><label for="or-5">★</label>

@@ -3,46 +3,46 @@
 
 {% block content %}
 <style>
-    .inbox-layout { display:grid; grid-template-columns:220px 320px 1fr; gap:0; height:calc(100vh - 80px); margin:-2rem; border-top:1px solid rgba(255,255,255,0.05); }
+    .inbox-layout { display:grid; grid-template-columns:220px 320px 1fr; gap:0; height:calc(100vh - 80px); margin:-2rem; border-top:1px solid var(--apple-border); }
     
     /* Pane 1: Folders */
-    .inbox-folders { background:rgba(0,0,0,0.2); border-right:1px solid rgba(255,255,255,0.05); padding:20px; display:flex; flex-direction:column; }
-    .compose-btn { background:linear-gradient(135deg, #0A84FF, #005bb5); border:none; color:#fff; border-radius:12px; padding:12px; font-weight:600; width:100%; display:flex; align-items:center; justify-content:center; margin-bottom:20px; cursor:pointer; font-size:0.95rem; box-shadow:0 4px 12px rgba(10, 132, 255, 0.3); transition:transform 0.2s; }
+    .inbox-folders { background:var(--apple-card-bg); border-right:1px solid var(--apple-border); padding:20px; display:flex; flex-direction:column; }
+    .compose-btn { background:linear-gradient(135deg, #0A84FF, #005bb5); border:none; color:var(--apple-text); border-radius:12px; padding:12px; font-weight:600; width:100%; display:flex; align-items:center; justify-content:center; margin-bottom:20px; cursor:pointer; font-size:0.95rem; box-shadow:0 4px 12px rgba(10, 132, 255, 0.3); transition:transform 0.2s; }
     .compose-btn:hover { transform:translateY(-1px); }
-    .folder-item { padding:10px 16px; border-radius:8px; cursor:pointer; color:rgba(255,255,255,0.7); display:flex; align-items:center; justify-content:space-between; margin-bottom:4px; font-size:0.9rem; transition:background 0.2s; }
-    .folder-item:hover, .folder-item.active { background:rgba(255,255,255,0.05); color:#fff; }
+    .folder-item { padding:10px 16px; border-radius:8px; cursor:pointer; color:var(--apple-text-secondary); display:flex; align-items:center; justify-content:space-between; margin-bottom:4px; font-size:0.9rem; transition:background 0.2s; }
+    .folder-item:hover, .folder-item.active { background:var(--apple-row-hover); color:var(--apple-text); }
     .folder-item.active { font-weight:600; }
     
     /* Pane 2: List */
-    .inbox-list-pane { background:var(--apple-card-bg); border-right:1px solid rgba(255,255,255,0.05); display:flex; flex-direction:column; overflow:hidden; }
-    .inbox-list-header { padding:20px; border-bottom:1px solid rgba(255,255,255,0.05); }
+    .inbox-list-pane { background:var(--apple-card-bg); border-right:1px solid var(--apple-border); display:flex; flex-direction:column; overflow:hidden; }
+    .inbox-list-header { padding:20px; border-bottom:1px solid var(--apple-border); }
     .inbox-list { flex:1; overflow-y:auto; }
-    .inbox-item { padding:16px 20px; border-bottom:1px solid rgba(255,255,255,0.05); cursor:pointer; transition:background 0.2s; position:relative; }
-    .inbox-item:hover, .inbox-item.active { background:rgba(255,255,255,0.03); }
+    .inbox-item { padding:16px 20px; border-bottom:1px solid var(--apple-border); cursor:pointer; transition:background 0.2s; position:relative; }
+    .inbox-item:hover, .inbox-item.active { background:var(--apple-row-hover); }
     .inbox-item.active::before { content:''; position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--cyber-blue); }
     .inbox-item-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px; }
-    .inbox-item-contact { font-weight:600; font-size:0.9rem; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:200px; }
-    .inbox-item-date { font-size:0.75rem; color:rgba(255,255,255,0.4); }
-    .inbox-item-subject { font-size:0.85rem; color:#fff; margin-bottom:4px; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .inbox-item-preview { font-size:0.8rem; color:rgba(255,255,255,0.5); line-height:1.4; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+    .inbox-item-contact { font-weight:600; font-size:0.9rem; color:var(--apple-text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:200px; }
+    .inbox-item-date { font-size:0.75rem; color:var(--apple-text-secondary); }
+    .inbox-item-subject { font-size:0.85rem; color:var(--apple-text); margin-bottom:4px; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .inbox-item-preview { font-size:0.8rem; color:var(--apple-text-muted); line-height:1.4; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
     
     /* Pane 3: Main View / Compose */
-    .inbox-main-pane { background:rgba(255,255,255,0.01); display:flex; flex-direction:column; position:relative; }
-    .inbox-main-empty { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; color:rgba(255,255,255,0.3); }
+    .inbox-main-pane { background:var(--apple-bg); display:flex; flex-direction:column; position:relative; }
+    .inbox-main-empty { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; color:var(--apple-text-muted); }
     
     .message-view { display:none; flex-direction:column; height:100%; }
-    .message-header { padding:24px; border-bottom:1px solid rgba(255,255,255,0.05); }
-    .message-body { padding:24px; flex:1; overflow-y:auto; color:rgba(255,255,255,0.8); line-height:1.6; font-size:0.95rem; }
+    .message-header { padding:24px; border-bottom:1px solid var(--apple-border); }
+    .message-body { padding:24px; flex:1; overflow-y:auto; color:var(--apple-text-muted); line-height:1.6; font-size:0.95rem; }
     
     .compose-view { display:none; flex-direction:column; height:100%; background:var(--apple-card-bg); }
-    .compose-header { padding:20px; border-bottom:1px solid rgba(255,255,255,0.05); display:flex; justify-content:space-between; align-items:center; }
+    .compose-header { padding:20px; border-bottom:1px solid var(--apple-border); display:flex; justify-content:space-between; align-items:center; }
     .compose-form { flex:1; display:flex; flex-direction:column; padding:20px; }
-    .compose-input { background:transparent; border:none; border-bottom:1px solid rgba(255,255,255,0.05); color:#fff; font-size:0.95rem; padding:12px 0; outline:none; }
-    .compose-textarea { flex:1; background:transparent; border:none; color:#fff; font-size:0.95rem; padding:20px 0; outline:none; resize:none; font-family:inherit; line-height:1.5; }
+    .compose-input { background:transparent; border:none; border-bottom:1px solid var(--apple-border); color:var(--apple-text); font-size:0.95rem; padding:12px 0; outline:none; }
+    .compose-textarea { flex:1; background:transparent; border:none; color:var(--apple-text); font-size:0.95rem; padding:20px 0; outline:none; resize:none; font-family:inherit; line-height:1.5; }
     
     /* AI Panel */
-    .ai-panel { background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.05); border-radius:12px; padding:16px; margin-bottom:16px; display:none; }
-    .ai-btn { background:linear-gradient(135deg, #8b5cf6, #6d28d9); border:none; color:#fff; border-radius:8px; padding:8px 16px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:6px; font-size:0.85rem; }
+    .ai-panel { background:var(--apple-card-bg); border:1px solid var(--apple-border); border-radius:12px; padding:16px; margin-bottom:16px; display:none; }
+    .ai-btn { background:linear-gradient(135deg, #8b5cf6, #6d28d9); border:none; color:var(--apple-text); border-radius:8px; padding:8px 16px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:6px; font-size:0.85rem; }
 </style>
 
 <div class="inbox-layout">
@@ -50,7 +50,7 @@
     <div class="inbox-folders">
         <button class="compose-btn" onclick="showCompose()"><i class="bx bx-edit" style="margin-right:8px; font-size:1.2rem;"></i> Compose</button>
         
-        <div style="font-size:0.75rem; color:rgba(255,255,255,0.4); text-transform:uppercase; letter-spacing:1px; margin-bottom:10px; padding-left:16px;">Mailbox</div>
+        <div style="font-size:0.75rem; color:var(--apple-text-secondary); text-transform:uppercase; letter-spacing:1px; margin-bottom:10px; padding-left:16px;">Mailbox</div>
         <div class="folder-item active" onclick="switchFolder('inbox', this)">
             <div><i class="bx bx-inbox" style="margin-right:10px; font-size:1.1rem;"></i> Inbox</div>
             <span style="background:var(--cyber-blue); color:#000; padding:2px 8px; border-radius:12px; font-size:0.7rem; font-weight:700;">{{ inbox_emails|length }}</span>
@@ -60,10 +60,10 @@
         </div>
         <div class="folder-item" onclick="switchFolder('drafts', this)">
             <div><i class="bx bx-file" style="margin-right:10px; font-size:1.1rem;"></i> Drafts</div>
-            {% if draft_emails %}<span style="background:rgba(255,255,255,0.1); padding:2px 8px; border-radius:12px; font-size:0.7rem;">{{ draft_emails|length }}</span>{% endif %}
+            {% if draft_emails %}<span style="background:var(--apple-border); padding:2px 8px; border-radius:12px; font-size:0.7rem;">{{ draft_emails|length }}</span>{% endif %}
         </div>
         
-        <div style="font-size:0.75rem; color:rgba(255,255,255,0.4); text-transform:uppercase; letter-spacing:1px; margin-top:24px; margin-bottom:10px; padding-left:16px;">Smart Views</div>
+        <div style="font-size:0.75rem; color:var(--apple-text-secondary); text-transform:uppercase; letter-spacing:1px; margin-top:24px; margin-bottom:10px; padding-left:16px;">Smart Views</div>
         <div class="folder-item">
             <div><i class="bx bx-bot" style="margin-right:10px; font-size:1.1rem; color:#8b5cf6;"></i> AI Generated</div>
         </div>
@@ -72,10 +72,10 @@
     <!-- Pane 2: List -->
     <div class="inbox-list-pane">
         <div class="inbox-list-header">
-            <h2 id="current-folder-title" style="font-size:1.2rem; margin:0 0 12px 0; color:#fff;">Inbox</h2>
+            <h2 id="current-folder-title" style="font-size:1.2rem; margin:0 0 12px 0; color:var(--apple-text);">Inbox</h2>
             <div style="position:relative;">
-                <i class="bx bx-search" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:rgba(255,255,255,0.4);"></i>
-                <input type="text" placeholder="Search emails..." style="width:100%; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:8px 12px 8px 36px; color:#fff; font-size:0.85rem; outline:none;">
+                <i class="bx bx-search" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--apple-text-secondary);"></i>
+                <input type="text" placeholder="Search emails..." style="width:100%; background:var(--apple-row-hover); border:1px solid var(--apple-border); border-radius:8px; padding:8px 12px 8px 36px; color:var(--apple-text); font-size:0.85rem; outline:none;">
             </div>
         </div>
         <div class="inbox-list" id="inbox-list-container">
@@ -95,17 +95,17 @@
         <!-- View Message -->
         <div class="message-view" id="message-view">
             <div class="message-header">
-                <h2 id="msg-subject" style="margin:0 0 16px 0; font-size:1.4rem; color:#fff;"></h2>
+                <h2 id="msg-subject" style="margin:0 0 16px 0; font-size:1.4rem; color:var(--apple-text);"></h2>
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <div style="display:flex; align-items:center; gap:12px;">
-                        <div style="width:40px; height:40px; border-radius:50%; background:rgba(255,255,255,0.1); display:flex; align-items:center; justify-content:center; font-weight:600;"><i class="bx bx-user"></i></div>
+                        <div style="width:40px; height:40px; border-radius:50%; background:var(--apple-border); display:flex; align-items:center; justify-content:center; font-weight:600;"><i class="bx bx-user"></i></div>
                         <div>
-                            <div id="msg-contact" style="font-weight:600; color:#fff;"></div>
-                            <div id="msg-date" style="font-size:0.8rem; color:rgba(255,255,255,0.5);"></div>
+                            <div id="msg-contact" style="font-weight:600; color:var(--apple-text);"></div>
+                            <div id="msg-date" style="font-size:0.8rem; color:var(--apple-text-muted);"></div>
                         </div>
                     </div>
                     <div style="display:flex; gap:8px;">
-                        <button class="btn" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:6px 12px; color:#fff;"><i class="bx bx-reply"></i> Reply</button>
+                        <button class="btn" style="background:var(--apple-row-hover); border:1px solid var(--apple-border); border-radius:8px; padding:6px 12px; color:var(--apple-text);"><i class="bx bx-reply"></i> Reply</button>
                     </div>
                 </div>
             </div>
@@ -115,16 +115,16 @@
         <!-- Compose Message -->
         <div class="compose-view" id="compose-view">
             <div class="compose-header">
-                <h2 style="margin:0; font-size:1.2rem; color:#fff;">New Message</h2>
+                <h2 style="margin:0; font-size:1.2rem; color:var(--apple-text);">New Message</h2>
                 <div style="display:flex; gap:8px;">
                     <button class="ai-btn" onclick="toggleAIPanel()"><i class="bx bx-magic-wand"></i> AI Generate</button>
-                    <button class="btn" style="background:transparent; border:none; color:rgba(255,255,255,0.5); cursor:pointer;" onclick="closeCompose()"><i class="bx bx-x" style="font-size:1.5rem;"></i></button>
+                    <button class="btn" style="background:transparent; border:none; color:var(--apple-text-muted); cursor:pointer;" onclick="closeCompose()"><i class="bx bx-x" style="font-size:1.5rem;"></i></button>
                 </div>
             </div>
             
             <div class="ai-panel" id="ai-panel">
-                <div style="color:#fff; font-size:0.9rem; margin-bottom:8px; font-weight:600;"><i class="bx bx-bot" style="color:#8b5cf6;"></i> Outreach AI Prompt</div>
-                <textarea id="ai-prompt" style="width:100%; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:10px; color:#fff; font-size:0.85rem; outline:none; resize:none; margin-bottom:10px;" rows="2" placeholder="e.g., Draft a follow-up email for Enterprise Lead X offering a demo..."></textarea>
+                <div style="color:var(--apple-text); font-size:0.9rem; margin-bottom:8px; font-weight:600;"><i class="bx bx-bot" style="color:#8b5cf6;"></i> Outreach AI Prompt</div>
+                <textarea id="ai-prompt" style="width:100%; background:var(--apple-input-bg); border:1px solid var(--apple-border); border-radius:8px; padding:10px; color:var(--apple-text); font-size:0.85rem; outline:none; resize:none; margin-bottom:10px;" rows="2" placeholder="e.g., Draft a follow-up email for Enterprise Lead X offering a demo..."></textarea>
                 <div style="display:flex; justify-content:flex-end;">
                     <button class="ai-btn" onclick="generateAI()"><i class="bx bx-loader-alt bx-spin" id="ai-spinner" style="display:none;"></i> Generate</button>
                 </div>
@@ -144,14 +144,14 @@
                 <input type="text" name="subject" id="compose-subject" class="compose-input" placeholder="Subject" required>
                 <textarea name="reply_text" id="compose-body" class="compose-textarea" placeholder="Write your message here..."></textarea>
                 
-                <div style="display:flex; justify-content:space-between; align-items:center; padding-top:16px; border-top:1px solid rgba(255,255,255,0.05);">
+                <div style="display:flex; justify-content:space-between; align-items:center; padding-top:16px; border-top:1px solid var(--apple-border);">
                     <div>
-                        <button type="button" class="btn" style="background:transparent; border:none; color:rgba(255,255,255,0.5); cursor:pointer;"><i class="bx bx-paperclip" style="font-size:1.2rem;"></i></button>
-                        <button type="button" class="btn" style="background:transparent; border:none; color:rgba(255,255,255,0.5); cursor:pointer;"><i class="bx bx-image" style="font-size:1.2rem;"></i></button>
+                        <button type="button" class="btn" style="background:transparent; border:none; color:var(--apple-text-muted); cursor:pointer;"><i class="bx bx-paperclip" style="font-size:1.2rem;"></i></button>
+                        <button type="button" class="btn" style="background:transparent; border:none; color:var(--apple-text-muted); cursor:pointer;"><i class="bx bx-image" style="font-size:1.2rem;"></i></button>
                     </div>
                     <div style="display:flex; gap:10px;">
-                        <button type="button" class="btn" style="background:transparent; border:1px solid rgba(255,255,255,0.1); color:#fff; border-radius:8px; padding:8px 16px; cursor:pointer;" onclick="document.getElementById('compose-status').value='draft'; this.form.submit();">Save Draft</button>
-                        <button type="submit" class="btn" style="background:linear-gradient(135deg, #0A84FF, #005bb5); border:none; color:#fff; border-radius:8px; padding:8px 24px; font-weight:600; cursor:pointer;">Send <i class="bx bx-send" style="margin-left:4px;"></i></button>
+                        <button type="button" class="btn" style="background:transparent; border:1px solid var(--apple-border); color:var(--apple-text); border-radius:8px; padding:8px 16px; cursor:pointer;" onclick="document.getElementById('compose-status').value='draft'; this.form.submit();">Save Draft</button>
+                        <button type="submit" class="btn" style="background:linear-gradient(135deg, #0A84FF, #005bb5); border:none; color:var(--apple-text); border-radius:8px; padding:8px 24px; font-weight:600; cursor:pointer;">Send <i class="bx bx-send" style="margin-left:4px;"></i></button>
                     </div>
                 </div>
             </form>
@@ -180,7 +180,7 @@
         const container = document.getElementById('inbox-list-container');
         container.innerHTML = '';
         if(emails.length === 0) {
-            container.innerHTML = `<div style="padding:40px 20px; text-align:center; color:rgba(255,255,255,0.3); font-size:0.9rem;">No messages found.</div>`;
+            container.innerHTML = `<div style="padding:40px 20px; text-align:center; color:var(--apple-text-muted); font-size:0.9rem;">No messages found.</div>`;
             return;
         }
         

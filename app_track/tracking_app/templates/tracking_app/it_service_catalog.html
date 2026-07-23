@@ -39,7 +39,7 @@
                                 {% csrf_token %}
                                 <input type="hidden" name="item_id" value="{{ item.id }}">
                                 {% if item.requires_approval %}
-                                <input type="text" name="justification" class="form-control form-control-sm mb-2" placeholder="Business justification required..." required style="background: rgba(0,0,0,0.2); border: 1px solid var(--apple-border); color: white;">
+                                <input type="text" name="justification" class="form-control form-control-sm mb-2" placeholder="Business justification required..." required style="background:var(--apple-input-bg); border: 1px solid var(--apple-border); color: white;">
                                 {% endif %}
                                 <button type="submit" class="btn btn-sm btn-primary w-100" style="border-radius: 6px;">
                                     <i class="bx bx-cart-add"></i> Request Item

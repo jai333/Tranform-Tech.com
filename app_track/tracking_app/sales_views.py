@@ -18,6 +18,7 @@ import re
 from django.views.decorators.http import require_POST, require_GET
 from django.db.models import Count, Sum, Avg, Q
 from django.contrib import messages
+from .views import get_tenant_filter
 
 from .sales_models import (
     Lead, EmailSequence, EmailSequenceStep, LeadSequenceEnrollment,
@@ -43,10 +44,11 @@ logger = logging.getLogger(__name__)
 def sales_dashboard(request):
     """Main AI Sales Intelligence Dashboard."""
     # Pipeline stages list for visual rendering
+    tenant_filter = get_tenant_filter(request.user)
     pipeline_stages = []
-    total_deals = Deal.objects.count()
+    total_deals = Deal.objects.filter(**tenant_filter).count()
     for stage, label in Deal.STAGE_CHOICES:
-        count = Deal.objects.filter(stage=stage).count()
+        count = Deal.objects.filter(**tenant_filter, stage=stage).count()
         pct = (count / total_deals * 100) if total_deals > 0 else 0
         pipeline_stages.append({
             'key': stage,
@@ -56,27 +58,34 @@ def sales_dashboard(request):
         })
 
     # Key metrics
-    total_leads = Lead.objects.count()
-    qualified_leads = Lead.objects.filter(icp_score__gte=65).count()
-    active_sequences = LeadSequenceEnrollment.objects.filter(status='active').count()
+    total_leads = Lead.objects.filter(**tenant_filter).count()
+    qualified_leads = Lead.objects.filter(**tenant_filter, icp_score__gte=65).count()
+    
+    # Prefix tenant filter for relational fields
+    rel_tenant_filter = {'lead__tenant': tenant_filter.get('tenant')} if tenant_filter else {}
+    
+    active_sequences = LeadSequenceEnrollment.objects.filter(**rel_tenant_filter, status='active').count()
     demos_this_month = DemoBooking.objects.filter(
+        **rel_tenant_filter,
         scheduled_at__month=timezone.now().month,
         scheduled_at__year=timezone.now().year
     ).count()
-    pipeline_value = Deal.objects.exclude(stage__in=['won', 'lost']).aggregate(
+    pipeline_value = Deal.objects.filter(**tenant_filter).exclude(stage__in=['won', 'lost']).aggregate(
         total=Sum('deal_value_monthly')
     )['total'] or 0
-    mrr_won = Deal.objects.filter(stage='won').aggregate(
+    mrr_won = Deal.objects.filter(**tenant_filter, stage='won').aggregate(
         total=Sum('deal_value_monthly')
     )['total'] or 0
 
     # Hot leads (opened 3+ times or icp>=80)
     hot_leads = Lead.objects.filter(
+        **tenant_filter
+    ).filter(
         Q(email_opens__gte=3) | Q(icp_score__gte=80)
     ).exclude(status__in=['converted', 'unsubscribed', 'lost']).order_by('-email_opens', '-icp_score')[:5]
 
     # Recent deals
-    recent_deals = Deal.objects.select_related('lead').exclude(
+    recent_deals = Deal.objects.filter(**tenant_filter).select_related('lead').exclude(
         stage__in=['won', 'lost']
     ).order_by('-updated_at')[:8]
 
@@ -85,14 +94,14 @@ def sales_dashboard(request):
 
     # Email stats (last 30 days)
     thirty_days_ago = timezone.now() - timedelta(days=30)
-    emails_sent = OutreachEmail.objects.filter(sent_at__gte=thirty_days_ago).count()
-    emails_opened = OutreachEmail.objects.filter(opened_at__gte=thirty_days_ago).count()
-    emails_replied = OutreachEmail.objects.filter(replied_at__gte=thirty_days_ago).count()
+    emails_sent = OutreachEmail.objects.filter(**rel_tenant_filter, sent_at__gte=thirty_days_ago).count()
+    emails_opened = OutreachEmail.objects.filter(**rel_tenant_filter, opened_at__gte=thirty_days_ago).count()
+    emails_replied = OutreachEmail.objects.filter(**rel_tenant_filter, replied_at__gte=thirty_days_ago).count()
     open_rate = round((emails_opened / emails_sent * 100) if emails_sent else 0, 1)
     reply_rate = round((emails_replied / emails_sent * 100) if emails_sent else 0, 1)
 
     # Recent leads
-    recent_leads = Lead.objects.order_by('-created_at')[:6]
+    recent_leads = Lead.objects.filter(**tenant_filter).order_by('-created_at')[:6]
 
     context = {
         'page_title': 'AI Sales Dashboard',
@@ -123,7 +132,7 @@ def sales_dashboard(request):
 @login_required
 def lead_list(request):
     """Paginated, filterable lead list."""
-    qs = Lead.objects.all().order_by('-icp_score', '-created_at')
+    qs = Lead.objects.filter(**get_tenant_filter(request.user)).order_by('-icp_score', '-created_at')
 
     # Filters
     status_filter = request.GET.get('status', '')
@@ -903,7 +912,7 @@ def unified_inbox(request):
             if reply_text and lead_id:
                 lead = Lead.objects.filter(id=lead_id).first()
                 if lead:
-                    OutreachEmail.objects.create(
+                    email_obj = OutreachEmail.objects.create(
                         lead=lead,
                         subject=subject,
                         body=reply_text,
@@ -913,7 +922,23 @@ def unified_inbox(request):
                     if status == 'draft':
                         messages.success(request, "Draft saved successfully.")
                     else:
-                        messages.success(request, "Email sent successfully.")
+                        try:
+                            from django.core.mail import send_mail
+                            send_mail(
+                                subject=subject,
+                                message=reply_text,
+                                from_email=None,
+                                recipient_list=[lead.email],
+                                fail_silently=False,
+                            )
+                            email_obj.sent_at = timezone.now()
+                            email_obj.save()
+                            messages.success(request, "Email sent successfully via Gmail SMTP.")
+                        except Exception as e:
+                            logger.error(f"Failed to send email to {lead.email}: {e}")
+                            email_obj.status = 'failed'
+                            email_obj.save()
+                            messages.error(request, f"Failed to send email: {e}")
                     from django.shortcuts import redirect
                     return redirect('unified-inbox')
     

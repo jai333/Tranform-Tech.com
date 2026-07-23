@@ -99,7 +99,7 @@ class ResumeParser:
         # Process with spaCy when available
         doc = self.nlp(text) if self.nlp else None
         
-        # Extract information
+        # Extract information using heuristics
         result = {
             'raw_text': text,
             'contact_info': self._extract_contact_info(text),
@@ -111,7 +111,66 @@ class ResumeParser:
             'total_experience_years': self._calculate_experience_years(text),
         }
         
+        # ── Phase 2 AI Integration: OpenAI Enrichment ──
+        import os
+        if os.getenv("OPENAI_API_KEY"):
+            try:
+                from tracking_app.sales_engine import _call_openai_json
+                ai_parsed = _call_openai_json(
+                    "You are an expert resume parser. Extract structured information from the resume text. Return JSON only.",
+                    f"Parse this resume and return JSON:\n"
+                    f"{{\n"
+                    f"  \"full_name\": \"...\",\n"
+                    f"  \"email\": \"...\",\n"
+                    f"  \"phone\": \"...\",\n"
+                    f"  \"current_role\": \"...\",\n"
+                    f"  \"experience_years\": 5,\n"
+                    f"  \"skills\": [\"Python\", \"React\", \"...\"],\n"
+                    f"  \"education\": \"...\",\n"
+                    f"  \"ai_score\": 78,\n"
+                    f"  \"ai_summary\": \"2-3 sentence professional summary\",\n"
+                    f"  \"strengths\": [\"Leadership\", \"...\"]\n"
+                    f"}}\n\n"
+                    f"Resume text:\n{text[:4000]}"
+                )
+                
+                if ai_parsed:
+                    # Enrich heuristic results with AI insights
+                    result['ai_enhanced'] = True
+                    result['ai_summary'] = ai_parsed.get('ai_summary', '')
+                    result['ai_score'] = ai_parsed.get('ai_score', 0)
+                    result['strengths'] = ai_parsed.get('strengths', [])
+                    
+                    # Override basic fields if AI found better matches
+                    if not result['contact_info'].get('email') and ai_parsed.get('email'):
+                        result['contact_info']['email'] = ai_parsed['email']
+                    if not result['contact_info'].get('phone') and ai_parsed.get('phone'):
+                        result['contact_info']['phone'] = ai_parsed['phone']
+                    if not result['personal_info'].get('name') and ai_parsed.get('full_name'):
+                        result['personal_info']['name'] = ai_parsed['full_name']
+                        
+                    # Add AI skills that might have been missed by heuristics
+                    ai_skills = set(s.lower() for s in ai_parsed.get('skills', []))
+                    heuristic_skills = set(s['skill'].lower() for s in result['skills'])
+                    for skill in ai_parsed.get('skills', []):
+                        if skill.lower() not in heuristic_skills:
+                            result['skills'].append({
+                                'skill': skill,
+                                'category': 'technical',
+                                'proficiency': 'Intermediate'
+                            })
+                            
+                    # Update experience years if AI found more
+                    ai_years = ai_parsed.get('experience_years', 0)
+                    if isinstance(ai_years, (int, float)) and ai_years > result['total_experience_years']:
+                        result['total_experience_years'] = int(ai_years)
+                        
+            except Exception as e:
+                import logging
+                logging.getLogger(__name__).error("OpenAI resume parsing error: %s", e)
+        
         return result
+
     
     def _extract_from_pdf(self, file_path: str) -> str:
         """Extract text from PDF file"""

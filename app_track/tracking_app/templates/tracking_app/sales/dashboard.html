@@ -232,6 +232,25 @@
             .kpi-grid { grid-template-columns: 1fr 1fr; }
             .dash-tabs { border-radius: 10px; }
         }
+
+        /* ── Light Theme Overrides ── */
+        body.light-theme .kpi-value,
+        body.light-theme .panel-title,
+        body.light-theme .lead-name,
+        body.light-theme .alert-title,
+        body.light-theme .email-stat .num,
+        body.light-theme .activity-item-title {
+            color: var(--text-white);
+        }
+        body.light-theme .lead-row,
+        body.light-theme .deal-row,
+        body.light-theme .alert-item,
+        body.light-theme .activity-item {
+            border-bottom-color: var(--secondary);
+        }
+        body.light-theme .email-stat {
+            border-right-color: var(--secondary);
+        }
     </style>
 </head>
 <body>
@@ -646,31 +665,31 @@
                 <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px;">
                     <div style="text-align:center;">
                         <div style="width:32px;height:32px;background:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 6px;">
-                            <span style="font-size:0.75rem;font-weight:800;color:#000;">1</span>
+                            <span style="font-size:0.75rem;font-weight:800;color:var(--apple-bg);">1</span>
                         </div>
                         <div style="font-size:0.68rem;color:var(--text-gray);">Import leads<br>from CSV/manual</div>
                     </div>
                     <div style="text-align:center;">
                         <div style="width:32px;height:32px;background:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 6px;">
-                            <span style="font-size:0.75rem;font-weight:800;color:#000;">2</span>
+                            <span style="font-size:0.75rem;font-weight:800;color:var(--apple-bg);">2</span>
                         </div>
                         <div style="font-size:0.68rem;color:var(--text-gray);">AI scores<br>ICP fit (0-100)</div>
                     </div>
                     <div style="text-align:center;">
                         <div style="width:32px;height:32px;background:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 6px;">
-                            <span style="font-size:0.75rem;font-weight:800;color:#000;">3</span>
+                            <span style="font-size:0.75rem;font-weight:800;color:var(--apple-bg);">3</span>
                         </div>
                         <div style="font-size:0.68rem;color:var(--text-gray);">Generate 5-step<br>email sequence</div>
                     </div>
                     <div style="text-align:center;">
                         <div style="width:32px;height:32px;background:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 6px;">
-                            <span style="font-size:0.75rem;font-weight:800;color:#000;">4</span>
+                            <span style="font-size:0.75rem;font-weight:800;color:var(--apple-bg);">4</span>
                         </div>
                         <div style="font-size:0.68rem;color:var(--text-gray);">Send via<br>Gmail SMTP</div>
                     </div>
                     <div style="text-align:center;">
                         <div style="width:32px;height:32px;background:var(--accent-green);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 6px;">
-                            <span style="font-size:0.75rem;font-weight:800;color:#000;">5</span>
+                            <span style="font-size:0.75rem;font-weight:800;color:var(--apple-bg);">5</span>
                         </div>
                         <div style="font-size:0.68rem;color:var(--text-gray);">Track opens<br>& book demos</div>
                     </div>
@@ -725,12 +744,12 @@
 <!-- ── AI Chat Widget ────────────────────────────────────────── -->
 <div id="chat-widget" style="position:fixed;bottom:24px;right:24px;z-index:200;">
     <div id="chat-bubble" onclick="toggleChat()" style="width:52px;height:52px;background:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 8px 24px rgba(0,229,255,0.3);transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'">
-        <i class='bx bx-bot' style="font-size:1.6rem;color:#000;"></i>
+        <i class='bx bx-bot' style="font-size:1.6rem;color:var(--apple-bg);"></i>
     </div>
     <div id="chat-panel" style="display:none;position:absolute;bottom:64px;right:0;width:320px;background:var(--bg-elevated);border:1px solid var(--primary);border-radius:16px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.5);">
         <div style="background:var(--primary);padding:12px 16px;display:flex;align-items:center;gap:8px;">
-            <i class='bx bx-bot' style="font-size:1.2rem;color:#000;"></i>
-            <span style="font-weight:700;color:#000;font-size:0.9rem;">Alex — AI Sales Assistant</span>
+            <i class='bx bx-bot' style="font-size:1.2rem;color:var(--apple-bg);"></i>
+            <span style="font-weight:700;color:var(--apple-bg);font-size:0.9rem;">Alex — AI Sales Assistant</span>
         </div>
         <div id="chat-messages" style="height:260px;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;">
             <div style="background:var(--bg-surface);border-radius:12px;padding:10px 12px;font-size:0.8rem;color:var(--text-gray);max-width:90%;">
@@ -739,7 +758,7 @@
         </div>
         <div style="padding:12px;border-top:1px solid var(--secondary);display:flex;gap:8px;">
             <input id="chat-input" type="text" placeholder="Type a message..." style="flex:1;background:var(--bg-surface);border:1px solid var(--secondary);border-radius:8px;padding:8px 12px;color:white;font-size:0.8rem;outline:none;" onkeydown="if(event.key==='Enter')sendChat()">
-            <button onclick="sendChat()" style="background:var(--primary);border:none;border-radius:8px;padding:8px 14px;cursor:pointer;color:#000;font-weight:700;font-size:0.85rem;transition:background 0.2s;" onmouseover="this.style.background='#00c4d8'" onmouseout="this.style.background='var(--primary)'">→</button>
+            <button onclick="sendChat()" style="background:var(--primary);border:none;border-radius:8px;padding:8px 14px;cursor:pointer;color:var(--apple-bg);font-weight:700;font-size:0.85rem;transition:background 0.2s;" onmouseover="this.style.background='#00c4d8'" onmouseout="this.style.background='var(--primary)'">→</button>
         </div>
     </div>
 </div>

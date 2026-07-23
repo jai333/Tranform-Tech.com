@@ -1,0 +1,43 @@
+{% extends 'tracking_app/base.html' %}
+
+{% block title %}Payment Successful - Transform.io{% endblock %}
+
+{% block content %}
+<div class="container mt-5 text-center">
+    <div class="card border-0 shadow-sm mx-auto" style="max-width: 500px; background: var(--apple-card-bg); border-radius: 20px;">
+        <div class="card-body p-5">
+            <div class="mb-4">
+                <i class="bx bx-check-circle" style="font-size: 80px; color: #10b981;"></i>
+            </div>
+            <h2 class="fw-bold mb-3">Subscription Upgraded!</h2>
+            <p class="text-muted mb-4">
+                Thank you for your payment. Your new subscription plan is now active, and all features have been unlocked.
+            </p>
+            <p class="small text-muted mb-4">
+                Session ID: {{ session_id|truncatechars:15 }}...
+            </p>
+            
+            <a href="{% url 'home' %}" class="btn btn-primary btn-lg rounded-pill px-5 shadow-sm fw-bold">
+                Go to Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Confetti effect on success
+    document.addEventListener("DOMContentLoaded", function() {
+        const script = document.createElement("script");
+        script.src = "https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js";
+        script.onload = () => {
+            confetti({
+                particleCount: 150,
+                spread: 70,
+                origin: { y: 0.6 },
+                colors: ['#00E5FF', '#8b5cf6', '#10b981']
+            });
+        };
+        document.body.appendChild(script);
+    });
+</script>
+{% endblock %}

@@ -20,8 +20,8 @@
 .soc-title .pulse { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--cyber-red); box-shadow: 0 0 0 0 rgba(255,59,48,0.6); animation: pulse-ring 1.5s ease-out infinite; }
 @keyframes pulse-ring { 0% { box-shadow: 0 0 0 0 rgba(255,59,48,0.6); } 100% { box-shadow: 0 0 0 12px rgba(255,59,48,0); } }
 .soc-subtitle { font-size: 0.8rem; color: var(--apple-text-muted); margin-top: 4px; font-family: 'Fira Code', monospace; }
-.btn-report { background: linear-gradient(135deg, var(--cyber-red), #cc1f1f); color: #fff; border: none; border-radius: 10px; padding: 10px 20px; font-size: 0.875rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; transition: opacity 0.2s, transform 0.2s; }
-.btn-report:hover { opacity: 0.9; transform: translateY(-1px); color: #fff; }
+.btn-report { background: linear-gradient(135deg, var(--cyber-red), #cc1f1f); color:var(--apple-text); border: none; border-radius: 10px; padding: 10px 20px; font-size: 0.875rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; transition: opacity 0.2s, transform 0.2s; }
+.btn-report:hover { opacity: 0.9; transform: translateY(-1px); color:var(--apple-text); }
 
 /* Stats bar */
 .stats-bar { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; margin-bottom: 2rem; }
@@ -64,7 +64,7 @@
 .sev-high { background: rgba(255,149,0,0.12); color: #ffa733; border-color: rgba(255,149,0,0.3); }
 .sev-medium { background: rgba(255,214,10,0.1); color: #ffd60a; border-color: rgba(255,214,10,0.25); }
 .sev-low { background: rgba(50,215,75,0.1); color: #5edb78; border-color: rgba(50,215,75,0.25); }
-.sev-info { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.5); border-color: rgba(255,255,255,0.12); }
+.sev-info { background:var(--apple-row-hover); color:var(--apple-text-secondary); border-color:var(--apple-text-muted); }
 .status-badge { display: inline-flex; align-items: center; gap: 4px; border-radius: 12px; padding: 3px 9px; font-size: 0.69rem; font-weight: 600; }
 .st-open { background: rgba(255,214,10,0.1); color: #ffd60a; }
 .st-investigating { background: rgba(10,132,255,0.1); color: #6ab4ff; }
@@ -108,28 +108,28 @@
 
     {% if incident %}
     <!-- ── SINGLE INCIDENT DETAIL MODE ─────────────────────────────────── -->
-    <a href="{% url 'threat-dashboard' %}" style="display:inline-flex;align-items:center;gap:6px;color:rgba(255,255,255,0.5);font-size:0.8rem;text-decoration:none;margin-bottom:1.5rem"><i class="bx bx-arrow-back"></i> Back to SOC Dashboard</a>
+    <a href="{% url 'threat-dashboard' %}" style="display:inline-flex;align-items:center;gap:6px;color:var(--apple-text-secondary);font-size:0.8rem;text-decoration:none;margin-bottom:1.5rem"><i class="bx bx-arrow-back"></i> Back to SOC Dashboard</a>
 
-    <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,59,48,0.2);border-radius:16px;padding:2rem;margin-bottom:1.5rem;position:relative;overflow:hidden">
+    <div style="background:var(--apple-bg);border:1px solid rgba(255,59,48,0.2);border-radius:16px;padding:2rem;margin-bottom:1.5rem;position:relative;overflow:hidden">
         <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--cyber-red),#ff6b6b)"></div>
         <div style="font-size:0.72rem;color:var(--cyber-red);font-family:'Fira Code',monospace;margin-bottom:6px">INCIDENT-{{ incident.id }} · Detected {{ incident.detected_at|date:"M d, Y H:i" }}</div>
-        <div style="font-size:1.4rem;font-weight:700;color:#fff;margin-bottom:1rem">{{ incident.title }}</div>
+        <div style="font-size:1.4rem;font-weight:700;color:var(--apple-text);margin-bottom:1rem">{{ incident.title }}</div>
         <div style="display:flex;flex-wrap:wrap;gap:8px">
             <span class="severity-badge sev-{{ incident.severity }}">{{ incident.get_severity_display }}</span>
             <span class="status-badge st-{{ incident.status }}">{{ incident.get_status_display }}</span>
-            <span style="background:rgba(255,255,255,0.06);border-radius:6px;padding:3px 9px;font-size:0.72rem;color:rgba(255,255,255,0.5);border:1px solid rgba(255,255,255,0.1)">{{ incident.get_category_display }}</span>
+            <span style="background:var(--apple-row-hover);border-radius:6px;padding:3px 9px;font-size:0.72rem;color:var(--apple-text-secondary);border:1px solid var(--apple-border)">{{ incident.get_category_display }}</span>
         </div>
     </div>
 
     <div style="display:grid;grid-template-columns:1fr 320px;gap:1.25rem">
         <div>
-            <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:1.5rem;margin-bottom:1.25rem">
-                <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:rgba(255,255,255,0.4);margin-bottom:1rem">Description</div>
-                <div style="color:rgba(255,255,255,0.8);font-size:0.9rem;line-height:1.7;white-space:pre-wrap">{{ incident.description }}</div>
+            <div style="background:var(--apple-bg);border:1px solid var(--apple-border);border-radius:14px;padding:1.5rem;margin-bottom:1.25rem">
+                <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--apple-text-secondary);margin-bottom:1rem">Description</div>
+                <div style="color:var(--apple-text-muted);font-size:0.9rem;line-height:1.7;white-space:pre-wrap">{{ incident.description }}</div>
             </div>
             {% if incident.affected_systems %}
-            <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:1.5rem;margin-bottom:1.25rem">
-                <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:rgba(255,255,255,0.4);margin-bottom:10px">Affected Systems</div>
+            <div style="background:var(--apple-bg);border:1px solid var(--apple-border);border-radius:14px;padding:1.5rem;margin-bottom:1.25rem">
+                <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--apple-text-secondary);margin-bottom:10px">Affected Systems</div>
                 <div>{% for sys in incident.affected_systems.split %}{% if sys %}<span class="affected-tag">{{ sys|slice:":50" }}</span>{% endif %}{% endfor %}</div>
             </div>
             {% endif %}
@@ -141,37 +141,37 @@
             {% endif %}
         </div>
         <div>
-            <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:1.5rem;margin-bottom:1.25rem">
-                <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:rgba(255,255,255,0.4);margin-bottom:1rem">Incident Info</div>
+            <div style="background:var(--apple-bg);border:1px solid var(--apple-border);border-radius:14px;padding:1.5rem;margin-bottom:1.25rem">
+                <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--apple-text-secondary);margin-bottom:1rem">Incident Info</div>
                 {% for label, val in details %}
-                <div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:0.83rem">
-                    <span style="color:rgba(255,255,255,0.4)">{{ label }}</span>
-                    <span style="color:#fff;font-weight:500;text-align:right;max-width:180px">{{ val }}</span>
+                <div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--apple-border);font-size:0.83rem">
+                    <span style="color:var(--apple-text-secondary)">{{ label }}</span>
+                    <span style="color:var(--apple-text);font-weight:500;text-align:right;max-width:180px">{{ val }}</span>
                 </div>
                 {% endfor %}
-                <div style="display:flex;justify-content:space-between;padding:9px 0;font-size:0.83rem"><span style="color:rgba(255,255,255,0.4)">Reported By</span><span style="color:#fff;font-weight:500">{% if incident and incident.reported_by %}{{ incident.reported_by.get_full_name|default:incident.reported_by.username }}{% endif %}</span></div>
-                <div style="display:flex;justify-content:space-between;padding:9px 0;font-size:0.83rem;border-top:1px solid rgba(255,255,255,0.05)"><span style="color:rgba(255,255,255,0.4)">Assigned To</span><span style="color:#fff;font-weight:500">{{ incident.assigned_to.get_full_name|default:"—" }}</span></div>
-                {% if incident.resolved_at %}<div style="display:flex;justify-content:space-between;padding:9px 0;font-size:0.83rem;border-top:1px solid rgba(255,255,255,0.05)"><span style="color:rgba(255,255,255,0.4)">Resolved At</span><span style="color:#6ee7b7;font-weight:500">{{ incident.resolved_at|date:"M d, H:i" }}</span></div>{% endif %}
+                <div style="display:flex;justify-content:space-between;padding:9px 0;font-size:0.83rem"><span style="color:var(--apple-text-secondary)">Reported By</span><span style="color:var(--apple-text);font-weight:500">{% if incident and incident.reported_by %}{{ incident.reported_by.get_full_name|default:incident.reported_by.username }}{% endif %}</span></div>
+                <div style="display:flex;justify-content:space-between;padding:9px 0;font-size:0.83rem;border-top:1px solid var(--apple-border)"><span style="color:var(--apple-text-secondary)">Assigned To</span><span style="color:var(--apple-text);font-weight:500">{{ incident.assigned_to.get_full_name|default:"—" }}</span></div>
+                {% if incident.resolved_at %}<div style="display:flex;justify-content:space-between;padding:9px 0;font-size:0.83rem;border-top:1px solid var(--apple-border)"><span style="color:var(--apple-text-secondary)">Resolved At</span><span style="color:#6ee7b7;font-weight:500">{{ incident.resolved_at|date:"M d, H:i" }}</span></div>{% endif %}
             </div>
             {% if user.is_staff or user.is_admin_role %}
-            <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:1.5rem">
-                <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:rgba(255,255,255,0.4);margin-bottom:1rem">Update Incident</div>
+            <div style="background:var(--apple-bg);border:1px solid var(--apple-border);border-radius:14px;padding:1.5rem">
+                <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--apple-text-secondary);margin-bottom:1rem">Update Incident</div>
                 <form method="POST">
                     {% csrf_token %}
-                    <label style="display:block;font-size:0.72rem;color:rgba(255,255,255,0.4);margin-bottom:6px;text-transform:uppercase">Status</label>
-                    <select name="status" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:9px 12px;color:#fff;font-size:0.85rem;outline:none;font-family:inherit;margin-bottom:1rem">
+                    <label style="display:block;font-size:0.72rem;color:var(--apple-text-secondary);margin-bottom:6px;text-transform:uppercase">Status</label>
+                    <select name="status" style="width:100%;background:var(--apple-row-hover);border:1px solid var(--apple-border);border-radius:8px;padding:9px 12px;color:var(--apple-text);font-size:0.85rem;outline:none;font-family:inherit;margin-bottom:1rem">
                         {% for val, label in status_choices %}
-                        <option value="{{ val }}" {% if val == incident.status %}selected{% endif %} style="background:#1a1a1a">{{ label }}</option>
+                        <option value="{{ val }}" {% if val == incident.status %}selected{% endif %} style="background:var(--apple-card-bg)">{{ label }}</option>
                         {% endfor %}
                     </select>
-                    <label style="display:block;font-size:0.72rem;color:rgba(255,255,255,0.4);margin-bottom:6px;text-transform:uppercase">Assign To</label>
-                    <select name="assigned_to" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:9px 12px;color:#fff;font-size:0.85rem;outline:none;font-family:inherit;margin-bottom:1rem">
-                        <option value="" style="background:#1a1a1a">— Unassigned —</option>
-                        {% for u in users %}<option value="{{ u.id }}" {% if incident.assigned_to and incident.assigned_to.id == u.id %}selected{% endif %} style="background:#1a1a1a">{{ u.get_full_name|default:u.username }}</option>{% endfor %}
+                    <label style="display:block;font-size:0.72rem;color:var(--apple-text-secondary);margin-bottom:6px;text-transform:uppercase">Assign To</label>
+                    <select name="assigned_to" style="width:100%;background:var(--apple-row-hover);border:1px solid var(--apple-border);border-radius:8px;padding:9px 12px;color:var(--apple-text);font-size:0.85rem;outline:none;font-family:inherit;margin-bottom:1rem">
+                        <option value="" style="background:var(--apple-card-bg)">— Unassigned —</option>
+                        {% for u in users %}<option value="{{ u.id }}" {% if incident.assigned_to and incident.assigned_to.id == u.id %}selected{% endif %} style="background:var(--apple-card-bg)">{{ u.get_full_name|default:u.username }}</option>{% endfor %}
                     </select>
-                    <label style="display:block;font-size:0.72rem;color:rgba(255,255,255,0.4);margin-bottom:6px;text-transform:uppercase">Response Notes</label>
-                    <textarea name="response_notes" rows="3" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:9px 12px;color:#fff;font-size:0.85rem;outline:none;font-family:inherit" placeholder="Add containment / response steps...">{{ incident.response_notes|default:'' }}</textarea>
-                    <button type="submit" style="margin-top:1rem;width:100%;background:linear-gradient(135deg,var(--cyber-red),#cc1f1f);color:#fff;border:none;border-radius:8px;padding:11px;font-weight:600;cursor:pointer;font-family:inherit;font-size:0.875rem">Save Changes</button>
+                    <label style="display:block;font-size:0.72rem;color:var(--apple-text-secondary);margin-bottom:6px;text-transform:uppercase">Response Notes</label>
+                    <textarea name="response_notes" rows="3" style="width:100%;background:var(--apple-row-hover);border:1px solid var(--apple-border);border-radius:8px;padding:9px 12px;color:var(--apple-text);font-size:0.85rem;outline:none;font-family:inherit" placeholder="Add containment / response steps...">{{ incident.response_notes|default:'' }}</textarea>
+                    <button type="submit" style="margin-top:1rem;width:100%;background:linear-gradient(135deg,var(--cyber-red),#cc1f1f);color:var(--apple-text);border:none;border-radius:8px;padding:11px;font-weight:600;cursor:pointer;font-family:inherit;font-size:0.875rem">Save Changes</button>
                 </form>
             </div>
             {% endif %}
@@ -190,7 +190,7 @@
         @keyframes radar-spin { 100% { transform: rotate(360deg); } }
         @keyframes blip-pulse { 0%, 100% { opacity: 0.2; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.5); } }
         
-        .soc-header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; background: rgba(0,0,0,0.4); padding: 20px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); }
+        .soc-header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; background:var(--apple-input-bg); padding: 20px; border-radius: 16px; border:1px solid var(--apple-border); }
         .soc-header-left { display: flex; align-items: center; }
     
 .threat-grid { display: grid; grid-template-columns: 1fr 350px; gap: 1.5rem; margin-bottom: 2rem; }
@@ -290,11 +290,11 @@
                     </td>
                     <td style="color:rgba(255,255,255,0.55);font-size:0.8rem">{{ inc.get_category_display }}</td>
                     <td><span class="status-badge st-{{ inc.status }}">{{ inc.get_status_display }}</span></td>
-                    <td style="font-size:0.78rem;color:rgba(255,255,255,0.5)">
+                    <td style="font-size:0.78rem;color:var(--apple-text-secondary)">
                         {% if inc.affected_systems %}{{ inc.affected_systems|truncatechars:40 }}{% else %}—{% endif %}
                     </td>
-                    <td style="color:rgba(255,255,255,0.5);font-size:0.8rem;white-space:nowrap">{{ inc.detected_at|date:"M d, H:i" }}</td>
-                    <td style="color:rgba(255,255,255,0.7);font-size:0.8rem">{% if inc.assigned_to %}{{ inc.assigned_to.get_full_name|default:inc.assigned_to.username }}{% else %}—{% endif %}</td>
+                    <td style="color:var(--apple-text-secondary);font-size:0.8rem;white-space:nowrap">{{ inc.detected_at|date:"M d, H:i" }}</td>
+                    <td style="color:var(--apple-text-secondary);font-size:0.8rem">{% if inc.assigned_to %}{{ inc.assigned_to.get_full_name|default:inc.assigned_to.username }}{% else %}—{% endif %}</td>
                 </tr>
                 {% empty %}
                 <tr><td colspan="7">
@@ -310,4 +310,44 @@
     </div>
     {% endif %}
 </div>
+
+<script>
+    // ── Phase 2: Real-Time SOC Live Feed ───────────────────────────────────
+    document.addEventListener("DOMContentLoaded", function() {
+        const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const wsUrl = `${wsProtocol}//${window.location.host}/ws/soc/`;
+        let socWs = null;
+
+        function connectSOC() {
+            try {
+                socWs = new WebSocket(wsUrl);
+
+                socWs.onmessage = function (event) {
+                    const data = JSON.parse(event.data);
+                    if (data.type === 'incident') {
+                        // Flash the screen slightly red
+                        const flash = document.createElement('div');
+                        flash.style.cssText = "position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(255,59,48,0.15);pointer-events:none;z-index:9999;transition:opacity 1s;";
+                        document.body.appendChild(flash);
+                        setTimeout(() => flash.style.opacity = '0', 50);
+                        setTimeout(() => flash.remove(), 1050);
+
+                        // Reload page to show new threat if we are on list view
+                        if (!window.location.pathname.includes('/detail/')) {
+                            // Simple auto-refresh for MVP SOC dashboard
+                            setTimeout(() => window.location.reload(), 1500);
+                        }
+                    }
+                };
+
+                socWs.onclose = function () {
+                    setTimeout(connectSOC, 5000);
+                };
+            } catch (e) {
+                console.warn("SOC WebSocket failed:", e);
+            }
+        }
+        connectSOC();
+    });
+</script>
 {% endblock %}

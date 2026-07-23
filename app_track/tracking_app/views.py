@@ -32,6 +32,12 @@ def add_global_context(request):
 
 # Create your views here.
 
+def get_tenant_filter(user):
+    """Returns a dict to filter querysets by the user's tenant (unless they are staff/admin)."""
+    if user.is_staff or user.is_admin_role or not user.tenant:
+        return {}
+    return {'tenant': user.tenant}
+
 def home(request):
     return render(request, 'tracking_app/home.html')
 # User Authentication Views
@@ -1080,7 +1086,7 @@ def api_update_pipeline_status(request):
 def it_helpdesk_list(request):
     """Kanban-style view of all IT tickets grouped by status."""
     statuses = ['open', 'in_progress', 'on_hold', 'pending_user', 'resolved']
-    base_qs = ITTicket.objects.select_related('submitted_by', 'assigned_to').prefetch_related('comments')
+    base_qs = ITTicket.objects.filter(**get_tenant_filter(request.user)).select_related('submitted_by', 'assigned_to').prefetch_related('comments')
     if request.user.is_it_enduser:
         base_qs = base_qs.filter(submitted_by=request.user)
     columns = {s: list(base_qs.filter(status=s)) for s in statuses}
@@ -1151,6 +1157,7 @@ def it_ticket_create(request):
                 attachment=attachment,
                 submitted_by=request.user,
                 asset_id=asset_id if asset_id else None,
+                tenant=request.user.tenant,
             )
             # Email notification to staff
             try:
@@ -1389,7 +1396,7 @@ def it_ticket_update_status(request, pk):
 def threat_dashboard(request):
     """Security operations center dashboard listing all threat incidents."""
     from django.db.models import Avg, Count
-    incidents = ThreatIncident.objects.select_related('reported_by', 'assigned_to').order_by('-detected_at')
+    incidents = ThreatIncident.objects.filter(**get_tenant_filter(request.user)).select_related('reported_by', 'assigned_to').order_by('-detected_at')
     severity_filter = request.GET.get('severity')
     status_filter = request.GET.get('status')
     category_filter = request.GET.get('category')
@@ -1400,18 +1407,20 @@ def threat_dashboard(request):
     if category_filter:
         incidents = incidents.filter(category=category_filter)
     from django.utils import timezone
+    tenant_filter = get_tenant_filter(request.user)
     stats = {
-        'critical': ThreatIncident.objects.filter(severity='critical').exclude(status__in=['resolved', 'false_positive']).count(),
-        'high': ThreatIncident.objects.filter(severity='high').exclude(status__in=['resolved', 'false_positive']).count(),
-        'open': ThreatIncident.objects.filter(status='open').count(),
-        'investigating': ThreatIncident.objects.filter(status='investigating').count(),
-        'contained': ThreatIncident.objects.filter(status='contained').count(),
-        'resolved_today': ThreatIncident.objects.filter(status='resolved', resolved_at__date=timezone.now().date()).count(),
-        'total': ThreatIncident.objects.count(),
-        'by_category': list(ThreatIncident.objects.values('category').annotate(n=Count('id')).order_by('-n')[:5]),
-        'by_severity': list(ThreatIncident.objects.values('severity').annotate(n=Count('id')).order_by('-n')),
-        'avg_cvss': round(ThreatIncident.objects.exclude(status__in=['resolved', 'false_positive']).aggregate(Avg('cvss_score'))['cvss_score__avg'] or 0.0, 1),
-        'top_ips': list(ThreatIncident.objects.exclude(ip_address__isnull=True).exclude(ip_address='').values('ip_address').annotate(n=Count('id')).order_by('-n')[:5]),
+        'critical': ThreatIncident.objects.filter(**tenant_filter, severity='critical').exclude(status__in=['resolved', 'false_positive']).count(),
+        'high': ThreatIncident.objects.filter(**tenant_filter, severity='high').exclude(status__in=['resolved', 'false_positive']).count(),
+        'open': ThreatIncident.objects.filter(**tenant_filter, status='open').count(),
+        'investigating': ThreatIncident.objects.filter(**tenant_filter, status='investigating').count(),
+        'contained': ThreatIncident.objects.filter(**tenant_filter, status='contained').count(),
+        'resolved_today': ThreatIncident.objects.filter(**tenant_filter, status='resolved', resolved_at__date=timezone.now().date()).count(),
+        'resolved_today': ThreatIncident.objects.filter(**tenant_filter, status='resolved', resolved_at__date=timezone.now().date()).count(),
+        'total': ThreatIncident.objects.filter(**tenant_filter).count(),
+        'by_category': list(ThreatIncident.objects.filter(**tenant_filter).values('category').annotate(n=Count('id')).order_by('-n')[:5]),
+        'by_severity': list(ThreatIncident.objects.filter(**tenant_filter).values('severity').annotate(n=Count('id')).order_by('-n')),
+        'avg_cvss': round(ThreatIncident.objects.filter(**tenant_filter).exclude(status__in=['resolved', 'false_positive']).aggregate(Avg('cvss_score'))['cvss_score__avg'] or 0.0, 1),
+        'top_ips': list(ThreatIncident.objects.filter(**tenant_filter).exclude(ip_address__isnull=True).exclude(ip_address='').values('ip_address').annotate(n=Count('id')).order_by('-n')[:5]),
     }
     context = {
         'incidents': incidents,
@@ -1866,8 +1875,8 @@ def it_asset_list(request):
         messages.error(request, 'Permission denied')
         return redirect('home')
     
-    assets = ITAsset.objects.select_related('vendor', 'owner').all().order_by('-created_at')
-    vendors = ITVendor.objects.all().order_by('name')
+    assets = ITAsset.objects.filter(**get_tenant_filter(request.user)).select_related('vendor', 'owner').order_by('-created_at')
+    vendors = ITVendor.objects.filter(**get_tenant_filter(request.user)).order_by('name')
     
     context = {
         'assets': assets,
@@ -1900,7 +1909,8 @@ def it_asset_create(request):
                 asset_type=asset_type,
                 status=status,
                 vendor_id=vendor_id if vendor_id else None,
-                owner_id=owner_id if owner_id else None
+                owner_id=owner_id if owner_id else None,
+                tenant=request.user.tenant,
             )
             messages.success(request, f'Asset {asset_tag} added.')
     return redirect('it-asset-list')
@@ -1920,7 +1930,8 @@ def it_vendor_create(request):
             ITVendor.objects.create(
                 name=name,
                 contact_name=contact_name or None,
-                contact_email=contact_email or None
+                contact_email=contact_email or None,
+                tenant=request.user.tenant,
             )
             messages.success(request, f'Vendor {name} added.')
     return redirect('it-asset-list')
@@ -2196,7 +2207,7 @@ def account_list(request):
     industry_filter = request.GET.get('industry')
     size_filter = request.GET.get('size')
     
-    accounts = SalesAccount.objects.prefetch_related('contacts').order_by('-created_at')
+    accounts = SalesAccount.objects.filter(**get_tenant_filter(request.user)).prefetch_related('contacts').order_by('-created_at')
     
     if industry_filter:
         accounts = accounts.filter(industry=industry_filter)
@@ -2214,16 +2225,54 @@ def account_list(request):
 
 
 @login_required
+def company_data_manager(request):
+    """Portal for a tenant to view and manage their isolated company data."""
+    if not request.user.tenant:
+        messages.error(request, "You are not assigned to a company tenant.")
+        return redirect('home')
+        
+    tenant = request.user.tenant
+    
+    # Handle simple CSV upload simulation
+    if request.method == 'POST' and request.FILES.get('data_file'):
+        upload_type = request.POST.get('upload_type')
+        # Here we would normally parse CSV, but we'll just show a success message for MVP
+        messages.success(request, f"Successfully processed {upload_type} data for {tenant.name}.")
+        return redirect('company-data-manager')
+        
+    context = {
+        'page_title': 'Company Data Manager',
+        'tenant': tenant,
+        'stats': {
+            'assets': ITAsset.objects.filter(tenant=tenant).count(),
+            'tickets': ITTicket.objects.filter(tenant=tenant).count(),
+            'candidates': Candidate.objects.filter(tenant=tenant).count(),
+            'jobs': Job.objects.filter(tenant=tenant).count(),
+        },
+        'users': User.objects.filter(tenant=tenant)
+    }
+    return render(request, 'tracking_app/company_data.html', context)
+
+
+@login_required
 def account_detail(request, pk):
     """360° B2B Account view."""
     from .sales_models import Account as SalesAccount, AccountActivity, AccountContact
-    account = get_object_or_404(SalesAccount, pk=pk)
+    from .models import ITAsset, User
+    import secrets, string
+
+    account = get_object_or_404(SalesAccount, pk=pk, **get_tenant_filter(request.user))
     contacts = account.contacts.all()
     activities = account.account_activities.order_by('-created_at')[:20]
     deals = account.deals.all() if hasattr(account, 'deals') else []
+    assets = ITAsset.objects.all().order_by('name')
+
+    # Store newly generated credentials to flash in modal
+    new_credentials = None
 
     if request.method == 'POST':
         action = request.POST.get('action')
+
         if action == 'add_contact':
             AccountContact.objects.create(
                 account=account,
@@ -2234,6 +2283,8 @@ def account_detail(request, pk):
                 phone=request.POST.get('phone', ''),
             )
             messages.success(request, "Contact added.")
+            return redirect('account-detail', pk=pk)
+
         elif action == 'log_activity':
             AccountActivity.objects.create(
                 account=account,
@@ -2243,13 +2294,110 @@ def account_detail(request, pk):
                 performed_by=request.user,
             )
             messages.success(request, "Activity logged.")
-        return redirect('account-detail', pk=pk)
+            return redirect('account-detail', pk=pk)
+
+        elif action == 'authorize_asset':
+            asset_id = request.POST.get('asset_id')
+            contact_id = request.POST.get('contact_id')
+            try:
+                asset = ITAsset.objects.get(pk=asset_id)
+                contact = AccountContact.objects.get(pk=contact_id, account=account)
+                # Try to find a platform user matching the contact's email
+                target_user = User.objects.filter(email=contact.email).first()
+                if target_user:
+                    asset.owner = target_user
+                    asset.status = 'active'
+                    asset.save()
+                    messages.success(request, f"✅ Asset '{asset.name}' authorized to {contact.full_name} ({target_user.username}).")
+                else:
+                    messages.warning(request, f"⚠️ No platform user found for {contact.email}. Generate credentials first, then re-authorize the asset.")
+            except (ITAsset.DoesNotExist, AccountContact.DoesNotExist):
+                messages.error(request, "Invalid asset or contact selection.")
+            return redirect('account-detail', pk=pk)
+
+        elif action == 'generate_credentials':
+            contact_id = request.POST.get('contact_id')
+            try:
+                contact = AccountContact.objects.get(pk=contact_id, account=account)
+                email = contact.email or request.POST.get('email', '')
+                first_name = contact.first_name
+                last_name = contact.last_name
+
+                if not email:
+                    messages.error(request, "Contact has no email address. Please add one first.")
+                    return redirect('account-detail', pk=pk)
+
+                # Check if user already exists
+                if User.objects.filter(email=email).exists():
+                    existing = User.objects.get(email=email)
+                    messages.warning(request, f"A platform user already exists for {email}. Username: '{existing.username}'. Use the Authorize Asset button to assign assets to them.")
+                    return redirect('account-detail', pk=pk)
+
+                # Generate secure password
+                alphabet = string.ascii_letters + string.digits + "!@#$%^&*"
+                password = ''.join(secrets.choice(alphabet) for _ in range(14))
+
+                # Generate unique username
+                base_username = email.split('@')[0].lower().replace('.', '_')
+                username = base_username
+                counter = 1
+                while User.objects.filter(username=username).exists():
+                    username = f"{base_username}{counter}"
+                    counter += 1
+
+                # Get dashboard permissions from form
+                can_view_ats = request.POST.get('can_view_ats') == 'on'
+                can_view_sales = request.POST.get('can_view_sales') == 'on'
+                can_view_it = request.POST.get('can_view_it') == 'on'
+                can_view_executive = request.POST.get('can_view_executive') == 'on'
+
+                # Get or create tenant for this account
+                from .models import Tenant
+                tenant = account.tenant if hasattr(account, 'tenant') and account.tenant else None
+
+                new_user = User.objects.create_user(
+                    username=username,
+                    email=email,
+                    password=password,
+                    first_name=first_name,
+                    last_name=last_name,
+                    tenant=tenant,
+                    role='recruiter',
+                    can_view_ats=can_view_ats,
+                    can_view_sales=can_view_sales,
+                    can_view_it=can_view_it,
+                    can_view_executive=can_view_executive,
+                )
+
+                # Store credentials in session to display in modal
+                request.session['new_credentials'] = {
+                    'contact_name': contact.full_name,
+                    'username': username,
+                    'password': password,
+                    'email': email,
+                    'access': {
+                        'ATS': can_view_ats,
+                        'Sales & CRM': can_view_sales,
+                        'IT Helpdesk': can_view_it,
+                        'C-Suite Executive': can_view_executive,
+                    }
+                }
+                return redirect('account-detail', pk=pk)
+
+            except AccountContact.DoesNotExist:
+                messages.error(request, "Contact not found.")
+                return redirect('account-detail', pk=pk)
+
+    # Check if credentials were just generated (pop from session)
+    new_credentials = request.session.pop('new_credentials', None)
 
     return render(request, 'tracking_app/account_detail.html', {
         'account': account,
         'contacts': contacts,
         'activities': activities,
         'deals': deals,
+        'assets': assets,
+        'new_credentials': new_credentials,
     })
 
 
@@ -2457,7 +2605,41 @@ def api_global_search(request):
             'color': '#9333ea'
         })
 
+    # ── Phase 2 AI Integration: OpenAI Semantic Fallback ──
+    if not results:
+        ai_results = _ai_fallback_suggestions(query)
+        results.extend(ai_results)
+
     return JsonResponse({'results': results})
+
+def _ai_fallback_suggestions(query: str) -> list:
+    """Generate navigation suggestions using AI when no DB results found."""
+    import os
+    if not os.getenv("OPENAI_API_KEY"):
+        return []
+    try:
+        from .sales_engine import _call_openai_json
+        result = _call_openai_json(
+            "You are a navigation assistant for an enterprise platform. Return JSON only.",
+            f"""The user typed "{query}" in a command palette for an ATS/CRM/IT platform.
+Suggest 3 relevant navigation actions from this list:
+- Go to Sales Dashboard
+- Create New Lead
+- View IT Tickets
+- Open Candidate List
+- Check Threat Dashboard
+- View IT Assets
+- Open Unified Inbox
+- Go to Accounts
+
+Return JSON: {{"suggestions": [{{"title": "...", "url": "/...", "icon": "bx bx-...", "subtitle": "..."}}]}}"""
+        )
+        return result.get("suggestions", [])
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).error("AI semantic search error: %s", e)
+        return []
+
 
 
 # ── EXECUTIVE DASHBOARD ──────────────────────────────────────────────────
@@ -2465,9 +2647,9 @@ def api_global_search(request):
 @login_required
 def executive_dashboard(request):
     """A high-level dashboard aggregating stats from Sales, ATS, IT, and Security."""
-    if not (request.user.is_staff or request.user.is_admin_role):
+    if not (request.user.is_staff or request.user.is_admin_role or request.user.can_view_executive):
         messages.error(request, "You don't have permission to view the executive dashboard.")
-        return redirect('dashboard')
+        return redirect('home')
         
     from django.db.models import Sum
     from .sales_models import Deal

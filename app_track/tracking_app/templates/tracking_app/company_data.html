@@ -1,0 +1,218 @@
+{% extends 'tracking_app/base.html' %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .data-card {
+        background: var(--apple-card-bg);
+        border: 1px solid var(--apple-border);
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        backdrop-filter: blur(var(--apple-blur));
+        -webkit-backdrop-filter: blur(var(--apple-blur));
+    }
+    
+    .data-stat-box {
+        background:var(--apple-row-hover);
+        border: 1px solid var(--apple-border);
+        border-radius: 12px;
+        padding: 1rem;
+        text-align: center;
+        transition: transform 0.3s ease;
+    }
+    
+    .data-stat-box:hover {
+        transform: translateY(-5px);
+        background:var(--apple-border);
+    }
+    
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #00E5FF;
+        margin: 0.5rem 0;
+    }
+    
+    .stat-label {
+        font-size: 0.85rem;
+        color: var(--apple-text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    .upload-zone {
+        border: 2px dashed rgba(255, 255, 255, 0.2);
+        border-radius: 12px;
+        padding: 2rem;
+        text-align: center;
+        background:var(--apple-input-bg);
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .upload-zone:hover {
+        border-color: #00E5FF;
+        background: rgba(0, 229, 255, 0.05);
+    }
+    
+    .user-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .user-item {
+        display: flex;
+        align-items: center;
+        padding: 1rem;
+        border-bottom: 1px solid var(--apple-border);
+    }
+    
+    .user-item:last-child {
+        border-bottom: none;
+    }
+    
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: rgba(0, 229, 255, 0.1);
+        color: #00E5FF;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        font-weight: 600;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1"><i class="fa-solid fa-building-user text-cyan"></i> Company Data Manager</h2>
+            <p class="text-secondary mb-0">Tenant: <strong class="text-white">{{ tenant.name }}</strong></p>
+        </div>
+        <div>
+            <a href="{% url 'home' %}" class="btn btn-outline-light"><i class="fa-solid fa-arrow-left"></i> Back to Dashboard</a>
+        </div>
+    </div>
+    
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="row">
+        <!-- Stats Row -->
+        <div class="col-12 mb-4">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <div class="data-stat-box">
+                        <i class="fa-solid fa-server fs-4 text-cyan"></i>
+                        <div class="stat-value">{{ stats.assets }}</div>
+                        <div class="stat-label">IT Assets</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="data-stat-box">
+                        <i class="fa-solid fa-ticket fs-4 text-cyan"></i>
+                        <div class="stat-value">{{ stats.tickets }}</div>
+                        <div class="stat-label">Support Tickets</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="data-stat-box">
+                        <i class="fa-solid fa-users fs-4 text-cyan"></i>
+                        <div class="stat-value">{{ stats.candidates }}</div>
+                        <div class="stat-label">Candidates</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="data-stat-box">
+                        <i class="fa-solid fa-briefcase fs-4 text-cyan"></i>
+                        <div class="stat-value">{{ stats.jobs }}</div>
+                        <div class="stat-label">Jobs Posted</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Left Column -->
+        <div class="col-lg-7">
+            <div class="data-card">
+                <h4 class="mb-3"><i class="fa-solid fa-cloud-arrow-up text-cyan"></i> Upload Data (CSV)</h4>
+                <p class="text-secondary small mb-4">Upload a CSV file to bulk import data directly into your company's isolated database. Data uploaded here cannot be seen by other companies.</p>
+                
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label text-secondary">Data Type</label>
+                        <select name="upload_type" class="form-select" style="background:var(--apple-input-bg); color: white; border: 1px solid var(--apple-border);">
+                            <option value="assets">IT Assets Inventory</option>
+                            <option value="candidates">Candidate List</option>
+                            <option value="contacts">Account Contacts</option>
+                        </select>
+                    </div>
+                    
+                    <div class="upload-zone mb-3" onclick="document.getElementById('file-upload').click()">
+                        <i class="fa-solid fa-file-csv fs-1 text-secondary mb-2"></i>
+                        <h5 class="text-white mb-1">Click to browse or drag file here</h5>
+                        <p class="text-secondary small mb-0">Supports .csv up to 10MB</p>
+                        <input type="file" id="file-upload" name="data_file" accept=".csv" style="display: none;" onchange="document.getElementById('file-name').textContent = this.files[0].name">
+                        <div id="file-name" class="mt-2 text-cyan fw-bold"></div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100" style="background: var(--apple-accent); border: none;"><i class="fa-solid fa-upload"></i> Process Import</button>
+                </form>
+            </div>
+            
+            <div class="data-card">
+                <h4 class="mb-3"><i class="fa-solid fa-cloud-arrow-down text-cyan"></i> Export Data</h4>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-light flex-grow-1"><i class="fa-solid fa-download"></i> Export Assets</button>
+                    <button class="btn btn-outline-light flex-grow-1"><i class="fa-solid fa-download"></i> Export Tickets</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right Column -->
+        <div class="col-lg-5">
+            <div class="data-card h-100">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4 class="mb-0"><i class="fa-solid fa-users-gear text-cyan"></i> Provisioned Users</h4>
+                    <span class="badge" style="background: rgba(0,229,255,0.2); color: #00E5FF;">{{ users|length }} Total</span>
+                </div>
+                
+                <ul class="user-list">
+                    {% for u in users %}
+                    <li class="user-item">
+                        <div class="user-avatar">{{ u.first_name|first|default:u.username|first|upper }}</div>
+                        <div class="flex-grow-1">
+                            <div class="text-white fw-bold">{{ u.get_full_name|default:u.username }}</div>
+                            <div class="small text-secondary">{{ u.email }}</div>
+                        </div>
+                        <div>
+                            {% if u.is_active %}
+                                <span class="badge bg-success">Active</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Inactive</span>
+                            {% endif %}
+                        </div>
+                    </li>
+                    {% empty %}
+                    <li class="text-secondary text-center py-4">No users provisioned yet.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
