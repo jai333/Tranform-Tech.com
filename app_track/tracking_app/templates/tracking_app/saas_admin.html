@@ -96,6 +96,38 @@
         {% endfor %}
     {% endif %}
 
+    <!-- Stats Row -->
+    <div class="row mb-4 g-3">
+        <div class="col-md-3">
+            <div class="admin-card text-center" style="padding:1.5rem; margin:0;">
+                <i class="fa-solid fa-buildings text-cyan fs-2 mb-2"></i>
+                <h3 class="text-white mb-0">{{ stats.total_tenants }}</h3>
+                <span class="text-secondary small text-uppercase" style="letter-spacing:1px;">Total Companies</span>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="admin-card text-center" style="padding:1.5rem; margin:0;">
+                <i class="fa-solid fa-users text-cyan fs-2 mb-2"></i>
+                <h3 class="text-white mb-0">{{ stats.total_users }}</h3>
+                <span class="text-secondary small text-uppercase" style="letter-spacing:1px;">Total Users</span>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="admin-card text-center" style="padding:1.5rem; margin:0;">
+                <i class="fa-solid fa-star text-warning fs-2 mb-2"></i>
+                <h3 class="text-white mb-0">{{ stats.premium_tenants }}</h3>
+                <span class="text-secondary small text-uppercase" style="letter-spacing:1px;">Premium Subscriptions</span>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="admin-card text-center" style="padding:1.5rem; margin:0;">
+                <i class="fa-solid fa-user-shield text-danger fs-2 mb-2"></i>
+                <h3 class="text-white mb-0">{{ stats.superadmins }}</h3>
+                <span class="text-secondary small text-uppercase" style="letter-spacing:1px;">Super Admins</span>
+            </div>
+        </div>
+    </div>
+
     <div class="row">
         <!-- Tenants / Subscriptions -->
         <div class="col-12 mb-4">

@@ -3034,9 +3034,17 @@ def saas_admin_dashboard(request):
     tenants = Tenant.objects.all().order_by('-created_at')
     users = User.objects.all().select_related('tenant').order_by('-date_joined')
     
+    stats = {
+        'total_tenants': tenants.count(),
+        'total_users': users.count(),
+        'premium_tenants': tenants.exclude(subscription_plan='free').count(),
+        'superadmins': users.filter(is_superuser=True).count(),
+    }
+    
     context = {
         'tenants': tenants,
         'users': users,
+        'stats': stats,
         'page_title': 'SaaS Super Admin Panel'
     }
     return render(request, 'tracking_app/saas_admin.html', context)
