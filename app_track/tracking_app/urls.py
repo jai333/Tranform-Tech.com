@@ -175,7 +175,6 @@ urlpatterns = [
     path('billing/', billing_views.billing_page, name='billing-page'),
     path('billing/checkout/', billing_views.create_checkout_session, name='billing-checkout'),
     path('billing/checkout/<str:plan_key>/', billing_views.create_checkout_session, name='billing-checkout-plan'),
-    path('billing/mock-checkout-process/', billing_views.mock_checkout_process, name='mock-checkout-process'),
     path('billing/success/', billing_views.billing_success, name='billing-success'),
     path('billing/portal/', billing_views.billing_portal, name='billing-portal'),
     path('billing/webhook/', billing_views.stripe_webhook, name='stripe-webhook'),
