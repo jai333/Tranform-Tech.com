@@ -1359,7 +1359,6 @@
                         {% if user.is_superuser or user.tenant.subscription_plan in 'growth,enterprise' %}
                         <li><a href="{% url 'unified-inbox' %}" class="{% if '/inbox/' in request.path %}active{% endif %}" style="white-space: nowrap;"><i class="fas fa-inbox"></i> Inbox</a></li>
                         {% endif %}
-                        {% endif %}
 
                         <!-- Jobseeker Specific -->
                         {% if user.is_jobseeker %}
@@ -2156,7 +2155,6 @@
             }
         });
     </script>
-    {% endif %}
     </body>
 
 
