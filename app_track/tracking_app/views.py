@@ -2538,6 +2538,68 @@ def account_detail(request, pk):
                 messages.error(request, "Contact not found.")
                 return redirect('account-detail', pk=pk)
 
+        elif request.FILES.get('data_file'):
+            # Handle simple CSV upload simulation on behalf of the Tenant
+            import csv
+            import io
+            import uuid
+            from .models import Tenant, Candidate, ITAsset
+            from .sales_models import Account as SalesAccountModel
+            
+            upload_type = request.POST.get('upload_type')
+            data_file = request.FILES.get('data_file')
+            tenant = account.tenant
+            
+            if not tenant:
+                messages.error(request, "This account is not linked to a Tenant. Please ensure a Tenant exists.")
+                return redirect('account-detail', pk=pk)
+            
+            try:
+                csv_file = io.StringIO(data_file.read().decode('utf-8-sig'))
+                reader = csv.DictReader(csv_file)
+                
+                created_count = 0
+                for row in reader:
+                    try:
+                        if upload_type == 'assets':
+                            ITAsset.objects.create(
+                                tenant=tenant,
+                                name=row.get('name', 'Unnamed Asset'),
+                                asset_tag=row.get('asset_tag', f"TAG-{uuid.uuid4().hex[:6].upper()}"),
+                                asset_type=row.get('asset_type', 'hardware').lower()
+                            )
+                        elif upload_type == 'candidates':
+                            email = row.get('email')
+                            if not email:
+                                continue
+                            Candidate.objects.create(
+                                tenant=tenant,
+                                first_name=row.get('first_name', ''),
+                                last_name=row.get('last_name', ''),
+                                email=email,
+                                user=request.user
+                            )
+                        elif upload_type == 'accounts':
+                            name = row.get('name')
+                            if not name:
+                                continue
+                            SalesAccountModel.objects.create(
+                                tenant=tenant,
+                                name=name,
+                                industry=row.get('industry', ''),
+                                website=row.get('website', ''),
+                                owner=request.user
+                            )
+                        created_count += 1
+                    except Exception as row_e:
+                        continue
+                
+                messages.success(request, f"Successfully uploaded {created_count} {upload_type} records for {tenant.name}.")
+            except Exception as e:
+                messages.error(request, f"Failed to parse CSV: {e}")
+                
+            return redirect('account-detail', pk=pk)
+
     # Check if credentials were just generated (pop from session)
     new_credentials = request.session.pop('new_credentials', None)
 

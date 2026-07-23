@@ -1,171 +1,267 @@
 {% extends 'tracking_app/base.html' %}
-{% block title %}{{ account.name }} | B2B Account{% endblock %}
+{% block title %}{{ account.name }} | Tenant Command Center{% endblock %}
 {% block content %}
 <style>
+    /* ── Exotic Premium Design System ── */
     .enterprise-title { font-size:2.2rem; font-weight:800; color:var(--apple-text); margin-bottom:0.25rem; }
     
-    .glass-card { background:var(--apple-card-bg); border:1px solid var(--apple-border); border-radius:20px; padding:1.5rem; backdrop-filter:blur(20px); height:100%; display:flex; flex-direction:column; }
-    .glass-card-header { padding:1.25rem 1.5rem; background:var(--apple-bg); border-bottom:1px solid var(--apple-border); font-weight:600; color:var(--apple-text); display:flex; align-items:center; font-size:1rem; }
-
-    .list-item-glass { padding:16px; border-bottom:1px solid var(--apple-border); transition:background 0.2s; }
-    .list-item-glass:hover { background:var(--apple-row-hover); }
+    .data-card {
+        background: linear-gradient(145deg, rgba(255,255,255,0.03) 0%, rgba(0,0,0,0.2) 100%);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 1.5rem;
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        position: relative;
+        overflow: hidden;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+    .data-card::before {
+        content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(0, 229, 255, 0.3), transparent);
+    }
     
-    .badge-glass { background:var(--apple-input-bg); color:var(--apple-text); padding:4px 10px; border-radius:12px; font-size:0.75rem; font-weight:600; border:1px solid var(--apple-border); }
+    .data-stat-box {
+        background: linear-gradient(135deg, rgba(255,255,255,0.02), rgba(255,255,255,0.05));
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 16px; padding: 1.5rem; text-align: center;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    .data-stat-box:hover {
+        transform: translateY(-5px) scale(1.02);
+        background: linear-gradient(135deg, rgba(0, 229, 255, 0.05), rgba(0, 229, 255, 0.1));
+        border-color: rgba(0, 229, 255, 0.3);
+        box-shadow: 0 10px 25px rgba(0, 229, 255, 0.15);
+    }
+    .stat-value { font-size: 2rem; font-weight: 700; color: #00E5FF; margin: 0.5rem 0; }
+    .stat-label { font-size: 0.85rem; color: var(--text-gray); text-transform: uppercase; letter-spacing: 1px; }
+    
+    .upload-zone {
+        border: 2px dashed rgba(0, 229, 255, 0.3);
+        border-radius: 16px; padding: 2.5rem; text-align: center;
+        background: rgba(0, 229, 255, 0.02); cursor: pointer; transition: all 0.3s ease;
+    }
+    .upload-zone:hover {
+        border-color: #00E5FF; background: rgba(0, 229, 255, 0.08);
+        box-shadow: 0 0 20px rgba(0, 229, 255, 0.1);
+    }
 
-    /* ── Modals ── */
+    .list-item-glass {
+        padding:16px; border-bottom:1px solid rgba(255,255,255,0.1); transition:background 0.2s;
+    }
+    .list-item-glass:hover { background:rgba(255,255,255,0.02); }
+    .list-item-glass:last-child { border-bottom:none; }
+
+    /* Forms & Inputs */
+    .form-control-glass { background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:white; border-radius:10px; padding:10px 14px; width:100%; font-size:0.9rem; }
+    .form-control-glass:focus { outline:none; border-color:#00E5FF; background:rgba(255,255,255,0.1); }
+    .form-label-glass { color:var(--text-gray); font-size:0.85rem; margin-bottom:4px; }
+    
+    /* Modals */
     .modal-glass { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:9999; align-items:center; justify-content:center; backdrop-filter:blur(8px); }
     .modal-glass.active { display:flex; }
     .modal-content-glass { background:var(--apple-card-bg); border:1px solid var(--apple-border); border-radius:20px; width:90%; max-width:520px; padding:2rem; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5); }
-    .form-control-glass { background:var(--apple-input-bg); border:1px solid var(--apple-border); color:var(--apple-text); border-radius:10px; padding:10px 14px; width:100%; margin-bottom:1rem; font-size:0.9rem; }
-    .form-control-glass:focus { outline:none; border-color:#0891b2; box-shadow:0 0 0 3px rgba(8,145,178,0.2); }
-
-    /* ── Contact action buttons ── */
-    .contact-actions { display:flex; gap:6px; margin-top:8px; }
-    .contact-action-btn { display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:8px; border:1px solid var(--apple-border); background:var(--apple-input-bg); color:var(--apple-text-secondary); font-size:0.75rem; font-weight:600; cursor:pointer; transition:all 0.2s; text-transform:uppercase; letter-spacing:0.5px; }
-    .contact-action-btn:hover { transform:translateY(-1px); }
-    .contact-action-btn.asset { border-color:rgba(6,182,212,0.4); color:#06b6d4; }
-    .contact-action-btn.asset:hover { background:rgba(6,182,212,0.1); box-shadow:0 0 12px rgba(6,182,212,0.2); }
-    .contact-action-btn.creds { border-color:rgba(52,211,153,0.4); color:#34d399; }
-    .contact-action-btn.creds:hover { background:rgba(52,211,153,0.1); box-shadow:0 0 12px rgba(52,211,153,0.2); }
-
-    /* ── Toggle switches for permissions ── */
-    .perm-toggle-row { display:flex; align-items:center; justify-content:space-between; padding:12px 0; border-bottom:1px solid var(--apple-border); }
-    .perm-toggle-row:last-child { border-bottom:none; }
-    .perm-toggle-label { display:flex; align-items:center; gap:10px; font-size:0.9rem; color:var(--apple-text); }
-    .perm-toggle-label i { font-size:1.2rem; }
-    .perm-sub { font-size:0.75rem; color:var(--apple-text-muted); }
-    .toggle-switch { position:relative; width:44px; height:24px; cursor:pointer; }
-    .toggle-switch input { opacity:0; width:0; height:0; }
-    .toggle-slider { position:absolute; inset:0; background:var(--apple-border); border-radius:24px; transition:0.3s; }
-    .toggle-slider:before { content:''; position:absolute; height:18px; width:18px; left:3px; bottom:3px; background:#fff; border-radius:50%; transition:0.3s; }
-    input:checked + .toggle-slider { background:linear-gradient(135deg,#0891b2,#06b6d4); }
-    input:checked + .toggle-slider:before { transform:translateX(20px); }
-
-    /* ── Credential reveal card ── */
-    .cred-box { background:var(--apple-input-bg); border:1px solid var(--apple-border); border-radius:12px; padding:1.25rem; font-family:'JetBrains Mono', 'Courier New', monospace; margin:0.75rem 0; position:relative; }
-    .cred-label { font-size:0.7rem; text-transform:uppercase; letter-spacing:1px; color:var(--apple-text-muted); margin-bottom:4px; }
-    .cred-value { font-size:1rem; font-weight:700; color:#06b6d4; word-break:break-all; }
-    .copy-btn { position:absolute; top:10px; right:10px; background:rgba(6,182,212,0.15); border:1px solid rgba(6,182,212,0.3); color:#06b6d4; border-radius:6px; padding:3px 8px; font-size:0.75rem; cursor:pointer; transition:all 0.2s; }
-    .copy-btn:hover { background:rgba(6,182,212,0.3); }
-
-    /* ── Access badge pills ── */
-    .access-pill { display:inline-flex; align-items:center; gap:4px; padding:4px 10px; border-radius:20px; font-size:0.75rem; font-weight:600; margin:3px; }
-    .access-pill.granted { background:rgba(52,211,153,0.15); border:1px solid rgba(52,211,153,0.3); color:#34d399; }
-    .access-pill.denied { background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.2); color:#ef4444; }
+    
+    .badge-glass { background:rgba(255,255,255,0.05); color:white; padding:4px 10px; border-radius:12px; font-size:0.75rem; font-weight:600; border:1px solid rgba(255,255,255,0.1); }
 </style>
 
 <div class="container-fluid py-4" style="max-width:1400px;">
 
-    <!-- Breadcrumb -->
-    <a href="{% url 'account-list' %}" class="text-muted small mb-3 d-inline-flex align-items-center gap-1" style="text-decoration:none; transition:color 0.2s;"><i class="bx bx-arrow-back"></i> Back to Accounts</a>
+    <a href="{% url 'account-list' %}" class="text-muted small mb-3 d-inline-flex align-items-center gap-1" style="text-decoration:none;"><i class="bx bx-arrow-back"></i> Back to Directory</a>
 
     {% if messages %}{% for m in messages %}
-    <div class="alert mt-2" style="background:{% if 'warning' in m.tags %}rgba(255,159,10,0.1); color:#FF9F0A; border:1px solid rgba(255,159,10,0.2){% elif 'error' in m.tags %}rgba(239,68,68,0.1); color:#ef4444; border:1px solid rgba(239,68,68,0.2){% else %}rgba(50,215,75,0.1); color:#32d74b; border:1px solid rgba(50,215,75,0.2){% endif %}; border-radius:12px;">{{ m }}</div>
+    <div class="alert mt-2" style="background:{% if 'warning' in m.tags %}rgba(255,159,10,0.1); color:#FF9F0A; border:1px solid rgba(255,159,10,0.2){% elif 'error' in m.tags %}rgba(239,68,68,0.1); color:#ef4444; border:1px solid rgba(239,68,68,0.2){% else %}rgba(0,229,255,0.1); color:#00E5FF; border:1px solid rgba(0,229,255,0.2){% endif %}; border-radius:12px;">{{ m }}</div>
     {% endfor %}{% endif %}
 
     <!-- Account Header -->
-    <div class="glass-card mb-4" style="height:auto;">
+    <div class="data-card mb-4" style="height:auto; padding:2.5rem;">
         <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
             <div style="display:flex; align-items:center; gap:20px;">
-                <div style="width:72px; height:72px; background:linear-gradient(135deg, #0A84FF, #00E5FF); border-radius:16px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:2rem; color:var(--apple-text); box-shadow:0 8px 20px rgba(0,229,255,0.2);">
+                <div style="width:72px; height:72px; background:linear-gradient(135deg, #00E5FF, #005bb5); border-radius:16px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:2rem; color:white; box-shadow:0 8px 20px rgba(0,229,255,0.2);">
                     {{ account.name|make_list|first|upper }}
                 </div>
                 <div>
-                    <h1 class="enterprise-title">{{ account.name }}</h1>
-                    <div style="display:flex; flex-wrap:wrap; gap:16px; color:var(--apple-text-muted); font-size:0.9rem;">
-                        {% if account.industry %}<span style="display:flex; align-items:center; gap:4px;"><i class="bx bx-category"></i> {{ account.get_industry_display }}</span>{% endif %}
-                        {% if account.employee_count %}<span style="display:flex; align-items:center; gap:4px;"><i class="bx bx-group"></i> {{ account.get_employee_count_display }}</span>{% endif %}
-                        {% if account.phone %}<span style="display:flex; align-items:center; gap:4px;"><i class="bx bx-phone"></i> {{ account.phone }}</span>{% endif %}
-                        {% if account.website %}<a href="{{ account.website }}" target="_blank" style="color:#00E5FF; text-decoration:none; display:flex; align-items:center; gap:4px;"><i class="bx bx-link-external"></i> Website</a>{% endif %}
+                    <h1 class="enterprise-title text-white" style="margin-bottom:8px;">{{ account.name }}</h1>
+                    <div style="display:flex; flex-wrap:wrap; gap:16px; color:var(--text-gray); font-size:0.95rem;">
+                        {% if account.industry %}<span style="display:flex; align-items:center; gap:6px;"><i class="bx bx-category text-cyan"></i> {{ account.get_industry_display }}</span>{% endif %}
+                        {% if account.employee_count %}<span style="display:flex; align-items:center; gap:6px;"><i class="bx bx-group text-cyan"></i> {{ account.get_employee_count_display }}</span>{% endif %}
+                        {% if account.phone %}<span style="display:flex; align-items:center; gap:6px;"><i class="bx bx-phone text-cyan"></i> {{ account.phone }}</span>{% endif %}
+                        {% if account.website %}<a href="https://{{ account.website }}" target="_blank" style="color:#00E5FF; text-decoration:none; display:flex; align-items:center; gap:6px;"><i class="bx bx-link-external"></i> Website</a>{% endif %}
+                        {% if account.tenant %}<span class="badge" style="background:rgba(50,215,75,0.1); color:#32d74b; border:1px solid rgba(50,215,75,0.3); font-weight:600;"><i class="bx bx-check-shield"></i> Active Tenant Linked</span>{% else %}<span class="badge" style="background:rgba(255,159,10,0.1); color:#FF9F0A; border:1px solid rgba(255,159,10,0.3); font-weight:600;">Prospect</span>{% endif %}
                     </div>
                 </div>
             </div>
             <div style="display:flex; gap:12px;">
-                <button class="btn" style="background:var(--apple-input-bg); border:1px solid var(--apple-border); color:var(--apple-text); border-radius:12px; padding:10px 16px; font-weight:600; display:flex; align-items:center; gap:6px;" onclick="document.getElementById('activity-modal').classList.add('active')"><i class="bx bx-history"></i> Log Activity</button>
-                <button class="btn btn-primary" style="background:linear-gradient(135deg, #0A84FF, #005bb5); border:none; color:var(--apple-text); border-radius:12px; padding:10px 16px; font-weight:600; display:flex; align-items:center; gap:6px;" onclick="document.getElementById('contact-modal').classList.add('active')"><i class="bx bx-user-plus"></i> Add Contact</button>
+                <button class="btn" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:white; border-radius:12px; padding:10px 16px; font-weight:600;" onclick="document.getElementById('activity-modal').classList.add('active')"><i class="bx bx-history"></i> Log Activity</button>
+                <button class="btn btn-primary" style="background:linear-gradient(135deg, #0A84FF, #005bb5); border:none; color:white; border-radius:12px; padding:10px 16px; font-weight:600;" onclick="document.getElementById('contact-modal').classList.add('active')"><i class="bx bx-user-plus"></i> Add Contact</button>
             </div>
         </div>
         {% if account.description %}
-        <div style="margin-top:1.5rem; padding-top:1.5rem; border-top:1px solid var(--apple-border); color:var(--apple-text-secondary); font-size:0.95rem; line-height:1.6;">{{ account.description }}</div>
+        <div style="margin-top:1.5rem; padding-top:1.5rem; border-top:1px solid rgba(255,255,255,0.1); color:var(--text-gray); font-size:0.95rem; line-height:1.6;">{{ account.description }}</div>
         {% endif %}
     </div>
 
-    <div class="row g-4">
-        <!-- ── Contacts (with actions) ── -->
-        <div class="col-md-4">
-            <div class="glass-card" style="padding:0;">
-                <div class="glass-card-header"><i class="bx bx-group" style="color:#0A84FF; margin-right:8px; font-size:1.2rem;"></i> Contacts ({{ contacts.count }})</div>
-                <div style="flex:1; overflow-y:auto;">
-                    {% for c in contacts %}
-                    <div class="list-item-glass">
-                        <div style="display:flex; align-items:flex-start; gap:12px;">
-                            <div style="width:42px; height:42px; border-radius:50%; background:rgba(0,229,255,0.1); display:flex; align-items:center; justify-content:center; font-size:0.9rem; font-weight:700; color:#00E5FF; flex-shrink:0; border:1px solid rgba(0,229,255,0.2);">{{ c.first_name.0 }}{{ c.last_name.0 }}</div>
-                            <div style="flex:1; min-width:0;">
-                                <div style="font-weight:700; color:var(--apple-text); font-size:0.95rem;">{{ c.full_name }}</div>
-                                <div style="color:var(--apple-text-muted); font-size:0.8rem;">{{ c.title|default:"No title" }}</div>
-                                {% if c.email %}<div style="color:var(--apple-text-muted); font-size:0.75rem; margin-top:2px;"><i class="bx bx-envelope"></i> {{ c.email }}</div>{% endif %}
-                                <!-- Action Buttons -->
-                                <div class="contact-actions">
-                                    <button class="contact-action-btn asset" onclick="openAssetModal({{ c.id }}, '{{ c.full_name|escapejs }}')">
-                                        <i class="bx bx-laptop"></i> Authorize Asset
-                                    </button>
-                                    <button class="contact-action-btn creds" onclick="openCredsModal({{ c.id }}, '{{ c.full_name|escapejs }}', '{{ c.email|escapejs }}')">
-                                        <i class="bx bx-key"></i> Generate Credentials
-                                    </button>
-                                </div>
-                            </div>
+    <!-- Tenant Operations Layout -->
+    <div class="row g-4 mb-4">
+        
+        <!-- Center Column: Data Management -->
+        <div class="col-lg-6">
+            <!-- Stats -->
+            <div class="row g-3 mb-4">
+                <div class="col-6">
+                    <div class="data-stat-box">
+                        <i class="bx bx-dollar-circle fs-4" style="color:#32d74b;"></i>
+                        <div class="stat-value" style="color:#32d74b;">{{ deals|length }}</div>
+                        <div class="stat-label">Active Deals</div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="data-stat-box">
+                        <i class="bx bx-group fs-4 text-cyan"></i>
+                        <div class="stat-value">{{ contacts.count }}</div>
+                        <div class="stat-label">Contacts</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Upload Zone -->
+            <div class="data-card" style="height:auto;">
+                <h4 class="mb-3 text-white"><i class="bx bx-cloud-upload text-cyan"></i> Database Injection</h4>
+                <p class="text-secondary small mb-4">Upload a CSV file directly into this Tenant's database space. They will immediately see this data in their portal.</p>
+                
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label-glass">Data Type</label>
+                        <select name="upload_type" class="form-control-glass">
+                            <option value="candidates">Candidate List / Resumes</option>
+                            <option value="assets">IT Assets Inventory</option>
+                            <option value="accounts">Sales CRM Accounts</option>
+                        </select>
+                    </div>
+                    
+                    <div class="upload-zone mb-3" onclick="document.getElementById('file-upload').click()">
+                        <i class="bx bx-file text-secondary mb-2" style="font-size:2.5rem;"></i>
+                        <h5 class="text-white mb-1">Click to browse or drag CSV file</h5>
+                        <input type="file" id="file-upload" name="data_file" accept=".csv" style="display: none;" onchange="document.getElementById('file-name').textContent = this.files[0].name">
+                        <div id="file-name" class="mt-2 text-cyan fw-bold"></div>
+                    </div>
+                    
+                    <button type="submit" class="btn w-100 fw-bold" style="background:linear-gradient(90deg, #00E5FF, #00b3cc); color:#000; border:none; padding:12px; border-radius:12px;"><i class="bx bx-upload"></i> Execute Import</button>
+                </form>
+            </div>
+            
+            <!-- Assign Assets -->
+            <div class="data-card" style="height:auto;">
+                <h4 class="mb-3 text-white"><i class="bx bx-laptop text-cyan"></i> Authorize Tenant Asset</h4>
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="authorize_asset">
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label-glass">Select Asset</label>
+                            <select name="asset_id" class="form-control-glass" required>
+                                <option value="">-- Choose Hardware --</option>
+                                {% for asset in assets %}
+                                    <option value="{{ asset.id }}">{{ asset.name }} ({{ asset.asset_tag }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label-glass">Assign To Contact</label>
+                            <select name="contact_id" class="form-control-glass" required>
+                                <option value="">-- Select Contact --</option>
+                                {% for c in contacts %}
+                                    <option value="{{ c.id }}">{{ c.full_name }}</option>
+                                {% endfor %}
+                            </select>
                         </div>
                     </div>
-                    {% empty %}
-                    <div style="padding:2rem; text-align:center; color:var(--apple-text-muted); font-size:0.9rem;">No contacts yet.</div>
-                    {% endfor %}
-                </div>
+                    <button type="submit" class="btn w-100 fw-bold text-white" style="background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); padding:10px; border-radius:12px;"><i class="bx bx-link"></i> Bind Asset to Contact</button>
+                </form>
             </div>
         </div>
 
-        <!-- Activity Timeline -->
-        <div class="col-md-4">
-            <div class="glass-card" style="padding:0;">
-                <div class="glass-card-header"><i class="bx bx-history" style="color:#FF9F0A; margin-right:8px; font-size:1.2rem;"></i> Activity Timeline</div>
-                <div style="flex:1; overflow-y:auto; max-height:400px;">
+        <!-- Right Column: Provisioning & CRM -->
+        <div class="col-lg-6">
+            <!-- Provision Contact Credentials -->
+            <div class="data-card" style="height:auto;">
+                <h4 class="mb-3 text-white"><i class="bx bx-key text-cyan"></i> Provision App Access</h4>
+                <p class="text-secondary small mb-3">Generate secure application credentials for a contact. This will provision them as a User inside this Tenant's workspace.</p>
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="generate_credentials">
+                    <div class="mb-3">
+                        <label class="form-label-glass">Select Contact to Provision</label>
+                        <select name="contact_id" class="form-control-glass" required>
+                            {% for c in contacts %}
+                                <option value="{{ c.id }}">{{ c.full_name }} ({{ c.email|default:"No email" }})</option>
+                            {% empty %}
+                                <option disabled>No contacts available. Add one first.</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="p-3 mb-3" style="background:rgba(0,0,0,0.2); border-radius:12px; border:1px solid rgba(255,255,255,0.05);">
+                        <label class="form-label-glass mb-3">Dashboard Entitlements</label>
+                        <div class="d-flex flex-wrap gap-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" name="can_view_ats" id="ats" checked>
+                                <label class="form-check-label text-white small" for="ats">ATS / HR</label>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" name="can_view_sales" id="sales">
+                                <label class="form-check-label text-white small" for="sales">Sales CRM</label>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" name="can_view_it" id="it">
+                                <label class="form-check-label text-white small" for="it">IT Helpdesk</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn w-100 fw-bold" style="background: linear-gradient(90deg, #32d74b, #28a745); color: #fff; border: none; padding: 12px; border-radius: 12px; box-shadow: 0 4px 15px rgba(50,215,75,0.3);"><i class="bx bx-user-check"></i> Generate Secure Credentials</button>
+                </form>
+                
+                <!-- Display New Credentials if generated -->
+                {% if new_credentials %}
+                <div class="mt-4 p-3" style="background:rgba(0,229,255,0.1); border:1px solid #00E5FF; border-radius:12px;">
+                    <h6 class="text-cyan mb-3"><i class="bx bx-check-shield"></i> User Provisioned Successfully</h6>
+                    <div style="font-family:monospace; font-size:1rem; color:white; line-height:1.6;">
+                        Username: <span style="color:#00E5FF; font-weight:bold;">{{ new_credentials.username }}</span><br>
+                        Password: <span style="color:#00E5FF; font-weight:bold;">{{ new_credentials.password }}</span>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Activity Timeline -->
+            <div class="data-card" style="flex:1;">
+                <h4 class="mb-3 text-white"><i class="bx bx-pulse text-cyan"></i> Activity Timeline</h4>
+                <div style="overflow-y:auto; flex:1; max-height:400px; padding-right:8px;">
                     {% for a in activities %}
                     <div class="list-item-glass">
                         <div style="display:flex; gap:12px; align-items:flex-start;">
-                            <div style="width:32px; height:32px; border-radius:50%; background:var(--apple-input-bg); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                            <div style="width:36px; height:36px; border-radius:10px; background:rgba(255,255,255,0.05); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
                                 {% if a.activity_type == 'call' %}<i class="bx bx-phone-call" style="color:#0A84FF;"></i>
                                 {% elif a.activity_type == 'email' %}<i class="bx bx-envelope" style="color:#32D74B;"></i>
                                 {% elif a.activity_type == 'meeting' %}<i class="bx bx-video" style="color:#FF9F0A;"></i>
-                                {% else %}<i class="bx bx-note" style="color:var(--apple-text-muted);"></i>{% endif %}
+                                {% else %}<i class="bx bx-note" style="color:var(--text-gray);"></i>{% endif %}
                             </div>
                             <div>
-                                <div style="font-weight:600; color:var(--apple-text); font-size:0.9rem; margin-bottom:2px;">{{ a.subject }}</div>
-                                <div style="color:var(--apple-text-muted); font-size:0.75rem;">{{ a.get_activity_type_display }} • {{ a.performed_by.username|default:"System" }} • {{ a.created_at|date:"M d" }}</div>
-                                {% if a.notes %}<div style="color:var(--apple-text-secondary); font-size:0.85rem; margin-top:6px; line-height:1.4;">{{ a.notes|truncatechars:80 }}</div>{% endif %}
+                                <div style="font-weight:600; color:white; font-size:0.95rem; margin-bottom:2px;">{{ a.subject }}</div>
+                                <div style="color:var(--text-gray); font-size:0.8rem;">{{ a.get_activity_type_display }} • {{ a.performed_by.username|default:"System" }} • {{ a.created_at|date:"M d" }}</div>
+                                {% if a.notes %}<div style="color:rgba(255,255,255,0.7); font-size:0.85rem; margin-top:6px; line-height:1.4;">{{ a.notes }}</div>{% endif %}
                             </div>
                         </div>
                     </div>
                     {% empty %}
-                    <div style="padding:2rem; text-align:center; color:var(--apple-text-muted); font-size:0.9rem;">No activities logged.</div>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-
-        <!-- Active Deals -->
-        <div class="col-md-4">
-            <div class="glass-card" style="padding:0;">
-                <div class="glass-card-header"><i class="bx bx-dollar-circle" style="color:#32D74B; margin-right:8px; font-size:1.2rem;"></i> Pipeline ({{ deals|length }})</div>
-                <div style="flex:1; overflow-y:auto;">
-                    {% for d in deals %}
-                    <div class="list-item-glass">
-                        <div style="font-weight:600; color:var(--apple-text); font-size:0.95rem; margin-bottom:6px;">{{ d.lead.company_name|default:d }}</div>
-                        <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <span class="badge-glass">{{ d.get_stage_display }}</span>
-                            <span style="color:#32D74B; font-weight:700; font-size:0.95rem;">${{ d.deal_value_monthly|default:d.value|floatformat:0 }}/mo</span>
-                        </div>
-                    </div>
-                    {% empty %}
-                    <div style="padding:2rem; text-align:center; color:var(--apple-text-muted); font-size:0.9rem;">No deals linked.</div>
+                    <div style="padding:2rem; text-align:center; color:var(--text-gray); font-size:0.9rem;">No CRM activities logged.</div>
                     {% endfor %}
                 </div>
             </div>
@@ -173,234 +269,48 @@
     </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════ MODALS ═══════ -->
-
-<!-- Log Activity Modal -->
+<!-- Log Activity Modal (Retained) -->
 <div id="activity-modal" class="modal-glass">
     <div class="modal-content-glass">
-        <h3 style="color:var(--apple-text); margin-top:0; margin-bottom:1.5rem; display:flex; align-items:center; gap:8px;"><i class="bx bx-history" style="color:#0A84FF;"></i> Log Activity</h3>
+        <h3 style="color:white; margin-top:0; margin-bottom:1.5rem; display:flex; align-items:center; gap:8px;"><i class="bx bx-history text-cyan"></i> Log Activity</h3>
         <form method="POST">{% csrf_token %}
             <input type="hidden" name="action" value="log_activity">
-            <select name="activity_type" class="form-control-glass">
+            <select name="activity_type" class="form-control-glass mb-3">
                 <option value="call">📞 Phone Call</option>
                 <option value="email">📧 Email</option>
                 <option value="meeting">🎥 Meeting</option>
                 <option value="demo">🖥️ Product Demo</option>
-                <option value="follow_up">🔁 Follow-up</option>
                 <option value="note">📝 Note</option>
             </select>
-            <input type="text" name="subject" class="form-control-glass" placeholder="Subject / Summary" required>
-            <textarea name="notes" class="form-control-glass" rows="4" placeholder="Notes..."></textarea>
+            <input type="text" name="subject" class="form-control-glass mb-3" placeholder="Subject / Summary" required>
+            <textarea name="notes" class="form-control-glass mb-3" rows="4" placeholder="Notes..."></textarea>
             <div style="display:flex; gap:12px; margin-top:1rem;">
-                <button type="submit" class="btn btn-primary" style="flex:1; border:none; border-radius:10px; padding:12px; font-weight:600;">Save Activity</button>
-                <button type="button" class="btn" style="flex:1; background:var(--apple-input-bg); border:1px solid var(--apple-border); color:var(--apple-text); border-radius:10px; padding:12px; font-weight:600;" onclick="document.getElementById('activity-modal').classList.remove('active')">Cancel</button>
+                <button type="submit" class="btn btn-primary" style="flex:1; border:none; border-radius:10px; padding:12px; font-weight:600; background:#00E5FF; color:#000;">Save Activity</button>
+                <button type="button" class="btn" style="flex:1; background:rgba(255,255,255,0.1); color:white; border-radius:10px; padding:12px; font-weight:600;" onclick="document.getElementById('activity-modal').classList.remove('active')">Cancel</button>
             </div>
         </form>
     </div>
 </div>
 
-<!-- Add Contact Modal -->
+<!-- Add Contact Modal (Retained) -->
 <div id="contact-modal" class="modal-glass">
     <div class="modal-content-glass">
-        <h3 style="color:var(--apple-text); margin-top:0; margin-bottom:1.5rem; display:flex; align-items:center; gap:8px;"><i class="bx bx-user-plus" style="color:#00E5FF;"></i> Add Contact</h3>
+        <h3 style="color:white; margin-top:0; margin-bottom:1.5rem; display:flex; align-items:center; gap:8px;"><i class="bx bx-user-plus text-cyan"></i> Add Contact</h3>
         <form method="POST">{% csrf_token %}
             <input type="hidden" name="action" value="add_contact">
-            <div style="display:flex; gap:12px;">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;" class="mb-3">
                 <input type="text" name="first_name" class="form-control-glass" placeholder="First Name" required>
                 <input type="text" name="last_name" class="form-control-glass" placeholder="Last Name" required>
             </div>
-            <input type="text" name="title" class="form-control-glass" placeholder="Job Title">
-            <input type="email" name="email" class="form-control-glass" placeholder="Email Address">
-            <input type="text" name="phone" class="form-control-glass" placeholder="Phone Number">
+            <input type="text" name="title" class="form-control-glass mb-3" placeholder="Job Title">
+            <input type="email" name="email" class="form-control-glass mb-3" placeholder="Email Address">
+            <input type="text" name="phone" class="form-control-glass mb-3" placeholder="Phone Number">
             <div style="display:flex; gap:12px; margin-top:1rem;">
-                <button type="submit" class="btn btn-primary" style="flex:1; background:linear-gradient(135deg, #0A84FF, #005bb5); border:none; border-radius:10px; padding:12px; font-weight:600;">Add Contact</button>
-                <button type="button" class="btn" style="flex:1; background:var(--apple-input-bg); border:1px solid var(--apple-border); color:var(--apple-text); border-radius:10px; padding:12px; font-weight:600;" onclick="document.getElementById('contact-modal').classList.remove('active')">Cancel</button>
+                <button type="submit" class="btn btn-primary" style="flex:1; border:none; border-radius:10px; padding:12px; font-weight:600; background:#00E5FF; color:#000;">Save Contact</button>
+                <button type="button" class="btn" style="flex:1; background:rgba(255,255,255,0.1); color:white; border-radius:10px; padding:12px; font-weight:600;" onclick="document.getElementById('contact-modal').classList.remove('active')">Cancel</button>
             </div>
         </form>
     </div>
 </div>
 
-<!-- ── Authorize Asset Modal ── -->
-<div id="asset-modal" class="modal-glass">
-    <div class="modal-content-glass">
-        <div style="display:flex; align-items:center; gap:12px; margin-bottom:1.5rem;">
-            <div style="width:44px; height:44px; background:rgba(6,182,212,0.15); border:1px solid rgba(6,182,212,0.3); border-radius:12px; display:flex; align-items:center; justify-content:center;">
-                <i class="bx bx-laptop" style="font-size:1.4rem; color:#06b6d4;"></i>
-            </div>
-            <div>
-                <h3 style="color:var(--apple-text); margin:0; font-size:1.2rem; font-weight:700;">Authorize IT Asset</h3>
-                <p id="asset-contact-name" style="color:var(--apple-text-muted); margin:0; font-size:0.85rem;"></p>
-            </div>
-        </div>
-        <form method="POST" id="asset-form">{% csrf_token %}
-            <input type="hidden" name="action" value="authorize_asset">
-            <input type="hidden" name="contact_id" id="asset-contact-id">
-            <label style="font-size:0.8rem; text-transform:uppercase; letter-spacing:1px; color:var(--apple-text-muted); font-weight:600;">Select Asset to Authorize</label>
-            <select name="asset_id" class="form-control-glass" style="margin-top:6px;">
-                {% for asset in assets %}
-                <option value="{{ asset.id }}">{{ asset.name }} — [{{ asset.asset_tag }}] ({{ asset.get_asset_type_display }})</option>
-                {% empty %}
-                <option disabled>No assets available</option>
-                {% endfor %}
-            </select>
-            <div style="background:rgba(6,182,212,0.05); border:1px solid rgba(6,182,212,0.15); border-radius:10px; padding:12px; margin-bottom:1rem; font-size:0.83rem; color:var(--apple-text-muted);">
-                <i class="bx bx-info-circle" style="color:#06b6d4;"></i>
-                The asset will be linked to the platform user account matching this contact's email. If no user exists yet, generate credentials first.
-            </div>
-            <div style="display:flex; gap:12px;">
-                <button type="submit" class="btn" style="flex:1; background:linear-gradient(135deg,#0891b2,#06b6d4); border:none; color:var(--apple-text); border-radius:10px; padding:12px; font-weight:700;">Authorize Asset</button>
-                <button type="button" class="btn" style="flex:1; background:var(--apple-input-bg); border:1px solid var(--apple-border); color:var(--apple-text); border-radius:10px; padding:12px; font-weight:600;" onclick="document.getElementById('asset-modal').classList.remove('active')">Cancel</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- ── Generate Credentials Modal ── -->
-<div id="creds-modal" class="modal-glass">
-    <div class="modal-content-glass">
-        <div style="display:flex; align-items:center; gap:12px; margin-bottom:1.5rem;">
-            <div style="width:44px; height:44px; background:rgba(52,211,153,0.15); border:1px solid rgba(52,211,153,0.3); border-radius:12px; display:flex; align-items:center; justify-content:center;">
-                <i class="bx bx-key" style="font-size:1.4rem; color:#34d399;"></i>
-            </div>
-            <div>
-                <h3 style="color:var(--apple-text); margin:0; font-size:1.2rem; font-weight:700;">Generate Platform Credentials</h3>
-                <p id="creds-contact-name" style="color:var(--apple-text-muted); margin:0; font-size:0.85rem;"></p>
-            </div>
-        </div>
-        <form method="POST" id="creds-form">{% csrf_token %}
-            <input type="hidden" name="action" value="generate_credentials">
-            <input type="hidden" name="contact_id" id="creds-contact-id">
-
-            <label style="font-size:0.8rem; text-transform:uppercase; letter-spacing:1px; color:var(--apple-text-muted); font-weight:600; display:block; margin-bottom:8px;">Dashboard Access & Permissions</label>
-            <div style="background:var(--apple-input-bg); border:1px solid var(--apple-border); border-radius:14px; padding:0 1rem; margin-bottom:1.25rem;">
-                <div class="perm-toggle-row">
-                    <div class="perm-toggle-label">
-                        <i class="bx bx-briefcase" style="color:#0A84FF;"></i>
-                        <div>
-                            <div>ATS — Applicant Tracking</div>
-                            <div class="perm-sub">Candidates, jobs, interviews</div>
-                        </div>
-                    </div>
-                    <label class="toggle-switch"><input type="checkbox" name="can_view_ats" checked><span class="toggle-slider"></span></label>
-                </div>
-                <div class="perm-toggle-row">
-                    <div class="perm-toggle-label">
-                        <i class="bx bx-trending-up" style="color:#32D74B;"></i>
-                        <div>
-                            <div>Sales & CRM</div>
-                            <div class="perm-sub">Accounts, deals, pipeline</div>
-                        </div>
-                    </div>
-                    <label class="toggle-switch"><input type="checkbox" name="can_view_sales" checked><span class="toggle-slider"></span></label>
-                </div>
-                <div class="perm-toggle-row">
-                    <div class="perm-toggle-label">
-                        <i class="bx bx-desktop" style="color:#06b6d4;"></i>
-                        <div>
-                            <div>IT Helpdesk & Assets</div>
-                            <div class="perm-sub">Tickets, assets, vendors</div>
-                        </div>
-                    </div>
-                    <label class="toggle-switch"><input type="checkbox" name="can_view_it" checked><span class="toggle-slider"></span></label>
-                </div>
-                <div class="perm-toggle-row">
-                    <div class="perm-toggle-label">
-                        <i class="bx bx-bar-chart-alt-2" style="color:#FF9F0A;"></i>
-                        <div>
-                            <div>C-Suite Executive Dashboard</div>
-                            <div class="perm-sub">Reports, analytics, KPIs</div>
-                        </div>
-                    </div>
-                    <label class="toggle-switch"><input type="checkbox" name="can_view_executive"><span class="toggle-slider"></span></label>
-                </div>
-            </div>
-
-            <div style="background:rgba(52,211,153,0.05); border:1px solid rgba(52,211,153,0.15); border-radius:10px; padding:12px; margin-bottom:1rem; font-size:0.83rem; color:var(--apple-text-muted);">
-                <i class="bx bx-lock-alt" style="color:#34d399;"></i>
-                A secure 14-character password will be auto-generated. Share it once — it cannot be recovered. The user can reset it from their profile.
-            </div>
-
-            <div style="display:flex; gap:12px;">
-                <button type="submit" class="btn" style="flex:1; background:linear-gradient(135deg,#059669,#34d399); border:none; color:var(--apple-text); border-radius:10px; padding:12px; font-weight:700;"><i class="bx bx-key me-2"></i>Generate & Provision</button>
-                <button type="button" class="btn" style="flex:1; background:var(--apple-input-bg); border:1px solid var(--apple-border); color:var(--apple-text); border-radius:10px; padding:12px; font-weight:600;" onclick="document.getElementById('creds-modal').classList.remove('active')">Cancel</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- ── Credentials Reveal Modal (shown after redirect if new_credentials in session) ── -->
-{% if new_credentials %}
-<div id="reveal-modal" class="modal-glass active">
-    <div class="modal-content-glass" style="max-width:560px;">
-        <div style="text-align:center; margin-bottom:1.5rem;">
-            <div style="width:60px; height:60px; background:rgba(52,211,153,0.15); border:1px solid rgba(52,211,153,0.3); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 1rem;">
-                <i class="bx bx-check-shield" style="font-size:2rem; color:#34d399;"></i>
-            </div>
-            <h3 style="color:var(--apple-text); margin:0 0 4px; font-size:1.3rem; font-weight:800;">Credentials Generated!</h3>
-            <p style="color:var(--apple-text-muted); font-size:0.88rem; margin:0;">
-                Platform access provisioned for <strong style="color:var(--apple-text);">{{ new_credentials.contact_name }}</strong>
-            </p>
-        </div>
-
-        <div class="cred-box">
-            <div class="cred-label">Username</div>
-            <div class="cred-value" id="reveal-username">{{ new_credentials.username }}</div>
-            <button class="copy-btn" onclick="copyToClipboard('reveal-username', this)"><i class="bx bx-copy"></i> Copy</button>
-        </div>
-        <div class="cred-box">
-            <div class="cred-label">Password (shown once — copy now)</div>
-            <div class="cred-value" id="reveal-password">{{ new_credentials.password }}</div>
-            <button class="copy-btn" onclick="copyToClipboard('reveal-password', this)"><i class="bx bx-copy"></i> Copy</button>
-        </div>
-        <div class="cred-box">
-            <div class="cred-label">Email</div>
-            <div class="cred-value" style="color:var(--apple-text-secondary);" id="reveal-email">{{ new_credentials.email }}</div>
-            <button class="copy-btn" onclick="copyToClipboard('reveal-email', this)"><i class="bx bx-copy"></i> Copy</button>
-        </div>
-
-        <div style="margin-top:1rem;">
-            <div style="font-size:0.8rem; text-transform:uppercase; letter-spacing:1px; color:var(--apple-text-muted); font-weight:600; margin-bottom:8px;">Dashboard Access Granted</div>
-            <div>
-                {% for label, granted in new_credentials.access.items %}
-                <span class="access-pill {% if granted %}granted{% else %}denied{% endif %}">
-                    {% if granted %}<i class="bx bx-check-circle"></i>{% else %}<i class="bx bx-x-circle"></i>{% endif %}
-                    {{ label }}
-                </span>
-                {% endfor %}
-            </div>
-        </div>
-
-        <button class="btn" style="width:100%; margin-top:1.5rem; background:var(--apple-input-bg); border:1px solid var(--apple-border); color:var(--apple-text); border-radius:10px; padding:12px; font-weight:600;" onclick="document.getElementById('reveal-modal').classList.remove('active')">
-            Done — I've Copied the Credentials
-        </button>
-    </div>
-</div>
-{% endif %}
-
-<script>
-function openAssetModal(contactId, contactName) {
-    document.getElementById('asset-contact-id').value = contactId;
-    document.getElementById('asset-contact-name').textContent = 'Assigning to: ' + contactName;
-    document.getElementById('asset-modal').classList.add('active');
-}
-function openCredsModal(contactId, contactName, contactEmail) {
-    document.getElementById('creds-contact-id').value = contactId;
-    document.getElementById('creds-contact-name').textContent = 'Provisioning for: ' + contactName + ' (' + contactEmail + ')';
-    document.getElementById('creds-modal').classList.add('active');
-}
-function copyToClipboard(elementId, btn) {
-    const text = document.getElementById(elementId).textContent.trim();
-    navigator.clipboard.writeText(text).then(() => {
-        btn.innerHTML = '<i class="bx bx-check"></i> Copied!';
-        btn.style.color = '#34d399';
-        setTimeout(() => { btn.innerHTML = '<i class="bx bx-copy"></i> Copy'; btn.style.color = ''; }, 2000);
-    });
-}
-// Close modals on backdrop click
-document.querySelectorAll('.modal-glass').forEach(modal => {
-    modal.addEventListener('click', function(e) {
-        if (e.target === this) this.classList.remove('active');
-    });
-});
-</script>
 {% endblock %}
