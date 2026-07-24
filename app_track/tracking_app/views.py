@@ -2484,17 +2484,37 @@ def account_detail(request, pk):
                 contact = AccountContact.objects.get(pk=contact_id, account=account)
                 # Try to find a platform user matching the contact's email
                 target_user = User.objects.filter(email=contact.email).first()
-                if target_user:
-                    asset.owner = target_user
-                    asset.status = 'active'
-                    # Auto-generate credentials for the asset
-                    creds = asset.auto_generate_credentials()
-                    asset.save()
+                if not target_user:
+                    # Auto-provision the user seamlessly
+                    base_username = contact.email.split('@')[0].lower().replace('.', '_')
+                    username = base_username
+                    counter = 1
+                    while User.objects.filter(username=username).exists():
+                        username = f"{base_username}{counter}"
+                        counter += 1
+                        
+                    alphabet = string.ascii_letters + string.digits + "!@#$%^&*"
+                    password = ''.join(secrets.choice(alphabet) for _ in range(14))
                     
-                    msg = f"✅ Asset '{asset.name}' authorized to {contact.full_name} ({target_user.username}). Auto-provisioned Device Credentials: Username='{creds['username']}', Password='{creds['password']}'"
-                    messages.success(request, msg)
-                else:
-                    messages.warning(request, f"⚠️ No platform user found for {contact.email}. Generate credentials first, then re-authorize the asset.")
+                    target_user = User.objects.create_user(
+                        username=username,
+                        email=contact.email,
+                        password=password,
+                        first_name=contact.first_name,
+                        last_name=contact.last_name,
+                        tenant=account.tenant
+                    )
+                    target_user.role = User.ROLE_JOBSEEKER
+                    target_user.save()
+
+                asset.owner = target_user
+                asset.status = 'active'
+                # Auto-generate credentials for the asset
+                creds = asset.auto_generate_credentials()
+                asset.save()
+                
+                msg = f"✅ Asset '{asset.name}' authorized to {contact.full_name} ({target_user.username}). Auto-provisioned Device Credentials: Username='{creds['username']}', Password='{creds['password']}'"
+                messages.success(request, msg)
             except (ITAsset.DoesNotExist, AccountContact.DoesNotExist):
                 messages.error(request, "Invalid asset or contact selection.")
             return redirect('account-detail', pk=pk)
