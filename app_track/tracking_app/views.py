@@ -2486,7 +2486,11 @@ def account_detail(request, pk):
                 target_user = User.objects.filter(email=contact.email).first()
                 if not target_user:
                     # Auto-provision the user seamlessly
-                    base_username = contact.email.split('@')[0].lower().replace('.', '_')
+                    email_prefix = contact.email.split('@')[0].lower().replace('.', '_') if contact.email else ""
+                    base_username = email_prefix or f"{contact.first_name.lower()}_{contact.last_name.lower()}"
+                    if not base_username.replace('_', '').strip():
+                        base_username = "contact_user"
+                        
                     username = base_username
                     counter = 1
                     while User.objects.filter(username=username).exists():

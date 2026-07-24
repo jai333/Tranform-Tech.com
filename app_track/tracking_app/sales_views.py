@@ -379,14 +379,15 @@ def api_send_email(request, email_id):
         logger.error("Error sending email %s: %s", email_id, e)
         
         # Notify the user via SalesAlert
-        SalesAlert.objects.create(
-            user=request.user,
-            lead=email.lead,
-            title="Email Delivery Failed",
-            message=f"SMTP Error: {str(e)}",
-            alert_type="action_required",
-            tenant=request.user.tenant
-        )
+        try:
+            SalesAlert.objects.create(
+                alert_type='cold_deal',  # Using an existing choice
+                title="Email Delivery Failed",
+                body=f"SMTP Error: {str(e)}",
+                lead=email.lead
+            )
+        except Exception as alert_e:
+            logger.error("Failed to create SalesAlert: %s", alert_e)
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
 @csrf_exempt
