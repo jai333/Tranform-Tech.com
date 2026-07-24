@@ -280,7 +280,12 @@ class User(AbstractUser):
     @property
     def is_it_agent(self):
         # Determine if the user is an IT agent based on their role or staff status
-        return self.is_staff or self.role in [self.ROLE_ADMIN, self.ROLE_IT]
+        return self.is_staff or self.role in [self.ROLE_ADMIN, self.ROLE_IT, 'it_admin']
+
+    @property
+    def is_it_admin(self):
+        # Determine if the user is an IT admin
+        return self.is_superuser or self.role in [self.ROLE_ADMIN, 'it_admin']
 
     @property
     def is_it_enduser(self):
