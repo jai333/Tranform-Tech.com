@@ -231,7 +231,10 @@ CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 
 # ── Production Security Settings ──────────────────────────────
-if not DEBUG:
+import sys
+IS_TESTING = 'test' in sys.argv or 'test_coverage' in sys.argv or os.getenv('GITHUB_ACTIONS') == 'true'
+
+if not DEBUG and not IS_TESTING:
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
