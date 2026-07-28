@@ -16,7 +16,7 @@
     <div class="container hero-cine-inner">
 
         <!-- Left Column: Text -->
-        <div class="hero-cine-text" data-reveal>
+        <div class="hero-cine-text">
             <div class="announce-chip">
                 <span class="chip-pulse"></span>
                 <span class="chip-text">New — AI Matching v3.0 just launched</span>
@@ -59,7 +59,7 @@
         </div>
 
         <!-- Right Column: Screenshot Mockup -->
-        <div class="hero-cine-visual" data-reveal data-delay="200">
+        <div class="hero-cine-visual">
             <div class="mockup-frame">
                 <div class="mockup-chrome">
                     <div class="chrome-dot chrome-red"></div>
@@ -74,7 +74,7 @@
             </div>
 
             <!-- Floating cards -->
-            <div class="float-card float-card-1" data-reveal data-delay="400">
+            <div class="float-card float-card-1">
                 <div class="fc-icon fc-icon-green"><i class='bx bx-trending-up'></i></div>
                 <div class="fc-content">
                     <div class="fc-num">+40%</div>
@@ -82,7 +82,7 @@
                 </div>
             </div>
 
-            <div class="float-card float-card-2" data-reveal data-delay="600">
+            <div class="float-card float-card-2">
                 <div class="fc-icon fc-icon-purple"><i class='bx bx-brain'></i></div>
                 <div class="fc-content">
                     <div class="fc-num">94%</div>
@@ -90,7 +90,7 @@
                 </div>
             </div>
 
-            <div class="float-card float-card-3" data-reveal data-delay="500">
+            <div class="float-card float-card-3">
                 <div class="fc-icon fc-icon-blue"><i class='bx bx-shield-quarter'></i></div>
                 <div class="fc-content">
                     <div class="fc-label">SOC2 Certified</div>
@@ -123,25 +123,25 @@
      ═══════════════════════════════════════════════════════════ -->
 <section class="counter-strip-section">
     <div class="container counter-strip-grid">
-        <div class="counter-item" data-reveal>
+        <div class="counter-item">
             <div class="counter-num" data-count="7" data-suffix="">7</div>
             <div class="counter-label">Service Verticals</div>
             <div class="counter-sub">All unified in one platform</div>
         </div>
         <div class="counter-div"></div>
-        <div class="counter-item" data-reveal data-delay="100">
+        <div class="counter-item">
             <div class="counter-num" data-count="40" data-suffix="%">40%</div>
             <div class="counter-label">Faster Hiring</div>
             <div class="counter-sub">Average time-to-fill reduction</div>
         </div>
         <div class="counter-div"></div>
-        <div class="counter-item" data-reveal data-delay="200">
+        <div class="counter-item">
             <div class="counter-num" data-count="94" data-suffix="%">94%</div>
             <div class="counter-label">AI Match Accuracy</div>
             <div class="counter-sub">NLP cosine similarity scoring</div>
         </div>
         <div class="counter-div"></div>
-        <div class="counter-item" data-reveal data-delay="300">
+        <div class="counter-item">
             <div class="counter-num" data-count="200" data-suffix="+">200+</div>
             <div class="counter-label">Enterprise Teams</div>
             <div class="counter-sub">Active clients globally</div>
@@ -2006,6 +2006,10 @@ body:not(.light-theme) #spotlight-layer { opacity: 1; }
     }
     // Also trigger after full load in case images shift layout
     window.addEventListener('load', revealInViewport);
+    // Guarantee visibility when returning to homepage via back/forward navigation or cache
+    window.addEventListener('pageshow', () => {
+        revealEls.forEach(el => el.classList.add('revealed'));
+    });
 })();
 
 /* ══════════════════════════════════════════════════════════════

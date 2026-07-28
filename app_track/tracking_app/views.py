@@ -40,22 +40,6 @@ def get_tenant_filter(user):
     return {'tenant': user.tenant}
 
 def home(request):
-    if request.user.is_authenticated and not request.GET.get('public'):
-        user = request.user
-        if user.is_superuser or user.is_staff or getattr(user, 'is_admin_role', False) or getattr(user, 'can_view_executive', False):
-            return redirect('executive-dashboard')
-        elif getattr(user, 'can_view_sales', False) or getattr(user, 'role', '') == 'sales':
-            return redirect('sales-dashboard')
-        elif getattr(user, 'can_view_it', False) or getattr(user, 'role', '') == 'it':
-            return redirect('it-helpdesk-list')
-        elif getattr(user, 'role', '') == 'jobseeker':
-            return redirect('my-applications')
-        elif getattr(user, 'can_view_ats', False) or getattr(user, 'role', '') == 'recruiter':
-            return redirect('candidate-list')
-        elif getattr(user, 'tenant', None):
-            return redirect('company-data-manager')
-        else:
-            return redirect('profile')
     return render(request, 'tracking_app/home.html')
 # User Authentication Views
 def register(request):
