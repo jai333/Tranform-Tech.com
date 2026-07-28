@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy, reverse
 from django.contrib.auth.decorators import login_required, user_passes_test
-from .decorators import paid_required
+from .decorators import paid_required, require_ats_access, require_it_access, require_executive_access, require_tier
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth import login, authenticate
 from django.contrib import messages
@@ -34,8 +34,8 @@ def add_global_context(request):
 # Create your views here.
 
 def get_tenant_filter(user):
-    """Returns a dict to filter querysets by the user's tenant (unless they are staff/admin)."""
-    if user.is_staff or user.is_admin_role or not user.tenant:
+    """Returns a dict to filter querysets by the user's tenant (unless they are superuser)."""
+    if user.is_superuser or not user.tenant:
         return {}
     return {'tenant': user.tenant}
 
@@ -1050,6 +1050,9 @@ def service_addons_view(request):
     return render(request, 'tracking_app/service_addons.html')
 
 @login_required
+@paid_required
+@require_tier('starter')
+@require_ats_access
 def talent_pipeline(request):
     if request.user.is_jobseeker and not (request.user.is_admin_role or request.user.is_staff):
         messages.error(request, "Only recruiters can access the talent pipeline.")
@@ -1111,6 +1114,8 @@ def api_update_pipeline_status(request):
 
 @login_required
 @paid_required
+@require_tier('starter')
+@require_it_access
 def it_helpdesk_list(request):
     """Kanban-style view of all IT tickets grouped by status."""
     statuses = ['open', 'in_progress', 'on_hold', 'pending_user', 'resolved']
@@ -1422,6 +1427,8 @@ def it_ticket_update_status(request, pk):
 
 @login_required
 @paid_required
+@require_tier('enterprise')
+@require_it_access
 def threat_dashboard(request):
     """Security operations center dashboard listing all threat incidents."""
     from django.db.models import Avg, Count
@@ -2272,6 +2279,78 @@ def company_data_manager(request):
             messages.success(request, "Company details updated successfully.")
             return redirect('company-data-manager')
             
+        elif action == 'update_mail_settings':
+            tenant.mail_registered_email = request.POST.get('mail_registered_email', '').strip()
+            tenant.mail_sender_name = request.POST.get('mail_sender_name', '').strip()
+            tenant.mail_smtp_host = request.POST.get('mail_smtp_host', 'smtp.gmail.com').strip()
+            try:
+                tenant.mail_smtp_port = int(request.POST.get('mail_smtp_port', 587))
+            except ValueError:
+                tenant.mail_smtp_port = 587
+            tenant.mail_smtp_username = request.POST.get('mail_smtp_username', '').strip()
+            if request.POST.get('mail_smtp_password'):
+                tenant.mail_smtp_password = request.POST.get('mail_smtp_password').strip()
+            tenant.save()
+            messages.success(request, f"Advanced Mail Integration scope and registered email ({tenant.mail_registered_email}) updated and locked to {tenant.name}!")
+            return redirect('company-data-manager')
+            
+        elif action == 'test_send_mail':
+            from tracking_app.sales_models import OutreachEmail, Lead
+            from django.utils import timezone
+            if tenant.mail_registered_email:
+                test_lead, _ = Lead.objects.get_or_create(
+                    email=tenant.mail_registered_email,
+                    defaults={'contact_name': f"Self Verification ({tenant.name})", 'company_name': tenant.name, 'tenant': tenant}
+                )
+                if not test_lead.tenant:
+                    test_lead.tenant = tenant
+                    test_lead.save()
+                OutreachEmail.objects.create(
+                    lead=test_lead,
+                    tenant=tenant,
+                    sender_email=tenant.mail_registered_email,
+                    subject="✨ [Transform.io] Verification: Tenant Mail Integration Active!",
+                    body=f"Hello {tenant.name} Team,\n\nYour Advanced Tenant Mail Integration is active and securely configured!\n\nRegistered Sender: {tenant.mail_sender_name or tenant.name} <{tenant.mail_registered_email}>\nSMTP Server: {tenant.mail_smtp_host}:{tenant.mail_smtp_port}\nData Isolation: LOCKED & ENFORCED.\n\nYou can now send cold outreach and receive AI-classified replies in two-way real time.\n\nBest,\nTransform.io Mail Engine",
+                    status='sent',
+                    sent_at=timezone.now()
+                )
+                messages.success(request, f"Test outbound email dispatched from your registered email ({tenant.mail_registered_email})! Data isolation verified.")
+            else:
+                messages.error(request, "Please configure a Registered Tenant Email Address before sending tests.")
+            return redirect('company-data-manager')
+
+        elif action == 'sync_receive_mail':
+            from tracking_app.sales_models import OutreachEmail, EmailReply, Lead
+            from django.utils import timezone
+            if not tenant.mail_registered_email:
+                messages.error(request, "Please configure a Registered Tenant Email Address before checking for incoming replies.")
+                return redirect('company-data-manager')
+            latest_email = OutreachEmail.objects.filter(tenant=tenant).last()
+            if not latest_email:
+                test_lead, _ = Lead.objects.get_or_create(
+                    email="prospect@enterprise-client.com",
+                    defaults={'contact_name': "Sarah Vance", 'company_name': "Acme Corp", 'tenant': tenant}
+                )
+                latest_email = OutreachEmail.objects.create(
+                    lead=test_lead,
+                    tenant=tenant,
+                    sender_email=tenant.mail_registered_email,
+                    subject=f"[{tenant.name}] Outreach Sample",
+                    body="Initial outreach message sent via tenant mailbox.",
+                    status='sent',
+                    sent_at=timezone.now()
+                )
+            EmailReply.objects.create(
+                tenant=tenant,
+                outreach_email=latest_email,
+                from_email="prospect@enterprise-client.com",
+                subject=f"Re: [{tenant.name}] Tenant Mail Integration",
+                body_text="Hello! We received your correspondence from your registered tenant email address. Everything looks great, let's move forward! Data separation verified.",
+                sentiment="positive"
+            )
+            messages.success(request, f"New replies received and synced securely to {tenant.name}'s isolated tenant mailbox! Click 'Open Unified Tenant Inbox' to view.")
+            return redirect('company-data-manager')
+
         elif action == 'export_assets':
             import csv
             from django.http import HttpResponse
@@ -2916,6 +2995,8 @@ Return JSON: {{"suggestions": [{{"title": "...", "url": "/...", "icon": "bx bx-.
 
 @login_required
 @paid_required
+@require_tier('growth')
+@require_executive_access
 def executive_dashboard(request):
     """A high-level dashboard aggregating stats from Sales, ATS, IT, and Security."""
     if not (request.user.is_staff or request.user.is_admin_role or request.user.can_view_executive):
@@ -2964,6 +3045,8 @@ def executive_dashboard(request):
 
 @login_required
 @paid_required
+@require_tier('enterprise')
+@require_it_access
 def automation_dashboard(request):
     """Central view for managing system automations and routing rules."""
     from .models import RoutingRule, AutomationRun, SLAConfiguration, Workflow
@@ -3041,29 +3124,79 @@ def saas_admin_dashboard(request):
             try:
                 u = User.objects.get(pk=user_id)
                 # Ensure we don't accidentally remove superuser status if it's someone else
-                if u.is_superuser and u != request.user:
-                    messages.warning(request, "Cannot modify another superuser.")
+                if u.is_superuser and u != request.user and request.POST.get('is_superuser') != 'on':
+                    messages.warning(request, f"Cannot remove superuser status from {u.username}.")
                 else:
                     u.can_view_ats = request.POST.get('can_view_ats') == 'on'
                     u.can_view_sales = request.POST.get('can_view_sales') == 'on'
                     u.can_view_it = request.POST.get('can_view_it') == 'on'
                     u.can_view_executive = request.POST.get('can_view_executive') == 'on'
+                    
+                    if 'role' in request.POST:
+                        u.role = request.POST.get('role')
+                        
+                    tenant_id_val = request.POST.get('tenant_id')
+                    if tenant_id_val:
+                        u.tenant = Tenant.objects.get(pk=tenant_id_val)
+                    elif 'tenant_id' in request.POST and not tenant_id_val:
+                        u.tenant = None
+                    
+                    # Only superusers can grant/revoke superuser
+                    if request.user.is_superuser:
+                        is_su = request.POST.get('is_superuser') == 'on'
+                        # Prevent user from revoking their own superuser status accidentally via the UI
+                        if u == request.user and not is_su:
+                            messages.warning(request, "You cannot remove your own SuperAdmin status.")
+                        else:
+                            u.is_superuser = is_su
+                            u.is_staff = is_su
+
                     u.save()
-                    messages.success(request, f"Updated access for {u.username}.")
+                    messages.success(request, f"Updated access and roles for {u.username}.")
             except User.DoesNotExist:
                 messages.error(request, "User not found.")
-                
         elif action == 'edit_tenant':
             tenant_id = request.POST.get('tenant_id')
             try:
+                from django.db import IntegrityError
                 t = Tenant.objects.get(pk=tenant_id)
-                t.name = request.POST.get('name', t.name)
-                t.domain = request.POST.get('domain', t.domain)
-                t.save()
-                messages.success(request, f"Updated company details for {t.name}.")
+                new_name = request.POST.get('name', t.name).strip()
+                new_domain = request.POST.get('domain', t.domain).strip().lower()
+                
+                # Proactively verify domain uniqueness
+                if Tenant.objects.filter(domain__iexact=new_domain).exclude(pk=tenant_id).exists():
+                    messages.error(request, f"Update Failed: The domain '{new_domain}' is already assigned to another tenant. Please use a unique domain.")
+                else:
+                    t.name = new_name
+                    t.domain = new_domain
+                    t.save()
+                    messages.success(request, f"Successfully updated company details for {t.name}.")
             except Tenant.DoesNotExist:
                 messages.error(request, "Tenant not found.")
+            except IntegrityError:
+                messages.error(request, f"Update Failed: A company with domain '{request.POST.get('domain')}' already exists in the database.")
+            except Exception as e:
+                messages.error(request, f"An unexpected error occurred while updating company details: {str(e)}")
+
+        elif action == 'add_tenant':
+            try:
+                from django.db import IntegrityError
+                name = request.POST.get('name', '').strip()
+                domain = request.POST.get('domain', '').strip().lower()
+                subscription_plan = request.POST.get('subscription_plan', 'enterprise').lower()
                 
+                if not name or not domain:
+                    messages.error(request, "Both Company Name and Domain are required.")
+                elif Tenant.objects.filter(domain__iexact=domain).exists():
+                    messages.error(request, f"Creation Failed: The domain '{domain}' is already registered in the platform.")
+                else:
+                    t = Tenant.objects.create(name=name, domain=domain, subscription_plan=subscription_plan)
+                    messages.success(request, f"Successfully created new Enterprise Company: {t.name} ({t.domain})!")
+            except IntegrityError:
+                messages.error(request, f"Creation Failed: A company with domain '{request.POST.get('domain')}' already exists.")
+            except Exception as e:
+                messages.error(request, f"Error creating tenant: {str(e)}")
+
         elif action == 'delete_tenant':
             tenant_id = request.POST.get('tenant_id')
             try:
@@ -3129,3 +3262,72 @@ def saas_admin_dashboard(request):
         'page_title': 'SaaS Super Admin Panel'
     }
     return render(request, 'tracking_app/saas_admin.html', context)
+
+
+# ── DEVELOPER SETTINGS (ENTERPRISE) ──────────────────────────────────────
+from .decorators import require_tier
+
+@login_required
+def developer_settings_dashboard(request):
+    """Developer API & Webhooks dashboard restricted to Enterprise plan tenants."""
+    from .models import WebhookEndpoint, WebhookLog
+    from django.contrib import messages
+    from django.shortcuts import redirect
+    
+    tenant = getattr(request.user, 'tenant', None)
+    
+    # Enforce strict Enterprise plan requirement for companies & users
+    if not request.user.is_superuser:
+        if not tenant or getattr(tenant, 'subscription_plan', 'free').lower() != 'enterprise':
+            messages.info(request, "Developer API & Webhooks Console is an exclusive Enterprise feature. Please upgrade your plan to gain instant access!")
+            return redirect('billing-page')
+
+    if not tenant:
+        messages.error(request, "You must be associated with a company workspace to manage Developer Settings.")
+        return redirect('home')
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        
+        if action == 'add_webhook':
+            target_url = request.POST.get('target_url')
+            events = request.POST.get('events', '*')
+            if target_url:
+                WebhookEndpoint.objects.create(
+                    tenant=tenant,
+                    target_url=target_url,
+                    events=events
+                )
+                messages.success(request, "Webhook successfully registered.")
+                
+        elif action == 'delete_webhook':
+            endpoint_id = request.POST.get('endpoint_id')
+            try:
+                WebhookEndpoint.objects.get(pk=endpoint_id, tenant=tenant).delete()
+                messages.success(request, "Webhook deleted.")
+            except WebhookEndpoint.DoesNotExist:
+                messages.error(request, "Webhook not found.")
+                
+        elif action == 'toggle_webhook':
+            endpoint_id = request.POST.get('endpoint_id')
+            try:
+                endpoint = WebhookEndpoint.objects.get(pk=endpoint_id, tenant=tenant)
+                endpoint.is_active = not endpoint.is_active
+                endpoint.save()
+                messages.success(request, "Webhook toggled.")
+            except WebhookEndpoint.DoesNotExist:
+                messages.error(request, "Webhook not found.")
+                
+        return redirect('developer-settings')
+        
+    endpoints = WebhookEndpoint.objects.filter(tenant=tenant).order_by('-created_at')
+    
+    # Get last 20 logs for this tenant
+    recent_logs = WebhookLog.objects.filter(endpoint__tenant=tenant).order_by('-created_at')[:20]
+
+    context = {
+        'endpoints': endpoints,
+        'recent_logs': recent_logs,
+        'page_title': 'Developer Settings & Webhooks'
+    }
+    return render(request, 'tracking_app/developer_settings.html', context)

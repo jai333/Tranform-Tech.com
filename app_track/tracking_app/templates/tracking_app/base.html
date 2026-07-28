@@ -193,7 +193,7 @@
             padding: 0;
             transition: all 0.35s ease;
             will-change: transform;
-            height: 75px;
+            height: 82px;
         }
 
         .header-content {
@@ -201,9 +201,11 @@
             justify-content: space-between;
             align-items: center;
             padding: 0 2rem;
-            max-width: 1400px;
+            max-width: 1850px;
+            width: 98%;
             margin: 0 auto;
             height: 100%;
+            gap: 20px;
         }
 
         .logo {
@@ -225,9 +227,9 @@
         }
 
         .logo img {
-            height: 40px;
+            height: 42px;
             width: auto;
-            max-width: 150px;
+            max-width: 160px;
             object-fit: contain;
         }
 
@@ -238,58 +240,125 @@
             flex-grow: 1;
         }
 
-        nav ul {
-            list-style: none;
-            display: flex;
-            width: 100%;
-            margin: 0 1.5rem;
-            background-color: transparent;
-            padding: 0;
-            border-radius: 0;
-            backdrop-filter: none;
-            -webkit-backdrop-filter: none;
-            border: none;
-            box-shadow: none;
-            flex-wrap: nowrap;
-            justify-content: space-evenly;
-            overflow: visible;
+        /* ── EXOTIC CYBER-NEBULA NAVIGATION COMMAND PILL ── */
+        nav ul.exotic-nav-pill {
+            list-style: none !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 8px !important;
+            margin: 0 1rem !important;
+            padding: 7px 16px !important;
+            background: linear-gradient(135deg, rgba(13, 17, 23, 0.85) 0%, rgba(22, 30, 42, 0.95) 100%) !important;
+            border: 1px solid rgba(0, 229, 255, 0.3) !important;
+            border-radius: 40px !important;
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.12), 0 0 25px rgba(0, 229, 255, 0.15) !important;
+            backdrop-filter: blur(24px) !important;
+            -webkit-backdrop-filter: blur(24px) !important;
+            white-space: nowrap !important;
+            overflow: visible !important;
         }
 
         nav li {
             margin: 0;
         }
 
-        nav a {
-            text-decoration: none;
-            color: var(--apple-text-secondary);
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 0.4rem;
-            padding: 0.5rem 0;
-            border-radius: 0;
-            transition: all 0.2s ease;
-            letter-spacing: 0.05em;
-            font-size: 0.75rem;
-            font-family: 'Fira Code', monospace;
-            text-transform: uppercase;
+        nav ul.exotic-nav-pill > li > a {
+            text-decoration: none !important;
+            color: #cbd5e1 !important;
+            font-weight: 700 !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 8px !important;
+            padding: 8px 16px !important;
+            border-radius: 30px !important;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+            letter-spacing: 0.04em !important;
+            font-size: 0.82rem !important;
+            font-family: 'Inter', -apple-system, system-ui, sans-serif !important;
+            text-transform: uppercase !important;
+            border: 1px solid transparent !important;
+            position: relative;
+            white-space: nowrap !important;
         }
 
-        nav a i {
-            font-size: 1rem;
+        nav ul.exotic-nav-pill > li > a i {
+            font-size: 1.08rem;
+            transition: transform 0.3s ease;
         }
 
-        nav a:hover {
-            color: var(--apple-accent);
-            background-color: transparent;
-            transform: none;
+        nav ul.exotic-nav-pill > li > a:hover {
+            color: #ffffff !important;
+            background: linear-gradient(135deg, rgba(0, 229, 255, 0.18) 0%, rgba(168, 85, 247, 0.18) 100%) !important;
+            border-color: rgba(0, 229, 255, 0.45) !important;
+            transform: translateY(-2px) scale(1.03) !important;
+            box-shadow: 0 4px 20px rgba(0, 229, 255, 0.3), inset 0 0 12px rgba(0, 229, 255, 0.15) !important;
         }
 
-        nav a.active {
-            color: var(--apple-text);
-            background-color: transparent;
-            box-shadow: none;
-            border-bottom: 2px solid var(--apple-accent);
+        nav ul.exotic-nav-pill > li > a:hover i {
+            transform: scale(1.15) rotate(4deg);
+        }
+
+        nav ul.exotic-nav-pill > li > a.active {
+            color: #00E5FF !important;
+            background: linear-gradient(135deg, rgba(0, 229, 255, 0.22) 0%, rgba(14, 165, 233, 0.25) 100%) !important;
+            border: 1px solid #00E5FF !important;
+            box-shadow: 0 0 25px rgba(0, 229, 255, 0.45), inset 0 1px 3px rgba(255, 255, 255, 0.2) !important;
+            border-radius: 30px !important;
+            font-weight: 800 !important;
+            text-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
+        }
+
+        .nav-chevron {
+            font-size: 0.68rem !important;
+            margin-left: 2px;
+            opacity: 0.8;
+            transition: transform 0.3s ease !important;
+        }
+
+        .dropdown-nav:hover .nav-chevron {
+            transform: rotate(180deg);
+        }
+
+        /* ── LIGHT THEME OVERRIDES FOR EXOTIC NAV PILL ── */
+        body.light-theme nav ul.exotic-nav-pill,
+        html.light-theme nav ul.exotic-nav-pill {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.92) 0%, rgba(240, 246, 255, 0.98) 100%) !important;
+            border: 1px solid rgba(14, 165, 233, 0.4) !important;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08), inset 0 1px 1px rgba(255, 255, 255, 0.9), 0 0 20px rgba(14, 165, 233, 0.15) !important;
+        }
+
+        body.light-theme nav ul.exotic-nav-pill > li > a,
+        html.light-theme nav ul.exotic-nav-pill > li > a {
+            color: #334155 !important;
+        }
+
+        body.light-theme nav ul.exotic-nav-pill > li > a:hover,
+        html.light-theme nav ul.exotic-nav-pill > li > a:hover {
+            color: #0f172a !important;
+            background: linear-gradient(135deg, rgba(14, 165, 233, 0.12) 0%, rgba(168, 85, 247, 0.12) 100%) !important;
+            border-color: rgba(14, 165, 233, 0.45) !important;
+        }
+
+        body.light-theme nav ul.exotic-nav-pill > li > a.active,
+        html.light-theme nav ul.exotic-nav-pill > li > a.active {
+            color: #0284c7 !important;
+            background: linear-gradient(135deg, rgba(14, 165, 233, 0.15) 0%, rgba(2, 132, 199, 0.2) 100%) !important;
+            border: 1px solid #0284c7 !important;
+            box-shadow: 0 0 15px rgba(2, 132, 199, 0.25) !important;
+        }
+
+        body.light-theme .dropdown-nav .dropdown-content,
+        html.light-theme .dropdown-nav .dropdown-content {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.97) 0%, rgba(248, 250, 252, 0.99) 100%) !important;
+            border: 1px solid rgba(14, 165, 233, 0.35) !important;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12), 0 0 20px rgba(14, 165, 233, 0.15) !important;
+        }
+
+        body.light-theme #main-header,
+        html.light-theme #main-header {
+            background: rgba(255, 255, 255, 0.88) !important;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
         }
 
         .auth-links {
@@ -1107,17 +1176,17 @@
         .dropdown-nav .dropdown-content {
             display: none;
             position: absolute;
-            top: 100%;
+            top: calc(100% + 8px);
             left: 50%;
             transform: translateX(-50%);
-            background-color: var(--apple-dropdown-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            min-width: 220px;
-            box-shadow: var(--apple-shadow);
-            border: 1px solid var(--apple-border);
-            border-radius: 12px;
-            padding: 0.5rem;
+            background: linear-gradient(135deg, rgba(13, 17, 23, 0.96) 0%, rgba(20, 27, 38, 0.98) 100%) !important;
+            backdrop-filter: blur(24px) !important;
+            -webkit-backdrop-filter: blur(24px) !important;
+            min-width: 240px;
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.75), 0 0 25px rgba(0, 229, 255, 0.25) !important;
+            border: 1px solid rgba(0, 229, 255, 0.35) !important;
+            border-radius: 16px !important;
+            padding: 0.6rem !important;
             z-index: 1000;
         }
         .dropdown-nav:hover .dropdown-content, .dropdown-content.show-dropdown {
@@ -1300,89 +1369,95 @@
             </a>
 
             <nav>
-                <ul style="white-space: nowrap; display: flex; align-items: center;">
-                    <li><a href="{% url 'home' %}" class="{% if request.path == '/' %}active{% endif %}" style="white-space: nowrap;"><i class="fas fa-home"></i> Home</a></li>
+                <ul class="exotic-nav-pill">
+                    <li><a href="{% url 'home' %}" class="{% if request.path == '/' %}active{% endif %}"><i class="fas fa-home" style="color: #38bdf8; filter: drop-shadow(0 0 4px rgba(56, 189, 248, 0.6));"></i> <span>Home</span></a></li>
                     
                     {% if user.is_authenticated %}
                         
                         <!-- C-SUITE DASHBOARDS -->
-                        {% if user.is_superuser or user.tenant.subscription_plan == 'enterprise' %}
+                        {% if user.is_superuser or user.can_view_executive or user.is_staff %}
                         <li class="dropdown-nav" onclick="this.querySelector('.dropdown-content').classList.toggle('show-dropdown')">
-                            <a href="javascript:void(0)" class="{% if '/executive-dashboard/' in request.path or '/automation/dashboard/' in request.path or '/ai-pipeline/' in request.path %}active{% endif %}" style="color:#00E5FF; white-space: nowrap;">
-                                <i class="fa-solid fa-crown"></i> C-Suite <i class="fas fa-chevron-down" style="font-size: 0.7em; margin-left: 4px;"></i>
+                            <a href="javascript:void(0)" class="{% if '/executive-dashboard/' in request.path or '/automation/dashboard/' in request.path or '/ai-pipeline/' in request.path %}active{% endif %}">
+                                <i class="fa-solid fa-crown" style="color: #f59e0b; filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.7));"></i> <span>C-Suite</span> <i class="fas fa-chevron-down nav-chevron"></i>
                             </a>
                             <ul class="dropdown-content">
-                                <li><a href="{% url 'executive-dashboard' %}"><i class="fa-solid fa-chart-pie"></i> Executive Analytics</a></li>
-                                <li><a href="{% url 'automation-dashboard' %}"><i class="fa-solid fa-robot"></i> Workflow Automation</a></li>
-                                <li><a href="{% url 'ai-pipeline-dashboard' %}"><i class="fa-solid fa-chart-network"></i> Recruitment Telemetry</a></li>
+                                <li><a href="{% url 'executive-dashboard' %}"><i class="fa-solid fa-chart-pie" style="color: #f59e0b;"></i> Executive Analytics</a></li>
+                                <li><a href="{% url 'automation-dashboard' %}"><i class="fa-solid fa-robot" style="color: #00E5FF;"></i> Workflow Automation</a></li>
+                                <li><a href="{% url 'ai-pipeline-dashboard' %}"><i class="fa-solid fa-chart-network" style="color: #a855f7;"></i> Recruitment Telemetry</a></li>
                             </ul>
                         </li>
                         {% endif %}
 
                         <!-- IT DASHBOARD -->
-                        {% if user.is_superuser or user.tenant.subscription_plan in 'growth,enterprise' %}
+                        {% if user.is_superuser or user.can_view_it or user.is_staff or user.role == 'admin' %}
                         <li class="dropdown-nav" onclick="this.querySelector('.dropdown-content').classList.toggle('show-dropdown')">
-                            <a href="{% url 'it-helpdesk-list' %}" class="{% if '/it/' in request.path %}active{% endif %}" style="white-space: nowrap;">
-                                <i class="fa-solid fa-desktop"></i> IT Dashboard <i class="fas fa-chevron-down" style="font-size: 0.7em; margin-left: 4px;"></i>
+                            <a href="{% url 'it-helpdesk-list' %}" class="{% if '/it/' in request.path %}active{% endif %}">
+                                <i class="fa-solid fa-desktop" style="color: #6366f1; filter: drop-shadow(0 0 5px rgba(99, 102, 241, 0.6));"></i> <span>IT Dashboard</span> <i class="fas fa-chevron-down nav-chevron"></i>
                             </a>
                             <ul class="dropdown-content">
-                                <li><a href="{% url 'it-helpdesk-list' %}"><i class="fa-solid fa-headset"></i> Tickets</a></li>
-                                <li><a href="{% url 'it-asset-list' %}"><i class="fa-solid fa-server"></i> Assets & Vendors</a></li>
+                                <li><a href="{% url 'it-helpdesk-list' %}"><i class="fa-solid fa-headset" style="color: #6366f1;"></i> Tickets</a></li>
+                                <li><a href="{% url 'it-asset-list' %}"><i class="fa-solid fa-server" style="color: #38bdf8;"></i> Assets & Vendors</a></li>
                                 {% if user.is_it_admin or user.is_superuser %}
-                                <li><a href="{% url 'it-admin-settings' %}"><i class="fa-solid fa-gear"></i> IT Admin Settings</a></li>
+                                <li><a href="{% url 'it-admin-settings' %}"><i class="fa-solid fa-gear" style="color: #00E5FF;"></i> IT Admin Settings</a></li>
                                 {% endif %}
                                 {% if user.is_it_agent or user.is_superuser %}
-                                <li><a href="{% url 'it-reports' %}"><i class="fa-solid fa-chart-bar"></i> IT Reports</a></li>
+                                <li><a href="{% url 'it-reports' %}"><i class="fa-solid fa-chart-bar" style="color: #10b981;"></i> IT Reports</a></li>
                                 {% endif %}
                             </ul>
                         </li>
                         {% endif %}
 
                         <!-- SALES DASHBOARD & ATS -->
-                        {% if user.is_superuser or user.tenant.subscription_plan in 'starter,growth,enterprise' %}
-                        <li><a href="{% url 'sales-dashboard' %}" class="{% if '/sales/' in request.path %}active{% endif %}" style="white-space: nowrap;"><i class="fas fa-chart-line"></i> Sales</a></li>
+                        {% if user.is_superuser or user.can_view_sales or user.is_staff %}
+                        <li><a href="{% url 'sales-dashboard' %}" class="{% if '/sales/' in request.path %}active{% endif %}"><i class="fas fa-chart-line" style="color: #10b981; filter: drop-shadow(0 0 5px rgba(16, 185, 129, 0.6));"></i> <span>Sales</span></a></li>
+                        {% endif %}
                         
+                        {% if user.is_superuser or user.can_view_ats or user.is_staff %}
                         <li class="dropdown-nav" onclick="this.querySelector('.dropdown-content').classList.toggle('show-dropdown')">
-                            <a href="javascript:void(0)" class="{% if '/candidates/' in request.path or '/applications/' in request.path or '/job-applications/' in request.path or '/interviews/' in request.path or '/jobs/' in request.path %}active{% endif %}" style="white-space: nowrap;">
-                                <i class="fa-solid fa-users-viewfinder"></i> ATS <i class="fas fa-chevron-down" style="font-size: 0.7em; margin-left: 4px;"></i>
+                            <a href="javascript:void(0)" class="{% if '/candidates/' in request.path or '/applications/' in request.path or '/job-applications/' in request.path or '/interviews/' in request.path or '/jobs/' in request.path %}active{% endif %}">
+                                <i class="fa-solid fa-users-viewfinder" style="color: #ec4899; filter: drop-shadow(0 0 5px rgba(236, 72, 153, 0.6));"></i> <span>ATS</span> <i class="fas fa-chevron-down nav-chevron"></i>
                             </a>
                             <ul class="dropdown-content">
-                                <li><a href="{% url 'candidate-list' %}"><i class="fas fa-user-tie"></i> Candidates</a></li>
-                                <li><a href="{% url 'application-list' %}"><i class="fas fa-file-alt"></i> Applications</a></li>
-                                <li><a href="{% url 'job-applications-list' %}"><i class="fas fa-clipboard-list"></i> Job Applications</a></li>
-                                <li><a href="{% url 'interview-list' %}"><i class="fas fa-handshake"></i> Interviews</a></li>
-                                <li><a href="{% url 'job-list' %}"><i class="fa-solid fa-briefcase"></i> Jobs</a></li>
+                                <li><a href="{% url 'candidate-list' %}"><i class="fas fa-user-tie" style="color: #ec4899;"></i> Candidates</a></li>
+                                <li><a href="{% url 'application-list' %}"><i class="fas fa-file-alt" style="color: #38bdf8;"></i> Applications</a></li>
+                                <li><a href="{% url 'job-applications-list' %}"><i class="fas fa-clipboard-list" style="color: #f59e0b;"></i> Job Applications</a></li>
+                                <li><a href="{% url 'interview-list' %}"><i class="fas fa-handshake" style="color: #10b981;"></i> Interviews</a></li>
+                                <li><a href="{% url 'job-list' %}"><i class="fa-solid fa-briefcase" style="color: #6366f1;"></i> Jobs</a></li>
                             </ul>
                         </li>
                         {% endif %}
 
-                        {% if user.is_superuser or user.tenant.subscription_plan in 'growth,enterprise' %}
-                        <li><a href="{% url 'unified-inbox' %}" class="{% if '/inbox/' in request.path %}active{% endif %}" style="white-space: nowrap;"><i class="fas fa-inbox"></i> Inbox</a></li>
+                        {% if user.is_superuser or user.can_view_sales or user.is_staff %}
+                        <li><a href="{% url 'unified-inbox' %}" class="{% if '/inbox/' in request.path %}active{% endif %}"><i class="fas fa-inbox" style="color: #a855f7; filter: drop-shadow(0 0 5px rgba(168, 85, 247, 0.6));"></i> <span>Inbox</span></a></li>
                         {% endif %}
 
                         <!-- Jobseeker Specific -->
                         {% if user.is_jobseeker %}
-                        <li><a href="{% url 'interview-list' %}" class="{% if '/interviews/' in request.path %}active{% endif %}" style="white-space: nowrap;"><i class="fa-solid fa-calendar-check"></i> Interviews</a></li>
-                        <li><a href="{% url 'ai-pipeline-dashboard' %}" class="{% if '/ai-pipeline/' in request.path %}active{% endif %}" style="white-space: nowrap;"><i class="fa-solid fa-chart-network"></i> AI Pipeline</a></li>
-                        <li><a href="{% url 'job-list' %}" class="{% if '/jobs/' in request.path %}active{% endif %}" style="white-space: nowrap;"><i class="fas fa-briefcase"></i> Jobs</a></li>
+                        <li><a href="{% url 'interview-list' %}" class="{% if '/interviews/' in request.path %}active{% endif %}"><i class="fa-solid fa-calendar-check" style="color: #10b981;"></i> <span>Interviews</span></a></li>
+                        <li><a href="{% url 'ai-pipeline-dashboard' %}" class="{% if '/ai-pipeline/' in request.path %}active{% endif %}"><i class="fa-solid fa-chart-network" style="color: #a855f7;"></i> <span>AI Pipeline</span></a></li>
+                        <li><a href="{% url 'job-list' %}" class="{% if '/jobs/' in request.path %}active{% endif %}"><i class="fas fa-briefcase" style="color: #6366f1;"></i> <span>Jobs</span></a></li>
                         {% endif %}
 
                         <!-- Common -->
-                        <li><a href="{% url 'account-list' %}" class="{% if '/accounts/' in request.path %}active{% endif %}" style="white-space: nowrap;"><i class="fa-solid fa-buildings"></i> Accounts</a></li>
+                        <li><a href="{% url 'account-list' %}" class="{% if '/accounts/' in request.path %}active{% endif %}"><i class="fa-solid fa-buildings" style="color: #14b8a6; filter: drop-shadow(0 0 5px rgba(20, 184, 166, 0.6));"></i> <span>Accounts</span></a></li>
                         
                         <li class="dropdown-nav" onclick="this.querySelector('.dropdown-content').classList.toggle('show-dropdown')">
-                            <a href="javascript:void(0)" class="{% if '/security/' in request.path %}active{% endif %}" style="white-space: nowrap;">
-                                <i class="fa-solid fa-shield-halved"></i> Security <i class="fas fa-chevron-down" style="font-size: 0.7em; margin-left: 4px;"></i>
+                            <a href="javascript:void(0)" class="{% if '/security/' in request.path %}active{% endif %}">
+                                <i class="fa-solid fa-shield-halved" style="color: #ef4444; filter: drop-shadow(0 0 6px rgba(239, 68, 68, 0.6));"></i> <span>Security</span> <i class="fas fa-chevron-down nav-chevron"></i>
                             </a>
                             <ul class="dropdown-content">
-                                {% if user.is_superuser or user.tenant.subscription_plan == 'enterprise' %}
-                                <li><a href="{% url 'threat-dashboard' %}"><i class="fa-solid fa-triangle-exclamation"></i> Security Report</a></li>
-                                <li><a href="{% url 'vuln-list' %}"><i class="fa-solid fa-bug"></i> Vulnerabilities</a></li>
+                                {% if user.is_superuser or user.can_view_it or user.is_staff %}
+                                <li><a href="{% url 'threat-dashboard' %}"><i class="fa-solid fa-triangle-exclamation" style="color: #ef4444;"></i> Security Report</a></li>
+                                <li><a href="{% url 'vuln-list' %}"><i class="fa-solid fa-bug" style="color: #f59e0b;"></i> Vulnerabilities</a></li>
                                 {% endif %}
-                                <li><a href="{% url 'ip-blocklist' %}"><i class="fa-solid fa-ban"></i> IP Blocklist</a></li>
-                                <li><a href="{% url 'report-phishing' %}"><i class="fa-solid fa-fish"></i> Report Phishing</a></li>
+                                <li><a href="{% url 'ip-blocklist' %}"><i class="fa-solid fa-ban" style="color: #6366f1;"></i> IP Blocklist</a></li>
+                                <li><a href="{% url 'report-phishing' %}"><i class="fa-solid fa-fish" style="color: #10b981;"></i> Report Phishing</a></li>
                             </ul>
                         </li>
+
+                        {% if user.is_superuser or user.can_view_it or user.is_staff or user.tenant %}
+                        <li><a href="{% url 'developer-settings' %}" class="{% if '/developer-settings/' in request.path %}active{% endif %}"><i class="fa-solid fa-code" style="color: #00E5FF; filter: drop-shadow(0 0 8px rgba(0, 229, 255, 0.8));"></i> <span>Developer API</span></a></li>
+                        {% endif %}
 
                     {% endif %}
                 </ul>
@@ -1424,8 +1499,8 @@
                             <i class="fas fa-user-friends"></i> Friends
                         </a>
                         {% if user.tenant %}
-                        <a href="{% url 'company-data-manager' %}" class="user-dropdown-item">
-                            <i class="fas fa-database text-cyan"></i> Company Data
+                        <a href="{% url 'company-data-manager' %}" class="user-dropdown-item" style="color: #00E5FF; font-weight: bold;">
+                            <i class="fa-solid fa-envelope-open-text text-cyan me-1"></i> Tenant Account & Mail Option
                         </a>
                         <a href="{% url 'billing-page' %}" class="user-dropdown-item">
                             <i class="fas fa-credit-card text-success"></i> Billing & Subscription
@@ -1471,12 +1546,18 @@
         (function () {
             const saved = localStorage.getItem('theme') || 'dark';
             if (saved === 'light') {
-                document.body.classList.add('light-theme');
+                document.documentElement.classList.add('light-theme');
+                document.documentElement.setAttribute('data-theme', 'light');
+                if (document.body) document.body.classList.add('light-theme');
+            } else {
+                document.documentElement.classList.remove('light-theme');
+                document.documentElement.setAttribute('data-theme', 'dark');
+                if (document.body) document.body.classList.remove('light-theme');
             }
         })();
 
         document.addEventListener('DOMContentLoaded', function () {
-            // Theme Toggle Logic is handled globally in transform.js
+            // Theme Toggle Logic is handled globally in transform.js and bottom script
         });
 
         // Scroll effect for header
@@ -1807,7 +1888,6 @@
     </script>
     
     <!-- ── AI COMMAND BAR ────────────────────────────────────────────────── -->
-    {% if user.is_authenticated %}
     <div id="cmd-k-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); backdrop-filter:blur(5px); z-index:999999; align-items:flex-start; justify-content:center; padding-top:12vh;">
         <div id="cmd-k-modal" style="background:var(--apple-card-bg); width:100%; max-width:640px; border-radius:16px; border:1px solid var(--apple-border); box-shadow:0 25px 50px -12px rgba(0,0,0,0.5); overflow:hidden; transform:scale(0.95); opacity:0; transition:all 0.15s cubic-bezier(0.16, 1, 0.3, 1);">
             <div style="display:flex; align-items:center; padding:16px 24px; border-bottom:1px solid var(--apple-border);">
@@ -1877,6 +1957,7 @@
                     }, 150);
                 }
             }
+            window.toggleCmdK = toggleCmdK;
             
             // Listen for Cmd+K (Mac) or Ctrl+K (Windows)
             document.addEventListener('keydown', (e) => {
@@ -1979,7 +2060,6 @@
             }
         });
     </script>
-    {% endif %}
 
     <!-- ── FLOATING AI CHATBOX ── -->
     <div id="ai-chat-widget" style="position:fixed;bottom:20px;right:20px;z-index:9999;font-family:-apple-system,BlinkMacSystemFont,sans-serif;">
@@ -2132,25 +2212,43 @@
             
             // Check for saved theme preference or use default (dark)
             const savedTheme = localStorage.getItem('theme') || 'dark';
-            document.documentElement.setAttribute('data-theme', savedTheme);
-            updateIcon(savedTheme);
+            applyTheme(savedTheme);
 
-            if (themeToggle) {
-                themeToggle.addEventListener('click', function() {
-                    const currentTheme = document.documentElement.getAttribute('data-theme');
-                    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            if (themeToggle && !themeToggle.dataset.themeBound) {
+                themeToggle.dataset.themeBound = 'true';
+                themeToggle.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const isLight = document.body.classList.contains('light-theme') || document.documentElement.classList.contains('light-theme');
+                    const newTheme = isLight ? 'dark' : 'light';
                     
-                    document.documentElement.setAttribute('data-theme', newTheme);
                     localStorage.setItem('theme', newTheme);
-                    updateIcon(newTheme);
+                    applyTheme(newTheme);
+                    
+                    // Add smooth spring rotation animation on click
+                    themeToggle.style.transform = 'scale(0.85) rotate(35deg)';
+                    setTimeout(() => { themeToggle.style.transform = ''; }, 250);
                 });
             }
 
-            function updateIcon(theme) {
-                if(theme === 'light') {
-                    themeIcon.className = 'fas fa-sun';
+            function applyTheme(theme) {
+                if (theme === 'light') {
+                    document.body.classList.add('light-theme');
+                    document.documentElement.classList.add('light-theme');
+                    document.documentElement.setAttribute('data-theme', 'light');
+                    if (themeIcon) {
+                        themeIcon.className = 'fas fa-sun';
+                        themeIcon.style.color = '#f59e0b';
+                    }
+                    if (themeToggle) themeToggle.title = 'Switch to dark mode';
                 } else {
-                    themeIcon.className = 'fas fa-moon';
+                    document.body.classList.remove('light-theme');
+                    document.documentElement.classList.remove('light-theme');
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                    if (themeIcon) {
+                        themeIcon.className = 'fas fa-moon';
+                        themeIcon.style.color = '';
+                    }
+                    if (themeToggle) themeToggle.title = 'Switch to light mode';
                 }
             }
         });

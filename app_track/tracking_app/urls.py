@@ -11,6 +11,7 @@ urlpatterns = [
     path('', views.home, name='home'),
     
     # Public Marketing Pages
+    path('pitch/', TemplateView.as_view(template_name='tracking_app/pitch.html'), name='public-pitch'),
     path('platform/ats/', TemplateView.as_view(template_name='tracking_app/public_ats.html'), name='public-ats'),
     path('platform/crm/', TemplateView.as_view(template_name='tracking_app/public_crm.html'), name='public-crm'),
     path('platform/ai/', TemplateView.as_view(template_name='tracking_app/public_ai.html'), name='public-ai'),
@@ -181,6 +182,7 @@ urlpatterns = [
 
     # ── SaaS Admin Portal ────────────────────────────────────────────────────
     path('saas-admin/', views.saas_admin_dashboard, name='saas-admin'),
+    path('developer-settings/', views.developer_settings_dashboard, name='developer-settings'),
 
     *sales_urlpatterns,
 ]

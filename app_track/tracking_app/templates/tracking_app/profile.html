@@ -307,6 +307,32 @@
     </div>
     {% endif %}
     
+    {% if user.tenant %}
+    <!-- ACTIVE TENANT ACCOUNT & MAIL OPTION -->
+    <div class="card mb-4" style="background: linear-gradient(135deg, rgba(8, 145, 178, 0.2) 0%, rgba(99, 102, 241, 0.2) 100%); border: 1px solid rgba(0, 229, 255, 0.4); border-radius: 16px; box-shadow: 0 0 25px rgba(0, 229, 255, 0.2); padding: 1.5rem;">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <span class="badge" style="background: #00E5FF; color: #000; font-weight: 800; margin-bottom: 0.5rem; display: inline-flex; align-items: center; gap: 6px; font-size: 0.8rem;">
+                    <i class="fa-solid fa-shield-halved"></i> ACTIVE TENANT ACCOUNT: ISOLATED SCOPE
+                </span>
+                <h3 class="mb-1 text-white" style="font-weight: 700; font-size: 1.5rem;">{{ user.tenant.name }} <span style="font-size:1rem; color: var(--text-secondary);">({{ user.tenant.subscription_plan|title }} Plan)</span></h3>
+                <p class="text-secondary mb-0" style="font-size: 0.95rem;">
+                    Registered Tenant Email: <strong style="color: #00E5FF;">{{ user.tenant.mail_registered_email|default:"Not configured (Click Manage below)" }}</strong> | 
+                    Data Isolation: <span class="text-success fw-bold"><i class="fa-solid fa-lock me-1"></i>Enforced</span>
+                </p>
+            </div>
+            <div class="d-flex gap-2 flex-wrap">
+                <a href="{% url 'company-data-manager' %}#mail-option-hub" class="btn fw-bold" style="background: #00E5FF; color: #000; border: none; padding: 0.75rem 1.4rem; border-radius: 10px; box-shadow: 0 0 20px rgba(0, 229, 255, 0.4); text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-envelope-open-text"></i> Manage Mail Option & Tenant Account →
+                </a>
+                <a href="{% url 'unified-inbox' %}" class="btn fw-bold text-white" style="background: linear-gradient(135deg, #6366f1, #4f46e5); border: none; padding: 0.75rem 1.4rem; border-radius: 10px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-inbox"></i> Inbox
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
         <div class="profile-grid">

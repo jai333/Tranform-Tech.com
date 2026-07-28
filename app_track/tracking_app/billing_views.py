@@ -59,6 +59,8 @@ PLANS = {
         "price": "$799",
         "period": "/ month",
         "features": [
+            "Developer API & Webhooks Console",
+            "Real-Time HMAC Streams",
             "Everything in Growth",
             "SOC Threat Dashboard",
             "Executive Analytics",
@@ -91,7 +93,6 @@ def _get_stripe():
 # Billing / Pricing Page
 # ─────────────────────────────────────────────────────────────
 
-@login_required
 def billing_page(request):
     """Display the pricing page with current subscription status."""
     tenant = getattr(request.user, "tenant", None)

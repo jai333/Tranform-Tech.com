@@ -190,6 +190,22 @@ class Tenant(models.Model):
     subscription_plan = models.CharField(max_length=32, choices=PLAN_CHOICES, default='enterprise')
     stripe_customer_id = models.CharField(max_length=128, blank=True, null=True)
 
+    # Phase 3 — Advanced Tenant Mail Integration
+    mail_registered_email = models.EmailField(blank=True, null=True, help_text="Registered corporate email address for sending and receiving")
+    mail_sender_name = models.CharField(max_length=150, blank=True, null=True, help_text="Sender display name (e.g., Nexus AI Sales)")
+    mail_reply_to = models.EmailField(blank=True, null=True, help_text="Dedicated inbound inbox for automated AI reply parsing")
+    mail_smtp_host = models.CharField(max_length=150, default='smtp.gmail.com', blank=True, null=True)
+    mail_smtp_port = models.IntegerField(default=587, blank=True, null=True)
+    mail_smtp_username = models.CharField(max_length=150, blank=True, null=True)
+    mail_smtp_password = models.CharField(max_length=255, blank=True, null=True)
+    mail_use_tls = models.BooleanField(default=True)
+    mail_auto_sync = models.BooleanField(default=True, help_text="Automatically parse and sync two-way email communications")
+    mail_integration_status = models.CharField(
+        max_length=32,
+        choices=[('unconfigured', 'Unconfigured'), ('connected', 'Connected & Active'), ('error', 'Connection Warning')],
+        default='unconfigured'
+    )
+
     def __str__(self):
         return self.name
 
@@ -280,12 +296,12 @@ class User(AbstractUser):
     @property
     def is_it_agent(self):
         # Determine if the user is an IT agent based on their role or staff status
-        return self.is_staff or self.role in [self.ROLE_ADMIN, self.ROLE_IT, 'it_admin']
+        return self.is_staff or self.can_view_it or self.role in [self.ROLE_ADMIN, self.ROLE_IT, 'it_admin']
 
     @property
     def is_it_admin(self):
         # Determine if the user is an IT admin
-        return self.is_superuser or self.role in [self.ROLE_ADMIN, 'it_admin']
+        return self.is_superuser or self.can_view_it or self.role in [self.ROLE_ADMIN, 'it_admin']
 
     @property
     def is_it_enduser(self):
@@ -1229,3 +1245,34 @@ class PhishingReport(models.Model):
 
     def __str__(self):
         return f"Phishing report from {self.reported_by} – {self.subject[:50]}"
+
+
+# ── Webhooks (Enterprise Developer Settings) ──────────────────
+
+class WebhookEndpoint(models.Model):
+    tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE, related_name='webhooks')
+    target_url = models.URLField(max_length=500)
+    secret_key = models.CharField(max_length=64, blank=True)
+    events = models.CharField(max_length=255, help_text="Comma separated events: candidate.created, job.updated, etc.", default="*")
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def save(self, *args, **kwargs):
+        if not self.secret_key:
+            import secrets
+            self.secret_key = secrets.token_urlsafe(32)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.tenant.name} - {self.target_url}"
+
+class WebhookLog(models.Model):
+    endpoint = models.ForeignKey(WebhookEndpoint, on_delete=models.CASCADE, related_name='logs')
+    event_type = models.CharField(max_length=100)
+    payload = models.JSONField()
+    status_code = models.IntegerField(null=True, blank=True)
+    response_body = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"{self.event_type} -> {self.endpoint.target_url} ({self.status_code})"

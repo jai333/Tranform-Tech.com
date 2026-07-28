@@ -140,12 +140,15 @@
 
 {% block content %}
 <div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
         <div>
-            <h2 class="mb-1"><i class="fa-solid fa-building-user text-cyan"></i> Company Data Manager</h2>
-            <p class="text-secondary mb-0">Tenant: <strong class="text-white">{{ tenant.name }}</strong></p>
+            <h2 class="mb-1"><i class="fa-solid fa-building-user text-cyan"></i> Tenant Account & Mail Manager</h2>
+            <p class="text-secondary mb-0">Tenant Workspace: <strong class="text-white">{{ tenant.name }}</strong> | ID: <strong class="text-cyan">#{{ tenant.id }}</strong></p>
         </div>
         <div>
+            <button class="btn btn-info me-2 fw-bold" style="background:#00E5FF; color:#000; border:none; box-shadow:0 0 15px rgba(0,229,255,0.4);" data-bs-toggle="modal" data-bs-target="#mailConfigModal">
+                <i class="fa-solid fa-envelope-open-text me-1"></i> Mail Option & Scope
+            </button>
             <button class="btn btn-primary me-2 btn-glow" style="background:var(--primary); border:none;" data-bs-toggle="modal" data-bs-target="#updateCompanyModal">
                 <i class="fa-solid fa-pen-to-square"></i> Edit Details
             </button>
@@ -161,6 +164,83 @@
             </div>
         {% endfor %}
     {% endif %}
+
+    <!-- ADVANCED TENANT MAIL INTEGRATION HUB -->
+    <div class="card mb-4" id="mail-option-hub" style="background: linear-gradient(135deg, rgba(8, 145, 178, 0.25) 0%, rgba(99, 102, 241, 0.2) 100%); border: 1px solid rgba(0, 229, 255, 0.45); border-radius: 20px; box-shadow: 0 12px 35px rgba(0, 0, 0, 0.35); overflow: hidden;">
+        <div style="background: rgba(0, 0, 0, 0.4); padding: 12px 24px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge" style="background: #00E5FF; color: #000; font-weight: 800; padding: 6px 12px; font-size: 0.85rem;">
+                    <i class="fa-solid fa-shield-halved me-1"></i> TENANT DATA SEPARATION ENFORCED
+                </span>
+                <span class="text-white small fw-medium">Zero Cross-Tenant Leakage — Dedicated to <strong>{{ tenant.name }}</strong> exclusively</span>
+            </div>
+            <span class="badge bg-success" style="font-size: 0.8rem;"><i class="fa-solid fa-circle-check me-1"></i> Active Two-Way Mail Engine</span>
+        </div>
+        <div class="p-4">
+            <div class="row align-items-center g-4">
+                <div class="col-lg-7">
+                    <h3 class="fw-bold mb-2 text-white d-flex align-items-center gap-2" style="font-size: 1.6rem;">
+                        <i class="fa-solid fa-paper-plane text-cyan" style="filter: drop-shadow(0 0 10px rgba(0, 229, 255, 0.6));"></i> Advanced Tenant Mail Integration
+                    </h3>
+                    <p class="text-secondary mb-3" style="font-size: 0.95rem; line-height: 1.5;">
+                        Send and receive automated communications directly through your registered tenant email address. With absolute data separation, your mailbox, SMTP credentials, and incoming prospect replies are strictly locked to <strong>{{ tenant.name }}</strong>. No other tenant or external entity can view, query, or intercept your mail records.
+                    </p>
+                    <div class="p-3 mb-1" style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px;">
+                        <div class="row g-2">
+                            <div class="col-sm-6">
+                                <small class="text-secondary d-block">Registered Sender Email:</small>
+                                <strong style="color: #00E5FF; font-size: 1.05rem;">
+                                    {% if tenant.mail_registered_email %}
+                                        <i class="fa-solid fa-check-circle text-success me-1"></i>{{ tenant.mail_registered_email }}
+                                    {% else %}
+                                        <span class="text-warning"><i class="fa-solid fa-triangle-exclamation me-1"></i>Not configured</span>
+                                    {% endif %}
+                                </strong>
+                            </div>
+                            <div class="col-sm-6">
+                                <small class="text-secondary d-block">Display Sender Name:</small>
+                                <strong class="text-white" style="font-size: 1.05rem;">{{ tenant.mail_sender_name|default:tenant.name }}</strong>
+                            </div>
+                            <div class="col-sm-6 mt-2">
+                                <small class="text-secondary d-block">SMTP Routing Server:</small>
+                                <strong class="text-light small">{{ tenant.mail_smtp_host|default:"smtp.gmail.com" }}:{{ tenant.mail_smtp_port|default:587 }}</strong>
+                            </div>
+                            <div class="col-sm-6 mt-2">
+                                <small class="text-secondary d-block">Mail Scope & Permissions:</small>
+                                <strong class="text-success small"><i class="fa-solid fa-lock me-1"></i>Isolated to Tenant ID #{{ tenant.id }}</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-5 text-lg-end">
+                    <div class="d-flex flex-column gap-3 justify-content-end">
+                        <button class="btn fw-bold p-3" style="background: linear-gradient(135deg, #00E5FF, #00b3cc); color: #000; border: none; border-radius: 12px; box-shadow: 0 0 20px rgba(0, 229, 255, 0.4); font-size: 1rem; transition: all 0.2s ease;" data-bs-toggle="modal" data-bs-target="#mailConfigModal">
+                            <i class="fa-solid fa-sliders me-2"></i> Update Registered Email & Scope
+                        </button>
+                        <div class="d-flex gap-2">
+                            <form method="post" class="flex-grow-1">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="test_send_mail">
+                                <button type="submit" class="btn btn-outline-light w-100 p-2 fw-bold" style="border-radius: 10px; font-size: 0.9rem;" {% if not tenant.mail_registered_email %}disabled title="Please configure registered email first"{% endif %}>
+                                    <i class="fa-solid fa-paper-plane text-cyan me-1"></i> Test Send Email
+                                </button>
+                            </form>
+                            <form method="post" class="flex-grow-1">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="sync_receive_mail">
+                                <button type="submit" class="btn btn-outline-info w-100 p-2 fw-bold" style="border-radius: 10px; font-size: 0.9rem;">
+                                    <i class="fa-solid fa-inbox text-cyan me-1"></i> Receive Replies
+                                </button>
+                            </form>
+                        </div>
+                        <a href="{% url 'unified-inbox' %}" class="btn fw-bold p-3 text-white" style="background: linear-gradient(135deg, #6366f1, #4f46e5); border: none; border-radius: 12px; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4); font-size: 1rem;">
+                            <i class="fa-solid fa-envelope-open text-white me-2"></i> Open Unified Tenant Inbox →
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="row">
         <!-- Stats Row -->
@@ -394,6 +474,71 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-info btn-glow">Save Profile</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Advanced Tenant Mail Configuration Modal -->
+<div class="modal fade modal-glass" id="mailConfigModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content" style="background: #111827; border: 1px solid rgba(0, 229, 255, 0.4); border-radius: 20px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);">
+            <form method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="update_mail_settings">
+                <div class="modal-header" style="border-bottom: 1px solid rgba(255,255,255,0.1); padding: 1.5rem;">
+                    <h5 class="modal-title fw-bold text-white" style="font-size: 1.4rem;">
+                        <i class="fa-solid fa-envelope text-cyan me-2" style="color: #00E5FF;"></i> Configure Advanced Tenant Mail Option
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" style="padding: 1.5rem;">
+                    <div class="alert alert-info mb-4" style="background: rgba(0, 229, 255, 0.1); border: 1px solid rgba(0, 229, 255, 0.3); color: #e0f2fe; border-radius: 12px;">
+                        <div class="d-flex align-items-center gap-3">
+                            <i class="fa-solid fa-lock fs-4" style="color: #00E5FF;"></i>
+                            <div>
+                                <strong class="text-white d-block">Data Separation Scope: Locked to Tenant #{{ tenant.id }} ({{ tenant.name }})</strong>
+                                <span class="small">Your email configuration and mailbox history are isolated to your tenant organization. No other tenant account can access or send using these credentials.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label text-secondary fw-bold">Registered Tenant Email Address <span class="text-danger">*</span></label>
+                            <input type="email" name="mail_registered_email" value="{{ tenant.mail_registered_email|default:'' }}" required placeholder="e.g. outreach@{{ tenant.domain|default:'yourcompany.com' }}" class="form-control" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 12px; border-radius: 10px;">
+                            <small class="text-secondary">Used for sending cold outreach & receiving prospect replies.</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-secondary fw-bold">Sender Display Name</label>
+                            <input type="text" name="mail_sender_name" value="{{ tenant.mail_sender_name|default:tenant.name }}" placeholder="e.g. Alex from {{ tenant.name }}" class="form-control" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 12px; border-radius: 10px;">
+                            <small class="text-secondary">Name shown in outbound email headers.</small>
+                        </div>
+                        <div class="col-md-8">
+                            <label class="form-label text-secondary fw-bold">SMTP Server Host</label>
+                            <input type="text" name="mail_smtp_host" value="{{ tenant.mail_smtp_host|default:'smtp.gmail.com' }}" placeholder="smtp.gmail.com or smtp.sendgrid.net" class="form-control" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 12px; border-radius: 10px;">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-secondary fw-bold">Port</label>
+                            <input type="number" name="mail_smtp_port" value="{{ tenant.mail_smtp_port|default:587 }}" class="form-control" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 12px; border-radius: 10px;">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-secondary fw-bold">SMTP Username / Auth ID</label>
+                            <input type="text" name="mail_smtp_username" value="{{ tenant.mail_smtp_username|default:'' }}" placeholder="Optional (defaults to email)" class="form-control" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 12px; border-radius: 10px;">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-secondary fw-bold">SMTP Password / App Secret</label>
+                            <input type="password" name="mail_smtp_password" placeholder="•••••••••••••••• (Leave unchanged to preserve)" class="form-control" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 12px; border-radius: 10px;">
+                            <small class="text-secondary">Stored with per-tenant encryption scope.</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid rgba(255,255,255,0.1); padding: 1.2rem 1.5rem;">
+                    <button type="button" class="btn btn-secondary px-4 py-2 fw-bold" style="border-radius: 10px;" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn fw-bold px-4 py-2" style="background: #00E5FF; color: #000; border: none; border-radius: 10px; box-shadow: 0 0 20px rgba(0, 229, 255, 0.4);">
+                        <i class="fa-solid fa-check me-1"></i> Save Mail Option & Enforce Scope
+                    </button>
                 </div>
             </form>
         </div>

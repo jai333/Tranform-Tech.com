@@ -175,10 +175,12 @@ class OutreachEmail(models.Model):
     lead = models.ForeignKey(Lead, on_delete=models.CASCADE, related_name='outreach_emails')
     enrollment = models.ForeignKey(LeadSequenceEnrollment, on_delete=models.CASCADE, related_name='emails', null=True)
     step = models.ForeignKey(EmailSequenceStep, on_delete=models.SET_NULL, null=True)
+    tenant = models.ForeignKey('tracking_app.Tenant', on_delete=models.CASCADE, null=True, blank=True, related_name='outreach_emails')
 
     subject = models.CharField(max_length=300)
     body = models.TextField()
     variant = models.CharField(max_length=1, choices=VARIANT_CHOICES, default='A')
+    sender_email = models.EmailField(blank=True, null=True, help_text="Registered tenant sender email address used")
 
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
     tracking_pixel_id = models.CharField(max_length=64, unique=True, null=True, blank=True)
@@ -208,6 +210,7 @@ class EmailReply(models.Model):
 
     email = models.ForeignKey(OutreachEmail, on_delete=models.CASCADE, related_name='replies')
     lead = models.ForeignKey(Lead, on_delete=models.CASCADE, related_name='replies')
+    tenant = models.ForeignKey('tracking_app.Tenant', on_delete=models.CASCADE, null=True, blank=True, related_name='email_replies')
 
     raw_content = models.TextField()
     ai_intent = models.CharField(max_length=20, choices=INTENT_CHOICES, null=True, blank=True)

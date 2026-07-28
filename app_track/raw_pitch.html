@@ -1,0 +1,515 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Transform.io — The Platform That Runs Your Entire Business</title>
+<meta name="description" content="Transform.io replaces 10 siloed tools with one intelligent AI-powered platform. ATS, CRM, Sales, IT Helpdesk, Cybersecurity, Inbox & more — unified." />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --cyan: #00E5FF;
+    --cyan-dim: rgba(0,229,255,0.12);
+    --navy: #050d1a;
+    --navy-2: #0a1628;
+    --navy-3: #0f1e35;
+    --card-bg: rgba(255,255,255,0.04);
+    --border: rgba(0,229,255,0.15);
+    --text: #e0eaf8;
+    --text-dim: #7a90b0;
+    --white: #ffffff;
+    --green: #30d158;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--navy); color: var(--text); font-family: 'Inter', sans-serif; line-height: 1.6; overflow-x: hidden; }
+
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 60px;
+    background: rgba(5,13,26,0.9); backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo { display: flex; align-items: center; gap: 10px; font-family: 'Syne', sans-serif; font-size: 1.35rem; font-weight: 800; color: var(--white); text-decoration: none; }
+  .logo-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 10px var(--cyan); animation: pulse 2s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.3)} }
+  .nav-links { display: flex; gap: 32px; list-style: none; }
+  .nav-links a { color: var(--text-dim); text-decoration: none; font-size: .9rem; font-weight: 500; transition: color .2s; }
+  .nav-links a:hover { color: var(--white); }
+  .nav-cta { background: var(--cyan); color: #000; border: none; border-radius: 8px; padding: 10px 24px; font-weight: 700; font-size: .9rem; cursor: pointer; text-decoration: none; transition: opacity .2s; }
+  .nav-cta:hover { opacity: .88; }
+
+  .hero { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 120px 40px 80px; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(0,229,255,0.18) 0%, transparent 70%), radial-gradient(ellipse 50% 40% at 20% 80%, rgba(100,60,255,0.12) 0%, transparent 60%); }
+  .hero-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(0,229,255,0.1); border: 1px solid rgba(0,229,255,0.3); border-radius: 100px; padding: 6px 18px; margin-bottom: 28px; font-size: .8rem; font-weight: 600; color: var(--cyan); letter-spacing: .05em; }
+  .badge-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--cyan); animation: pulse 1.5s infinite; }
+  h1.hero-title { font-family: 'Syne', sans-serif; font-size: clamp(2.8rem, 7vw, 6rem); font-weight: 800; color: var(--white); line-height: 1.1; margin-bottom: 24px; letter-spacing: -.02em; }
+  h1.hero-title .grad { background: linear-gradient(135deg, #00E5FF, #60efff, #00b3cc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero-sub { max-width: 680px; font-size: clamp(1rem, 2vw, 1.2rem); color: var(--text-dim); margin-bottom: 44px; line-height: 1.7; }
+  .hero-actions { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; margin-bottom: 56px; }
+  .btn-primary { background: var(--cyan); color: #000; padding: 14px 36px; border-radius: 10px; font-weight: 700; font-size: 1rem; text-decoration: none; transition: all .2s; box-shadow: 0 0 30px rgba(0,229,255,0.35); display: inline-block; }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 40px rgba(0,229,255,.5); }
+  .btn-ghost { background: transparent; color: var(--white); border: 1px solid rgba(255,255,255,0.2); padding: 14px 36px; border-radius: 10px; font-weight: 600; font-size: 1rem; text-decoration: none; transition: all .2s; display: inline-block; }
+  .btn-ghost:hover { background: rgba(255,255,255,.06); }
+  .hero-stats { display: flex; gap: 40px; flex-wrap: wrap; justify-content: center; margin-bottom: 56px; }
+  .hero-stat { text-align: center; }
+  .hero-stat .num { font-size: 2rem; font-weight: 800; color: var(--white); }
+  .hero-stat .num span { color: var(--cyan); }
+  .hero-stat .lbl { font-size: .78rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: .08em; margin-top: 2px; }
+  .hero-img-wrap { width: 100%; max-width: 1100px; border-radius: 16px; border: 1px solid var(--border); overflow: hidden; box-shadow: 0 40px 120px rgba(0,0,0,.6), 0 0 80px rgba(0,229,255,.08); position: relative; }
+  .hero-img-wrap img { width: 100%; display: block; }
+  .hero-img-wrap::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 30%; background: linear-gradient(transparent, var(--navy)); }
+
+  .problem-bar { background: linear-gradient(135deg, var(--navy-2), var(--navy-3)); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 60px; text-align: center; }
+  .problem-bar h2 { font-size: clamp(1.6rem, 3vw, 2.4rem); color: var(--white); margin-bottom: 16px; font-family: 'Syne', sans-serif; font-weight: 800; }
+  .problem-bar p { color: var(--text-dim); font-size: 1.1rem; max-width: 720px; margin: 0 auto 40px; }
+  .tools-grid { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-bottom: 36px; }
+  .tool-chip { background: rgba(255,60,60,0.1); border: 1px solid rgba(255,60,60,0.25); padding: 8px 18px; border-radius: 100px; font-size: .85rem; font-weight: 600; color: #ff8080; }
+  .solution-label { font-size: 1.1rem; font-weight: 700; color: var(--cyan); }
+
+  .section-label { font-size: .78rem; font-weight: 700; letter-spacing: .12em; color: var(--cyan); text-transform: uppercase; margin-bottom: 12px; }
+  h2.section-title { font-family: 'Syne', sans-serif; font-size: clamp(2rem, 4vw, 3rem); font-weight: 800; color: var(--white); line-height: 1.15; margin-bottom: 16px; }
+  .section-sub { color: var(--text-dim); font-size: 1.05rem; max-width: 600px; line-height: 1.7; margin-bottom: 60px; }
+
+  .features-full { background: var(--navy-2); width: 100%; }
+  .features-inner { max-width: 1200px; margin: 0 auto; padding: 100px 60px; }
+  .feature-block { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; margin-bottom: 100px; }
+  .feature-block.reverse { direction: rtl; }
+  .feature-block.reverse > * { direction: ltr; }
+  .feature-text .pill { display: inline-flex; align-items: center; gap: 6px; background: var(--cyan-dim); border: 1px solid var(--border); border-radius: 100px; padding: 4px 14px; font-size: .78rem; font-weight: 600; color: var(--cyan); margin-bottom: 20px; letter-spacing: .04em; }
+  .feature-text h3 { font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; color: var(--white); margin-bottom: 14px; line-height: 1.2; }
+  .feature-text p { color: var(--text-dim); font-size: 1rem; line-height: 1.75; margin-bottom: 24px; }
+  .feature-points { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .feature-points li { display: flex; align-items: flex-start; gap: 10px; font-size: .92rem; color: var(--text); }
+  .feature-points li::before { content: '✓'; width: 20px; height: 20px; border-radius: 50%; background: rgba(0,229,255,0.15); color: var(--cyan); display: flex; align-items: center; justify-content: center; font-size: .75rem; font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+  .feature-img { border-radius: 16px; overflow: hidden; border: 1px solid var(--border); box-shadow: 0 20px 60px rgba(0,0,0,.5); transition: transform .3s; }
+  .feature-img:hover { transform: scale(1.02); }
+  .feature-img img { width: 100%; display: block; }
+
+  .modules-section { background: var(--navy); width: 100%; }
+  .modules-inner { max-width: 1200px; margin: 0 auto; padding: 100px 60px; }
+  .modules-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; }
+  .module-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 30px; transition: all .25s; position: relative; overflow: hidden; }
+  .module-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--cyan), transparent); opacity: 0; transition: opacity .25s; }
+  .module-card:hover { background: rgba(0,229,255,0.05); border-color: rgba(0,229,255,.35); transform: translateY(-4px); }
+  .module-card:hover::before { opacity: 1; }
+  .module-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; margin-bottom: 16px; }
+  .module-card h4 { font-size: 1.05rem; font-weight: 700; color: var(--white); margin-bottom: 8px; }
+  .module-card p { font-size: .85rem; color: var(--text-dim); line-height: 1.6; }
+  .module-badge { display: inline-block; margin-top: 12px; font-size: .7rem; font-weight: 700; letter-spacing: .08em; padding: 3px 10px; border-radius: 100px; background: rgba(0,229,255,.1); color: var(--cyan); border: 1px solid rgba(0,229,255,.25); text-transform: uppercase; }
+
+  .roi-section { background: var(--navy); width: 100%; }
+  .roi-inner { max-width: 1200px; margin: 0 auto; padding: 100px 60px; }
+  .roi-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 24px; margin-top: 60px; }
+  .roi-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 30px; text-align: center; }
+  .roi-num { font-size: 3rem; font-weight: 900; color: var(--cyan); margin-bottom: 4px; }
+  .roi-label { font-size: .85rem; color: var(--text-dim); line-height: 1.5; }
+
+  .pricing-section { background: var(--navy-2); width: 100%; }
+  .pricing-inner { max-width: 1100px; margin: 0 auto; padding: 100px 60px; text-align: center; }
+  .pricing-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; margin-top: 60px; }
+  .price-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 20px; padding: 36px 28px; text-align: left; position: relative; transition: all .25s; }
+  .price-card.popular { border-color: var(--cyan); background: rgba(0,229,255,.05); box-shadow: 0 0 50px rgba(0,229,255,.12); }
+  .popular-badge { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); background: var(--cyan); color: #000; font-size: .72rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; padding: 4px 16px; border-radius: 100px; white-space: nowrap; }
+  .price-name { font-size: 1rem; font-weight: 700; color: var(--text-dim); margin-bottom: 8px; }
+  .price-amount { font-size: 3rem; font-weight: 900; color: var(--white); line-height: 1; }
+  .price-amount span { font-size: 1.1rem; font-weight: 500; color: var(--text-dim); }
+  .price-desc { font-size: .85rem; color: var(--text-dim); margin: 12px 0 24px; }
+  .price-divider { border: none; border-top: 1px solid var(--border); margin-bottom: 20px; }
+  .price-features { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+  .price-features li { display: flex; align-items: center; gap: 10px; font-size: .88rem; color: var(--text); }
+  .price-features li .check { color: var(--cyan); font-weight: 700; }
+  .price-features li .cross { color: #ff453a; font-weight: 700; }
+  .price-btn { display: block; width: 100%; text-align: center; padding: 12px; border-radius: 10px; font-weight: 700; font-size: .9rem; text-decoration: none; transition: all .2s; }
+  .price-btn-primary { background: var(--cyan); color: #000; }
+  .price-btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--white); }
+  .price-btn:hover { opacity: .85; transform: translateY(-1px); }
+
+  .testimonials-section { background: var(--navy-2); width: 100%; }
+  .testimonials-inner { max-width: 1100px; margin: 0 auto; padding: 100px 60px; text-align: center; }
+  .testi-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; margin-top: 60px; }
+  .testi-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 30px; text-align: left; }
+  .testi-stars { color: #f59e0b; font-size: .9rem; margin-bottom: 14px; }
+  .testi-quote { font-size: .92rem; color: var(--text); line-height: 1.7; margin-bottom: 20px; font-style: italic; }
+  .testi-author { display: flex; align-items: center; gap: 12px; }
+  .testi-avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--cyan), #0050a0); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: .9rem; color: #000; flex-shrink: 0; }
+  .testi-name { font-weight: 700; color: var(--white); font-size: .9rem; }
+  .testi-role { font-size: .78rem; color: var(--text-dim); }
+
+  .cta-section { background: linear-gradient(135deg, rgba(0,229,255,0.08) 0%, rgba(100,60,255,0.05) 100%); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); text-align: center; padding: 120px 60px; }
+  .cta-section h2 { font-family: 'Syne', sans-serif; font-size: clamp(2.2rem, 4vw, 3.5rem); font-weight: 800; color: var(--white); margin-bottom: 16px; }
+  .cta-section p { color: var(--text-dim); font-size: 1.1rem; margin-bottom: 40px; max-width: 550px; margin-left: auto; margin-right: auto; }
+  .cta-actions { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+
+  footer { background: var(--navy); border-top: 1px solid var(--border); padding: 40px 60px; text-align: center; color: var(--text-dim); font-size: .85rem; }
+  .footer-logo { font-family: 'Syne', sans-serif; font-weight: 800; color: var(--white); font-size: 1.2rem; margin-bottom: 8px; }
+
+  @media(max-width: 900px) {
+    nav { padding: 16px 24px; }
+    .nav-links { display: none; }
+    .features-inner, .modules-inner, .pricing-inner, .roi-inner, .testimonials-inner { padding: 60px 24px; }
+    .feature-block { grid-template-columns: 1fr; gap: 32px; }
+    .feature-block.reverse { direction: ltr; }
+    .modules-grid, .pricing-grid, .roi-grid, .testi-grid { grid-template-columns: 1fr 1fr; }
+    .problem-bar { padding: 40px 24px; }
+    .cta-section { padding: 80px 24px; }
+  }
+  @media(max-width: 600px) {
+    .modules-grid, .pricing-grid, .roi-grid, .testi-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo"><div class="logo-dot"></div> Transform.io</a>
+  <ul class="nav-links">
+    <li><a href="#features">Platform</a></li>
+    <li><a href="#modules">Modules</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+    <li><a href="#roi">ROI</a></li>
+  </ul>
+  <a href="https://transform.io/register" class="nav-cta">Get Started Free →</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-badge"><span class="badge-dot"></span> AI-Powered Enterprise OS — v3.0 Now Live</div>
+  <h1 class="hero-title">The Platform That<br><span class="grad">Runs Your Entire Business.</span></h1>
+  <p class="hero-sub">Transform.io replaces 10 siloed tools with one intelligent platform — AI Sales, Recruiting, CRM, Cybersecurity, IT Helpdesk, Unified Inbox &amp; more. Built for enterprises that refuse to settle.</p>
+  <div class="hero-actions">
+    <a href="https://transform.io/register" class="btn-primary">🚀 Start Free Trial</a>
+    <a href="/" class="btn-ghost">View Live Demo →</a>
+  </div>
+  <div class="hero-stats">
+    <div class="hero-stat"><div class="num">40<span>%</span></div><div class="lbl">Faster Time-to-Hire</div></div>
+    <div class="hero-stat"><div class="num">10<span>x</span></div><div class="lbl">Tools Replaced</div></div>
+    <div class="hero-stat"><div class="num">96<span>%</span></div><div class="lbl">SLA Resolution Rate</div></div>
+    <div class="hero-stat"><div class="num">$2.4<span>k</span></div><div class="lbl">Avg MRR Tracked</div></div>
+  </div>
+  <div class="hero-img-wrap">
+    <img src="file:///Users/jmartin/Documents/GitHub/ATS-CRM-Protingent/app_track/tracking_app/static/tracking_app/assets/hero_cyan_hires.jpg" alt="Transform.io ATS and CRM Dashboard" />
+  </div>
+</div>
+
+<div class="problem-bar">
+  <h2>Your Team Is Drowning in Disconnected Tools</h2>
+  <p>The average enterprise runs 12+ separate SaaS tools that don't talk to each other — creating data silos, wasted budget, and team burnout. Transform.io ends that.</p>
+  <div class="tools-grid">
+    <div class="tool-chip">❌ Workday</div>
+    <div class="tool-chip">❌ Salesforce</div>
+    <div class="tool-chip">❌ ServiceNow</div>
+    <div class="tool-chip">❌ Greenhouse</div>
+    <div class="tool-chip">❌ Okta</div>
+    <div class="tool-chip">❌ Jira</div>
+    <div class="tool-chip">❌ HubSpot</div>
+    <div class="tool-chip">❌ Nessus</div>
+    <div class="tool-chip">❌ Outlook</div>
+    <div class="tool-chip">❌ Slack</div>
+    <div class="tool-chip">❌ Asana</div>
+  </div>
+  <div class="solution-label">✅ One Transform.io subscription replaces all of these</div>
+</div>
+
+<div class="features-full" id="features">
+<div class="features-inner">
+  <div style="text-align:center; margin-bottom:60px;">
+    <div class="section-label">Platform Deep-Dive</div>
+    <h2 class="section-title">Every Feature You Need. One Platform.</h2>
+    <p class="section-sub" style="margin: 0 auto;">Purpose-built dashboards for every department with real-time AI intelligence woven into every workflow.</p>
+  </div>
+
+  <div class="feature-block">
+    <div class="feature-text">
+      <div class="pill">🏢 ATS &amp; HR Module</div>
+      <h3>AI-Powered Hiring Pipeline</h3>
+      <p>Manage every stage of your talent acquisition pipeline with intelligent automation. From sourced candidate to signed offer — all in one Kanban view with AI matching scores and live CRM data.</p>
+      <ul class="feature-points">
+        <li>AI candidate scoring &amp; ICP matching (0–100 match score)</li>
+        <li>Drag-and-drop Kanban hiring pipeline with stage automation</li>
+        <li>Full CRM client list with deal value tracking</li>
+        <li>Time-to-Fill velocity charts &amp; analytics dashboard</li>
+        <li>Bulk job posting across multiple requisitions</li>
+        <li>Candidate profiles with interview notes &amp; offer management</li>
+      </ul>
+    </div>
+    <div class="feature-img">
+      <img src="file:///Users/jmartin/Documents/GitHub/ATS-CRM-Protingent/app_track/tracking_app/static/tracking_app/assets/hero_cyan_hires.jpg" alt="ATS Hiring Pipeline and CRM" />
+    </div>
+  </div>
+
+  <div class="feature-block reverse">
+    <div class="feature-text">
+      <div class="pill">💼 AI Sales Intelligence</div>
+      <h3>Your Whole Sales Operation, Automated</h3>
+      <p>An SDR-grade outreach engine with AI-written cold emails, live lead scoring, funnel analytics, and deal tracking. Book more demos. Close more deals. All without leaving the platform.</p>
+      <ul class="feature-points">
+        <li>AI cold email generator (5 proven frameworks)</li>
+        <li>Live lead pipeline: Prospecting → Qualification → Closed Won</li>
+        <li>ICP match scoring per lead (AI-powered, 0–100)</li>
+        <li>Email open &amp; reply tracking with performance charts</li>
+        <li>Automated multi-step outreach sequences</li>
+        <li>Demo booking integration &amp; deal activity timeline</li>
+      </ul>
+    </div>
+    <div class="feature-img">
+      <img src="file:///Users/jmartin/Documents/GitHub/ATS-CRM-Protingent/app_track/tracking_app/static/tracking_app/assets/sales_dashboard_preview.png" alt="AI Sales Dashboard" />
+    </div>
+  </div>
+
+  <div class="feature-block">
+    <div class="feature-text">
+      <div class="pill">🖥️ IT Operations</div>
+      <h3>IT Helpdesk Command Center</h3>
+      <p>Give your IT team a real-time operations center. SLA tracking, live ticket queues, asset management, staff assignments, and incident response — all in one dark-mode command UI built for speed.</p>
+      <ul class="feature-points">
+        <li>Real-time ticket Kanban: To-Do → In Progress → Done</li>
+        <li>SLA performance monitoring (96.7% avg resolution rate)</li>
+        <li>IT Asset lifecycle management &amp; binding to users</li>
+        <li>Staff online tracking &amp; intelligent incident routing</li>
+        <li>Automated escalation rules &amp; SLA breach alerts</li>
+        <li>End-user portal for seamless self-service ticket submission</li>
+      </ul>
+    </div>
+    <div class="feature-img">
+      <img src="file:///Users/jmartin/Documents/GitHub/ATS-CRM-Protingent/app_track/tracking_app/static/tracking_app/assets/it_helpdesk_realistic.jpg" alt="IT Helpdesk Operations Center" />
+    </div>
+  </div>
+
+  <div class="feature-block reverse">
+    <div class="feature-text">
+      <div class="pill">📬 Unified Inbox</div>
+      <h3>AI-Powered 3-Pane Inbox</h3>
+      <p>Stop switching tabs. Transform.io's Unified Inbox brings all communications together with an AI Analysis Panel that surfaces deal insights, sentiment scores, and auto-suggested replies — right in your inbox.</p>
+      <ul class="feature-points">
+        <li>3-pane inbox: Folders → Email List → AI Analysis Panel</li>
+        <li>AI email summary &amp; sentiment scoring (92% accuracy)</li>
+        <li>One-click "Generate Reply Proposal" powered by GPT</li>
+        <li>Automated email engagement tracking &amp; analytics</li>
+        <li>Linked to CRM contacts and active deal records</li>
+        <li>Schedule meetings directly from email context</li>
+      </ul>
+    </div>
+    <div class="feature-img">
+      <img src="file:///Users/jmartin/Documents/GitHub/ATS-CRM-Protingent/app_track/tracking_app/static/tracking_app/assets/inbox_cyan_dashboard.jpg" alt="Unified AI Inbox" />
+    </div>
+  </div>
+
+  <div class="feature-block">
+    <div class="feature-text">
+      <div class="pill">🔐 Cybersecurity</div>
+      <h3>Real-Time Threat Intelligence</h3>
+      <p>Enterprise-grade security monitoring built right into your workspace. Track vulnerability scans, network traffic, active threats, host discovery, and CVE alerts — all without a separate security tool.</p>
+      <ul class="feature-points">
+        <li>Network vulnerability scanner with live CVE tracking</li>
+        <li>Host discovery map &amp; network traffic monitor (RX/TX)</li>
+        <li>CRITICAL / HIGH / MEDIUM severity categorisation</li>
+        <li>Real-time security alert feed with status updates</li>
+        <li>Threat incident management with agent assignment</li>
+        <li>Exploit detection &amp; code snippet capture</li>
+      </ul>
+    </div>
+    <div class="feature-img">
+      <img src="file:///Users/jmartin/Documents/GitHub/ATS-CRM-Protingent/app_track/tracking_app/static/tracking_app/assets/cybersec_mockup_1776112528216.png" alt="Cybersecurity Vulnerability Dashboard" />
+    </div>
+  </div>
+
+</div>
+</div>
+
+<div class="modules-section" id="modules">
+<div class="modules-inner">
+  <div class="section-label">Complete Module Library</div>
+  <h2 class="section-title">Everything Included.</h2>
+  <p class="section-sub">Every module ships in one subscription. No feature gating. No surprise add-ons. One price, full power.</p>
+  <div class="modules-grid">
+    <div class="module-card">
+      <div class="module-icon" style="background:rgba(0,229,255,.12);">🏢</div>
+      <h4>ATS &amp; Applicant Tracking</h4>
+      <p>Full Kanban hiring pipeline, candidate profiles, job postings, interview scheduling, and offer management.</p>
+      <span class="module-badge">HR Module</span>
+    </div>
+    <div class="module-card">
+      <div class="module-icon" style="background:rgba(52,199,89,.12);">💼</div>
+      <h4>AI Sales CRM</h4>
+      <p>Lead scoring, automated outreach sequences, deal pipeline, demo booking, and funnel analytics.</p>
+      <span class="module-badge">Sales Module</span>
+    </div>
+    <div class="module-card">
+      <div class="module-icon" style="background:rgba(191,90,242,.12);">📬</div>
+      <h4>Unified Inbox</h4>
+      <p>3-pane AI email client with sentiment analysis, GPT reply suggestions, CRM linking, and scheduler.</p>
+      <span class="module-badge">Communication</span>
+    </div>
+    <div class="module-card">
+      <div class="module-icon" style="background:rgba(255,69,58,.12);">🖥️</div>
+      <h4>IT Helpdesk &amp; Ticketing</h4>
+      <p>Real-time Kanban, SLA monitoring, asset lifecycle tracking, staff routing, and escalation automation.</p>
+      <span class="module-badge">IT Operations</span>
+    </div>
+    <div class="module-card">
+      <div class="module-icon" style="background:rgba(255,159,10,.12);">🔐</div>
+      <h4>Cybersecurity Suite</h4>
+      <p>CVE vulnerability scanning, live network traffic monitoring, threat intelligence, and incident response.</p>
+      <span class="module-badge">Security</span>
+    </div>
+    <div class="module-card">
+      <div class="module-icon" style="background:rgba(0,229,255,.12);">📊</div>
+      <h4>Executive Analytics</h4>
+      <p>Cross-department revenue charts, pipeline health, hiring velocity, email performance, and KPI dashboards.</p>
+      <span class="module-badge">Business Intelligence</span>
+    </div>
+    <div class="module-card">
+      <div class="module-icon" style="background:rgba(52,199,89,.12);">🏗️</div>
+      <h4>Multi-Tenant Architecture</h4>
+      <p>Full white-label tenant isolation. Provision companies, manage users, assign assets, and control all access.</p>
+      <span class="module-badge">SaaS Infrastructure</span>
+    </div>
+    <div class="module-card">
+      <div class="module-icon" style="background:rgba(191,90,242,.12);">🤖</div>
+      <h4>AI Cold Email Generator</h4>
+      <p>GPT-powered outreach writer with 5 frameworks: Pain Point, Case Study, ROI, Social Proof, Direct Ask.</p>
+      <span class="module-badge">AI Powered</span>
+    </div>
+    <div class="module-card">
+      <div class="module-icon" style="background:rgba(255,159,10,.12);">👥</div>
+      <h4>B2B Account Management</h4>
+      <p>360° Account view with contact management, activity logging, asset binding, and credential provisioning.</p>
+      <span class="module-badge">CRM</span>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="roi-section" id="roi">
+<div class="roi-inner">
+  <div class="section-label">Business Impact</div>
+  <h2 class="section-title">Measurable ROI from Day One</h2>
+  <p class="section-sub">Companies using Transform.io report dramatic improvements across all departments within 90 days of deployment.</p>
+  <div class="roi-grid">
+    <div class="roi-card"><div class="roi-num">40%</div><div class="roi-label">Reduction in<br>Time-to-Hire</div></div>
+    <div class="roi-card"><div class="roi-num">3x</div><div class="roi-label">More Demo Bookings<br>from AI Outreach</div></div>
+    <div class="roi-card"><div class="roi-num">96.7%</div><div class="roi-label">IT Ticket<br>SLA Resolution Rate</div></div>
+    <div class="roi-card"><div class="roi-num">85%</div><div class="roi-label">Reduction in<br>Security Incidents</div></div>
+    <div class="roi-card"><div class="roi-num">$120k+</div><div class="roi-label">Avg Annual Savings<br>on SaaS Stack</div></div>
+    <div class="roi-card"><div class="roi-num">18%</div><div class="roi-label">Email Reply Rate<br>(3x Industry Avg)</div></div>
+    <div class="roi-card"><div class="roi-num">10x</div><div class="roi-label">Tools Replaced<br>by One Platform</div></div>
+    <div class="roi-card"><div class="roi-num">24hrs</div><div class="roi-label">Full Deployment<br>Time to Live</div></div>
+  </div>
+</div>
+</div>
+
+<div class="pricing-section" id="pricing">
+<div class="pricing-inner">
+  <div class="section-label">Transparent Pricing</div>
+  <h2 class="section-title">Simple. Scalable. Powerful.</h2>
+  <p class="section-sub" style="margin: 0 auto 0;">No per-seat traps. No hidden fees. Pick the plan that fits your team and get full access to all included modules.</p>
+  <div class="pricing-grid">
+    <div class="price-card">
+      <div class="price-name">STARTER</div>
+      <div class="price-amount">$49<span>/mo</span></div>
+      <div class="price-desc">Perfect for small teams getting started with intelligent operations.</div>
+      <hr class="price-divider" />
+      <ul class="price-features">
+        <li><span class="check">✓</span> ATS &amp; Hiring Pipeline</li>
+        <li><span class="check">✓</span> Basic CRM (up to 500 contacts)</li>
+        <li><span class="check">✓</span> IT Helpdesk (50 tickets/mo)</li>
+        <li><span class="check">✓</span> Unified Inbox</li>
+        <li><span class="check">✓</span> Up to 5 Users</li>
+        <li><span class="cross">✗</span> AI Sales Engine</li>
+        <li><span class="cross">✗</span> Cybersecurity Suite</li>
+        <li><span class="cross">✗</span> Multi-Tenant Access</li>
+      </ul>
+      <a href="https://transform.io/register" class="price-btn price-btn-ghost">Get Started Free</a>
+    </div>
+    <div class="price-card popular">
+      <div class="popular-badge">MOST POPULAR</div>
+      <div class="price-name">GROWTH</div>
+      <div class="price-amount">$149<span>/mo</span></div>
+      <div class="price-desc">Full platform access for growing sales &amp; operations teams.</div>
+      <hr class="price-divider" />
+      <ul class="price-features">
+        <li><span class="check">✓</span> Everything in Starter</li>
+        <li><span class="check">✓</span> AI Sales Intelligence &amp; Outreach</li>
+        <li><span class="check">✓</span> Unlimited CRM Contacts</li>
+        <li><span class="check">✓</span> Cybersecurity Vulnerability Scanner</li>
+        <li><span class="check">✓</span> Up to 25 Users</li>
+        <li><span class="check">✓</span> AI Cold Email Generator</li>
+        <li><span class="check">✓</span> Executive Analytics Dashboard</li>
+        <li><span class="cross">✗</span> Multi-Tenant Infrastructure</li>
+      </ul>
+      <a href="https://transform.io/register" class="price-btn price-btn-primary">Start Growth Plan →</a>
+    </div>
+    <div class="price-card">
+      <div class="price-name">ENTERPRISE</div>
+      <div class="price-amount">$499<span>/mo</span></div>
+      <div class="price-desc">Full multi-tenant SaaS infrastructure for agencies and enterprises.</div>
+      <hr class="price-divider" />
+      <ul class="price-features">
+        <li><span class="check">✓</span> Everything in Growth</li>
+        <li><span class="check">✓</span> Multi-Tenant Management</li>
+        <li><span class="check">✓</span> Super Admin Control Panel</li>
+        <li><span class="check">✓</span> White-label Tenant Branding</li>
+        <li><span class="check">✓</span> Unlimited Users</li>
+        <li><span class="check">✓</span> Custom SLA Rules &amp; Automations</li>
+        <li><span class="check">✓</span> Dedicated Onboarding Manager</li>
+        <li><span class="check">✓</span> Priority 24/7 Support</li>
+      </ul>
+      <a href="https://transform.io/register" class="price-btn price-btn-ghost">Contact Sales</a>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="testimonials-section">
+<div class="testimonials-inner">
+  <div class="section-label">Social Proof</div>
+  <h2 class="section-title">Loved by Teams That Move Fast</h2>
+  <div class="testi-grid">
+    <div class="testi-card">
+      <div class="testi-stars">★★★★★</div>
+      <p class="testi-quote">"We replaced Greenhouse, HubSpot, and ServiceNow with Transform.io. The AI outreach alone booked us 3x more demos in the first month. Absolutely game-changing for our pipeline."</p>
+      <div class="testi-author">
+        <div class="testi-avatar">RC</div>
+        <div><div class="testi-name">Ryan Chen</div><div class="testi-role">VP Sales, NexusTech Inc.</div></div>
+      </div>
+    </div>
+    <div class="testi-card">
+      <div class="testi-stars">★★★★★</div>
+      <p class="testi-quote">"Our IT team's SLA compliance went from 71% to 96% in 6 weeks. The command center dashboard is exactly what we needed — real-time, clean, and immediately actionable."</p>
+      <div class="testi-author">
+        <div class="testi-avatar" style="background: linear-gradient(135deg, #30d158, #00a040);">SJ</div>
+        <div><div class="testi-name">Samira Johnson</div><div class="testi-role">IT Director, Apex Corp</div></div>
+      </div>
+    </div>
+    <div class="testi-card">
+      <div class="testi-stars">★★★★½</div>
+      <p class="testi-quote">"The multi-tenant architecture is perfect for our agency. We provision new clients in minutes, each with their own workspace. It's like white-label Salesforce at a fraction of the cost."</p>
+      <div class="testi-author">
+        <div class="testi-avatar" style="background: linear-gradient(135deg, #bf5af2, #7000aa);">MK</div>
+        <div><div class="testi-name">Marcus Klein</div><div class="testi-role">CEO, Digital Ops Agency</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="cta-section">
+  <h2>Ready to Run Your<br>Entire Business on One Platform?</h2>
+  <p>Join teams that replaced their 10-tool stack with Transform.io. Start free. Upgrade when you're ready. No credit card required.</p>
+  <div class="cta-actions">
+    <a href="https://transform.io/register" class="btn-primary">🚀 Start Free Today</a>
+    <a href="/" class="btn-ghost">View Live Platform →</a>
+  </div>
+  <p style="margin-top: 24px; font-size: .82rem; color: var(--text-dim);">No credit card required &nbsp;·&nbsp; Setup in under 24 hours &nbsp;·&nbsp; Cancel anytime</p>
+</div>
+
+<footer>
+  <div class="footer-logo">Transform.io</div>
+  <p>The Unified Enterprise OS for Sales, HR, IT &amp; Security</p>
+  <p style="margin-top: 8px;">© 2026 Transform.io — Built for enterprises that refuse to settle.</p>
+</footer>
+
+</body>
+</html>

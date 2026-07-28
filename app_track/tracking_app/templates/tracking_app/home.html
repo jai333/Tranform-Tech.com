@@ -432,7 +432,7 @@
                         <div><strong>Lightning Navigation</strong><span>Jump directly to specialized dashboards in one keystroke</span></div>
                     </li>
                 </ul>
-                <button class="btn-showcase btn-showcase-blue" onclick="document.dispatchEvent(new KeyboardEvent('keydown', {key: 'k', metaKey: true}))">Try Cmd+K Now →</button>
+                <button class="btn-showcase btn-showcase-cyan" onclick="if(window.toggleCmdK){window.toggleCmdK();}else{document.dispatchEvent(new KeyboardEvent('keydown', {key: 'k', metaKey: true}));}">Try Cmd+K Now →</button>
             </div>
             <div class="showcase-col-visual">
                 <div class="showcase-frame showcase-frame-cyan">
@@ -513,6 +513,41 @@
                 </div>
             </div>
         </div>
+        
+        <!-- Webhooks / Developer API -->
+        <div class="showcase-row showcase-reverse" style="margin-top: 150px;" data-reveal>
+            <div class="showcase-col-text">
+                <div class="sc-badge sc-badge-cyan">EXTENSIBILITY</div>
+                <h3 class="sc-heading">Enterprise API &amp; <span style="color: #00E5FF;">Webhooks</span></h3>
+                <p class="sc-description">Connect Transform.io to your existing ecosystem in seconds. Stream real-time events to Slack, Teams, Workday, or your custom internal tools with our blazing-fast webhook engine.</p>
+                <ul class="sc-features">
+                    <li>
+                        <div class="sc-check sc-cyan"><i class='bx bx-bolt-circle'></i></div>
+                        <div><strong>Real-Time Delivery</strong><span>Events stream the millisecond they happen</span></div>
+                    </li>
+                    <li>
+                        <div class="sc-check sc-cyan"><i class='bx bx-check-shield'></i></div>
+                        <div><strong>HMAC-SHA256 Signed</strong><span>Cryptographically secure payloads</span></div>
+                    </li>
+                    <li>
+                        <div class="sc-check sc-cyan"><i class='bx bx-plug'></i></div>
+                        <div><strong>Zero-Friction Integration</strong><span>Play nicely with any external service</span></div>
+                    </li>
+                </ul>
+                <a href="{% url 'developer-settings' %}" class="btn-showcase btn-showcase-cyan">Explore Developer Settings →</a>
+            </div>
+            <div class="showcase-col-visual">
+                <div class="showcase-frame showcase-frame-cyan" style="border: 1px solid rgba(0, 229, 255, 0.2); padding: 0; overflow: hidden;">
+                    <img src="{% static 'tracking_app/assets/api_screen_only_ui.jpg' %}" alt="API & Webhooks Direct Interface" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;">
+                    <div class="sf-glow" style="background: radial-gradient(circle, rgba(0,229,255,0.4) 0%, transparent 60%);"></div>
+                    <div class="sf-badge sf-badge-bottom" style="background: rgba(0,229,255,0.1); border-color: rgba(0,229,255,0.3);">
+                        <i class='bx bx-data' style="color:#00E5FF;"></i>
+                        <span style="color: #00E5FF;">Global Data Streams</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 </section>
 
@@ -1212,19 +1247,26 @@
 .showcase-checklist strong { font-size: 0.9rem; color: var(--text-white); }
 .showcase-checklist span { font-size: 0.8rem; color: var(--text-gray); line-height: 1.4; }
 .btn-showcase {
-    display: inline-flex; align-items: center; gap: 4px;
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
     background: linear-gradient(135deg, #6366f1, #4f46e5);
-    color:var(--apple-text); padding: 12px 24px; border-radius: 10px;
-    font-weight: 700; font-size: 0.9rem; text-decoration: none;
-    box-shadow: 0 4px 20px rgba(99,102,241,0.3);
-    transition: all 0.25s ease;
+    color: #ffffff !important; padding: 12px 26px; border-radius: 10px;
+    font-weight: 700; font-size: 0.95rem; text-decoration: none;
+    box-shadow: 0 4px 20px rgba(99,102,241,0.35);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    border: none; cursor: pointer; font-family: inherit; line-height: 1.4;
 }
-.btn-showcase:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(99,102,241,0.5); }
+.btn-showcase:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(99,102,241,0.55); color: #ffffff !important; }
 .btn-showcase-cyan {
     background: linear-gradient(135deg, #0891b2, #06b6d4) !important;
-    box-shadow: 0 4px 20px rgba(6,182,212,0.3) !important;
+    box-shadow: 0 4px 20px rgba(6,182,212,0.35) !important;
+    color: #ffffff !important;
 }
-.btn-showcase-cyan:hover { box-shadow: 0 8px 32px rgba(6,182,212,0.5) !important; }
+.btn-showcase-cyan:hover {
+    background: linear-gradient(135deg, #06b6d4, #22d3ee) !important;
+    box-shadow: 0 8px 32px rgba(6,182,212,0.55) !important;
+    color: #ffffff !important;
+    transform: translateY(-2px);
+}
 
 .showcase-frame {
     border-radius: 16px; overflow: hidden; position: relative;
@@ -1816,6 +1858,10 @@ body:not(.light-theme) #spotlight-layer { opacity: 1; }
 .sc-indigo { background: rgba(99,102,241,0.1) !important; color: #818cf8 !important; }
 .btn-showcase-indigo { background: linear-gradient(135deg, #6366f1, #4f46e5) !important; box-shadow: 0 4px 20px rgba(99,102,241,0.3) !important; }
 .btn-showcase-indigo:hover { box-shadow: 0 8px 32px rgba(99,102,241,0.5) !important; }
+/* Cyan Showcase Styles for Webhooks */
+.sc-badge-cyan { background: rgba(0,229,255,0.1); color: #00E5FF; border: 1px solid rgba(0,229,255,0.2); }
+.sc-cyan { background: rgba(0,229,255,0.1); color: #00E5FF; }
+.btn-showcase-cyan:hover { background: linear-gradient(135deg, #06b6d4, #22d3ee) !important; color: #ffffff !important; box-shadow: 0 8px 32px rgba(6,182,212,0.55) !important; transform: translateY(-2px); }
 </style>
 
 <script>
