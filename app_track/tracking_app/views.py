@@ -1,3 +1,4 @@
+import logging
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy, reverse
@@ -8,11 +9,13 @@ from django.contrib.auth import login, authenticate
 from django.contrib import messages
 from django.http import Http404, JsonResponse
 from django.core.exceptions import PermissionDenied
-from .models import Candidate, Job, Interview, User, Application, Friendship, Message, Notification, JobSeekerApplication, Note, ITTicket, ITTicketComment, ThreatIncident, DevProjectRequest, ScheduledReport, AutomationRun, ResumeData, ITAsset, ITVendor, KBArticle, TicketSurvey, TicketAuditLog, RoutingRule, SLAConfiguration, TicketMacro, TicketWorkLog, ITProblem, ITChangeRequest, ChangeApprovalBoard, ServiceCatalogItem, ServiceRequest, TicketRoutingRule, AssetRelationship, SystemOutage, BusinessHoursSchedule, HolidayCalendar, VulnerabilityScan, IPBlocklist, PhishingReport
+from .models import Candidate, Job, Interview, InterviewScorecard, User, Application, Friendship, Message, Notification, JobSeekerApplication, Note, ITTicket, ITTicketComment, ThreatIncident, DevProjectRequest, ScheduledReport, AutomationRun, ResumeData, ITAsset, ITVendor, KBArticle, TicketSurvey, TicketAuditLog, RoutingRule, SLAConfiguration, TicketMacro, TicketWorkLog, ITProblem, ITChangeRequest, ChangeApprovalBoard, ServiceCatalogItem, ServiceRequest, TicketRoutingRule, AssetRelationship, SystemOutage, BusinessHoursSchedule, HolidayCalendar, VulnerabilityScan, IPBlocklist, PhishingReport
 from .forms import UserRegistrationForm, ProfileUpdateForm, JobSeekerApplicationForm, JobForm
 from django.db import models
 from datetime import datetime, timedelta
 from .utils import generate_meeting_url
+
+logger = logging.getLogger(__name__)
 from django.template.context_processors import csrf
 from django.template import RequestContext
 

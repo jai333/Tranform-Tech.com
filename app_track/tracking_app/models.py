@@ -173,6 +173,28 @@ class Interview(models.Model):
 # Using Django's built-in User model features for simplicity and security
 # Although the plan specifies a custom Users table, using AbstractUser 
 # allows leveraging Django's auth system while adding custom fields if needed.
+
+class InterviewScorecard(models.Model):
+    RECOMMENDATION_CHOICES = [
+        ('hire', 'Strong Hire'),
+        ('maybe', 'Maybe'),
+        ('reject', 'No Hire'),
+    ]
+    interview = models.OneToOneField(Interview, on_delete=models.CASCADE, related_name='scorecard')
+    interviewer = models.ForeignKey('User', on_delete=models.CASCADE, related_name='scorecards')
+    technical_score = models.IntegerField(default=3)
+    communication_score = models.IntegerField(default=3)
+    culture_fit_score = models.IntegerField(default=3)
+    problem_solving_score = models.IntegerField(default=3)
+    overall_rating = models.IntegerField(default=3)
+    strengths = models.TextField(blank=True, null=True)
+    weaknesses = models.TextField(blank=True, null=True)
+    notes = models.TextField(blank=True, null=True)
+    recommendation = models.CharField(max_length=20, choices=RECOMMENDATION_CHOICES, default='maybe')
+
+    def __str__(self):
+        return f"Scorecard for {self.interview}"
+
 class Tenant(models.Model):
     """Represents a company or organization using the platform (Multi-Tenancy)."""
     PLAN_CHOICES = [
