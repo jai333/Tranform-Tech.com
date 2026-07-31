@@ -29,6 +29,27 @@
 <!-- CSRF Token for JS fetch -->
 {% csrf_token %}
 
+<div class="row g-4 mb-4">
+    <!-- Time to Hire Chart -->
+    <div class="col-lg-7">
+        <div class="data-card" style="background:var(--apple-card-bg); border:1px solid var(--apple-border); border-radius:12px; padding:1.5rem; height:100%;">
+            <h4 class="font-mono text-sm text-cyan mb-3"><i class="bx bx-time"></i> Avg. Days in Stage (Time-to-Hire)</h4>
+            <div style="height: 250px; position:relative;">
+                <canvas id="timeToHireChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <!-- Source of Hire -->
+    <div class="col-lg-5">
+        <div class="data-card" style="background:var(--apple-card-bg); border:1px solid var(--apple-border); border-radius:12px; padding:1.5rem; height:100%;">
+            <h4 class="font-mono text-sm text-primary mb-3"><i class="bx bx-pie-chart-alt"></i> Source of Candidates</h4>
+            <div style="height: 250px; position:relative; display:flex; justify-content:center;">
+                <canvas id="sourceChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="kanban-board animate-slide-up" style="display: flex; gap: 20px; overflow-x: auto; padding-bottom: 20px; min-height: 70vh;">
     
     <!-- Stage: Pending -->
@@ -199,6 +220,63 @@
                 col.querySelector('.badge').textContent = count;
             });
         }
+    });
+</script>
+
+<!-- Chart.js for ATS Analytics -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        Chart.defaults.color = 'rgba(255, 255, 255, 0.5)';
+        Chart.defaults.font.family = "'Inter', -apple-system, sans-serif";
+        
+        // Time to Hire Bar Chart
+        const ctxTime = document.getElementById('timeToHireChart').getContext('2d');
+        new Chart(ctxTime, {
+            type: 'bar',
+            data: {
+                labels: JSON.parse('{{ time_to_hire_labels_json|safe }}'),
+                datasets: [{
+                    label: 'Days in Stage',
+                    data: JSON.parse('{{ time_to_hire_data_json|safe }}'),
+                    backgroundColor: 'rgba(0, 229, 255, 0.7)',
+                    borderRadius: 6,
+                    barPercentage: 0.6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: 'rgba(255, 255, 255, 0.05)', drawBorder: false } },
+                    x: { grid: { display: false, drawBorder: false } }
+                }
+            }
+        });
+        
+        // Source of Hire Doughnut Chart
+        const ctxSource = document.getElementById('sourceChart').getContext('2d');
+        new Chart(ctxSource, {
+            type: 'doughnut',
+            data: {
+                labels: JSON.parse('{{ source_hire_labels_json|safe }}'),
+                datasets: [{
+                    data: JSON.parse('{{ source_hire_data_json|safe }}'),
+                    backgroundColor: ['#0A84FF', '#32d74b', '#9333EA', '#FF9500'],
+                    borderWidth: 0,
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '70%',
+                plugins: {
+                    legend: { position: 'right', labels: { usePointStyle: true, padding: 15 } }
+                }
+            }
+        });
     });
 </script>
 {% endblock %}

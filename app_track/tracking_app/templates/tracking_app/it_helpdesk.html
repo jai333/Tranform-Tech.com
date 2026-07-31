@@ -12,12 +12,14 @@
     --col-resolved: #10b981;
     --p1: #ef4444; --p2: #f59e0b; --p3: #00E5FF; --p4: #6b7280;
 }
-.it-page { padding: 2rem; max-width: 1600px; margin: 0 auto; }
+.it-page { padding: 2rem; max-width: 1600px; margin: 0 auto; position: relative; z-index: 1; }
+/* Add background glow for NOC feel */
+.it-page::before { content:''; position:fixed; top:10%; left:10%; width:800px; height:800px; background:radial-gradient(circle,rgba(0,166,251,0.06) 0%,transparent 60%); border-radius:50%; z-index:-1; pointer-events:none; }
 .it-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem; }
 .it-title { font-size: 1.6rem; font-weight: 800; color: var(--apple-text); letter-spacing: -0.02em; }
 .it-title span { color: var(--it-blue); }
 .it-stats { display: flex; gap: 1rem; flex-wrap: wrap; }
-.stat-pill { background: var(--apple-card-bg); border: 1px solid var(--apple-border); border-radius: 24px; padding: 6px 16px; font-size: 0.8rem; color: var(--apple-text-secondary); display: flex; align-items: center; gap: 6px; }
+.stat-pill { background: rgba(30,30,30,0.5); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.08); border-radius: 24px; padding: 6px 16px; font-size: 0.8rem; color: var(--apple-text-secondary); display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
 .stat-pill strong { color: var(--apple-text); }
 .btn-new-ticket { background: linear-gradient(135deg, var(--it-blue), #0077cc); color:var(--apple-text); border: none; border-radius: 10px; padding: 10px 20px; font-size: 0.875rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; text-decoration: none; transition: opacity 0.2s, transform 0.2s; }
 .btn-new-ticket:hover { opacity: 0.9; transform: translateY(-1px); color:var(--apple-text); }
@@ -43,8 +45,8 @@
 @media (max-width: 900px) { .kanban-board { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 640px) { .kanban-board { grid-template-columns: 1fr; } }
 
-.kanban-col { background: var(--apple-card-bg); border: 1px solid var(--apple-border); border-radius: 14px; padding: 1rem; }
-.col-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--apple-border-subtle); color: var(--apple-text); }
+.kanban-col { background: rgba(20,20,20,0.6); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 1rem; box-shadow: 0 8px 32px rgba(0,0,0,0.15); }
+.col-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.05); color: var(--apple-text); }
 .col-title { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; display: flex; align-items: center; gap: 8px; color: var(--apple-text); }
 .col-dot { width: 8px; height: 8px; border-radius: 50%; }
 .dot-open { background: var(--col-open); box-shadow: 0 0 8px var(--col-open); }
@@ -53,9 +55,9 @@
 .dot-resolved { background: var(--col-resolved); box-shadow: 0 0 8px var(--col-resolved); }
 .col-count { font-size: 0.75rem; background: var(--apple-bg); border-radius: 20px; padding: 2px 8px; color: var(--apple-text-secondary); border: 1px solid var(--apple-border); }
 
-.ticket-card { background: var(--apple-bg); border: 1px solid var(--apple-border); border-radius: 10px; padding: 14px; margin-bottom: 10px; cursor: pointer; transition: transform 0.15s, border-color 0.15s, background 0.15s; text-decoration: none; display: block; color: var(--apple-text); }
-.ticket-card:hover { transform: translateY(-2px); background: var(--apple-card-bg-hover); border-color: var(--apple-accent-glow); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-.ticket-priority { display: inline-flex; align-items: center; gap: 5px; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; border-radius: 4px; padding: 2px 8px; margin-bottom: 8px; }
+.ticket-card { background: rgba(35,35,35,0.7); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 14px; margin-bottom: 10px; cursor: pointer; transition: all 0.2s; text-decoration: none; display: block; color: var(--apple-text); }
+.ticket-card:hover { transform: translateY(-3px); background: rgba(45,45,45,0.85); border-color: rgba(0,166,251,0.4); box-shadow: 0 8px 20px rgba(0,0,0,0.2), 0 0 15px rgba(0,166,251,0.1); }
+.ticket-priority { display: inline-flex; align-items: center; gap: 5px; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; border-radius: 6px; padding: 3px 8px; margin-bottom: 8px; box-shadow: inset 0 0 10px rgba(0,0,0,0.1); }
 .pri-p1 { background: rgba(239,68,68,0.15); color: var(--p1); border: 1px solid rgba(239,68,68,0.3); }
 .pri-p2 { background: rgba(245,158,11,0.15); color: var(--p2); border: 1px solid rgba(245,158,11,0.3); }
 .pri-p3 { background: rgba(0,229,255,0.1); color: var(--p3); border: 1px solid rgba(0,229,255,0.25); }
@@ -118,6 +120,24 @@
         <a href="{% url 'it-asset-list' %}" class="btn btn-sm" style="color: var(--apple-text-secondary);"><i class="bx bx-laptop"></i> Assets & Vendors</a>
         <a href="{% url 'kb-article-list' %}" class="btn btn-sm" style="color: var(--apple-text-secondary);"><i class="bx bx-book"></i> Knowledge Base</a>
         <a href="{% url 'it-status-page' %}" class="btn btn-sm" style="color: var(--apple-text-secondary);"><i class="bx bx-check-shield"></i> Status Page</a>
+    </div>
+
+    <!-- SLA Breach Countdown Banner -->
+    <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.4); border-radius: 12px; padding: 16px 20px; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.05);">
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="background: rgba(239, 68, 68, 0.2); width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #ef4444; position: relative;">
+                <i class="bx bx-alarm-exclamation" style="font-size: 1.5rem;"></i>
+                <div style="position: absolute; inset: -4px; border-radius: 50%; border: 1px solid #ef4444; animation: pulse-ring 2s infinite; opacity: 0.5;"></div>
+            </div>
+            <div>
+                <h4 style="color: #ef4444; margin: 0; font-size: 0.95rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">SLA Breach Warning</h4>
+                <p style="margin: 4px 0 0; font-size: 0.8rem; color: var(--apple-text-secondary);">3 High Priority tickets are nearing their SLA limits.</p>
+            </div>
+        </div>
+        <div style="text-align: right;">
+            <div style="font-family: 'Fira Code', monospace; font-size: 1.5rem; font-weight: 800; color: #ef4444;" id="sla-countdown">00:45:12</div>
+            <div style="font-size: 0.7rem; color: var(--apple-text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Until Next Breach</div>
+        </div>
     </div>
 
     <!-- Analytics Strip -->
@@ -594,6 +614,20 @@ if (titleInput) {
                 });
         }, 500);
     });
+}
+
+// SLA Countdown Simulation
+let slaTime = 45 * 60 + 12; // 45m 12s
+const slaEl = document.getElementById('sla-countdown');
+if(slaEl) {
+    setInterval(() => {
+        slaTime--;
+        if(slaTime < 0) slaTime = 0;
+        const h = String(Math.floor(slaTime / 3600)).padStart(2, '0');
+        const m = String(Math.floor((slaTime % 3600) / 60)).padStart(2, '0');
+        const s = String(slaTime % 60).padStart(2, '0');
+        slaEl.innerText = `${h}:${m}:${s}`;
+    }, 1000);
 }
 </script>
 {% endblock %}

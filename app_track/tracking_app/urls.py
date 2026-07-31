@@ -55,6 +55,9 @@ urlpatterns = [
     path('candidates/<int:pk>/', views.CandidateDetailView.as_view(), name='candidate-detail'),
     path('candidates/<int:pk>/update/', views.CandidateUpdateView.as_view(), name='candidate-update'),
     path('candidates/<int:pk>/delete/', views.CandidateDeleteView.as_view(), name='candidate-delete'),
+    path('candidates/sourcing/', views.candidate_sourcing, name='candidate-sourcing'),
+    path('candidates/api/add-sourced/', views.add_sourced_candidate, name='add-sourced-candidate'),
+    path('candidates/api/parse-and-scrape/', views.parse_and_scrape, name='parse-and-scrape'),
     
     # Job URLs
     path('jobs/', views.JobListView.as_view(), name='job-list'),

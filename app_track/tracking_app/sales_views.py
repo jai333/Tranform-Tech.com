@@ -81,6 +81,9 @@ def sales_dashboard(request):
         total=Sum('deal_value_monthly')
     )['total'] or 0
 
+    deals_won = Deal.objects.filter(**tenant_filter, stage='won').count()
+    deals_lost = Deal.objects.filter(**tenant_filter, stage='lost').count()
+
     # Hot leads (opened 3+ times or icp>=80)
     hot_leads = Lead.objects.filter(
         **tenant_filter
@@ -125,6 +128,8 @@ def sales_dashboard(request):
         'open_rate': open_rate,
         'reply_rate': reply_rate,
         'recent_leads': recent_leads,
+        'deals_won': deals_won,
+        'deals_lost': deals_lost,
     }
     return render(request, 'tracking_app/sales/dashboard.html', context)
 
@@ -347,16 +352,39 @@ def api_send_email(request, email_id):
     """Mark an email as sent and dispatch it through SMTP backend (Gmail)."""
     email = get_object_or_404(OutreachEmail, id=email_id)
     try:
-        from django.core.mail import send_mail
+        from django.core.mail import send_mail, get_connection, EmailMessage
         
-        # Send physical email via configured backend
-        send_mail(
-            subject=email.subject,
-            message=email.body,
-            from_email=None,  # Uses DEFAULT_FROM_EMAIL from settings
-            recipient_list=[email.lead.email],
-            fail_silently=False,
-        )
+        tenant = email.tenant or (email.lead.tenant if hasattr(email.lead, 'tenant') else None)
+        if tenant and tenant.mail_registered_email and tenant.mail_smtp_host and tenant.mail_smtp_username:
+            try:
+                connection = get_connection(
+                    backend='django.core.mail.backends.smtp.EmailBackend',
+                    host=tenant.mail_smtp_host,
+                    port=tenant.mail_smtp_port,
+                    username=tenant.mail_smtp_username,
+                    password=tenant.mail_smtp_password,
+                    use_tls=tenant.mail_use_tls,
+                    fail_silently=False,
+                )
+                msg = EmailMessage(
+                    subject=email.subject,
+                    body=email.body,
+                    from_email=tenant.mail_registered_email,
+                    to=[email.lead.email],
+                    connection=connection,
+                )
+                msg.send()
+            except Exception as e:
+                return JsonResponse({'status': 'error', 'message': f'SMTP Error: {str(e)}'}, status=500)
+        else:
+            # Fallback to default physical email via configured backend
+            send_mail(
+                subject=email.subject,
+                message=email.body,
+                from_email=None,  # Uses DEFAULT_FROM_EMAIL from settings
+                recipient_list=[email.lead.email],
+                fail_silently=False,
+            )
 
         email.status = 'sent'
         email.sent_at = timezone.now()
@@ -946,24 +974,53 @@ def unified_inbox(request):
 
         elif action == 'test_send':
             if tenant and tenant.mail_registered_email:
-                test_lead, _ = Lead.objects.get_or_create(
-                    email=tenant.mail_registered_email,
-                    defaults={'contact_name': f"Self Verification ({tenant.name})", 'company_name': tenant.name, 'tenant': tenant}
-                )
-                if not test_lead.tenant:
-                    test_lead.tenant = tenant
-                    test_lead.save()
-                
-                OutreachEmail.objects.create(
-                    lead=test_lead,
-                    tenant=tenant,
-                    sender_email=tenant.mail_registered_email,
-                    subject="✨ [Transform.io] Verification: Tenant Mail Integration Active!",
-                    body=f"Hello {tenant.name} Team,\n\nYour Advanced Tenant Mail Integration is active and securely configured!\n\nRegistered Sender: {tenant.mail_sender_name or tenant.name} <{tenant.mail_registered_email}>\nSMTP Server: {tenant.mail_smtp_host}:{tenant.mail_smtp_port}\nData Isolation: LOCKED & ENFORCED.\n\nYou can now send cold outreach and receive AI-classified replies in two-way real time.\n\nBest,\nTransform.io Mail Engine",
-                    status='sent',
-                    sent_at=timezone.now()
-                )
-                messages.success(request, f"Test verification message dispatched via your registered email ({tenant.mail_registered_email})!")
+                from django.core.mail import get_connection, EmailMessage
+                try:
+                    # Attempt SMTP dispatch if configured, else use default backend to verify it works
+                    if tenant.mail_smtp_host and tenant.mail_smtp_username:
+                        connection = get_connection(
+                            backend='django.core.mail.backends.smtp.EmailBackend',
+                            host=tenant.mail_smtp_host,
+                            port=tenant.mail_smtp_port,
+                            username=tenant.mail_smtp_username,
+                            password=tenant.mail_smtp_password,
+                            use_tls=tenant.mail_use_tls,
+                            fail_silently=False,
+                        )
+                    else:
+                        connection = None
+                        
+                    email_body = f"Hello {tenant.name} Team,\n\nYour Advanced Tenant Mail Integration is active and securely configured!\n\nRegistered Sender: {tenant.mail_sender_name or tenant.name} <{tenant.mail_registered_email}>\nSMTP Server: {tenant.mail_smtp_host}:{tenant.mail_smtp_port}\nData Isolation: LOCKED & ENFORCED.\n\nYou can now send cold outreach and receive AI-classified replies in two-way real time.\n\nBest,\nTransform.io Mail Engine"
+
+                    msg = EmailMessage(
+                        subject="✨ [Transform.io] Verification: Tenant Mail Integration Active!",
+                        body=email_body,
+                        from_email=tenant.mail_registered_email,
+                        to=[tenant.mail_registered_email],
+                        connection=connection,
+                    )
+                    msg.send()
+
+                    test_lead, _ = Lead.objects.get_or_create(
+                        email=tenant.mail_registered_email,
+                        defaults={'contact_name': f"Self Verification ({tenant.name})", 'company_name': tenant.name, 'tenant': tenant}
+                    )
+                    if not test_lead.tenant:
+                        test_lead.tenant = tenant
+                        test_lead.save()
+                    
+                    OutreachEmail.objects.create(
+                        lead=test_lead,
+                        tenant=tenant,
+                        sender_email=tenant.mail_registered_email,
+                        subject="✨ [Transform.io] Verification: Tenant Mail Integration Active!",
+                        body=email_body,
+                        status='sent',
+                        sent_at=timezone.now()
+                    )
+                    messages.success(request, f"Test verification message actively dispatched via your registered email ({tenant.mail_registered_email})!")
+                except Exception as e:
+                    messages.error(request, f"SMTP Connection Failed: {str(e)}")
             else:
                 messages.error(request, "Please save a Registered Corporate Email Address before testing delivery.")
             return redirect('unified-inbox')

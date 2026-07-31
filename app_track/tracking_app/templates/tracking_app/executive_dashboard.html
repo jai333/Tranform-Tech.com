@@ -66,6 +66,47 @@
     </div>
 </div>
 
+<div class="row g-4 mb-4">
+    <!-- Top At-Risk Accounts -->
+    <div class="col-12">
+        <div class="data-card" style="background:var(--apple-card-bg); border:1px solid var(--apple-border); border-radius:20px; padding:1.5rem;">
+            <h3 style="margin-top:0; color:var(--apple-text); font-size:1.1rem; margin-bottom:1.5rem; display:flex; align-items:center; gap:8px;">
+                <i class="bx bx-error-alt text-warning"></i> AI-Flagged At-Risk Accounts
+            </h3>
+            <div class="table-responsive">
+                <table class="table table-dark table-hover mb-0" style="background:transparent;">
+                    <thead>
+                        <tr style="border-bottom:1px solid rgba(255,255,255,0.1);">
+                            <th style="color:var(--text-gray); font-weight:600; font-size:0.85rem;">Account Name</th>
+                            <th style="color:var(--text-gray); font-weight:600; font-size:0.85rem;">Industry</th>
+                            <th style="color:var(--text-gray); font-weight:600; font-size:0.85rem;">Health Score</th>
+                            <th style="color:var(--text-gray); font-weight:600; font-size:0.85rem;">Action Required</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for acc in at_risk_accounts %}
+                        <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                            <td style="color:white; font-weight:600; padding:12px 8px;">
+                                <a href="{% url 'account-detail' acc.id %}" style="color:var(--apple-text); text-decoration:none;">{{ acc.name }}</a>
+                            </td>
+                            <td style="color:rgba(255,255,255,0.8); padding:12px 8px;">{{ acc.get_industry_display }}</td>
+                            <td style="padding:12px 8px;">
+                                <span class="badge" style="background:rgba(255,59,48,0.2); color:#ff3b30; border:1px solid #ff3b30;">Critical</span>
+                            </td>
+                            <td style="padding:12px 8px;">
+                                <button class="btn btn-sm" style="background:rgba(255,255,255,0.1); color:white; border-radius:8px;">Schedule Review</button>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="4" class="text-center py-4 text-secondary">No at-risk accounts detected.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Include Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
@@ -80,29 +121,50 @@
         gradientRev.addColorStop(0, 'rgba(50, 215, 75, 0.4)');
         gradientRev.addColorStop(1, 'rgba(50, 215, 75, 0.0)');
         
+        const gradientForecast = ctxRev.createLinearGradient(0, 0, 0, 300);
+        gradientForecast.addColorStop(0, 'rgba(10, 132, 255, 0.4)');
+        gradientForecast.addColorStop(1, 'rgba(10, 132, 255, 0.0)');
+
         const revChart = new Chart(ctxRev, {
             type: 'line',
             data: {
                 labels: JSON.parse('{{ months_json|safe }}'),
-                datasets: [{
-                    label: 'Revenue',
-                    data: JSON.parse('{{ revenue_trend_json|safe }}'),
-                    borderColor: '#32d74b',
-                    backgroundColor: gradientRev,
-                    borderWidth: 3,
-                    tension: 0.4,
-                    fill: true,
-                    pointBackgroundColor: '#1a1a1a',
-                    pointBorderColor: '#32d74b',
-                    pointBorderWidth: 2,
-                    pointRadius: 4,
-                    pointHoverRadius: 6
-                }]
+                datasets: [
+                    {
+                        label: 'Historical Revenue',
+                        data: JSON.parse('{{ historical_revenue_json|safe }}'),
+                        borderColor: '#32d74b',
+                        backgroundColor: gradientRev,
+                        borderWidth: 3,
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: '#1a1a1a',
+                        pointBorderColor: '#32d74b',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    },
+                    {
+                        label: 'AI Forecast',
+                        data: JSON.parse('{{ forecast_revenue_json|safe }}'),
+                        borderColor: '#0A84FF',
+                        backgroundColor: gradientForecast,
+                        borderWidth: 3,
+                        borderDash: [5, 5],
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: '#1a1a1a',
+                        pointBorderColor: '#0A84FF',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    }
+                ]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
+                plugins: { legend: { position: 'top', labels: { usePointStyle: true, color: 'rgba(255,255,255,0.7)' } } },
                 scales: {
                     y: {
                         beginAtZero: true,

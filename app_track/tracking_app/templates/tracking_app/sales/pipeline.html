@@ -140,14 +140,14 @@
                 </span>
             </div>
             
-            <div class="column-body">
+            <div class="column-body" data-stage="{{ stage }}">
                 {% for key, d_list in pipeline.items %}
                     {% if key == stage %}
                         {% if d_list %}
                             {% for deal in d_list %}
-                            <div class="kanban-card" id="deal-card-{{ deal.id }}">
+                            <div class="kanban-card" id="deal-card-{{ deal.id }}" data-deal-id="{{ deal.id }}">
                                 <div class="card-company">
-                                    <a href="{% url 'deal-detail' deal.id %}" style="color:white;text-decoration:none;display:flex;align-items:center;justify-content:between;">
+                                    <a href="{% url 'deal-detail' deal.id %}" style="color:white;text-decoration:none;display:flex;align-items:center;justify-content:space-between;">
                                         {{ deal.lead.company_name }}
                                         <i class='bx bx-chevron-right' style="font-size:1rem;color:var(--text-dark-gray);"></i>
                                     </a>
@@ -181,8 +181,34 @@
     </div>
 </div>
 
+<!-- Include SortableJS for Drag & Drop -->
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 <script>
-async function changeStage(dealId, newStage) {
+document.addEventListener("DOMContentLoaded", function() {
+    const columns = document.querySelectorAll('.column-body');
+    columns.forEach(col => {
+        new Sortable(col, {
+            group: 'deals',
+            animation: 150,
+            ghostClass: 'sortable-ghost',
+            onEnd: function(evt) {
+                const item = evt.item; 
+                const newCol = evt.to;
+                
+                const dealId = item.getAttribute('data-deal-id');
+                const newStage = newCol.getAttribute('data-stage');
+                
+                if (dealId && newStage && evt.from !== evt.to) {
+                    const select = item.querySelector('.card-select');
+                    if(select) select.value = newStage;
+                    changeStage(dealId, newStage, false);
+                }
+            }
+        });
+    });
+});
+
+async function changeStage(dealId, newStage, reload=true) {
     const card = document.getElementById(`deal-card-${dealId}`);
     card.style.opacity = '0.5';
     
@@ -197,8 +223,14 @@ async function changeStage(dealId, newStage) {
         });
         const data = await res.json();
         if (data.success) {
-            // Reload to reposition the card under its new column cleanly
-            location.reload();
+            if (reload) {
+                location.reload();
+            } else {
+                card.style.opacity = '1';
+                // Success visual cue
+                card.style.boxShadow = '0 0 16px rgba(52, 199, 89, 0.6)';
+                setTimeout(() => { card.style.boxShadow = ''; }, 1000);
+            }
         } else {
             alert('Error updating deal stage: ' + (data.error || 'Unknown error'));
             card.style.opacity = '1';

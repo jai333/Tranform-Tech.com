@@ -11,7 +11,13 @@
     --cyber-green: #32d74b;
     --cyber-blue: #0a84ff;
 }
-.soc-page { padding: 2rem; max-width: 1600px; margin: 0 auto; }
+.soc-page { padding: 2rem; max-width: 1600px; margin: 0 auto; position: relative; z-index: 1; }
+/* Cyber Threat Matrix Background */
+.soc-page::before { content:''; position:fixed; top:0; left:0; right:0; bottom:0; background: 
+    linear-gradient(rgba(255,59,48,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,59,48,0.03) 1px, transparent 1px);
+    background-size: 40px 40px; z-index:-2; pointer-events:none; }
+.soc-page::after { content:''; position:fixed; top:20%; right:10%; width:600px; height:600px; background:radial-gradient(circle,rgba(255,59,48,0.05) 0%,transparent 70%); border-radius:50%; z-index:-1; pointer-events:none; }
 
 /* Header */
 .soc-header { margin-bottom: 2rem; }
@@ -27,13 +33,18 @@
 .stats-bar { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; margin-bottom: 2rem; }
 @media (max-width: 900px) { .stats-bar { grid-template-columns: repeat(3, 1fr); } }
 @media (max-width: 500px) { .stats-bar { grid-template-columns: repeat(2, 1fr); } }
-.stat-card { background: var(--apple-card-bg); border: 1px solid var(--apple-border); border-radius: 12px; padding: 1rem 1.25rem; position: relative; overflow: hidden; }
-.stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
-.stat-card.critical::before { background: var(--cyber-red); }
-.stat-card.high::before { background: var(--cyber-orange); }
-.stat-card.open::before { background: var(--cyber-amber); }
-.stat-card.investigating::before { background: var(--cyber-blue); }
-.stat-card.total::before { background: var(--apple-border); }
+.stat-card { background: rgba(20,20,20,0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 1rem 1.25rem; position: relative; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+.stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+.stat-card.critical { border-color: rgba(255,59,48,0.3); background: linear-gradient(180deg, rgba(255,59,48,0.08) 0%, rgba(20,20,20,0.7) 100%); }
+.stat-card.critical::before { background: var(--cyber-red); box-shadow: 0 0 15px var(--cyber-red); }
+.stat-card.high { border-color: rgba(255,149,0,0.2); }
+.stat-card.high::before { background: var(--cyber-orange); box-shadow: 0 0 10px var(--cyber-orange); }
+.stat-card.open { border-color: rgba(255,214,10,0.2); }
+.stat-card.open::before { background: var(--cyber-amber); box-shadow: 0 0 10px var(--cyber-amber); }
+.stat-card.investigating { border-color: rgba(10,132,255,0.2); }
+.stat-card.investigating::before { background: var(--cyber-blue); box-shadow: 0 0 10px var(--cyber-blue); }
+.stat-card.total { border-color: rgba(255,255,255,0.1); }
+.stat-card.total::before { background: rgba(255,255,255,0.2); }
 .stat-val { font-size: 2rem; font-weight: 800; margin-bottom: 2px; }
 .stat-card.critical .stat-val { color: var(--cyber-red); }
 .stat-card.high .stat-val { color: var(--cyber-orange); }
@@ -52,11 +63,11 @@
 .btn-clear { background: transparent; border: 1px solid var(--apple-border); color: var(--apple-text-secondary); border-radius: 8px; padding: 8px 14px; font-size: 0.8rem; cursor: pointer; font-family: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; }
 
 /* Incident table */
-.incident-table-wrap { background: var(--apple-card-bg); border: 1px solid var(--apple-border); border-radius: 14px; overflow: hidden; }
+.incident-table-wrap { background: rgba(20,20,20,0.7); backdrop-filter: blur(16px); border: 1px solid rgba(255,59,48,0.15); border-radius: 14px; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.2); }
 .incident-table { width: 100%; border-collapse: collapse; }
-.incident-table thead th { background: var(--apple-bg); padding: 12px 16px; text-align: left; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--apple-text-secondary); border-bottom: 1px solid var(--apple-border-subtle); }
-.incident-table tbody tr { border-bottom: 1px solid var(--apple-border-subtle); transition: background 0.15s; cursor: pointer; color: var(--apple-text); }
-.incident-table tbody tr:hover { background: var(--apple-row-hover); }
+.incident-table thead th { background: rgba(0,0,0,0.4); padding: 12px 16px; text-align: left; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--apple-text-secondary); border-bottom: 1px solid rgba(255,255,255,0.05); }
+.incident-table tbody tr { border-bottom: 1px solid rgba(255,255,255,0.03); transition: all 0.2s; cursor: pointer; color: var(--apple-text); }
+.incident-table tbody tr:hover { background: rgba(255,59,48,0.04); }
 .incident-table tbody tr:last-child { border-bottom: none; }
 .incident-table td { padding: 14px 16px; vertical-align: middle; font-size: 0.875rem; }
 .severity-badge { display: inline-flex; align-items: center; gap: 4px; border-radius: 6px; padding: 3px 9px; font-size: 0.69rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; border: 1px solid; }
@@ -266,6 +277,26 @@
         </form>
     </div>
 
+    <!-- Global Threat Map -->
+    <div class="threat-grid">
+        <div class="map-panel">
+            <div class="map-bg"></div>
+            <div style="position: relative; z-index: 10;">
+                <h3 style="color: var(--apple-text); font-size: 1rem; margin-bottom: 5px;"><i class="bx bx-world"></i> Global Live Threat Map</h3>
+                <p style="color: var(--apple-text-secondary); font-size: 0.75rem; font-family: 'Fira Code', monospace;">Tracking active threat origins in real-time</p>
+            </div>
+            <div id="map-points-container" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 5;"></div>
+        </div>
+        <div class="top-ips-panel">
+            <h3 style="color: var(--apple-text); font-size: 0.75rem; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 0.05em;"><i class="bx bx-radar"></i> Top Attack Vectors</h3>
+            <div class="ip-row"><span class="ip-addr">192.168.1.104 (CN)</span><span class="ip-count">142</span></div>
+            <div class="ip-row"><span class="ip-addr">10.0.45.2 (RU)</span><span class="ip-count">98</span></div>
+            <div class="ip-row"><span class="ip-addr">172.16.0.4 (US)</span><span class="ip-count">56</span></div>
+            <div class="ip-row"><span class="ip-addr">203.0.113.89 (BR)</span><span class="ip-count">24</span></div>
+            <div class="ip-row"><span class="ip-addr">198.51.100.12 (IR)</span><span class="ip-count">11</span></div>
+        </div>
+    </div>
+
     <!-- Incident Table -->
     <div class="incident-table-wrap">
         <table class="incident-table">
@@ -348,6 +379,29 @@
             }
         }
         connectSOC();
+
+        // ── Map Points Generator ──────────────────────────────────────────
+        const mapContainer = document.getElementById('map-points-container');
+        if (mapContainer) {
+            function spawnThreatPoint() {
+                const pt = document.createElement('div');
+                pt.className = 'map-point';
+                pt.style.top = Math.floor(Math.random() * 80 + 10) + '%';
+                pt.style.left = Math.floor(Math.random() * 80 + 10) + '%';
+                mapContainer.appendChild(pt);
+                
+                // Remove after a few seconds
+                setTimeout(() => {
+                    if (pt.parentNode) pt.parentNode.removeChild(pt);
+                }, Math.random() * 4000 + 2000);
+            }
+            
+            // Spawn initial points
+            for(let i=0; i<5; i++) spawnThreatPoint();
+            
+            // Periodically spawn new ones
+            setInterval(spawnThreatPoint, 1500);
+        }
     });
 </script>
 {% endblock %}

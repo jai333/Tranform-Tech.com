@@ -751,12 +751,7 @@ class ITAsset(models.Model):
             ''.join(random.choice(chars) for _ in range(12))
         )
         
-        # In a real system, you would store this securely (e.g. Hashicorp Vault)
-        # For this CRM, we append it to the asset notes or return it.
-        creds_note = f"\n\n[AUTO-PROVISIONED CREDENTIALS]\nGenerated: {self.updated_at.strftime('%Y-%m-%d %H:%M:%S')}\nUsername: admin\nPassword: {password}"
-        self.notes = (self.notes or "") + creds_note
-        self.save(update_fields=['notes'])
-        
+        # For this CRM, we just return the credentials so they can be flashed in the UI.
         return {"username": "admin", "password": password}
 
 class SLAConfiguration(models.Model):

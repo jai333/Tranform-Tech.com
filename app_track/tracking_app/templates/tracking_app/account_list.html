@@ -86,6 +86,8 @@
                 <th>Industry</th>
                 <th>Size</th>
                 <th>Contacts</th>
+                <th>Assigned Team</th>
+                <th>Managed Assets</th>
                 <th>Active Deals</th>
                 <th style="text-align:right; padding-right:24px;">Joined</th>
             </tr>
@@ -110,6 +112,20 @@
                 <td style="color:var(--text-gray);">{{ acc.get_employee_count_display|default:"—" }}</td>
                 <td><span class="contact-badge"><i class="bx bx-user" style="margin-right:4px;"></i>{{ acc.contacts.count }}</span></td>
                 <td>
+                    <div style="display:flex; align-items:center; gap:4px;">
+                        <div style="width:28px; height:28px; border-radius:50%; background:var(--primary); color:#000; display:flex; align-items:center; justify-content:center; font-size:0.7rem; font-weight:700; border:2px solid var(--bg-surface);" title="Dedicated Account Manager">AM</div>
+                        <div style="width:28px; height:28px; border-radius:50%; background:var(--accent-purple); color:#fff; display:flex; align-items:center; justify-content:center; font-size:0.7rem; font-weight:700; border:2px solid var(--bg-surface); margin-left:-10px;" title="Lead SOC Analyst">SA</div>
+                        <div style="width:28px; height:28px; border-radius:50%; background:#10b981; color:#fff; display:flex; align-items:center; justify-content:center; font-size:0.7rem; font-weight:700; border:2px solid var(--bg-surface); margin-left:-10px;" title="IT Support Lead">IT</div>
+                        <span style="font-size:0.7rem; color:var(--text-gray); margin-left:4px;">+2</span>
+                    </div>
+                </td>
+                <td>
+                    <div style="display:flex; flex-direction:column; gap:4px;">
+                        <span style="font-size:0.7rem; background:rgba(0,229,255,0.1); color:var(--primary); padding:2px 6px; border-radius:4px; border:1px solid rgba(0,229,255,0.2); white-space:nowrap;"><i class="bx bx-server"></i> Dedicated Cluster</span>
+                        <span style="font-size:0.7rem; background:rgba(139,92,246,0.1); color:var(--accent-purple); padding:2px 6px; border-radius:4px; border:1px solid rgba(139,92,246,0.2); white-space:nowrap;"><i class="bx bx-shield"></i> Premium WAF</span>
+                    </div>
+                </td>
+                <td>
                     {% if acc.deals.count > 0 %}
                     <span class="metric-badge"><i class="bx bx-dollar-circle" style="margin-right:4px;"></i>{{ acc.deals.count }} Pipeline</span>
                     {% else %}
@@ -120,7 +136,7 @@
             </tr>
             {% empty %}
             <tr>
-                <td colspan="6" style="text-align:center; padding:60px 20px; color:var(--apple-text-muted);">
+                <td colspan="8" style="text-align:center; padding:60px 20px; color:var(--apple-text-muted);">
                     <i class="bx bx-buildings" style="font-size:3rem; margin-bottom:16px; opacity:0.5; display:block;"></i>
                     <h3 style="margin:0 0 8px 0; color:var(--apple-text); font-size:1.2rem;">No accounts found</h3>
                     <p style="margin:0; font-size:0.95rem;">You haven't added any enterprise accounts yet.</p>

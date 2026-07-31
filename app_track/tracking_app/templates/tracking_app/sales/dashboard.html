@@ -723,6 +723,14 @@
                         <div class="funnel-label">Demos</div>
                         <div class="funnel-bar" style="width:{% if total_leads %}{{ demos_this_month|floatformat:0 }}%{% else %}0%{% endif %};">{{ demos_this_month }}</div>
                     </div>
+                    <div class="funnel-row" style="margin-top: 16px;">
+                        <div class="funnel-label">Deals Won</div>
+                        <div class="funnel-bar" style="width:{% if total_leads %}{{ deals_won|floatformat:0 }}%{% else %}0%{% endif %};background:linear-gradient(90deg,#32d74b,rgba(50,215,75,0.3));">{{ deals_won }}</div>
+                    </div>
+                    <div class="funnel-row">
+                        <div class="funnel-label" style="color:var(--text-dark-gray);">Deals Lost</div>
+                        <div class="funnel-bar" style="width:{% if total_leads %}{{ deals_lost|floatformat:0 }}%{% else %}0%{% endif %};background:linear-gradient(90deg,var(--accent-red),rgba(255,59,48,0.3));color:white;">{{ deals_lost }}</div>
+                    </div>
                     {% endwith %}
                 </div>
                 <div style="border-left:1px solid var(--secondary);padding-left:32px;">

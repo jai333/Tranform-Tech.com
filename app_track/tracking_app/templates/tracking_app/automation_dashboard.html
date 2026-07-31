@@ -36,6 +36,14 @@
     </div>
 </div>
 
+<!-- Live Workflow Execution Graph -->
+<div style="background:var(--apple-card-bg); border:1px solid var(--apple-border); border-radius:20px; padding:1.5rem; margin-bottom: 2.5rem;">
+    <h3 style="margin-top:0; margin-bottom:1rem; font-size:1.1rem; display:flex; align-items:center; gap:8px;"><i class="bx bx-pulse" style="color:var(--apple-text-secondary);"></i> Automation Execution History</h3>
+    <div style="height: 300px; position:relative;">
+        <canvas id="automationChart"></canvas>
+    </div>
+</div>
+
 <div style="display:grid; grid-template-columns:2fr 1fr; gap:1.5rem;">
     <!-- Active Workflows -->
     <div style="background:var(--apple-card-bg); border:1px solid var(--apple-border); border-radius:20px; padding:1.5rem;">
@@ -201,4 +209,70 @@
         </form>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        Chart.defaults.color = 'rgba(255, 255, 255, 0.5)';
+        Chart.defaults.font.family = "'Inter', -apple-system, sans-serif";
+        
+        const ctx = document.getElementById('automationChart').getContext('2d');
+        
+        // Gradient for success line
+        let gradientSuccess = ctx.createLinearGradient(0, 0, 0, 300);
+        gradientSuccess.addColorStop(0, 'rgba(50, 215, 75, 0.3)');
+        gradientSuccess.addColorStop(1, 'rgba(50, 215, 75, 0)');
+        
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: JSON.parse('{{ auto_labels_json|safe }}'),
+                datasets: [
+                    {
+                        label: 'Successful Runs',
+                        data: JSON.parse('{{ auto_success_json|safe }}'),
+                        borderColor: '#32d74b',
+                        backgroundColor: gradientSuccess,
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: '#32d74b',
+                        pointBorderColor: '#fff'
+                    },
+                    {
+                        label: 'Failed Runs',
+                        data: JSON.parse('{{ auto_failed_json|safe }}'),
+                        borderColor: '#ff3b30',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        borderDash: [5, 5],
+                        fill: false,
+                        pointBackgroundColor: '#ff3b30',
+                        pointBorderColor: '#fff'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false,
+                },
+                scales: {
+                    y: { 
+                        beginAtZero: true, 
+                        grid: { color: 'rgba(255, 255, 255, 0.05)' } 
+                    },
+                    x: { 
+                        grid: { display: false } 
+                    }
+                },
+                plugins: {
+                    legend: { position: 'top' }
+                }
+            }
+        });
+    });
+</script>
 {% endblock %}

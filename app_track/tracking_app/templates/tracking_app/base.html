@@ -1419,6 +1419,7 @@
                             </a>
                             <ul class="dropdown-content">
                                 <li><a href="{% url 'candidate-list' %}"><i class="fas fa-user-tie" style="color: #ec4899;"></i> Candidates</a></li>
+                                <li><a href="{% url 'candidate-sourcing' %}" style="{% if '/candidates/sourcing/' in request.path %}color:#a78bfa{% endif %}"><i class="fas fa-satellite-dish" style="color: #a78bfa;"></i> Sourcing Engine</a></li>
                                 <li><a href="{% url 'application-list' %}"><i class="fas fa-file-alt" style="color: #38bdf8;"></i> Applications</a></li>
                                 <li><a href="{% url 'job-applications-list' %}"><i class="fas fa-clipboard-list" style="color: #f59e0b;"></i> Job Applications</a></li>
                                 <li><a href="{% url 'interview-list' %}"><i class="fas fa-handshake" style="color: #10b981;"></i> Interviews</a></li>
