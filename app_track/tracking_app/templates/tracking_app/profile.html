@@ -323,7 +323,7 @@
             </div>
             <div class="d-flex gap-2 flex-wrap">
                 <a href="{% url 'company-data-manager' %}#mail-option-hub" class="btn fw-bold" style="background: #00E5FF; color: #000; border: none; padding: 0.75rem 1.4rem; border-radius: 10px; box-shadow: 0 0 20px rgba(0, 229, 255, 0.4); text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
-                    <i class="fa-solid fa-envelope-open-text"></i> Manage Mail Option & Tenant Account →
+                    <i class="fa-solid fa-envelope-open-text"></i> Company Data Manager →
                 </a>
                 <a href="{% url 'unified-inbox' %}" class="btn fw-bold text-white" style="background: linear-gradient(135deg, #6366f1, #4f46e5); border: none; padding: 0.75rem 1.4rem; border-radius: 10px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
                     <i class="fa-solid fa-inbox"></i> Inbox
@@ -529,24 +529,6 @@
                             <div class="card-body">
                                 <ul class="action-list">
                                     <li class="action-item">
-                                        <a href="#" class="action-link">
-                                            <div class="action-icon">
-                                                <i class="fas fa-lock"></i>
-                                            </div>
-                                            <span class="action-text">Change Password</span>
-                                        </a>
-                                    </li>
-                                    
-                                    <li class="action-item">
-                                        <a href="#" class="action-link">
-                                            <div class="action-icon">
-                                                <i class="fas fa-bell"></i>
-                                            </div>
-                                            <span class="action-text">Notification Settings</span>
-                                        </a>
-                                    </li>
-                                    
-                                    <li class="action-item">
                                         <form method="post" action="{% url 'logout' %}" style="margin: 0;">
                                             {% csrf_token %}
                                             <button type="submit" class="action-link logout-link" style="width: 100%; text-align: left; border: none; background: none; cursor: pointer;">
@@ -560,6 +542,94 @@
                                 </ul>
                             </div>
                         </div>
+
+                        {% if user.tenant %}
+                        <div class="profile-card" style="margin-top: 1.5rem;">
+                            <div class="card-header">
+                                <div class="card-icon" style="background: #00E5FF; color: #000;">
+                                    <i class="fas fa-envelope"></i>
+                                </div>
+                                <h3 class="card-title">Advanced Tenant Mail Hub</h3>
+                                {% if user.tenant.mail_integration_status == 'connected' %}
+                                    <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #10b981; margin-left: auto;">🟢 Connected</span>
+                                {% elif user.tenant.mail_integration_status == 'error' %}
+                                    <span class="badge" style="background: rgba(239, 68, 68, 0.2); color: #ef4444; margin-left: auto;">🔴 Error</span>
+                                {% else %}
+                                    <span class="badge" style="background: rgba(156, 163, 175, 0.2); color: #9ca3af; margin-left: auto;">⚪ Unconfigured</span>
+                                {% endif %}
+                            </div>
+                            <div class="card-body">
+                                <form method="post" action="{% url 'save-mail-settings' %}" id="mail-settings-form">
+                                    {% csrf_token %}
+                                    <div class="info-group">
+                                        <p class="info-label">Sender Name</p>
+                                        <div class="form-group">
+                                            <input type="text" name="mail_sender_name" class="form-control" value="{{ user.tenant.mail_sender_name|default:'' }}" placeholder="e.g. Nexus AI Sales">
+                                        </div>
+                                    </div>
+                                    <div class="info-group">
+                                        <p class="info-label">Registered Corporate Email</p>
+                                        <div class="form-group">
+                                            <input type="email" name="mail_registered_email" class="form-control" value="{{ user.tenant.mail_registered_email|default:'' }}" required>
+                                        </div>
+                                    </div>
+                                    <div class="info-group">
+                                        <p class="info-label">Reply-To (Inbound Parser)</p>
+                                        <div class="form-group">
+                                            <input type="email" name="mail_reply_to" class="form-control" value="{{ user.tenant.mail_reply_to|default:'' }}">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="d-flex gap-2">
+                                        <div class="info-group flex-grow-1">
+                                            <p class="info-label">SMTP Host</p>
+                                            <div class="form-group">
+                                                <input type="text" name="mail_smtp_host" class="form-control" value="{{ user.tenant.mail_smtp_host|default:'smtp.gmail.com' }}" required>
+                                            </div>
+                                        </div>
+                                        <div class="info-group" style="width: 100px;">
+                                            <p class="info-label">Port</p>
+                                            <div class="form-group">
+                                                <input type="number" name="mail_smtp_port" class="form-control" value="{{ user.tenant.mail_smtp_port|default:'587' }}" required>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="info-group">
+                                        <p class="info-label">SMTP Username</p>
+                                        <div class="form-group">
+                                            <input type="text" name="mail_smtp_username" class="form-control" value="{{ user.tenant.mail_smtp_username|default:'' }}" required>
+                                        </div>
+                                    </div>
+                                    <div class="info-group">
+                                        <p class="info-label">SMTP Password</p>
+                                        <div class="form-group">
+                                            <input type="password" name="mail_smtp_password" class="form-control" placeholder="Leave blank to keep current password">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="d-flex gap-4 mt-3 mb-3">
+                                        <label class="d-flex align-items-center gap-2">
+                                            <input type="checkbox" name="mail_use_tls" {% if user.tenant.mail_use_tls %}checked{% endif %}>
+                                            <span style="font-size: 0.9rem; color: var(--text-secondary);">Use TLS</span>
+                                        </label>
+                                        <label class="d-flex align-items-center gap-2">
+                                            <input type="checkbox" name="mail_auto_sync" {% if user.tenant.mail_auto_sync %}checked{% endif %}>
+                                            <span style="font-size: 0.9rem; color: var(--text-secondary);">Auto-Sync Two-Way</span>
+                                        </label>
+                                    </div>
+                                    
+                                    <div class="d-flex gap-2 mt-4">
+                                        <button type="submit" class="btn btn-primary" style="flex: 1;">Save Settings</button>
+                                        <button type="button" class="btn btn-outline-primary" id="btn-test-mail" style="flex: 1; border: 1px solid #00E5FF; color: #00E5FF;">
+                                            <i class="fas fa-paper-plane me-1"></i> Test Connection
+                                        </button>
+                                    </div>
+                                    <div id="mail-test-result" class="mt-2" style="display:none; font-size: 0.9rem; border-radius: 8px; padding: 10px;"></div>
+                                </form>
+                            </div>
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -620,6 +690,61 @@
         setTimeout(() => {
             button.innerHTML = originalText;
         }, 2000);
+    }
+    
+    // Mail test logic
+    const btnTestMail = document.getElementById('btn-test-mail');
+    if (btnTestMail) {
+        btnTestMail.addEventListener('click', async () => {
+            const resultDiv = document.getElementById('mail-test-result');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'mt-2';
+            resultDiv.style.background = 'rgba(255, 255, 255, 0.1)';
+            resultDiv.style.color = 'inherit';
+            resultDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Testing connection...';
+            
+            // Build payload from form to allow inline saving and testing
+            const form = document.getElementById('mail-settings-form');
+            const fd = new FormData(form);
+            const data = {
+                save_settings: true,
+                sender_name: fd.get('mail_sender_name'),
+                registered_email: fd.get('mail_registered_email'),
+                reply_to: fd.get('mail_reply_to'),
+                smtp_host: fd.get('mail_smtp_host'),
+                smtp_port: fd.get('mail_smtp_port'),
+                smtp_username: fd.get('mail_smtp_username'),
+                smtp_password: fd.get('mail_smtp_password'),
+                use_tls: fd.get('mail_use_tls') === 'on',
+                auto_sync: fd.get('mail_auto_sync') === 'on'
+            };
+            
+            try {
+                const res = await fetch("{% url 'send-test-mail' %}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    },
+                    body: JSON.stringify(data)
+                });
+                const json = await res.json();
+                if (json.success) {
+                    resultDiv.style.background = 'rgba(16, 185, 129, 0.2)';
+                    resultDiv.style.color = '#10b981';
+                    resultDiv.innerHTML = '<i class="fas fa-check-circle"></i> ' + json.message;
+                    setTimeout(() => window.location.reload(), 2000); // Reload to update status badge
+                } else {
+                    resultDiv.style.background = 'rgba(239, 68, 68, 0.2)';
+                    resultDiv.style.color = '#ef4444';
+                    resultDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + json.error;
+                }
+            } catch (err) {
+                resultDiv.style.background = 'rgba(239, 68, 68, 0.2)';
+                resultDiv.style.color = '#ef4444';
+                resultDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> Network error.';
+            }
+        });
     }
 </script>
 {% endblock %} 

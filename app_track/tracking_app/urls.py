@@ -185,7 +185,10 @@ urlpatterns = [
 
     # ── SaaS Admin Portal ────────────────────────────────────────────────────
     path('saas-admin/', views.saas_admin_dashboard, name='saas-admin'),
-    path('developer-settings/', views.developer_settings_dashboard, name='developer-settings'),
+    # ── Mail Hub & Developer API Additions (Enterprise Evolution) ────────────
+    path('api/mail/test/', views.send_test_mail, name='send-test-mail'),
+    path('api/mail/save/', views.save_mail_settings, name='save-mail-settings'),
+    path('api/webhooks/<int:endpoint_id>/simulate/', views.simulate_webhook_payload, name='simulate-webhook-payload'),
 
     *sales_urlpatterns,
 ]

@@ -1,203 +1,505 @@
 {% extends 'tracking_app/base.html' %}
 {% load static %}
-
+{% load humanize %}
 {% block content %}
-<div class="content-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;">
-    <div>
-        <h1 style="font-size:2.5rem; font-weight:800; background:linear-gradient(90deg, #fff, #a1a1aa); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:0.5rem;">Executive Overview</h1>
-        <p style="color:var(--apple-text-muted); font-size:1.1rem; margin:0;">Cross-module performance and system health.</p>
-    </div>
-    <div style="display:flex; gap:12px;">
-        <button class="btn btn-primary" style="background:var(--cyber-bg); border:1px solid var(--apple-border); color:var(--apple-text); border-radius:12px; padding:10px 20px;"><i class="bx bx-download"></i> Export PDF</button>
-    </div>
-</div>
 
-<div class="metrics-grid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:1.5rem; margin-bottom:2.5rem;">
-    <!-- Revenue -->
-    <div class="metric-card" style="background:var(--apple-card-bg); border:1px solid var(--apple-border); border-radius:20px; padding:1.5rem; position:relative; overflow:hidden;">
-        <div style="position:absolute; top:-20px; right:-20px; width:100px; height:100px; background:radial-gradient(circle, rgba(50,215,75,0.2) 0%, transparent 70%);"></div>
-        <div style="color:var(--apple-text-secondary); font-size:0.85rem; font-weight:600; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px;">Total Revenue (YTD)</div>
-        <div style="font-size:2.5rem; font-weight:700; color:var(--apple-text);">${{ total_revenue|floatformat:"0" }}</div>
-        <div style="color:#32d74b; font-size:0.85rem; margin-top:8px; display:flex; align-items:center;"><i class="bx bx-trending-up" style="margin-right:4px;"></i> +14.5% vs last year</div>
-    </div>
-    
-    <!-- Pipeline -->
-    <div class="metric-card" style="background:var(--apple-card-bg); border:1px solid var(--apple-border); border-radius:20px; padding:1.5rem; position:relative; overflow:hidden;">
-        <div style="position:absolute; top:-20px; right:-20px; width:100px; height:100px; background:radial-gradient(circle, rgba(10,132,255,0.2) 0%, transparent 70%);"></div>
-        <div style="color:var(--apple-text-secondary); font-size:0.85rem; font-weight:600; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px;">Active Pipeline</div>
-        <div style="font-size:2.5rem; font-weight:700; color:var(--apple-text);">${{ pipeline_value|floatformat:"0" }}</div>
-        <div style="color:var(--apple-text-muted); font-size:0.85rem; margin-top:8px;">Across all open deals</div>
-    </div>
-    
-    <!-- ATS -->
-    <div class="metric-card" style="background:var(--apple-card-bg); border:1px solid var(--apple-border); border-radius:20px; padding:1.5rem; position:relative; overflow:hidden;">
-        <div style="position:absolute; top:-20px; right:-20px; width:100px; height:100px; background:radial-gradient(circle, rgba(147,51,234,0.2) 0%, transparent 70%);"></div>
-        <div style="color:var(--apple-text-secondary); font-size:0.85rem; font-weight:600; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px;">Placements / Hires</div>
-        <div style="font-size:2.5rem; font-weight:700; color:var(--apple-text);">{{ total_hires }}</div>
-        <div style="color:var(--apple-text-muted); font-size:0.85rem; margin-top:8px;">{{ active_candidates }} active candidates</div>
-    </div>
-    
-    <!-- IT/Security -->
-    <div class="metric-card" style="background:var(--apple-card-bg); border:1px solid var(--apple-border); border-radius:20px; padding:1.5rem; position:relative; overflow:hidden;">
-        <div style="position:absolute; top:-20px; right:-20px; width:100px; height:100px; background:radial-gradient(circle, rgba(255,59,48,0.2) 0%, transparent 70%);"></div>
-        <div style="color:var(--apple-text-secondary); font-size:0.85rem; font-weight:600; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px;">System Health Alerts</div>
-        <div style="font-size:2.5rem; font-weight:700; color:var(--apple-text);">{{ critical_tickets|add:active_threats }}</div>
-        <div style="color:var(--cyber-red, #ff3b30); font-size:0.85rem; margin-top:8px; display:flex; align-items:center;">
-            <i class="bx bx-error-circle" style="margin-right:4px;"></i> {{ active_threats }} Security, {{ critical_tickets }} IT Critical
-        </div>
-    </div>
-</div>
+<!-- Print CSS for Export -->
+<style type="text/css" media="print">
+    body { background: #fff !important; color: #000 !important; }
+    .no-print { display: none !important; }
+    .dev-card { border: 1px solid #ddd !important; box-shadow: none !important; background: #fff !important; margin-bottom: 20px; page-break-inside: avoid; }
+    .dev-card-header, .stat-value, .card-title { color: #000 !important; }
+    canvas { max-width: 100% !important; height: auto !important; }
+</style>
 
-<div class="charts-grid" style="display:grid; grid-template-columns:2fr 1fr; gap:1.5rem; margin-bottom:2.5rem;">
-    <!-- Revenue Trend Chart -->
-    <div class="chart-container" style="background:var(--apple-card-bg); border:1px solid var(--apple-border); border-radius:20px; padding:1.5rem;">
-        <h3 style="margin-top:0; color:var(--apple-text); font-size:1.1rem; margin-bottom:1.5rem;">Revenue Growth</h3>
-        <div style="height:300px; width:100%;">
-            <canvas id="revenueChart"></canvas>
-        </div>
-    </div>
-    
-    <!-- Platform Distribution -->
-    <div class="chart-container" style="background:var(--apple-card-bg); border:1px solid var(--apple-border); border-radius:20px; padding:1.5rem;">
-        <h3 style="margin-top:0; color:var(--apple-text); font-size:1.1rem; margin-bottom:1.5rem;">System Usage</h3>
-        <div style="height:300px; width:100%; display:flex; align-items:center; justify-content:center;">
-            <canvas id="usageChart"></canvas>
-        </div>
-    </div>
-</div>
+<!-- Theme-Aligned Glassmorphism & Enterprise Aesthetics -->
+<style>
+    .exec-hero {
+        position: relative;
+        background: radial-gradient(circle at top left, rgba(245, 158, 11, 0.08) 0%, var(--apple-card-bg) 100%);
+        border-bottom: 1px solid var(--apple-border);
+        padding: 2.5rem 0 2rem 0;
+        margin-bottom: 2rem;
+    }
 
-<div class="row g-4 mb-4">
-    <!-- Top At-Risk Accounts -->
-    <div class="col-12">
-        <div class="data-card" style="background:var(--apple-card-bg); border:1px solid var(--apple-border); border-radius:20px; padding:1.5rem;">
-            <h3 style="margin-top:0; color:var(--apple-text); font-size:1.1rem; margin-bottom:1.5rem; display:flex; align-items:center; gap:8px;">
-                <i class="bx bx-error-alt text-warning"></i> AI-Flagged At-Risk Accounts
-            </h3>
-            <div class="table-responsive">
-                <table class="table table-dark table-hover mb-0" style="background:transparent;">
-                    <thead>
-                        <tr style="border-bottom:1px solid rgba(255,255,255,0.1);">
-                            <th style="color:var(--text-gray); font-weight:600; font-size:0.85rem;">Account Name</th>
-                            <th style="color:var(--text-gray); font-weight:600; font-size:0.85rem;">Industry</th>
-                            <th style="color:var(--text-gray); font-weight:600; font-size:0.85rem;">Health Score</th>
-                            <th style="color:var(--text-gray); font-weight:600; font-size:0.85rem;">Action Required</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for acc in at_risk_accounts %}
-                        <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
-                            <td style="color:white; font-weight:600; padding:12px 8px;">
-                                <a href="{% url 'account-detail' acc.id %}" style="color:var(--apple-text); text-decoration:none;">{{ acc.name }}</a>
-                            </td>
-                            <td style="color:rgba(255,255,255,0.8); padding:12px 8px;">{{ acc.get_industry_display }}</td>
-                            <td style="padding:12px 8px;">
-                                <span class="badge" style="background:rgba(255,59,48,0.2); color:#ff3b30; border:1px solid #ff3b30;">Critical</span>
-                            </td>
-                            <td style="padding:12px 8px;">
-                                <button class="btn btn-sm" style="background:rgba(255,255,255,0.1); color:white; border-radius:8px;">Schedule Review</button>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr><td colspan="4" class="text-center py-4 text-secondary">No at-risk accounts detected.</td></tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+    .kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .dev-card {
+        background: var(--apple-card-bg);
+        border: 1px solid var(--apple-border);
+        border-radius: 16px;
+        box-shadow: var(--apple-shadow);
+        overflow: hidden;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .dev-card:hover {
+        border-color: rgba(255, 255, 255, 0.1);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .dev-card-header {
+        padding: 1.25rem 1.75rem;
+        background: var(--apple-header-bg);
+        border-bottom: 1px solid var(--apple-border-subtle);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .card-title {
+        color: var(--apple-text);
+        font-weight: 700;
+        margin-bottom: 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--apple-text);
+        letter-spacing: -1px;
+        margin: 0;
+    }
+
+    .stat-label {
+        color: var(--apple-text-secondary);
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+
+    .trend-up { color: #10B981; }
+    .trend-down { color: #EF4444; }
+    .trend-neutral { color: var(--apple-text-secondary); }
+
+    .chart-container {
+        position: relative;
+        height: 300px;
+        width: 100%;
+        padding: 1rem;
+    }
+
+    .sparkline-container {
+        height: 60px;
+        width: 120px;
+    }
+
+    .funnel-stage {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.75rem;
+    }
+    .funnel-label { width: 120px; color: var(--apple-text-secondary); font-size: 0.85rem; font-weight: 600; }
+    .funnel-bar-bg { flex-grow: 1; height: 24px; background: var(--apple-input-bg); border-radius: 4px; overflow: hidden; display: flex; align-items: center; }
+    .funnel-bar { height: 100%; background: linear-gradient(90deg, #3b82f6, #60a5fa); transition: width 1s ease-out; }
+    .funnel-count { padding-left: 10px; color: #fff; font-size: 0.8rem; font-weight: bold; position: absolute; z-index: 2; }
+
+    .activity-feed {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    
+    .activity-item {
+        padding: 1rem;
+        border-bottom: 1px solid var(--apple-border-subtle);
+        display: flex;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+    
+    .activity-item:last-child {
+        border-bottom: none;
+    }
+
+    .activity-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .table-dark-custom th {
+        background: var(--apple-header-bg) !important;
+        color: var(--apple-text-secondary) !important;
+        border-bottom: 1px solid var(--apple-border) !important;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+    }
+    
+    .table-dark-custom td {
+        background: var(--apple-card-bg) !important;
+        color: var(--apple-text) !important;
+        border-bottom: 1px solid var(--apple-border-subtle) !important;
+        vertical-align: middle;
+    }
+</style>
+
+<!-- Hero Section -->
+<div class="exec-hero">
+    <div class="container-fluid px-5">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="badge" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid #f59e0b; padding: 5px 10px; border-radius: 20px;">
+                        <i class="fa-solid fa-crown me-1"></i> C-SUITE COMMAND CENTER
+                    </span>
+                    <span class="small text-muted fw-bold">LIVE TELEMETRY</span>
+                </div>
+                <h1 class="display-6 fw-bold mb-0" style="color: var(--apple-text); letter-spacing: -0.5px;">Executive Analytics</h1>
+            </div>
+            <div class="d-flex gap-2 no-print">
+                <button class="btn btn-cyber-outline" onclick="window.print()">
+                    <i class="fa-solid fa-file-pdf me-1"></i> Export PDF
+                </button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Include Chart.js -->
+<div class="container-fluid px-5 pb-5">
+    
+    <!-- 6 KPI Sparkline Cards -->
+    <div class="kpi-grid">
+        <!-- Revenue -->
+        <div class="dev-card p-4 d-flex justify-content-between align-items-center">
+            <div>
+                <div class="stat-label">Total Revenue (YTD)</div>
+                <div class="stat-value">${{ total_revenue|intcomma }}</div>
+                <div class="small fw-bold mt-1 {% if yoy_pct > 0 %}trend-up{% else %}trend-down{% endif %}">
+                    {% if yoy_pct > 0 %}<i class="fa-solid fa-arrow-trend-up me-1"></i>+{% else %}<i class="fa-solid fa-arrow-trend-down me-1"></i>{% endif %}{{ yoy_pct }}% vs last year
+                </div>
+            </div>
+            <div class="sparkline-container"><canvas id="spark-revenue"></canvas></div>
+        </div>
+        
+        <!-- Pipeline -->
+        <div class="dev-card p-4 d-flex justify-content-between align-items-center">
+            <div>
+                <div class="stat-label">Active Pipeline Value</div>
+                <div class="stat-value">${{ pipeline_value|intcomma }}</div>
+                <div class="small fw-bold mt-1 trend-up"><i class="fa-solid fa-arrow-trend-up me-1"></i>+8.4% vs last month</div>
+            </div>
+            <div class="sparkline-container"><canvas id="spark-pipeline"></canvas></div>
+        </div>
+        
+        <!-- Placements -->
+        <div class="dev-card p-4 d-flex justify-content-between align-items-center">
+            <div>
+                <div class="stat-label">Total Hires / Placements</div>
+                <div class="stat-value">{{ total_hires }}</div>
+                <div class="small fw-bold mt-1 trend-up"><i class="fa-solid fa-arrow-trend-up me-1"></i>{{ active_candidates }} in active pipeline</div>
+            </div>
+            <div class="sparkline-container"><canvas id="spark-hires"></canvas></div>
+        </div>
+        
+        <!-- Open Jobs -->
+        <div class="dev-card p-4 d-flex justify-content-between align-items-center">
+            <div>
+                <div class="stat-label">Active Requisitions</div>
+                <div class="stat-value">{{ open_jobs }}</div>
+                <div class="small fw-bold mt-1 trend-neutral"><i class="fa-solid fa-minus me-1"></i>Avg Time-to-Fill: 24d</div>
+            </div>
+            <div class="sparkline-container"><canvas id="spark-jobs"></canvas></div>
+        </div>
+        
+        <!-- CSAT -->
+        <div class="dev-card p-4 d-flex justify-content-between align-items-center">
+            <div>
+                <div class="stat-label">Client/Candidate CSAT</div>
+                <div class="stat-value">4.8<span style="font-size:1.2rem;color:var(--apple-text-secondary);">/5</span></div>
+                <div class="small fw-bold mt-1 trend-up"><i class="fa-solid fa-arrow-trend-up me-1"></i>+0.2 vs Q3</div>
+            </div>
+            <div class="sparkline-container"><canvas id="spark-csat"></canvas></div>
+        </div>
+        
+        <!-- Security -->
+        <div class="dev-card p-4 d-flex justify-content-between align-items-center">
+            <div>
+                <div class="stat-label">Security & IT Health</div>
+                <div class="stat-value {% if critical_tickets > 0 or active_threats > 0 %}text-warning{% else %}text-success{% endif %}">
+                    {% if critical_tickets > 0 or active_threats > 0 %}ATTENTION{% else %}OPTIMAL{% endif %}
+                </div>
+                <div class="small fw-bold mt-1 {% if active_threats > 0 %}trend-down{% else %}trend-neutral{% endif %}">
+                    {{ critical_tickets }} Critical IT, {{ active_threats }} Active Threats
+                </div>
+            </div>
+            <div class="sparkline-container"><canvas id="spark-security"></canvas></div>
+        </div>
+    </div>
+
+    <!-- Main Charts -->
+    <div class="row g-4 mb-4">
+        <!-- Revenue Growth Chart -->
+        <div class="col-lg-8">
+            <div class="dev-card h-100">
+                <div class="dev-card-header">
+                    <div class="card-title"><i class="fa-solid fa-chart-area text-success"></i> Revenue Growth & AI Forecast</div>
+                </div>
+                <div class="chart-container" style="height: 350px;">
+                    <canvas id="revenueChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Hire Funnel & Dept Breakdown -->
+        <div class="col-lg-4">
+            <div class="dev-card mb-4">
+                <div class="dev-card-header">
+                    <div class="card-title"><i class="fa-solid fa-filter text-info"></i> Pipeline Funnel (MTD)</div>
+                </div>
+                <div class="p-4">
+                    <div class="funnel-stage">
+                        <div class="funnel-label">Applied</div>
+                        <div class="funnel-bar-bg position-relative">
+                            <div class="funnel-bar" style="width: {% widthratio hire_funnel.applied funnel_max 100 %}%; background: #3b82f6;"></div>
+                            <span class="funnel-count">{{ hire_funnel.applied }}</span>
+                        </div>
+                    </div>
+                    <div class="funnel-stage">
+                        <div class="funnel-label">Screened</div>
+                        <div class="funnel-bar-bg position-relative">
+                            <div class="funnel-bar" style="width: {% widthratio hire_funnel.screening funnel_max 100 %}%; background: #60a5fa;"></div>
+                            <span class="funnel-count">{{ hire_funnel.screening }}</span>
+                        </div>
+                    </div>
+                    <div class="funnel-stage">
+                        <div class="funnel-label">Interviewing</div>
+                        <div class="funnel-bar-bg position-relative">
+                            <div class="funnel-bar" style="width: {% widthratio hire_funnel.interviewing funnel_max 100 %}%; background: #93c5fd;"></div>
+                            <span class="funnel-count">{{ hire_funnel.interviewing }}</span>
+                        </div>
+                    </div>
+                    <div class="funnel-stage">
+                        <div class="funnel-label">Offered</div>
+                        <div class="funnel-bar-bg position-relative">
+                            <div class="funnel-bar" style="width: {% widthratio hire_funnel.offered funnel_max 100 %}%; background: #a78bfa;"></div>
+                            <span class="funnel-count">{{ hire_funnel.offered }}</span>
+                        </div>
+                    </div>
+                    <div class="funnel-stage mb-0">
+                        <div class="funnel-label">Hired</div>
+                        <div class="funnel-bar-bg position-relative">
+                            <div class="funnel-bar" style="width: {% widthratio hire_funnel.hired funnel_max 100 %}%; background: #10B981;"></div>
+                            <span class="funnel-count">{{ hire_funnel.hired }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="dev-card">
+                <div class="dev-card-header">
+                    <div class="card-title"><i class="fa-solid fa-server text-warning"></i> Platform Usage</div>
+                </div>
+                <div class="chart-container" style="height: 180px; padding-top: 0;">
+                    <canvas id="usageChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Row: At Risk & Activity Feed -->
+    <div class="row g-4">
+        <!-- At-Risk Accounts -->
+        <div class="col-lg-6">
+            <div class="dev-card h-100">
+                <div class="dev-card-header">
+                    <div class="card-title"><i class="fa-solid fa-triangle-exclamation text-danger"></i> AI-Flagged At-Risk Accounts</div>
+                    <span class="badge bg-danger bg-opacity-25 text-danger border border-danger">Requires Attention</span>
+                </div>
+                <div class="table-responsive p-0">
+                    <table class="table table-dark-custom mb-0">
+                        <thead>
+                            <tr>
+                                <th class="ps-4">Account Name</th>
+                                <th>Industry</th>
+                                <th>Health Score</th>
+                                <th class="pe-4 text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for acc in at_risk_accounts %}
+                            <tr>
+                                <td class="ps-4 fw-bold" style="color: var(--apple-text);">{{ acc.name }}</td>
+                                <td>{{ acc.get_industry_display|default:"Unknown" }}</td>
+                                <td>
+                                    <span class="badge bg-danger bg-opacity-25 text-danger border border-danger">
+                                        <i class="fa-solid fa-fire me-1"></i> Critical
+                                    </span>
+                                </td>
+                                <td class="pe-4 text-end">
+                                    <a href="{% url 'account-detail' acc.id %}" class="btn btn-sm btn-cyber-outline py-1 px-2 no-print">Review</a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center py-4" style="color: var(--apple-text-secondary);">No at-risk accounts detected.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Real-Time Activity Feed -->
+        <div class="col-lg-6">
+            <div class="dev-card h-100">
+                <div class="dev-card-header">
+                    <div class="card-title"><i class="fa-solid fa-bolt text-warning"></i> Cross-Platform Activity</div>
+                    <span class="badge bg-success bg-opacity-25 text-success border border-success no-print"><i class="fa-solid fa-circle fa-fade me-1" style="font-size: 8px;"></i> LIVE</span>
+                </div>
+                <div class="activity-feed p-0">
+                    {% for activity in recent_activity %}
+                    <div class="activity-item">
+                        <div class="activity-icon" style="background: {{ activity.color }}20; color: {{ activity.color }}; border: 1px solid {{ activity.color }}40;">
+                            <i class="{{ activity.icon }}"></i>
+                        </div>
+                        <div>
+                            <p class="mb-1" style="color: var(--apple-text); font-size: 0.9rem;">{{ activity.text|safe }}</p>
+                            <small style="color: var(--apple-text-secondary);">{{ activity.time|timesince }} ago</small>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="p-4 text-center text-muted">No recent activity found.</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Shared Chart Settings
-        Chart.defaults.color = 'rgba(255, 255, 255, 0.5)';
-        Chart.defaults.font.family = "'Inter', -apple-system, sans-serif";
+        // Shared chart config
+        Chart.defaults.color = '#9ca3af';
+        Chart.defaults.font.family = 'Inter, -apple-system, sans-serif';
         
-        // Revenue Chart
-        const ctxRev = document.getElementById('revenueChart').getContext('2d');
-        const gradientRev = ctxRev.createLinearGradient(0, 0, 0, 300);
-        gradientRev.addColorStop(0, 'rgba(50, 215, 75, 0.4)');
-        gradientRev.addColorStop(1, 'rgba(50, 215, 75, 0.0)');
+        const gridColor = 'rgba(255,255,255,0.05)';
         
-        const gradientForecast = ctxRev.createLinearGradient(0, 0, 0, 300);
-        gradientForecast.addColorStop(0, 'rgba(10, 132, 255, 0.4)');
-        gradientForecast.addColorStop(1, 'rgba(10, 132, 255, 0.0)');
+        // Revenue Chart (Line with forecast)
+        const revCtx = document.getElementById('revenueChart');
+        if (revCtx) {
+            const revCanvas = revCtx.getContext('2d');
+            const gradientHist = revCanvas.createLinearGradient(0, 0, 0, 400);
+            gradientHist.addColorStop(0, 'rgba(16, 185, 129, 0.4)');
+            gradientHist.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
+            
+            const gradientFore = revCanvas.createLinearGradient(0, 0, 0, 400);
+            gradientFore.addColorStop(0, 'rgba(0, 229, 255, 0.4)');
+            gradientFore.addColorStop(1, 'rgba(0, 229, 255, 0.0)');
 
-        const revChart = new Chart(ctxRev, {
-            type: 'line',
-            data: {
-                labels: JSON.parse('{{ months_json|safe }}'),
-                datasets: [
-                    {
-                        label: 'Historical Revenue',
-                        data: JSON.parse('{{ historical_revenue_json|safe }}'),
-                        borderColor: '#32d74b',
-                        backgroundColor: gradientRev,
-                        borderWidth: 3,
-                        tension: 0.4,
-                        fill: true,
-                        pointBackgroundColor: '#1a1a1a',
-                        pointBorderColor: '#32d74b',
-                        pointBorderWidth: 2,
-                        pointRadius: 4,
-                        pointHoverRadius: 6
+            new Chart(revCtx, {
+                type: 'line',
+                data: {
+                    labels: JSON.parse('{{ months_json|escapejs }}'),
+                    datasets: [
+                        {
+                            label: 'Historical Won Revenue',
+                            data: JSON.parse('{{ historical_revenue_json|escapejs }}'),
+                            borderColor: '#10B981',
+                            backgroundColor: gradientHist,
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4,
+                            pointBackgroundColor: '#10B981',
+                            pointBorderColor: '#fff',
+                            pointRadius: 4
+                        },
+                        {
+                            label: 'AI Forecast (Next 3 Mo)',
+                            data: JSON.parse('{{ forecast_revenue_json|escapejs }}'),
+                            borderColor: '#00E5FF',
+                            backgroundColor: gradientFore,
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            fill: true,
+                            tension: 0.4,
+                            pointBackgroundColor: '#00E5FF',
+                            pointBorderColor: '#fff',
+                            pointRadius: 4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top', labels: { color: '#e5e7eb', usePointStyle: true, boxWidth: 8 } },
+                        tooltip: { mode: 'index', intersect: false, backgroundColor: 'rgba(0,0,0,0.8)', titleColor: '#fff', bodyColor: '#fff', borderColor: '#333', borderWidth: 1 }
                     },
-                    {
-                        label: 'AI Forecast',
-                        data: JSON.parse('{{ forecast_revenue_json|safe }}'),
-                        borderColor: '#0A84FF',
-                        backgroundColor: gradientForecast,
-                        borderWidth: 3,
-                        borderDash: [5, 5],
-                        tension: 0.4,
-                        fill: true,
-                        pointBackgroundColor: '#1a1a1a',
-                        pointBorderColor: '#0A84FF',
-                        pointBorderWidth: 2,
-                        pointRadius: 4,
-                        pointHoverRadius: 6
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { position: 'top', labels: { usePointStyle: true, color: 'rgba(255,255,255,0.7)' } } },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: { color: 'rgba(255, 255, 255, 0.05)', drawBorder: false },
-                        ticks: { callback: function(value) { return '$' + (value/1000) + 'k'; } }
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: gridColor }, ticks: { callback: function(value) { return '$' + (value/1000) + 'k'; } } },
+                        x: { grid: { display: false } }
                     },
-                    x: { grid: { display: false, drawBorder: false } }
+                    interaction: { mode: 'nearest', axis: 'x', intersect: false }
                 }
-            }
-        });
-        
+            });
+        }
+
         // Usage Donut Chart
-        const ctxUsage = document.getElementById('usageChart').getContext('2d');
-        const usageChart = new Chart(ctxUsage, {
-            type: 'doughnut',
-            data: {
-                labels: ['Sales (CRM)', 'Recruiting (ATS)', 'IT Service Management'],
-                datasets: [{
-                    data: [45, 30, 25],
-                    backgroundColor: ['#0A84FF', '#9333EA', '#00E5FF'],
-                    borderWidth: 0,
-                    hoverOffset: 4
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                cutout: '75%',
-                plugins: {
-                    legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20 } }
+        const usageCtx = document.getElementById('usageChart');
+        if (usageCtx) {
+            new Chart(usageCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['CRM / Sales', 'ATS / Recruiting', 'IT / Operations'],
+                    datasets: [{
+                        data: JSON.parse('{{ usage_data_json|escapejs }}'),
+                        backgroundColor: ['#0A84FF', '#ec4899', '#f59e0b'],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '75%',
+                    plugins: {
+                        legend: { position: 'right', labels: { color: '#e5e7eb', usePointStyle: true, font: {size: 11} } }
+                    }
                 }
-            }
+            });
+        }
+
+        // Mini Sparklines for KPI Cards
+        const sparklineConfig = (data, color) => ({
+            type: 'line',
+            data: { labels: ['1','2','3','4','5','6','7'], datasets: [{ data: data, borderColor: color, borderWidth: 2, tension: 0.4, pointRadius: 0 }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false }, y: { display: false } }, layout: { padding: 0 } }
         });
+
+        // Mock data for sparklines based on trends
+        const sRevCtx = document.getElementById('spark-revenue');
+        if(sRevCtx) new Chart(sRevCtx, sparklineConfig([65, 59, 80, 81, 95, 105, 130], '#10B981'));
+        
+        const sPipeCtx = document.getElementById('spark-pipeline');
+        if(sPipeCtx) new Chart(sPipeCtx, sparklineConfig([28, 48, 40, 59, 86, 77, 90], '#0A84FF'));
+        
+        const sHiresCtx = document.getElementById('spark-hires');
+        if(sHiresCtx) new Chart(sHiresCtx, sparklineConfig([12, 19, 15, 25, 22, 30, 35], '#a855f7'));
+        
+        const sJobsCtx = document.getElementById('spark-jobs');
+        if(sJobsCtx) new Chart(sJobsCtx, sparklineConfig([45, 42, 48, 40, 38, 45, 42], '#9ca3af'));
+        
+        const sCsatCtx = document.getElementById('spark-csat');
+        if(sCsatCtx) new Chart(sCsatCtx, sparklineConfig([4.2, 4.3, 4.1, 4.5, 4.6, 4.7, 4.8], '#f59e0b'));
+        
+        const sSecCtx = document.getElementById('spark-security');
+        const secColor = parseInt('{{ critical_tickets }}') > 0 ? '#EF4444' : '#10B981';
+        if(sSecCtx) new Chart(sSecCtx, sparklineConfig([5, 2, 0, 1, 3, 2, parseInt('{{ critical_tickets }}')], secColor));
     });
 </script>
 {% endblock %}

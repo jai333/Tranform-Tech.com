@@ -164,6 +164,26 @@
     
     .badge-post { background: rgba(16, 185, 129, 0.15); color: #10B981; border: 1px solid #10B981; }
     .badge-get { background: rgba(0, 229, 255, 0.15); color: var(--apple-accent); border: 1px solid var(--apple-accent); }
+
+    /* Plan Enforcement Overlay */
+    .plan-gate-overlay {
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.7);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        z-index: 1000;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        border-radius: inherit;
+    }
+    
+    .gated-content {
+        position: relative;
+    }
 </style>
 
 <!-- Hero Banner & Telemetry Bar -->
@@ -173,7 +193,7 @@
             <div class="col-lg-6">
                 <div class="d-flex align-items-center gap-2 mb-3">
                     <span class="badge" style="background: var(--apple-accent-glow); color: var(--apple-accent); border: 1px solid var(--apple-accent); padding: 5px 10px; border-radius: 20px;">
-                        <i class="fa-solid fa-bolt me-1"></i> v2.4 API LIVE
+                        <i class="fa-solid fa-bolt me-1"></i> v2.5 API LIVE
                     </span>
                     <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid #10b981; padding: 5px 10px; border-radius: 20px;">
                         <i class="fa-solid fa-lock me-1"></i> HMAC-SHA256 SECURED
@@ -189,24 +209,30 @@
             <div class="col-lg-6 mt-4 mt-lg-0">
                 <div class="d-flex flex-wrap justify-content-lg-end gap-3">
                     <div class="dev-stat-badge">
-                        <i class="fa-solid fa-bolt-lightning fa-2x" style="color: var(--apple-accent);"></i>
+                        <i class="fa-solid fa-satellite-dish fa-2x" style="color: var(--apple-accent);"></i>
                         <div>
-                            <div class="small text-uppercase fw-bold" style="color: var(--apple-text-secondary); font-size: 0.7rem;">Delivery Speed</div>
-                            <div class="fs-5 fw-bold" style="color: var(--apple-text);">24ms <span class="small text-success fw-normal">avg</span></div>
+                            <div class="small text-uppercase fw-bold" style="color: var(--apple-text-secondary); font-size: 0.7rem;">Active Endpoints</div>
+                            <div class="fs-5 fw-bold" style="color: var(--apple-text);">{{ endpoint_count }}</div>
                         </div>
                     </div>
                     <div class="dev-stat-badge">
-                        <i class="fa-solid fa-shield-halved fa-2x text-success"></i>
+                        <i class="fa-solid fa-paper-plane fa-2x text-success"></i>
                         <div>
-                            <div class="small text-uppercase fw-bold" style="color: var(--apple-text-secondary); font-size: 0.7rem;">SLA Reliability</div>
-                            <div class="fs-5 fw-bold" style="color: var(--apple-text);">99.98% <span class="small fw-normal" style="color: var(--apple-accent);">Uptime</span></div>
+                            <div class="small text-uppercase fw-bold" style="color: var(--apple-text-secondary); font-size: 0.7rem;">Total Deliveries</div>
+                            <div class="fs-5 fw-bold" style="color: var(--apple-text);">{{ total_deliveries }}</div>
                         </div>
                     </div>
                     <div class="dev-stat-badge">
-                        <i class="fa-solid fa-network-wired fa-2x" style="color: #10B981;"></i>
+                        <i class="fa-solid fa-shield-check fa-2x" style="color: #10B981;"></i>
                         <div>
-                            <div class="small text-uppercase fw-bold" style="color: var(--apple-text-secondary); font-size: 0.7rem;">Webhook Status</div>
-                            <div class="fs-5 fw-bold text-success">Online</div>
+                            <div class="small text-uppercase fw-bold" style="color: var(--apple-text-secondary); font-size: 0.7rem;">Success Rate</div>
+                            <div class="fs-5 fw-bold text-success">
+                                {% if total_deliveries > 0 %}
+                                    {% widthratio successful_deliveries total_deliveries 100 %}%
+                                {% else %}
+                                    100%
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -216,7 +242,6 @@
 </div>
 
 <div class="container-fluid px-5 pb-5">
-    
     {% if messages %}
     <div class="mb-4">
         {% for message in messages %}
@@ -228,238 +253,211 @@
     </div>
     {% endif %}
 
-    <div class="row g-4 mb-4">
-        <!-- API Authentication & Tokens Card -->
-        <div class="col-lg-12">
-            <div class="dev-card">
-                <div class="dev-card-header">
-                    <h5 class="mb-0 fw-bold" style="color: var(--apple-text);"><i class="fa-solid fa-key me-2" style="color: var(--apple-accent);"></i> REST API Authentication & Client Keys</h5>
-                    <button class="btn dev-btn-outline" onclick="alert('API Key rotation requested. Contact SaaS Super Admin if rotating production Workday credentials.')">
-                        <i class="fa-solid fa-rotate me-1"></i> Rotate API Secret
-                    </button>
+    <div class="gated-content {% if not request.user.is_superuser and request.user.tenant.subscription_plan != 'enterprise' %}opacity-75{% endif %}">
+        {% if not request.user.is_superuser and request.user.tenant.subscription_plan != 'enterprise' %}
+        <div class="plan-gate-overlay">
+            <i class="fa-solid fa-lock fa-3x mb-3" style="color: var(--apple-accent);"></i>
+            <h3 class="fw-bold text-white mb-2">Enterprise Feature</h3>
+            <p class="text-white-50 mb-4" style="max-width: 400px;">API access and real-time webhooks require the Enterprise plan. Upgrade to unlock full integrations with Workday and Slack.</p>
+            <a href="{% url 'billing-page' %}" class="btn dev-btn-theme btn-lg">Upgrade to Enterprise</a>
+        </div>
+        {% endif %}
+        
+        <div class="row g-4 mb-4">
+            <!-- API Usage Analytics & Authentication -->
+            <div class="col-lg-6">
+                <div class="dev-card h-100">
+                    <div class="dev-card-header">
+                        <h5 class="mb-0 fw-bold" style="color: var(--apple-text);"><i class="fa-solid fa-chart-line me-2" style="color: var(--apple-accent);"></i> API Usage (Last 7 Days)</h5>
+                    </div>
+                    <div class="p-4">
+                        <canvas id="apiUsageChart" height="200"></canvas>
+                    </div>
                 </div>
-                <div class="p-4">
-                    <div class="row align-items-center">
-                        <div class="col-lg-7">
-                            <p class="mb-2" style="color: var(--apple-text-secondary);">Use your dedicated API Secret Token in the <code>Authorization</code> header to securely call AI resume parsing, automated job scoring, and executive pipeline services programmatically.</p>
-                            <div class="d-flex flex-wrap align-items-center gap-3 mt-3">
-                                <span class="small fw-bold text-uppercase" style="color: var(--apple-text-secondary);">Active Token:</span>
-                                <div class="secret-pill d-flex align-items-center gap-3">
-                                    <span id="api-key-val">tr_live_992834710283947192834_ent</span>
-                                    <button class="btn btn-link p-0 m-0" style="color: var(--apple-text-secondary);" onclick="navigator.clipboard.writeText('tr_live_992834710283947192834_ent'); alert('API Key Copied to Clipboard!');" title="Copy to Clipboard">
-                                        <i class="fa-regular fa-copy"></i>
-                                    </button>
-                                </div>
-                                <span class="badge bg-success" style="padding: 6px 12px; font-size: 0.8rem;">Rate Limit: 10k req/min</span>
+            </div>
+            <div class="col-lg-6">
+                <div class="dev-card h-100">
+                    <div class="dev-card-header">
+                        <h5 class="mb-0 fw-bold" style="color: var(--apple-text);"><i class="fa-solid fa-key me-2" style="color: var(--apple-accent);"></i> REST API Authentication</h5>
+                        <button class="btn dev-btn-outline" onclick="alert('API Key rotation requested. Contact SaaS Super Admin if rotating production Workday credentials.')">
+                            <i class="fa-solid fa-rotate me-1"></i> Rotate Secret
+                        </button>
+                    </div>
+                    <div class="p-4">
+                        <p class="mb-3" style="color: var(--apple-text-secondary);">Use your dedicated API Secret Token in the <code>Authorization</code> header to securely call AI resume parsing, automated job scoring, and executive pipeline services programmatically.</p>
+                        
+                        <div class="mb-4">
+                            <span class="small fw-bold text-uppercase d-block mb-2" style="color: var(--apple-text-secondary);">Active Token:</span>
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="secret-pill w-100" id="api-key-val">{% if request.user.tenant %}tr_live_{{ request.user.tenant.id|add:"90000" }}_{{ request.user.tenant.name|slugify|slice:":8" }}_ent{% else %}tr_live_992834710283947192834_ent{% endif %}</div>
+                                <button class="btn dev-btn-theme text-nowrap" onclick="navigator.clipboard.writeText(document.getElementById('api-key-val').innerText); this.innerHTML='<i class=\'fa-solid fa-check\'></i> Copied'; setTimeout(() => { this.innerHTML='<i class=\'fa-regular fa-copy\'></i> Copy'; }, 2000);">
+                                    <i class="fa-regular fa-copy"></i> Copy
+                                </button>
                             </div>
                         </div>
-                        <div class="col-lg-5 mt-4 mt-lg-0">
-                            <div class="code-box">
-                                <div class="code-box-header">
-                                    <span>SHELL / CURL EXAMPLE</span>
-                                    <span style="color: var(--apple-accent);">BASH</span>
-                                </div>
-                                <code>
-curl -X POST https://app.transform.io/api/parse-resume/ \<br>
-  -H <span style="color: #f59e0b;">"Authorization: Bearer tr_live_992..."</span> \<br>
-  -F <span style="color: var(--apple-accent);">"resume=@/path/to/candidate.pdf"</span>
-                                </code>
-                            </div>
+
+                        <!-- Code SDK Tabs -->
+                        <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+                            <li class="nav-item" role="presentation"><button class="nav-link active py-1 px-3 text-white" data-bs-toggle="pill" data-bs-target="#tab-curl">cURL</button></li>
+                            <li class="nav-item" role="presentation"><button class="nav-link py-1 px-3 text-white" data-bs-toggle="pill" data-bs-target="#tab-python">Python</button></li>
+                            <li class="nav-item" role="presentation"><button class="nav-link py-1 px-3 text-white" data-bs-toggle="pill" data-bs-target="#tab-node">Node.js</button></li>
+                        </ul>
+                        <div class="tab-content" id="pills-tabContent">
+                            <div class="tab-pane fade show active code-box" id="tab-curl">
+curl -X POST https://app.transform.io/api/parse-resume/ \
+  -H "Authorization: Bearer <span style="color:#00E5FF">YOUR_API_KEY</span>" \
+  -F "resume=@/path/to/candidate.pdf"</div>
+                            <div class="tab-pane fade code-box" id="tab-python">
+import requests
+
+url = "https://app.transform.io/api/parse-resume/"
+headers = {"Authorization": "Bearer <span style="color:#00E5FF">YOUR_API_KEY</span>"}
+files = {"resume": open("candidate.pdf", "rb")}
+response = requests.post(url, headers=headers, files=files)
+print(response.json())</div>
+                            <div class="tab-pane fade code-box" id="tab-node">
+const axios = require('axios');
+const fs = require('fs');
+const FormData = require('form-data');
+
+const form = new FormData();
+form.append('resume', fs.createReadStream('candidate.pdf'));
+axios.post('https://app.transform.io/api/parse-resume/', form, {
+    headers: { 'Authorization': 'Bearer <span style="color:#00E5FF">YOUR_API_KEY</span>', ...form.getHeaders() }
+}).then(res => console.log(res.data));</div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="row g-4">
-        <!-- Webhooks Table Section -->
-        <div class="col-lg-8">
-            <div class="dev-card mb-4">
-                <div class="dev-card-header">
-                    <div>
-                        <h5 class="mb-0 fw-bold" style="color: var(--apple-text);"><i class="fa-solid fa-satellite-dish me-2" style="color: var(--apple-accent);"></i> Event Webhooks Configuration</h5>
-                        <small style="color: var(--apple-text-secondary);">Push notifications dispatched automatically when records mutate in your workspace.</small>
+        <div class="row g-4">
+            <!-- Webhooks Table Section -->
+            <div class="col-lg-8">
+                <div class="dev-card mb-4">
+                    <div class="dev-card-header">
+                        <div>
+                            <h5 class="mb-0 fw-bold" style="color: var(--apple-text);"><i class="fa-solid fa-satellite-dish me-2" style="color: var(--apple-accent);"></i> Event Webhooks Configuration</h5>
+                            <small style="color: var(--apple-text-secondary);">Push notifications dispatched automatically when records mutate in your workspace.</small>
+                        </div>
+                        <button class="btn dev-btn-theme" data-bs-toggle="modal" data-bs-target="#addWebhookModal">
+                            <i class="fa-solid fa-plus"></i> Register Webhook
+                        </button>
                     </div>
-                    <button class="btn dev-btn-theme" data-bs-toggle="modal" data-bs-target="#addWebhookModal">
-                        <i class="fa-solid fa-plus"></i> Register Webhook
-                    </button>
+                    <div class="table-responsive">
+                        <table class="table table-dev w-100">
+                            <thead>
+                                <tr>
+                                    <th class="ps-4">Target URL / Endpoint</th>
+                                    <th>Subscribed Events</th>
+                                    <th>HMAC Secret</th>
+                                    <th class="pe-4 text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for endpoint in endpoints %}
+                                <tr>
+                                    <td class="ps-4">
+                                        <div class="d-flex align-items-center gap-2">
+                                            {% if endpoint.is_active %}
+                                                <div style="width: 8px; height: 8px; border-radius: 50%; background: #10B981; box-shadow: 0 0 8px #10B981;"></div>
+                                            {% else %}
+                                                <div style="width: 8px; height: 8px; border-radius: 50%; background: #ef4444;"></div>
+                                            {% endif %}
+                                            <div class="fw-bold font-monospace" style="font-size:0.9rem; color: var(--apple-text);">{{ endpoint.target_url }}</div>
+                                        </div>
+                                        <div class="small ms-3" style="color: var(--apple-text-secondary);"><i class="fa-regular fa-clock me-1"></i> Registered {{ endpoint.created_at|date:"M d, Y" }}</div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex flex-wrap gap-1">
+                                            {% for ev in endpoint.events|slice:":20"|make_list %}{% endfor %}
+                                            <span class="badge" style="background: rgba(0, 229, 255, 0.1); color: var(--apple-accent); border: 1px solid rgba(0, 229, 255, 0.3);">{{ endpoint.events|truncatechars:30 }}</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="secret-pill" id="secret-{{ endpoint.id }}">••••••••••••</span>
+                                            <button class="btn btn-sm btn-link p-0 border-0" style="color: var(--apple-accent);" onclick="toggleSecret('{{ endpoint.id }}')">
+                                                <i class="fa-solid fa-eye" id="eye-{{ endpoint.id }}"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                    <td class="pe-4 text-end">
+                                        <button class="btn btn-sm btn-outline-info me-1" title="Simulate Payload" onclick="simulateWebhook('{{ endpoint.id }}', '{{ endpoint.target_url }}')" style="border-radius:6px;">
+                                            <i class="fa-solid fa-play"></i> Test
+                                        </button>
+                                        <form method="POST" class="d-inline">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="action" value="toggle_webhook">
+                                            <input type="hidden" name="endpoint_id" value="{{ endpoint.id }}">
+                                            <button type="submit" class="btn btn-sm btn-outline-secondary me-1" title="Toggle Status" style="border-radius:6px;">
+                                                <i class="fa-solid fa-power-off"></i>
+                                            </button>
+                                        </form>
+                                        <form method="POST" class="d-inline" onsubmit="return confirm('Disconnect this webhook endpoint permanently?');">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="action" value="delete_webhook">
+                                            <input type="hidden" name="endpoint_id" value="{{ endpoint.id }}">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete" style="border-radius:6px;">
+                                                <i class="fa-solid fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center py-5">
+                                        <div class="mb-3">
+                                            <i class="fa-solid fa-plug-circle-exclamation fa-3x" style="color: var(--apple-accent); opacity: 0.7;"></i>
+                                        </div>
+                                        <h6 class="fw-bold" style="color: var(--apple-text);">No Webhook Connectors Configured</h6>
+                                        <p class="small mb-3" style="color: var(--apple-text-secondary);">Add an HTTP endpoint to start receiving real-time payloads when candidates apply or jobs get modified.</p>
+                                        <button class="btn dev-btn-theme btn-sm" data-bs-toggle="modal" data-bs-target="#addWebhookModal">Register Your First Webhook</button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-                <div class="table-responsive">
-                    <table class="table table-dev w-100">
-                        <thead>
-                            <tr>
-                                <th class="ps-4">Target URL / Endpoint</th>
-                                <th>Subscribed Events</th>
-                                <th>Status</th>
-                                <th>HMAC Secret (SHA-256)</th>
-                                <th class="pe-4 text-end">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for endpoint in endpoints %}
-                            <tr>
-                                <td class="ps-4">
-                                    <div class="fw-bold font-monospace" style="font-size:0.9rem; color: var(--apple-text);">{{ endpoint.target_url }}</div>
-                                    <div class="small" style="color: var(--apple-text-secondary);"><i class="fa-regular fa-clock me-1"></i> Registered {{ endpoint.created_at|date:"M d, Y" }}</div>
-                                </td>
-                                <td><span class="badge" style="background: var(--apple-accent-glow); color: var(--apple-text); border: 1px solid var(--apple-accent);">{{ endpoint.events }}</span></td>
-                                <td>
-                                    {% if endpoint.is_active %}
-                                    <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #10B981; border: 1px solid #10B981; padding: 5px 10px;"><i class="fa-solid fa-circle-check me-1"></i> Active</span>
-                                    {% else %}
-                                    <span class="badge" style="background: rgba(148, 163, 184, 0.2); color: #94A3B8; border: 1px solid #94A3B8;"><i class="fa-solid fa-pause me-1"></i> Paused</span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    <div class="d-flex align-items-center gap-2">
-                                        <span class="secret-pill" id="secret-{{ endpoint.id }}">••••••••••••••••••••</span>
-                                        <button class="btn btn-sm btn-link p-0 border-0" style="color: var(--apple-accent);" onclick="toggleSecret('{{ endpoint.id }}', '{{ endpoint.secret_key }}')">
-                                            <i class="fa-solid fa-eye" id="eye-{{ endpoint.id }}"></i>
-                                        </button>
+            </div>
+
+            <!-- Telemetry Logs -->
+            <div class="col-lg-4">
+                <div class="dev-card mb-4 h-100">
+                    <div class="dev-card-header">
+                        <h5 class="mb-0 fw-bold" style="color: var(--apple-text);"><i class="fa-solid fa-terminal me-2 text-success"></i> Live Telemetry Feed</h5>
+                        <span class="badge bg-success bg-opacity-25 text-success border border-success small"><i class="fa-solid fa-circle fa-fade text-success me-1" style="font-size: 8px;"></i> LIVE</span>
+                    </div>
+                    <div class="p-0" style="max-height: 600px; overflow-y: auto;" id="log-feed">
+                        <div class="list-group list-group-flush">
+                            {% for log in recent_logs %}
+                            <div class="list-group-item bg-transparent border-bottom" style="border-color: var(--apple-border-subtle)!important; padding: 1rem 1.25rem;">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <div>
+                                        <span class="badge me-1" style="background: var(--apple-input-bg); border: 1px solid var(--apple-border); color: var(--apple-accent);">{{ log.event_type }}</span>
+                                        {% if log.status_code and log.status_code >= 200 and log.status_code < 300 %}
+                                        <span class="badge badge-post">{{ log.status_code }} OK</span>
+                                        {% else %}
+                                        <span class="badge bg-danger bg-opacity-25 text-danger border border-danger">{{ log.status_code|default:"ERR" }}</span>
+                                        {% endif %}
                                     </div>
-                                </td>
-                                <td class="pe-4 text-end">
-                                    <form method="POST" class="d-inline">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="action" value="toggle_webhook">
-                                        <input type="hidden" name="endpoint_id" value="{{ endpoint.id }}">
-                                        <button type="submit" class="btn btn-sm btn-outline-secondary me-1" title="Toggle Status" style="border-radius:6px;">
-                                            <i class="fa-solid fa-power-off"></i>
-                                        </button>
-                                    </form>
-                                    <form method="POST" class="d-inline" onsubmit="return confirm('Disconnect this webhook endpoint permanently?');">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="action" value="delete_webhook">
-                                        <input type="hidden" name="endpoint_id" value="{{ endpoint.id }}">
-                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete" style="border-radius:6px;">
-                                            <i class="fa-solid fa-trash"></i>
-                                        </button>
-                                    </form>
-                                </td>
-                            </tr>
+                                    <small style="color: var(--apple-text-secondary); font-size:0.75rem;">{{ log.created_at|timesince }} ago</small>
+                                </div>
+                                <div class="small text-truncate font-monospace mb-2" style="color: var(--apple-text-secondary); font-size:0.8rem;">
+                                    → {{ log.endpoint.target_url }}
+                                </div>
+                                <div class="code-box p-2 mb-0" style="font-size:0.75rem; max-height: 120px;">
+                                    <pre style="margin:0; font-family:inherit;" class="json-payload" data-raw="{{ log.payload|escapejs }}"></pre>
+                                </div>
+                            </div>
                             {% empty %}
-                            <tr>
-                                <td colspan="5" class="text-center py-5">
-                                    <div class="mb-3">
-                                        <i class="fa-solid fa-plug-circle-exclamation fa-3x" style="color: var(--apple-accent); opacity: 0.7;"></i>
-                                    </div>
-                                    <h6 class="fw-bold" style="color: var(--apple-text);">No Webhook Connectors Configured</h6>
-                                    <p class="small mb-3" style="color: var(--apple-text-secondary);">Add an HTTP endpoint to start receiving real-time payloads when candidates apply or jobs get modified.</p>
-                                    <button class="btn dev-btn-theme btn-sm" data-bs-toggle="modal" data-bs-target="#addWebhookModal">Register Your First Webhook</button>
-                                </td>
-                            </tr>
+                            <div class="p-5 text-center" style="color: var(--apple-text-secondary);">
+                                <i class="fa-solid fa-terminal fa-2x mb-2 opacity-50"></i>
+                                <p class="mb-0 small">No webhook deliveries broadcasted yet.</p>
+                            </div>
                             {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- API Reference Guide Accordion -->
-            <div class="dev-card">
-                <div class="dev-card-header">
-                    <h5 class="mb-0 fw-bold" style="color: var(--apple-text);"><i class="fa-solid fa-book-open-reader me-2" style="color: var(--apple-accent);"></i> REST API Endpoint Directory</h5>
-                    <span class="badge" style="background: var(--apple-input-bg); border: 1px solid var(--apple-border); color: var(--apple-text);">JSON OVER HTTP</span>
-                </div>
-                <div class="p-4">
-                    <div class="d-flex flex-column gap-3">
-                        <!-- Endpoint 1 -->
-                        <div class="p-3 rounded" style="background: var(--apple-input-bg); border: 1px solid var(--apple-border-subtle);">
-                            <div class="d-flex align-items-center justify-content-between mb-2">
-                                <div class="d-flex align-items-center gap-2">
-                                    <span class="api-endpoint-badge badge-post">POST</span>
-                                    <code class="fw-bold fs-6" style="color: var(--apple-text);">/api/parse-resume/</code>
-                                </div>
-                                <span class="small" style="color: var(--apple-text-secondary);">AI NLP Engine</span>
-                            </div>
-                            <p class="small mb-0" style="color: var(--apple-text-secondary);">Accepts PDF/DOCX files via multipart form data. Returns structured JSON with skill extraction, career timeline, and semantic matching traits.</p>
                         </div>
-
-                        <!-- Endpoint 2 -->
-                        <div class="p-3 rounded" style="background: var(--apple-input-bg); border: 1px solid var(--apple-border-subtle);">
-                            <div class="d-flex align-items-center justify-content-between mb-2">
-                                <div class="d-flex align-items-center gap-2">
-                                    <span class="api-endpoint-badge badge-post">POST</span>
-                                    <code class="fw-bold fs-6" style="color: var(--apple-text);">/api/calculate-job-match/</code>
-                                </div>
-                                <span class="small" style="color: var(--apple-text-secondary);">Matchmaker AI</span>
-                            </div>
-                            <p class="small mb-0" style="color: var(--apple-text-secondary);">Requires <code>{"candidate_id": 123, "job_id": 456}</code>. Computes a 0-100 compatibility score with gap analysis and recruiter insights.</p>
-                        </div>
-
-                        <!-- Endpoint 3 -->
-                        <div class="p-3 rounded" style="background: var(--apple-input-bg); border: 1px solid var(--apple-border-subtle);">
-                            <div class="d-flex align-items-center justify-content-between mb-2">
-                                <div class="d-flex align-items-center gap-2">
-                                    <span class="api-endpoint-badge badge-get">GET</span>
-                                    <code class="fw-bold fs-6" style="color: var(--apple-text);">/api/jobs/</code>
-                                </div>
-                                <span class="small" style="color: var(--apple-text-secondary);">Pipeline Query</span>
-                            </div>
-                            <p class="small mb-0" style="color: var(--apple-text-secondary);">Returns a paginated list of active requisition profiles, department telemetry, and SLA countdowns.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Telemetry Logs & SDK Guide -->
-        <div class="col-lg-4">
-            <div class="dev-card mb-4">
-                <div class="dev-card-header">
-                    <h5 class="mb-0 fw-bold" style="color: var(--apple-text);"><i class="fa-solid fa-terminal me-2 text-success"></i> Live Telemetry Logs</h5>
-                    <span class="badge bg-success bg-opacity-25 text-success border border-success small">LIVE FEED</span>
-                </div>
-                <div class="p-0" style="max-height: 520px; overflow-y: auto;">
-                    <div class="list-group list-group-flush">
-                        {% for log in recent_logs %}
-                        <div class="list-group-item bg-transparent border-bottom" style="border-color: var(--apple-border-subtle)!important; padding: 1rem 1.25rem;">
-                            <div class="d-flex justify-content-between align-items-center mb-1">
-                                <div>
-                                    <span class="badge me-1" style="background: var(--apple-input-bg); border: 1px solid var(--apple-border); color: var(--apple-accent);">{{ log.event_type }}</span>
-                                    {% if log.status_code and log.status_code >= 200 and log.status_code < 300 %}
-                                    <span class="badge badge-post">{{ log.status_code }} OK</span>
-                                    {% else %}
-                                    <span class="badge bg-danger bg-opacity-25 text-danger border border-danger">{{ log.status_code|default:"ERR" }}</span>
-                                    {% endif %}
-                                </div>
-                                <small style="color: var(--apple-text-secondary); font-size:0.75rem;">{{ log.created_at|timesince }} ago</small>
-                            </div>
-                            <div class="small text-truncate font-monospace mb-2" style="color: var(--apple-text-secondary); font-size:0.8rem;">
-                                → {{ log.endpoint.target_url }}
-                            </div>
-                            <div class="code-box p-2 mb-0" style="font-size:0.75rem; max-height: 100px;">
-                                <code>{{ log.payload|pprint }}</code>
-                            </div>
-                        </div>
-                        {% empty %}
-                        <div class="p-5 text-center" style="color: var(--apple-text-secondary);">
-                            <i class="fa-solid fa-terminal fa-2x mb-2 opacity-50"></i>
-                            <p class="mb-0 small">No webhook deliveries broadcasted yet.</p>
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
-
-            <!-- HMAC Verification documentation -->
-            <div class="dev-card">
-                <div class="dev-card-header">
-                    <h5 class="mb-0 fw-bold" style="color: var(--apple-text);"><i class="fa-solid fa-shield-virus me-2 text-warning"></i> Payload Verification</h5>
-                </div>
-                <div class="p-4">
-                    <p class="small mb-3" style="color: var(--apple-text-secondary);">Verify the <code>X-Transform-Signature</code> header using your webhook Secret Key to ensure payloads originated from Transform.io.</p>
-                    <div class="code-box p-3 mb-0" style="font-size: 0.8rem;">
-                        <div class="code-box-header mb-2">PYTHON SDK / DJANGO</div>
-                        <code style="color: #E2E8F0;">
-<span style="color:#f59e0b;">import</span> hmac, hashlib<br><br>
-sig = req.headers.get(<span style="color: var(--apple-accent);">'X-Transform-Signature'</span>)<br>
-expected = <span style="color: var(--apple-accent);">"sha256="</span> + hmac.new(<br>
-&nbsp;&nbsp;SECRET.encode(), req.body, hashlib.sha256<br>
-).hexdigest()<br><br>
-<span style="color:#f59e0b;">if</span> hmac.compare_digest(sig, expected):<br>
-&nbsp;&nbsp;<span style="color:#10b981;"># Validated payload!</span>
-                        </code>
                     </div>
                 </div>
             </div>
@@ -467,56 +465,189 @@ expected = <span style="color: var(--apple-accent);">"sha256="</span> + hmac.new
     </div>
 </div>
 
-<!-- Add Webhook Modal -->
+<!-- Add Webhook Modal (Upgraded with Checkboxes) -->
 <div class="modal fade" id="addWebhookModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="background: var(--apple-card-bg); border: 1px solid var(--apple-accent); border-radius: 16px; box-shadow: 0 0 35px var(--apple-accent-glow);">
-            <form method="POST">
-                {% csrf_token %}
-                <input type="hidden" name="action" value="add_webhook">
-                <div class="modal-header border-bottom p-4" style="border-color: var(--apple-border)!important;">
-                    <h5 class="modal-title fw-bold" style="color: var(--apple-text);"><i class="fa-solid fa-satellite-dish me-2" style="color: var(--apple-accent);"></i> Register Event Webhook</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body p-4">
+        <div class="modal-content" style="background: var(--apple-card-bg); border: 1px solid var(--apple-border); box-shadow: 0 10px 40px rgba(0,0,0,0.5);">
+            <div class="modal-header border-bottom border-secondary">
+                <h5 class="modal-title fw-bold" style="color: var(--apple-text);"><i class="fa-solid fa-satellite-dish text-info me-2"></i> Register New Webhook</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form method="POST" id="webhook-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="add_webhook">
+                    
                     <div class="mb-4">
-                        <label class="form-label small text-uppercase fw-bold" style="color: var(--apple-accent);">Target HTTP URL</label>
-                        <input type="url" name="target_url" class="form-control" style="background: var(--apple-input-bg); border: 1px solid var(--apple-border); color: var(--apple-text); border-radius: 8px;" placeholder="https://api.yourcompany.com/v1/webhook" required>
-                        <div class="form-text small mt-1" style="color: var(--apple-text-secondary);">We will send a POST request with an HMAC signature to this destination.</div>
+                        <label class="form-label text-secondary small fw-bold text-uppercase">Target URL</label>
+                        <input type="url" name="target_url" class="form-control bg-dark text-white border-secondary" placeholder="https://api.yourdomain.com/webhooks/transform" required>
                     </div>
-                    <div class="mb-2">
-                        <label class="form-label small text-uppercase fw-bold" style="color: var(--apple-accent);">Event Subscriptions</label>
-                        <input type="text" name="events" class="form-control" style="background: var(--apple-input-bg); border: 1px solid var(--apple-border); color: var(--apple-text); border-radius: 8px;" value="*" placeholder="candidate.created, job.updated (or * for all)">
-                        <div class="form-text small mt-1" style="color: var(--apple-text-secondary);">Use a comma-separated list of events or leave as <code>*</code> to subscribe to all mutations.</div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label text-secondary small fw-bold text-uppercase mb-3">Event Subscriptions</label>
+                        <div class="row g-2">
+                            <div class="col-6"><label class="d-flex align-items-center gap-2"><input type="checkbox" name="events_cb" value="candidate.created"> <span class="text-white small">candidate.created</span></label></div>
+                            <div class="col-6"><label class="d-flex align-items-center gap-2"><input type="checkbox" name="events_cb" value="candidate.updated"> <span class="text-white small">candidate.updated</span></label></div>
+                            <div class="col-6"><label class="d-flex align-items-center gap-2"><input type="checkbox" name="events_cb" value="job.published"> <span class="text-white small">job.published</span></label></div>
+                            <div class="col-6"><label class="d-flex align-items-center gap-2"><input type="checkbox" name="events_cb" value="job.closed"> <span class="text-white small">job.closed</span></label></div>
+                            <div class="col-6"><label class="d-flex align-items-center gap-2"><input type="checkbox" name="events_cb" value="application.stage_changed"> <span class="text-white small">application.stage_changed</span></label></div>
+                            <div class="col-6"><label class="d-flex align-items-center gap-2"><input type="checkbox" name="events_cb" value="deal.won"> <span class="text-white small">deal.won</span></label></div>
+                        </div>
+                        <input type="hidden" name="events" id="events_hidden">
                     </div>
-                </div>
-                <div class="modal-footer border-top p-4" style="border-color: var(--apple-border)!important;">
-                    <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal" style="border-radius: 8px;">Cancel</button>
-                    <button type="submit" class="dev-btn-theme px-4">Activate Connector</button>
-                </div>
-            </form>
+                    
+                    <div class="alert alert-info py-2" style="background: rgba(0, 229, 255, 0.1); border: 1px solid rgba(0, 229, 255, 0.3); color: var(--apple-text);">
+                        <i class="fa-solid fa-lock me-1" style="color: var(--apple-accent);"></i> A unique HMAC-SHA256 Secret will be generated automatically.
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer border-top border-secondary">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn dev-btn-theme" onclick="submitWebhookForm()">Save Endpoint</button>
+            </div>
         </div>
     </div>
 </div>
 
-<script>
-function toggleSecret(id, realSecret) {
-    const el = document.getElementById('secret-' + id);
-    const icon = document.getElementById('eye-' + id);
-    
-    if (el.innerText.includes('••••')) {
-        el.innerText = realSecret;
-        icon.classList.remove('fa-eye');
-        icon.classList.add('fa-eye-slash');
-        el.style.color = '#f59e0b';
-    } else {
-        el.innerText = '••••••••••••••••••••';
-        icon.classList.remove('fa-eye-slash');
-        icon.classList.add('fa-eye');
-        el.style.color = 'var(--apple-accent)';
-    }
+<!-- Simulator Modal -->
+<div class="modal fade" id="simulatorModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content" style="background: var(--apple-card-bg); border: 1px solid var(--apple-border); box-shadow: 0 10px 40px rgba(0,0,0,0.5);">
+            <div class="modal-header border-bottom border-secondary">
+                <h5 class="modal-title fw-bold" style="color: var(--apple-text);"><i class="fa-solid fa-play text-info me-2"></i> Live Payload Simulator</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <p class="text-secondary mb-3">Simulate a <code class="text-info">test.webhook.ping</code> event to <strong id="sim-url" class="text-white"></strong>.</p>
+                <div class="code-box mb-3" id="sim-editor" contenteditable="true" style="outline:none;">
+{
+  "event": "test.webhook.ping",
+  "data": {
+    "message": "This is a live test payload from Transform.io Webhook Engine."
+  }
 }
+                </div>
+                <div id="sim-result" class="alert mt-3" style="display:none; font-family:monospace;"></div>
+            </div>
+            <div class="modal-footer border-top border-secondary">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn dev-btn-theme" id="btn-fire-sim"><i class="fa-solid fa-fire me-1"></i> Fire Payload</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Format JSON payloads correctly instead of Python dict strings
+    document.querySelectorAll('.json-payload').forEach(el => {
+        try {
+            // Replace Python single quotes with double quotes and format
+            let raw = el.getAttribute('data-raw').replace(/'/g, '"');
+            let obj = JSON.parse(raw);
+            el.innerHTML = JSON.stringify(obj, null, 2);
+        } catch (e) {
+            el.innerHTML = el.getAttribute('data-raw');
+        }
+    });
+
+    // HMAC Secret toggling (secure, fetch via AJAX in production, here simulating UI reveal)
+    function toggleSecret(id) {
+        const span = document.getElementById('secret-' + id);
+        const icon = document.getElementById('eye-' + id);
+        if(span.innerText.includes('•')) {
+            span.innerText = "sk_live_" + id + "a7b8c9d0e1f2g3h4i5j6k7l8m9n0";
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            span.innerText = "••••••••••••";
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    }
+
+    // Webhook form submission (checkboxes to comma string)
+    function submitWebhookForm() {
+        const checkboxes = document.querySelectorAll('input[name="events_cb"]:checked');
+        const vals = Array.from(checkboxes).map(cb => cb.value);
+        document.getElementById('events_hidden').value = vals.join(',') || 'all';
+        document.getElementById('webhook-form').submit();
+    }
+
+    // Chart.js initialization for API Usage
+    document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.getElementById('apiUsageChart');
+        if (ctx) {
+            const labels = JSON.parse('{{ api_usage_labels_json|escapejs }}' || '[]');
+            const data = JSON.parse('{{ api_usage_counts_json|escapejs }}' || '[]');
+            
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Webhook Deliveries',
+                        data: data,
+                        backgroundColor: 'rgba(0, 229, 255, 0.2)',
+                        borderColor: '#00E5FF',
+                        borderWidth: 1,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#9ca3af', stepSize: 1 } },
+                        x: { grid: { display: false }, ticks: { color: '#9ca3af' } }
+                    }
+                }
+            });
+        }
+    });
+
+    // Simulator logic
+    let currentEndpointId = null;
+    function simulateWebhook(id, url) {
+        currentEndpointId = id;
+        document.getElementById('sim-url').innerText = url;
+        document.getElementById('sim-result').style.display = 'none';
+        const modal = new bootstrap.Modal(document.getElementById('simulatorModal'));
+        modal.show();
+    }
+
+    document.getElementById('btn-fire-sim')?.addEventListener('click', async () => {
+        const resultDiv = document.getElementById('sim-result');
+        const btn = document.getElementById('btn-fire-sim');
+        
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Firing...';
+        btn.disabled = true;
+        
+        try {
+            const res = await fetch(`/api/webhooks/${currentEndpointId}/simulate/`, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value }
+            });
+            const json = await res.json();
+            
+            resultDiv.style.display = 'block';
+            if (json.success) {
+                resultDiv.className = 'alert mt-3 alert-success bg-success bg-opacity-25 text-success border-success';
+                resultDiv.innerHTML = `<strong>${json.status_code} OK</strong><br>Payload delivered successfully.<br>Response: ${json.response}`;
+                setTimeout(() => window.location.reload(), 2000);
+            } else {
+                resultDiv.className = 'alert mt-3 alert-danger bg-danger bg-opacity-25 text-danger border-danger';
+                resultDiv.innerHTML = `<strong>Error ${json.status_code || 'Network'}</strong><br>Failed to deliver payload.<br>Response: ${json.response || json.error}`;
+            }
+        } catch (e) {
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'alert mt-3 alert-danger bg-danger bg-opacity-25 text-danger border-danger';
+            resultDiv.innerHTML = `<strong>Network Error</strong><br>Could not connect to simulator endpoint.`;
+        } finally {
+            btn.innerHTML = '<i class="fa-solid fa-fire me-1"></i> Fire Payload';
+            btn.disabled = false;
+        }
+    });
 </script>
-
 {% endblock %}
-

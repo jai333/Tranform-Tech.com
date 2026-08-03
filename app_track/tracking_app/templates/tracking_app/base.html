@@ -6,6 +6,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Transform.io{% endblock %}</title>
+    <!-- ── Theme toggle — applied BEFORE DOMContentLoaded to avoid flash ──────── -->
+    <script>
+        (function () {
+            const saved = localStorage.getItem('theme') || 'dark';
+            if (saved === 'light') {
+                document.documentElement.classList.add('light-theme');
+                document.documentElement.setAttribute('data-theme', 'light');
+            } else {
+                document.documentElement.classList.remove('light-theme');
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        })();
+    </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -478,10 +491,56 @@
         }
 
         .btn:hover {
-            background: var(--apple-accent-glow);
-            transform: translateY(-2px);
-            box-shadow: 0 0 18px var(--apple-accent-glow);
-            color: var(--apple-text);
+            background: var(--apple-accent);
+            color: #000;
+            box-shadow: 0 0 15px var(--apple-accent-glow);
+            transform: scale(1.02);
+        }
+        
+        .btn-cyber-primary {
+            background: var(--brand-primary);
+            color: #000 !important;
+            font-weight: 700;
+            border: none;
+            border-radius: 8px;
+            padding: 0.6rem 1.25rem;
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.4);
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+        }
+        .btn-cyber-primary:hover {
+            transform: scale(1.03);
+            box-shadow: 0 0 25px rgba(0, 229, 255, 0.7);
+            color: #000 !important;
+        }
+        
+        .btn-cyber-outline {
+            background: transparent;
+            border: 1px solid var(--brand-primary);
+            color: var(--brand-primary) !important;
+            font-weight: 600;
+            border-radius: 8px;
+            padding: 0.5rem 1.1rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+        }
+        .btn-cyber-outline:hover {
+            background: rgba(0, 229, 255, 0.1);
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.2);
+        }
+        
+        .cyber-pill-float {
+            position: fixed;
+            top: 100px;
+            right: 30px;
+            z-index: 990;
+            display: flex;
+            gap: 10px;
+            animation: card-fade-in 0.5s ease-out;
         }
 
         .btn-secondary {
@@ -1500,11 +1559,33 @@
                             <i class="fas fa-user-friends"></i> Friends
                         </a>
                         {% if user.tenant %}
-                        <a href="{% url 'company-data-manager' %}" class="user-dropdown-item" style="color: #00E5FF; font-weight: bold;">
-                            <i class="fa-solid fa-envelope-open-text text-cyan me-1"></i> Tenant Account & Mail Option
+                        <div class="px-3 py-2 border-bottom mb-1" style="border-color: var(--apple-border-subtle)!important;">
+                            <div class="small fw-bold text-uppercase" style="color: var(--apple-text-secondary); font-size: 0.7rem;">Active Workspace</div>
+                            <div class="fw-bold d-flex align-items-center justify-content-between" style="color: var(--apple-text);">
+                                {{ user.tenant.name|default:"Acme Corp" }}
+                                {% if user.tenant.subscription_plan == 'enterprise' %}
+                                    <span class="badge bg-success bg-opacity-25 text-success border border-success" style="font-size:0.65rem;">ENTERPRISE</span>
+                                {% else %}
+                                    <span class="badge bg-secondary bg-opacity-25 text-secondary border border-secondary" style="font-size:0.65rem;">STANDARD</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <a href="{% url 'profile' %}#mail" class="user-dropdown-item d-flex justify-content-between align-items-center">
+                            <span><i class="fa-solid fa-envelope text-info" style="width: 20px;"></i> Mail Hub</span>
+                            {% if user.tenant.mail_integration_status == 'active' %}
+                                <span class="badge bg-success rounded-pill" style="width: 8px; height: 8px; padding: 0;"></span>
+                            {% else %}
+                                <span class="badge bg-danger rounded-pill" style="width: 8px; height: 8px; padding: 0;" title="Configuration Required"></span>
+                            {% endif %}
+                        </a>
+                        <a href="{% url 'company-data-manager' %}" class="user-dropdown-item">
+                            <i class="fa-solid fa-building text-primary" style="width: 20px;"></i> Workspace Settings
+                        </a>
+                        <a href="{% url 'developer_settings' %}" class="user-dropdown-item">
+                            <i class="fa-solid fa-code text-warning" style="width: 20px;"></i> Developer & API
                         </a>
                         <a href="{% url 'billing-page' %}" class="user-dropdown-item">
-                            <i class="fas fa-credit-card text-success"></i> Billing & Subscription
+                            <i class="fas fa-credit-card text-success" style="width: 20px;"></i> Subscription
                         </a>
                         {% endif %}
                         {% if user.is_superuser %}
@@ -1530,6 +1611,17 @@
         </div>
     </header>
 
+    {% if user.is_authenticated and request.resolver_match.url_name != 'executive_dashboard' and request.resolver_match.url_name != 'login' and request.resolver_match.url_name != 'register' %}
+    <div class="cyber-pill-float">
+        <a href="{% url 'dashboard' %}" class="btn-cyber-outline" style="background: var(--apple-card-bg); backdrop-filter: blur(10px); padding: 0.45rem 1rem; font-size: 0.85rem;">
+            <i class="fa-solid fa-chart-pie me-1"></i> Standard Ops
+        </a>
+        <a href="{% url 'executive_dashboard' %}" class="btn-cyber-primary" style="padding: 0.45rem 1rem; font-size: 0.85rem;">
+            <i class="fa-solid fa-crown me-1"></i> Exec Analytics
+        </a>
+    </div>
+    {% endif %}
+
     <div class="main-content">
         <div class="container">
             {% block content %}{% endblock %}
@@ -1543,20 +1635,6 @@
     </footer>
 
     <script>
-        // ── Theme toggle — applied BEFORE DOMContentLoaded to avoid flash ────────
-        (function () {
-            const saved = localStorage.getItem('theme') || 'dark';
-            if (saved === 'light') {
-                document.documentElement.classList.add('light-theme');
-                document.documentElement.setAttribute('data-theme', 'light');
-                if (document.body) document.body.classList.add('light-theme');
-            } else {
-                document.documentElement.classList.remove('light-theme');
-                document.documentElement.setAttribute('data-theme', 'dark');
-                if (document.body) document.body.classList.remove('light-theme');
-            }
-        })();
-
         document.addEventListener('DOMContentLoaded', function () {
             // Theme Toggle Logic is handled globally in transform.js and bottom script
         });
