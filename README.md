@@ -4,6 +4,28 @@ An enterprise-grade, multi-tenant Applicant Tracking System (ATS), B2B Sales CRM
 
 ---
 
+<p align="center">
+  <img src="app_track/tracking_app/static/tracking_app/assets/full_application_showcase_1780489286010.png" width="100%" alt="Transform.io Full Application Showcase">
+</p>
+
+## 📸 MVP Showcase & Visual Quality
+
+Experience our cutting-edge **Cyber-Nebula** design system combining glassmorphism, cinematic lighting, and exotic dashboard visualisations.
+
+| Autonomous AI Recruitment | Enterprise Sales CRM |
+| :---: | :---: |
+| <img src="app_track/tracking_app/static/tracking_app/assets/ai_pipeline_preview.png" width="450" alt="AI Pipeline"> | <img src="app_track/tracking_app/static/tracking_app/assets/sales_dashboard_preview.png" width="450" alt="Sales Dashboard"> |
+
+| Developer API & Webhooks | IT Telemetry & Helpdesk |
+| :---: | :---: |
+| <img src="app_track/tracking_app/static/tracking_app/assets/api_webhooks_exotic_visualization_1784933431760.jpg" width="450" alt="API and Webhooks"> | <img src="app_track/tracking_app/static/tracking_app/assets/it_helpdesk_realistic.jpg" width="450" alt="IT Helpdesk"> |
+
+| Universal Cmd+K Navigation | Exotic Dark Mode Aesthetics |
+| :---: | :---: |
+| <img src="app_track/tracking_app/static/tracking_app/assets/command_k_palette.jpg" width="450" alt="Command K"> | <img src="app_track/tracking_app/static/tracking_app/assets/hero_cyan_hires.jpg" width="450" alt="Exotic UI"> |
+
+---
+
 ## 🌟 Executive & Enterprise Features
 
 ### 1. 🏢 White-Label Multi-Tenant Architecture & Governance
