@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.humanize',
     'tracking_app',
     'video',
     'channels',
@@ -165,6 +166,11 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 # ── AI / OpenAI ───────────────────────────────────────────────
 # Set OPENAI_API_KEY in your environment (never hardcode keys)
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY', '')
+
+# ── SerpAPI (Google Maps Lead Scraper) ────────────────────────
+# Sign up at https://serpapi.com — free tier: 100 searches/month
+SERP_API_KEY = os.getenv('SERP_API_KEY', '')
+
 
 # ── Celery Configuration ──────────────────────────────────────
 CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', _REDIS_URL)

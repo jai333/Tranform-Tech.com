@@ -13,6 +13,7 @@ sales_urlpatterns = [
     path('sales/leads/', sales_views.lead_list, name='lead-list'),
     path('sales/leads/new/', sales_views.lead_create, name='lead-create'),
     path('sales/leads/import/', sales_views.import_leads, name='import-leads'),
+    path('sales/leads/google-maps/', sales_views.gmaps_lead_scraper, name='gmaps-lead-scraper'),
     path('sales/leads/<int:lead_id>/', sales_views.lead_detail, name='lead-detail'),
 
 
@@ -32,6 +33,10 @@ sales_urlpatterns = [
     path('api/sales/deals/<int:deal_id>/next-action/', sales_views.api_get_next_action, name='api-get-next-action'),
     path('api/sales/demo/<int:booking_id>/brief/', sales_views.api_generate_demo_brief, name='api-demo-brief'),
     path('api/sales/alerts/<int:alert_id>/dismiss/', sales_views.api_dismiss_alert, name='api-dismiss-alert'),
+
+    # ── Google Maps Scraper API ───────────────────────────────────
+    path('api/sales/gmaps/scrape/', sales_views.gmaps_lead_scraper, name='api-gmaps-scrape'),
+    path('api/sales/gmaps/import/', sales_views.api_gmaps_import, name='api-gmaps-import'),
 
     # ── Email Tracking Pixel (public) ────────────────────────────
     path('t/<str:tracking_id>.gif', sales_views.email_tracking_pixel, name='email-pixel'),

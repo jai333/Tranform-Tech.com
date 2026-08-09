@@ -385,20 +385,6 @@
         .main-content {
             padding-top: 150px;
             min-height: calc(100vh - 75px);
-            transition: padding-top 0.3s ease;
-            animation: fade-in 0.6s ease-out;
-        }
-
-        @keyframes fade-in {
-            0% {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-
-            100% {
-                opacity: 1;
-                transform: translateY(0);
-            }
         }
 
         .page-header {
@@ -433,13 +419,7 @@
             border: 1px solid var(--apple-border);
             border-top: 3px solid var(--apple-accent);
             overflow: hidden;
-            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease, background 0.35s ease;
-            animation: card-fade-in 0.5s ease-out;
-        }
-
-        @keyframes card-fade-in {
-            0% { transform: translateY(20px); opacity: 0; }
-            100% { transform: translateY(0); opacity: 1; }
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
         }
 
         .card:hover {
@@ -1516,7 +1496,7 @@
                         </li>
 
                         {% if user.is_superuser or user.can_view_it or user.is_staff or user.tenant %}
-                        <li><a href="{% url 'developer-settings' %}" class="{% if '/developer-settings/' in request.path %}active{% endif %}"><i class="fa-solid fa-code" style="color: #00E5FF; filter: drop-shadow(0 0 8px rgba(0, 229, 255, 0.8));"></i> <span>Developer API</span></a></li>
+                        <li><a href="{% url 'developer_settings' %}" class="{% if '/developer-settings/' in request.path %}active{% endif %}"><i class="fa-solid fa-code" style="color: #00E5FF; filter: drop-shadow(0 0 8px rgba(0, 229, 255, 0.8));"></i> <span>Developer API</span></a></li>
                         {% endif %}
 
                     {% endif %}
@@ -1588,6 +1568,12 @@
                             <i class="fas fa-credit-card text-success" style="width: 20px;"></i> Subscription
                         </a>
                         {% endif %}
+                        {% if user.role == 'admin' %}
+                        <div class="dropdown-divider"></div>
+                        <a href="{% url 'company-users' %}" class="user-dropdown-item" style="color: var(--apple-accent); font-weight: bold;">
+                            <i class="fa-solid fa-users text-primary"></i> Company Users
+                        </a>
+                        {% endif %}
                         {% if user.is_superuser %}
                         <div class="dropdown-divider"></div>
                         <a href="{% url 'saas-admin' %}" class="user-dropdown-item" style="color: #00E5FF; font-weight: bold;">
@@ -1611,12 +1597,12 @@
         </div>
     </header>
 
-    {% if user.is_authenticated and request.resolver_match.url_name != 'executive_dashboard' and request.resolver_match.url_name != 'login' and request.resolver_match.url_name != 'register' %}
+    {% if user.is_authenticated and request.resolver_match.url_name != 'executive-dashboard' and request.resolver_match.url_name != 'login' and request.resolver_match.url_name != 'register' %}
     <div class="cyber-pill-float">
-        <a href="{% url 'dashboard' %}" class="btn-cyber-outline" style="background: var(--apple-card-bg); backdrop-filter: blur(10px); padding: 0.45rem 1rem; font-size: 0.85rem;">
+        <a href="{% url 'standard-ops-dashboard' %}" class="btn-cyber-outline" style="background: var(--apple-card-bg); backdrop-filter: blur(10px); padding: 0.45rem 1rem; font-size: 0.85rem;">
             <i class="fa-solid fa-chart-pie me-1"></i> Standard Ops
         </a>
-        <a href="{% url 'executive_dashboard' %}" class="btn-cyber-primary" style="padding: 0.45rem 1rem; font-size: 0.85rem;">
+        <a href="{% url 'executive-dashboard' %}" class="btn-cyber-primary" style="padding: 0.45rem 1rem; font-size: 0.85rem;">
             <i class="fa-solid fa-crown me-1"></i> Exec Analytics
         </a>
     </div>
@@ -1924,44 +1910,12 @@
         });
     </script>
 
-    <style>
-        #instant-loader { position: fixed; top: 0; left: 0; width: 0; height: 3px; background: #00E5FF; z-index: 99999; transition: width 0.3s ease, opacity 0.3s ease; box-shadow: 0 0 10px #00E5FF; pointer-events: none; opacity: 0; }
-    </style>
-    <div id="instant-loader"></div>
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const loader = document.getElementById("instant-loader");
-            document.querySelectorAll('a[href]:not([href^="#"]):not([href^="javascript:"]):not([target="_blank"])').forEach(a => {
-                a.addEventListener("click", function(e) {
-                    if (e.ctrlKey || e.metaKey || e.shiftKey) return;
-                    loader.style.opacity = "1";
-                    loader.style.width = "30%";
-                    setTimeout(() => loader.style.width = "60%", 100);
-                    setTimeout(() => loader.style.width = "90%", 300);
-                });
-            });
-            window.addEventListener("pageshow", () => {
-                loader.style.width = "100%";
-                setTimeout(() => { loader.style.opacity = "0"; setTimeout(() => loader.style.width = "0", 300); }, 200);
-            });
-        });
-    </script>
-    {% block extra_scripts %}{% endblock %}
-
     <script>
         document.body.addEventListener('htmx:beforeRequest', function() {
-            const loader = document.getElementById('instant-loader');
-            if(loader) { loader.style.opacity = '1'; loader.style.width = '30%'; }
+            // loader removed
         });
         document.body.addEventListener('htmx:afterOnLoad', function() {
-            const loader = document.getElementById('instant-loader');
-            if(loader) {
-                loader.style.width = '100%';
-                setTimeout(() => {
-                    loader.style.opacity = '0';
-                    setTimeout(() => { loader.style.width = '0'; }, 300);
-                }, 200);
-            }
+            // loader removed
         });
     </script>
     </script>

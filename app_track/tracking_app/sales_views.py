@@ -22,7 +22,7 @@ from django.contrib import messages
 from .views import get_tenant_filter
 
 from .sales_models import (
-    Lead, EmailSequence, EmailSequenceStep, LeadSequenceEnrollment,
+    Lead, LeadFolder, EmailSequence, EmailSequenceStep, LeadSequenceEnrollment,
     OutreachEmail, EmailReply, DemoBooking, Deal, DealActivity,
     SalesDailySnapshot, SalesAlert, OnboardingFunnel
 )
@@ -148,6 +148,8 @@ def lead_list(request):
     search = request.GET.get('q', '')
     min_score = request.GET.get('min_score', '')
 
+    folder_id = request.GET.get('folder', '')
+
     if status_filter:
         qs = qs.filter(status=status_filter)
     if search:
@@ -158,6 +160,19 @@ def lead_list(request):
         )
     if min_score:
         qs = qs.filter(icp_score__gte=float(min_score))
+    if folder_id:
+        if folder_id == 'uncategorized':
+            qs = qs.filter(folder__isnull=True)
+        else:
+            qs = qs.filter(folder_id=folder_id)
+
+    # Fetch folders with lead counts
+    folders = LeadFolder.objects.filter(**get_tenant_filter(request.user)).annotate(
+        lead_count=Count('leads')
+    )
+    
+    # Uncategorized count
+    uncategorized_count = Lead.objects.filter(**get_tenant_filter(request.user), folder__isnull=True).count()
 
     context = {
         'page_title': 'Leads',
@@ -166,7 +181,10 @@ def lead_list(request):
         'status_filter': status_filter,
         'search': search,
         'min_score': min_score,
+        'folder_id': folder_id,
         'total_count': qs.count(),
+        'folders': folders,
+        'uncategorized_count': uncategorized_count,
     }
     return render(request, 'tracking_app/sales/leads.html', context)
 
@@ -943,7 +961,6 @@ def unified_inbox(request):
             # AI cold outreach writer
             prompt = request.POST.get('prompt', '')
             import time
-            time.sleep(1)
             sender_nm = (tenant.mail_sender_name if tenant and tenant.mail_sender_name else (tenant.name if tenant else "Executive Sales"))
             generated_text = f"Subject: Following up regarding AI infrastructure scalability\n\nHi there,\n\nI noticed your organization recently explored our enterprise architecture and wanted to reach out directly. Based on your target goals ({prompt}), our cutting-edge AI pipeline offers immediate, measurable acceleration for your team.\n\nWould you be open to a brief 10-minute executive briefing next week to explore alignment?\n\nBest regards,\n{sender_nm}"
             
@@ -1159,3 +1176,126 @@ def unified_inbox(request):
         'page_title': 'Tenant Mail & Communication Matrix',
     }
     return render(request, 'tracking_app/sales/unified_inbox.html', context)
+
+
+# ─────────────────────────────────────────────────────────────────
+# GOOGLE MAPS LEAD SCRAPER
+# ─────────────────────────────────────────────────────────────────
+
+import json as _json
+from django.conf import settings as _settings
+from django.views.decorators.http import require_POST as _require_POST
+from .gmaps_scraper import scrape_google_maps, import_lead_from_gmaps
+
+
+@login_required
+@paid_required
+def gmaps_lead_scraper(request):
+    """
+    GET  → renders the Google Maps Lead Scraper UI.
+    POST → (AJAX) runs the scrape and returns JSON results without importing.
+    """
+    tenant = getattr(request.user, 'tenant', None)
+
+    if request.method == 'GET':
+        return render(request, 'tracking_app/sales/gmaps_scraper.html', {
+            'page_title': 'Google Maps Lead Scraper',
+            'serp_key_set': True,
+        })
+
+    # ── POST: run scrape, return JSON ────────────────────────────
+    try:
+        body = _json.loads(request.body)
+    except Exception:
+        body = request.POST
+
+    keyword     = (body.get('keyword') or '').strip()
+    location    = (body.get('location') or '').strip()
+    category    = (body.get('category') or '').strip()
+    max_results = min(int(body.get('max_results', 20)), 100)
+    min_rating  = float(body.get('min_rating', 0) or 0)
+
+    if not keyword or not location:
+        return JsonResponse({'error': 'keyword and location are required'}, status=400)
+
+    results = []
+    error   = None
+    for item in scrape_google_maps(keyword, location, max_results, min_rating, category):
+        if '_error' in item:
+            error = item['_error']
+            break
+        results.append(item)
+
+    return JsonResponse({'results': results, 'error': error, 'count': len(results)})
+
+
+@login_required
+@paid_required
+def api_gmaps_import(request):
+    """
+    POST → receives a list of business dicts (already scraped) and imports
+           them as Lead objects, then triggers AI ICP scoring.
+    Returns JSON with counts of created/skipped leads.
+    """
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST required'}, status=405)
+
+    try:
+        body = _json.loads(request.body)
+    except Exception:
+        return JsonResponse({'error': 'Invalid JSON body'}, status=400)
+
+    businesses = body.get('businesses', [])
+    keyword = body.get('keyword', '').strip()
+    location = body.get('location', '').strip()
+    tenant = getattr(request.user, 'tenant', None)
+
+    # Automatically create/get a folder for this search
+    folder = None
+    if keyword or location:
+        folder_name = f"{keyword} in {location}".strip(" in") if location else keyword
+        if folder_name:
+            folder, _ = LeadFolder.objects.get_or_create(
+                name=folder_name[:200],
+                tenant=tenant,
+                defaults={'description': f'Auto-generated from Google Maps Scraper (Keyword: {keyword}, Location: {location})'}
+            )
+
+    created_count = 0
+    skipped_count = 0
+    lead_ids = []
+
+    for biz in businesses:
+        try:
+            lead, was_created = import_lead_from_gmaps(biz, tenant=tenant, folder=folder)
+            if was_created:
+                created_count += 1
+                lead_ids.append(lead.id)
+            else:
+                # Optionally, update existing lead's folder if it didn't have one
+                if not lead.folder and folder:
+                    lead.folder = folder
+                    lead.save(update_fields=['folder'])
+                skipped_count += 1
+        except Exception as e:
+            logger.warning("Failed to import gmaps lead: %s — %s", biz.get('name'), e)
+            skipped_count += 1
+
+    # Trigger async AI ICP scoring for new leads (best-effort)
+    for lead_id in lead_ids[:20]:  # cap at 20 to avoid long response
+        try:
+            lead_obj = Lead.objects.get(id=lead_id)
+            result = score_lead_icp(lead_obj)
+            lead_obj.icp_score = result.get('score', 0)
+            lead_obj.icp_score_breakdown = result.get('breakdown', {})
+            lead_obj.status = 'qualified' if lead_obj.icp_score >= 65 else 'enriched'
+            lead_obj.save(update_fields=['icp_score', 'icp_score_breakdown', 'status'])
+        except Exception as e:
+            logger.warning("ICP scoring failed for lead %s: %s", lead_id, e)
+
+    return JsonResponse({
+        'created': created_count,
+        'skipped': skipped_count,
+        'scored': min(len(lead_ids), 20),
+        'redirect': '/sales/leads/',
+    })

@@ -1,6 +1,37 @@
 {% extends 'tracking_app/base.html' %}
 {% load static %}
 
+{% block extra_styles %}
+<style>
+    .glass-card {
+        background: var(--apple-card-bg);
+        border: 1px solid var(--apple-border);
+        border-radius: 20px;
+        padding: 1.5rem;
+        box-shadow: var(--apple-shadow);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        position: relative;
+        overflow: hidden;
+    }
+    .glass-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0; height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(10,132,255,0.8), transparent);
+        opacity: 0.8;
+    }
+    .metric-value {
+        font-size: 2.5rem;
+        font-weight: 800;
+        line-height: 1;
+        background: linear-gradient(135deg, #fff, #a1a1aa);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="content-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;">
     <div>
@@ -15,29 +46,29 @@
 
 <div class="metrics-grid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:1.5rem; margin-bottom:2.5rem;">
     <!-- Active Rules -->
-    <div class="metric-card" style="background:var(--apple-card-bg); border:1px solid var(--apple-border); border-radius:20px; padding:1.5rem;">
+    <div class="metric-card" class="glass-card">
         <div style="color:var(--apple-text-secondary); font-size:0.85rem; font-weight:600; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px;">Active Routing Rules</div>
-        <div style="font-size:2.5rem; font-weight:700; color:var(--apple-text);">{{ routing_rules.count }}</div>
+        <div class="metric-value">{{ routing_rules.count }}</div>
     </div>
     <!-- SLA Configs -->
-    <div class="metric-card" style="background:var(--apple-card-bg); border:1px solid var(--apple-border); border-radius:20px; padding:1.5rem;">
+    <div class="metric-card" class="glass-card">
         <div style="color:var(--apple-text-secondary); font-size:0.85rem; font-weight:600; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px;">SLA Monitors</div>
-        <div style="font-size:2.5rem; font-weight:700; color:var(--apple-text);">{{ sla_configs.count }}</div>
+        <div class="metric-value">{{ sla_configs.count }}</div>
     </div>
     <!-- Sequences -->
-    <div class="metric-card" style="background:var(--apple-card-bg); border:1px solid var(--apple-border); border-radius:20px; padding:1.5rem;">
+    <div class="metric-card" class="glass-card">
         <div style="color:var(--apple-text-secondary); font-size:0.85rem; font-weight:600; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px;">Email Sequences</div>
-        <div style="font-size:2.5rem; font-weight:700; color:var(--apple-text);">{{ email_sequences.count }}</div>
+        <div class="metric-value">{{ email_sequences.count }}</div>
     </div>
     <!-- Success Rate -->
-    <div class="metric-card" style="background:var(--apple-card-bg); border:1px solid var(--apple-border); border-radius:20px; padding:1.5rem;">
+    <div class="metric-card" class="glass-card">
         <div style="color:var(--apple-text-secondary); font-size:0.85rem; font-weight:600; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px;">Run Success Rate</div>
-        <div style="font-size:2.5rem; font-weight:700; color:var(--apple-text);">{{ success_rate|default:"100" }}%</div>
+        <div class="metric-value">{{ success_rate|default:"100" }}%</div>
     </div>
 </div>
 
 <!-- Live Workflow Execution Graph -->
-<div style="background:var(--apple-card-bg); border:1px solid var(--apple-border); border-radius:20px; padding:1.5rem; margin-bottom: 2.5rem;">
+<div class="glass-card mb-5">
     <h3 style="margin-top:0; margin-bottom:1rem; font-size:1.1rem; display:flex; align-items:center; gap:8px;"><i class="bx bx-pulse" style="color:var(--apple-text-secondary);"></i> Automation Execution History</h3>
     <div style="height: 300px; position:relative;">
         <canvas id="automationChart"></canvas>
@@ -46,7 +77,7 @@
 
 <div style="display:grid; grid-template-columns:2fr 1fr; gap:1.5rem;">
     <!-- Active Workflows -->
-    <div style="background:var(--apple-card-bg); border:1px solid var(--apple-border); border-radius:20px; padding:1.5rem;">
+    <div class="glass-card">
         <h3 style="margin-top:0; margin-bottom:1rem; font-size:1.1rem;">Active Workflows</h3>
         <table style="width:100%; border-collapse:collapse;">
             <thead>
@@ -85,7 +116,7 @@
     </div>
 
     <!-- Recent Runs -->
-    <div style="background:var(--apple-card-bg); border:1px solid var(--apple-border); border-radius:20px; padding:1.5rem;">
+    <div class="glass-card">
         <h3 style="margin-top:0; margin-bottom:1rem; font-size:1.1rem;">Recent Runs</h3>
         <div style="display:flex; flex-direction:column; gap:12px;">
             {% for run in recent_runs %}
@@ -113,7 +144,7 @@
 
 <!-- Automation Simulator Modal -->
 <div id="simulator-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:9999; align-items:center; justify-content:center; backdrop-filter:blur(8px);">
-    <div style="background:var(--apple-card-bg); border:1px solid var(--apple-border); border-radius:20px; width:90%; max-width:550px; padding:2rem; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5);">
+    <div class="glass-card" style="width:90%; max-width:550px; padding:2rem; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5);">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
             <h3 style="color:var(--apple-text); margin:0; display:flex; align-items:center; gap:8px;"><i class="bx bx-play-circle" style="color:#0A84FF; font-size:1.5rem;"></i> Automation Simulator</h3>
             <i class="bx bx-x" style="color:var(--apple-text-secondary); font-size:1.5rem; cursor:pointer;" onclick="document.getElementById('simulator-modal').style.display='none'"></i>
@@ -163,7 +194,7 @@
 
 <!-- Workflow Builder Modal -->
 <div id="workflow-builder-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:9999; align-items:center; justify-content:center; backdrop-filter:blur(8px);">
-    <div style="background:var(--apple-card-bg); border:1px solid var(--apple-border); border-radius:20px; width:90%; max-width:600px; padding:2rem; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5);">
+    <div class="glass-card" style="width:90%; max-width:600px; padding:2rem; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5);">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
             <h3 style="color:var(--apple-text); margin:0; display:flex; align-items:center; gap:8px;"><i class="bx bx-git-merge" style="color:#0A84FF; font-size:1.5rem;"></i> New Workflow Builder</h3>
             <i class="bx bx-x" style="color:var(--apple-text-secondary); font-size:1.5rem; cursor:pointer;" onclick="document.getElementById('workflow-builder-modal').style.display='none'"></i>

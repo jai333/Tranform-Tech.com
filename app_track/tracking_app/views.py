@@ -12,6 +12,7 @@ from django.core.exceptions import PermissionDenied
 from .models import Candidate, Job, Interview, InterviewScorecard, User, Application, Friendship, Message, Notification, JobSeekerApplication, Note, ITTicket, ITTicketComment, ThreatIncident, DevProjectRequest, ScheduledReport, AutomationRun, ResumeData, ITAsset, ITVendor, KBArticle, TicketSurvey, TicketAuditLog, RoutingRule, SLAConfiguration, TicketMacro, TicketWorkLog, ITProblem, ITChangeRequest, ChangeApprovalBoard, ServiceCatalogItem, ServiceRequest, TicketRoutingRule, AssetRelationship, SystemOutage, BusinessHoursSchedule, HolidayCalendar, VulnerabilityScan, IPBlocklist, PhishingReport
 from .forms import UserRegistrationForm, ProfileUpdateForm, JobSeekerApplicationForm, JobForm
 from django.db import models
+from django.views.decorators.http import require_POST
 from datetime import datetime, timedelta
 from .utils import generate_meeting_url
 
@@ -41,6 +42,29 @@ def get_tenant_filter(user):
     if user.is_superuser or not user.tenant:
         return {}
     return {'tenant': user.tenant}
+
+@login_required
+def standard_ops_dashboard(request):
+    """The main unified dashboard for authenticated users (Standard Ops)."""
+    tenant_filter = get_tenant_filter(request.user)
+    
+    context = {'page_title': 'Standard Operations'}
+    
+    # 1. ATS Tasks
+    if request.user.can_view_ats or request.user.is_superuser:
+        context['my_applications'] = Application.objects.filter(user=request.user, **tenant_filter).order_by('-applied_date')[:5]
+        context['recent_jobs'] = Job.objects.filter(**tenant_filter).order_by('-created_at')[:5]
+    
+    # 2. Sales Tasks
+    if request.user.can_view_sales or request.user.is_superuser:
+        from .sales_models import Deal
+        context['my_deals'] = Deal.objects.filter(**tenant_filter).exclude(stage__in=['won', 'lost']).order_by('-last_activity_at')[:5]
+    
+    # 3. IT Tasks
+    if request.user.can_view_it or request.user.is_superuser:
+        context['my_it_tickets'] = ITTicket.objects.filter(submitted_by=request.user, **tenant_filter).exclude(status='closed').order_by('-created_at')[:5]
+        
+    return render(request, 'tracking_app/standard_ops_dashboard.html', context)
 
 def home(request):
     return render(request, 'tracking_app/home.html')
@@ -537,23 +561,11 @@ from django.views.decorators.csrf import csrf_exempt
 @login_required
 @require_ats_access
 def parse_and_scrape(request):
-    """Real CV Parser & Web Scraper for live candidate sourcing."""
+    """Real JD/CV Parser & Multi-site Web Scraper for live candidate sourcing."""
     import pypdf
     from docx import Document
-    import urllib.request
-    import urllib.parse
-    import ssl
-    from html.parser import HTMLParser
+    from tracking_app.services.sourcing_engine import SourcingEngine
     
-    class DDGParser(HTMLParser):
-        def __init__(self):
-            super().__init__()
-            self.links = []
-        def handle_starttag(self, tag, attrs):
-            d = dict(attrs)
-            if tag == 'a' and 'class' in d and 'result__url' in d['class']:
-                self.links.append(d.get('href'))
-                
     if request.method != 'POST':
         return JsonResponse({'error': 'POST required'}, status=405)
     
@@ -576,64 +588,42 @@ def parse_and_scrape(request):
     except Exception as e:
         return JsonResponse({'error': f'Failed to parse file: {str(e)}'}, status=400)
 
-    # Basic NLP keyword extraction
+    # Basic NLP keyword extraction (handles both JD and CV)
     text_lower = text.lower()
-    tech_skills = ["python", "java", "javascript", "react", "node.js", "aws", "docker", "kubernetes", "machine learning", "sql", "devops", "cloud", "agile", "c++", "go", "ruby", "data science", "cybersecurity", "azure"]
+    
+    tech_skills = [
+        "python", "java", "javascript", "react", "node.js", "aws", "docker", "kubernetes",
+        "machine learning", "sql", "devops", "cloud", "agile", "c++", "go", "ruby",
+        "data science", "cybersecurity", "azure", "salesforce", "marketing", "seo", "hubspot"
+    ]
     found_skills = [skill for skill in tech_skills if skill in text_lower]
     
     if not found_skills:
-        found_skills = ["python", "agile"] # fallback if resume is vague
+        found_skills = ["communication", "project management"] # fallback
         
-    # Determine title based on resume content
-    title = "Software Engineer"
+    # Determine title based on document content
+    title = "Professional Candidate"
     if "data" in text_lower or "machine learning" in text_lower:
         title = "Data Scientist"
-    if "devops" in text_lower or "kubernetes" in text_lower:
+    elif "devops" in text_lower or "kubernetes" in text_lower:
         title = "DevOps Engineer"
+    elif "marketing" in text_lower or "seo" in text_lower:
+        title = "Marketing Specialist"
+    elif "sales" in text_lower or "account executive" in text_lower:
+        title = "Sales Executive"
+    elif "engineer" in text_lower or "developer" in text_lower:
+        title = "Software Engineer"
+        
     if "manager" in text_lower or "lead" in text_lower:
         title = f"Lead {title}"
         
-    # Execute REAL DDG scraping for linkedin profiles based on extracted skills
-    ssl._create_default_https_context = ssl._create_unverified_context
-    query = f'site:linkedin.com/in/ "{title}" ' + " ".join([f'"{s}"' for s in found_skills[:3]])
-    url = f'https://html.duckduckgo.com/html/?q={urllib.parse.quote(query)}'
-    req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64 AppleWebKit/537.36)'})
-    
-    candidates = []
-    try:
-        html = urllib.request.urlopen(req, timeout=10).read().decode('utf-8')
-        parser = DDGParser()
-        parser.feed(html)
-        
-        for raw_link in parser.links[:6]:
-            if 'uddg=' in raw_link:
-                uddg_part = raw_link.split('uddg=')[1].split('&')[0]
-                real_url = urllib.parse.unquote(uddg_part)
-                if 'linkedin.com/in/' in real_url:
-                    slug = real_url.split('linkedin.com/in/')[1].strip('/').split('?')[0]
-                    name_parts = slug.split('-')
-                    name = " ".join([p.capitalize() for p in name_parts[:2]])
-                    if not name:
-                        name = "LinkedIn User"
-                    
-                    candidates.append({
-                        "name": name,
-                        "title": title.title(),
-                        "company": "Live Web Profile",
-                        "loc": "Remote",
-                        "yrs": 5,
-                        "level": "senior",
-                        "avail": "Open to offers",
-                        "skills": [s.title() for s in found_skills],
-                        "score": 92,
-                        "email": slug.replace("-", ".") + "@example.com",
-                        "li": real_url,
-                        "edu": "Parsed from internet",
-                        "about": "REAL WEB SCRAPE: Found live via DuckDuckGo search."
-                    })
-    except Exception as e:
-        print(f"Scraping error: {e}")
-        pass
+    # Run the Hybrid Sourcing Engine
+    candidates = SourcingEngine.source_candidates(
+        title=title,
+        skills=[s.title() for s in found_skills],
+        location="Remote",
+        num_results=10
+    )
         
     return JsonResponse({
         'success': True,
@@ -641,6 +631,36 @@ def parse_and_scrape(request):
         'extracted_skills': [s.title() for s in found_skills],
         'candidates': candidates
     })
+
+def search_web_candidates(request):
+    """Handles manual search queries from the candidate sourcing engine UI."""
+    from tracking_app.services.sourcing_engine import SourcingEngine
+    import json
+    
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST required'}, status=405)
+        
+    try:
+        data = json.loads(request.body)
+        title = data.get('title', 'Software Engineer')
+        location = data.get('location', 'Remote')
+        skills = data.get('skills', [])
+        
+        # Run the Hybrid Sourcing Engine
+        candidates = SourcingEngine.source_candidates(
+            title=title,
+            skills=skills,
+            location=location,
+            num_results=12
+        )
+        
+        return JsonResponse({
+            'success': True,
+            'candidates': candidates
+        })
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
+
 
 
 # Candidate CRUD Views
@@ -3321,27 +3341,27 @@ def executive_dashboard(request):
         round(it_usage / usage_total * 100),
     ]
 
-    # ── At-Risk Accounts (by account with fewest recent deals) ────────────────
+    # ── At-Risk Accounts (by account with fewest recent activities) ───────────────
     at_risk_accounts = Account.objects.annotate(
-        deal_count=Count('deal')
-    ).order_by('deal_count')[:4]
+        activity_count=Count('account_activities')
+    ).order_by('activity_count')[:4]
 
     # ── Recent Cross-Platform Activity Feed ───────────────────────────────────
     recent_activity = []
     # Last 5 applications
-    for app in Application.objects.select_related('candidate', 'job').order_by('-applied_at')[:3]:
+    for app in Application.objects.select_related('candidate', 'job').order_by('-applied_date')[:3]:
         recent_activity.append({
             'icon': 'bx-user-check',
             'color': '#10b981',
-            'text': f'<strong>{app.candidate.name if app.candidate else "Candidate"}</strong> applied for <strong>{app.job.title if app.job else "a role"}</strong>',
-            'time': app.applied_at,
+            'text': f'<strong>{app.candidate.full_name if app.candidate else "Candidate"}</strong> applied for <strong>{app.job.title if app.job else "a role"}</strong>',
+            'time': app.applied_date,
         })
     # Last 3 deals
     for deal in Deal.objects.order_by('-updated_at')[:3]:
         recent_activity.append({
             'icon': 'bx-dollar-circle',
             'color': '#0A84FF',
-            'text': f'Deal <strong>{deal.name}</strong> moved to <strong>{deal.stage}</strong>',
+            'text': f'Deal <strong>{deal.lead.company_name if hasattr(deal, "lead") and deal.lead else "Unknown"}</strong> moved to <strong>{deal.stage}</strong>',
             'time': deal.updated_at,
         })
     # Last 2 IT tickets
@@ -3353,7 +3373,15 @@ def executive_dashboard(request):
             'time': ticket.created_at,
         })
     # Sort by time
-    recent_activity.sort(key=lambda x: x['time'] if x['time'] else now, reverse=True)
+    import datetime
+    def _to_dt(val):
+        if not val:
+            return now
+        if isinstance(val, datetime.datetime):
+            return val
+        return timezone.make_aware(datetime.datetime.combine(val, datetime.time.min))
+        
+    recent_activity.sort(key=lambda x: _to_dt(x['time']), reverse=True)
     recent_activity = recent_activity[:8]
 
     context = {
@@ -3496,6 +3524,27 @@ def saas_admin_dashboard(request):
                         else:
                             u.is_superuser = is_su
                             u.is_staff = is_su
+                    
+                    # Data Migration
+                    if request.POST.get('migrate_data') == 'on' and u.tenant:
+                        from .models import Candidate, Job, Application, ITTicket
+                        Candidate.objects.filter(user=u, tenant__isnull=True).update(tenant=u.tenant)
+                        Job.objects.filter(user=u, tenant__isnull=True).update(tenant=u.tenant)
+                        Application.objects.filter(user=u, tenant__isnull=True).update(tenant=u.tenant)
+                        ITTicket.objects.filter(requester=u, tenant__isnull=True).update(tenant=u.tenant)
+                        # Migrate Deals
+                        from .sales_models import Deal, Lead
+                        Deal.objects.filter(lead__user=u, tenant__isnull=True).update(tenant=u.tenant)
+                        Lead.objects.filter(user=u, tenant__isnull=True).update(tenant=u.tenant)
+                        messages.success(request, f"Migrated {u.username}'s loose data to {u.tenant.name}.")
+
+                    # Generate Credentials
+                    if request.POST.get('generate_credentials') == 'on':
+                        import string, random
+                        from django.contrib.auth.hashers import make_password
+                        temp_pw = ''.join(random.choices(string.ascii_letters + string.digits, k=12))
+                        u.password = make_password(temp_pw)
+                        messages.success(request, f"Generated new password for {u.username}: {temp_pw}")
 
                     u.save()
                     messages.success(request, f"Updated access and roles for {u.username}.")
@@ -3859,4 +3908,91 @@ def save_mail_settings(request):
     tenant.save()
     messages.success(request, 'Mail integration settings saved successfully.')
     return redirect('profile')
+
+
+
+@login_required
+def company_user_management(request):
+    """Tenant Admin view for managing co-workers in their company."""
+    from .models import User, Tenant
+    from django.contrib import messages
+    from django.shortcuts import redirect
+    import string
+    import random
+    from django.contrib.auth.hashers import make_password
+
+    if request.user.role != User.ROLE_ADMIN or not request.user.tenant:
+        messages.error(request, "Access denied. Company Admin privileges required.")
+        return redirect('home')
+
+    tenant = request.user.tenant
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        
+        if action == 'add_coworker':
+            username = request.POST.get('username')
+            email = request.POST.get('email')
+            first_name = request.POST.get('first_name', '')
+            last_name = request.POST.get('last_name', '')
+            role = request.POST.get('role', User.ROLE_JOBSEEKER)
+            
+            can_ats = request.POST.get('can_view_ats') == 'on'
+            can_sales = request.POST.get('can_view_sales') == 'on'
+            can_it = request.POST.get('can_view_it') == 'on'
+            can_exec = request.POST.get('can_view_executive') == 'on'
+            
+            if User.objects.filter(username=username).exists() or User.objects.filter(email=email).exists():
+                messages.error(request, "A user with this username or email already exists.")
+            else:
+                temp_password = ''.join(random.choices(string.ascii_letters + string.digits, k=12))
+                
+                u = User.objects.create(
+                    username=username,
+                    email=email,
+                    first_name=first_name,
+                    last_name=last_name,
+                    role=role,
+                    tenant=tenant,
+                    can_view_ats=can_ats,
+                    can_view_sales=can_sales,
+                    can_view_it=can_it,
+                    can_view_executive=can_exec,
+                    password=make_password(temp_password)
+                )
+                messages.success(request, f"Successfully created {u.username}. Their temporary password is: {temp_password}")
+                
+        elif action == 'update_coworker':
+            user_id = request.POST.get('user_id')
+            try:
+                u = User.objects.get(pk=user_id, tenant=tenant)
+                
+                if u == request.user and request.POST.get('role') != User.ROLE_ADMIN:
+                    messages.error(request, "You cannot remove your own Admin role.")
+                else:
+                    u.role = request.POST.get('role', u.role)
+                    u.can_view_ats = request.POST.get('can_view_ats') == 'on'
+                    u.can_view_sales = request.POST.get('can_view_sales') == 'on'
+                    u.can_view_it = request.POST.get('can_view_it') == 'on'
+                    u.can_view_executive = request.POST.get('can_view_executive') == 'on'
+                    
+                    if request.POST.get('reset_password') == 'on':
+                        temp_password = ''.join(random.choices(string.ascii_letters + string.digits, k=12))
+                        u.password = make_password(temp_password)
+                        messages.success(request, f"Password reset for {u.username}. New password: {temp_password}")
+                        
+                    u.save()
+                    messages.success(request, f"Updated permissions for {u.username}.")
+            except User.DoesNotExist:
+                messages.error(request, "User not found or you do not have permission to edit them.")
+
+    coworkers = User.objects.filter(tenant=tenant).order_by('username')
+    
+    context = {
+        'page_title': f'{tenant.name} - User Management',
+        'tenant': tenant,
+        'coworkers': coworkers,
+        'role_choices': User.ROLE_CHOICES,
+    }
+    return render(request, 'tracking_app/company_users.html', context)
 

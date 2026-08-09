@@ -12,6 +12,20 @@ from django.utils import timezone
 # LAYER 1 — Lead Intelligence
 # ─────────────────────────────────────────────────────────────────
 
+class LeadFolder(models.Model):
+    """A collection of leads, usually generated from a specific search or campaign."""
+    name = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    tenant = models.ForeignKey('tracking_app.Tenant', on_delete=models.CASCADE, null=True, blank=True, related_name='lead_folders')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return self.name
+
+
 class Lead(models.Model):
     """A prospective customer discovered or enriched by AI."""
 
@@ -22,6 +36,7 @@ class Lead(models.Model):
         ('manual', 'Manual Entry'),
         ('inbound', 'Inbound (Website)'),
         ('referral', 'Referral'),
+        ('google_maps', 'Google Maps Scraper'),
     ]
 
     STATUS_CHOICES = [
@@ -40,7 +55,7 @@ class Lead(models.Model):
 
     # Contact information
     contact_name = models.CharField(max_length=200)
-    email = models.EmailField(unique=True)
+    email = models.EmailField(blank=True, null=True)  # nullable for Google Maps leads
     linkedin_url = models.URLField(blank=True, null=True)
     phone = models.CharField(max_length=30, blank=True, null=True)
 
@@ -50,6 +65,14 @@ class Lead(models.Model):
     industry = models.CharField(max_length=100, blank=True, null=True)
     company_website = models.URLField(blank=True, null=True)
     company_location = models.CharField(max_length=150, blank=True, null=True)
+
+    # Google Maps extra data
+    gmaps_place_id = models.CharField(max_length=200, blank=True, null=True, unique=True)
+    gmaps_rating = models.FloatField(null=True, blank=True)
+    gmaps_reviews = models.IntegerField(null=True, blank=True)
+    gmaps_category = models.CharField(max_length=200, blank=True, null=True)
+    gmaps_address = models.TextField(blank=True, null=True)
+    gmaps_maps_url = models.URLField(blank=True, null=True)
 
     # AI-enriched data
     tech_stack = models.JSONField(default=list, help_text="Technologies used by the company")
@@ -77,8 +100,17 @@ class Lead(models.Model):
 
     class Meta:
         ordering = ['-icp_score', '-created_at']
+        constraints = [
+            # Only enforce email uniqueness when email is not null
+            models.UniqueConstraint(
+                fields=['email'],
+                condition=models.Q(email__isnull=False),
+                name='unique_lead_email_when_not_null',
+            )
+        ]
 
     tenant = models.ForeignKey('tracking_app.Tenant', on_delete=models.CASCADE, null=True, blank=True, related_name='%(class)ss')
+    folder = models.ForeignKey(LeadFolder, on_delete=models.SET_NULL, null=True, blank=True, related_name='leads')
 
     def __str__(self):
         return f"{self.contact_name} @ {self.company_name} ({self.icp_score:.0f}/100)"

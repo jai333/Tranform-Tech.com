@@ -9,6 +9,7 @@ from .sales_urls import sales_urlpatterns
 
 urlpatterns = [
     path('', views.home, name='home'),
+    path('standard-ops/', views.standard_ops_dashboard, name='standard-ops-dashboard'),
     
     # Public Marketing Pages
     path('pitch/', TemplateView.as_view(template_name='tracking_app/pitch.html'), name='public-pitch'),
@@ -58,6 +59,7 @@ urlpatterns = [
     path('candidates/sourcing/', views.candidate_sourcing, name='candidate-sourcing'),
     path('candidates/api/add-sourced/', views.add_sourced_candidate, name='add-sourced-candidate'),
     path('candidates/api/parse-and-scrape/', views.parse_and_scrape, name='parse-and-scrape'),
+    path('candidates/api/search-web-candidates/', views.search_web_candidates, name='search-web-candidates'),
     
     # Job URLs
     path('jobs/', views.JobListView.as_view(), name='job-list'),
@@ -185,7 +187,9 @@ urlpatterns = [
 
     # ── SaaS Admin Portal ────────────────────────────────────────────────────
     path('saas-admin/', views.saas_admin_dashboard, name='saas-admin'),
+    path('company-users/', views.company_user_management, name='company-users'),
     # ── Mail Hub & Developer API Additions (Enterprise Evolution) ────────────
+    path('developer/', views.developer_settings_dashboard, name='developer_settings'),
     path('api/mail/test/', views.send_test_mail, name='send-test-mail'),
     path('api/mail/save/', views.save_mail_settings, name='save-mail-settings'),
     path('api/webhooks/<int:endpoint_id>/simulate/', views.simulate_webhook_payload, name='simulate-webhook-payload'),

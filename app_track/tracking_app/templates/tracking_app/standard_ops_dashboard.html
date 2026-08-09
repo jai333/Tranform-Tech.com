@@ -1,0 +1,187 @@
+{% extends 'tracking_app/base.html' %}
+
+{% block title %}Standard Ops Dashboard{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .ops-dashboard {
+        color: var(--apple-text);
+        padding-bottom: 3rem;
+    }
+    
+    .ops-widget {
+        background: var(--apple-card-bg);
+        border: 1px solid var(--apple-border);
+        border-radius: 20px;
+        padding: 1.5rem;
+        box-shadow: var(--apple-shadow);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        height: 100%;
+        transition: transform 0.3s ease;
+    }
+    
+    .ops-widget:hover {
+        transform: translateY(-4px);
+    }
+
+    .ops-widget-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.25rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    .ops-widget-title {
+        font-weight: 700;
+        margin: 0;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .ops-list-item {
+        padding: 0.75rem 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    }
+    .ops-list-item:last-child {
+        border-bottom: none;
+    }
+
+    .ops-pill {
+        font-size: 0.7rem;
+        padding: 0.2rem 0.5rem;
+        border-radius: 4px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .ops-empty {
+        padding: 2rem 0;
+        text-align: center;
+        color: var(--apple-text-secondary);
+        font-size: 0.9rem;
+    }
+
+    /* Accents */
+    .widget-ats { border-top: 3px solid #0A84FF; }
+    .widget-sales { border-top: 3px solid #10b981; }
+    .widget-it { border-top: 3px solid #6366f1; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4 ops-dashboard">
+    <div class="mb-5">
+        <h2 class="display-5 fw-bold mb-1">Standard Ops</h2>
+        <p class="text-secondary fs-5">Welcome back, {{ request.user.first_name|default:request.user.username }}!</p>
+    </div>
+
+    <div class="row g-4">
+        
+        {% if user.can_view_ats or user.is_superuser %}
+        <!-- ATS Widget -->
+        <div class="col-lg-4">
+            <div class="ops-widget widget-ats">
+                <div class="ops-widget-header">
+                    <h5 class="ops-widget-title text-primary">
+                        <i class="fa-solid fa-file-alt"></i> My Applications
+                    </h5>
+                    <a href="{% url 'application-list' %}" class="btn btn-sm btn-outline-primary" style="border-radius: 20px;">View All</a>
+                </div>
+                
+                {% if my_applications %}
+                    {% for app in my_applications %}
+                    <div class="ops-list-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1 text-white" style="font-size: 0.95rem;">{{ app.job.title }}</h6>
+                            <small class="text-secondary">{{ app.job.company_name }}</small>
+                        </div>
+                        <span class="ops-pill bg-primary bg-opacity-25 text-primary">{{ app.status }}</span>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="ops-empty">
+                        <i class="fa-solid fa-folder-open mb-2 fs-3 text-secondary opacity-50"></i>
+                        <p class="mb-0">No active applications</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if user.can_view_sales or user.is_superuser %}
+        <!-- Sales Widget -->
+        <div class="col-lg-4">
+            <div class="ops-widget widget-sales">
+                <div class="ops-widget-header">
+                    <h5 class="ops-widget-title" style="color: #10b981;">
+                        <i class="fa-solid fa-handshake"></i> Active Deals
+                    </h5>
+                    <a href="{% url 'sales-dashboard' %}" class="btn btn-sm btn-outline-success" style="border-radius: 20px;">Pipeline</a>
+                </div>
+                
+                {% if my_deals %}
+                    {% for deal in my_deals %}
+                    <div class="ops-list-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1 text-white" style="font-size: 0.95rem;">{{ deal.lead.company_name }}</h6>
+                            <small class="text-secondary">${{ deal.deal_value_monthly }}/mo</small>
+                        </div>
+                        <span class="ops-pill bg-success bg-opacity-25 text-success">{{ deal.get_stage_display }}</span>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="ops-empty">
+                        <i class="fa-solid fa-box-open mb-2 fs-3 text-secondary opacity-50"></i>
+                        <p class="mb-0">No active deals in pipeline</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if user.can_view_it or user.is_superuser %}
+        <!-- IT Support Widget -->
+        <div class="col-lg-4">
+            <div class="ops-widget widget-it">
+                <div class="ops-widget-header">
+                    <h5 class="ops-widget-title" style="color: #6366f1;">
+                        <i class="fa-solid fa-ticket"></i> Open IT Tickets
+                    </h5>
+                    <a href="{% url 'it-helpdesk-list' %}" class="btn btn-sm btn-outline-info" style="border-radius: 20px;">Helpdesk</a>
+                </div>
+                
+                {% if my_it_tickets %}
+                    {% for ticket in my_it_tickets %}
+                    <div class="ops-list-item d-flex justify-content-between align-items-center">
+                        <div style="max-width: 70%;">
+                            <h6 class="mb-1 text-white text-truncate" style="font-size: 0.95rem;">{{ ticket.title }}</h6>
+                            <small class="text-secondary">#{{ ticket.id }} • {{ ticket.created_at|date:"M d" }}</small>
+                        </div>
+                        <span class="ops-pill 
+                            {% if ticket.status == 'new' %}bg-danger bg-opacity-25 text-danger
+                            {% elif ticket.status == 'in_progress' %}bg-warning bg-opacity-25 text-warning
+                            {% else %}bg-secondary bg-opacity-25 text-white{% endif %}
+                        ">
+                            {{ ticket.get_status_display }}
+                        </span>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="ops-empty">
+                        <i class="fa-solid fa-check-circle mb-2 fs-3 text-secondary opacity-50"></i>
+                        <p class="mb-0">No open support tickets</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

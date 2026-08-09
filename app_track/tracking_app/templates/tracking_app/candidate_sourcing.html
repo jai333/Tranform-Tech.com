@@ -82,6 +82,12 @@
 .b-add:disabled { background:rgba(0,229,255,.15); color:var(--brand-primary); cursor:default; opacity:.8; }
 .b-li { background:rgba(10,102,194,.1); border:1px solid rgba(10,102,194,.3); color:#38a0e0; border-radius:7px; padding:5px 10px; font-size:.7rem; font-weight:600; font-family:inherit; text-decoration:none; display:flex; align-items:center; justify-content:center; gap:4px; transition:background .15s; }
 .b-li:hover { background:rgba(10,102,194,.2); color:#38a0e0; }
+.b-gh { background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.2); color:#e2e8f0; border-radius:7px; padding:5px 10px; font-size:.7rem; font-weight:600; font-family:inherit; text-decoration:none; display:flex; align-items:center; justify-content:center; gap:4px; transition:background .15s; }
+.b-gh:hover { background:rgba(255,255,255,.1); color:#fff; }
+.b-rd { background:rgba(255,69,0,.1); border:1px solid rgba(255,69,0,.3); color:#ff4500; border-radius:7px; padding:5px 10px; font-size:.7rem; font-weight:600; font-family:inherit; text-decoration:none; display:flex; align-items:center; justify-content:center; gap:4px; transition:background .15s; }
+.b-rd:hover { background:rgba(255,69,0,.2); color:#ff6a33; }
+.b-nk { background:rgba(0,123,255,.1); border:1px solid rgba(0,123,255,.3); color:#3399ff; border-radius:7px; padding:5px 10px; font-size:.7rem; font-weight:600; font-family:inherit; text-decoration:none; display:flex; align-items:center; justify-content:center; gap:4px; transition:background .15s; }
+.b-nk:hover { background:rgba(0,123,255,.2); color:#66b2ff; }
 .b-contact { background:rgba(139,92,246,.12); border:1px solid rgba(139,92,246,.35); color:#8b5cf6; border-radius:7px; padding:5px 10px; font-size:.7rem; font-weight:600; cursor:pointer; font-family:inherit; text-align:center; transition:background .15s; }
 .b-contact:hover { background:rgba(139,92,246,.22); }
 .b-sl { background:none; border:1px solid var(--apple-border); color:var(--apple-text-muted); border-radius:6px; padding:4px 10px; font-size:.67rem; cursor:pointer; font-family:inherit; width:100%; transition:all .15s; text-align:center; }
@@ -142,14 +148,14 @@
     <div style="display:flex;align-items:center;gap:15px;flex:1;">
       <div class="li-mark" style="background:linear-gradient(135deg,var(--brand-primary),var(--brand-accent)); box-shadow:0 0 15px rgba(0,229,255,0.2);"><i class='bx bx-brain'></i></div>
       <div>
-        <div style="font-size:.9rem;font-weight:700;color:var(--apple-text);">AI Sourcing Engine & Integrations</div>
-        <div style="font-size:.74rem;color:var(--apple-text-secondary);">Import via URL or upload a CV/JD. The AI will parse requirements and pull exact matches from LinkedIn & Naukri.</div>
+        <div style="font-size:.9rem;font-weight:700;color:var(--apple-text);">AI Sourcing Engine & Multi-Site Integrations</div>
+        <div style="font-size:.74rem;color:var(--apple-text-secondary);">Upload a Job Description (JD) or CV. The AI will extract requirements and source matches across GitHub, LinkedIn, Reddit, and Naukri.</div>
       </div>
     </div>
     <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;">
       <!-- CV / JD Upload -->
       <div style="display:flex;gap:5px;align-items:center;">
-        <label for="cv-upload" style="font-size:.74rem;color:var(--apple-text-muted);cursor:pointer;"><i class="bx bx-file"></i> Upload CV/JD:</label>
+        <label for="cv-upload" style="font-size:.74rem;color:var(--apple-text-muted);cursor:pointer;"><i class="bx bx-file"></i> Upload JD / CV:</label>
         <input type="file" id="cv-upload" accept=".pdf,.doc,.docx,.txt" class="fi" style="width:180px;padding:4px 8px;font-size:.7rem;border-radius:6px;background:rgba(255,255,255,0.05);" onchange="parseCV()">
       </div>
       <!-- LinkedIn Import -->
@@ -388,18 +394,49 @@
       return true;
     });
     
-    // DEMO MAGIC: If filter yields no local results, fetch mock LinkedIn results
+    // If filter yields no local results, fetch from our Hybrid Sourcing Engine!
     if(pool.length === 0 && (t || l || co || ex || av || selSkills.length > 0)) {
-        var generated = generateMocks(t, l, co, ex, av, selSkills);
-        for(var i=0; i<generated.length; i++) {
-            DATA.unshift(generated[i]);
-            pool.push(generated[i]);
-        }
-        toast("Scraped " + generated.length + " matching profiles from LinkedIn data", "ok");
+        toast("Sourcing live candidates from web engines...", "ok");
+        
+        var reqData = {
+            title: t || "Professional Candidate",
+            location: l || "Remote",
+            skills: selSkills.length > 0 ? selSkills : []
+        };
+        
+        fetch("{% url 'search-web-candidates' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCsrf()
+            },
+            body: JSON.stringify(reqData)
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+            if (data.success && data.candidates) {
+                var newIdBase = DATA.length + 900;
+                for(var i=0; i<data.candidates.length; i++) {
+                    var c = data.candidates[i];
+                    c.id = newIdBase + i;
+                    DATA.unshift(c);
+                    pool.push(c);
+                }
+                toast("Sourced " + data.candidates.length + " matching profiles from GitHub & Web!", "ok");
+                doSort(false);
+                buildLiUrl();
+            } else {
+                toast("Could not source external candidates.", "err");
+            }
+        })
+        .catch(function(err) {
+            console.error(err);
+            toast("Error sourcing external candidates.", "err");
+        });
+        return; // async handling
     }
 
     doSort(false);
-    buildLiUrl();
   }
 
   /* ===== SORT ===== */
@@ -442,7 +479,16 @@
       h+='<span class="apill '+ap+'">'+c.avail+'</span>';
       h+='<div class="cbtns">';
       h+='<button class="b-add" id="pb'+c.id+'" onclick="addPipe('+c.id+')" '+(inDB?'disabled':'')+'>'+(inDB?'&#10003; In Pipeline':'+ Add to Pipeline')+'</button>';
-      h+='<a href="'+c.li+'" target="_blank" class="b-li"><span style="font-weight:900;font-family:sans-serif;">in</span> View on LinkedIn</a>';
+      
+      var sourceName = c.source || "LinkedIn";
+      var sourceIcon = "in";
+      var sourceClass = "b-li";
+      if (sourceName === "GitHub") { sourceIcon = "<i class='bx bxl-github'></i>"; sourceClass = "b-gh"; }
+      else if (sourceName === "Reddit") { sourceIcon = "<i class='bx bxl-reddit'></i>"; sourceClass = "b-rd"; }
+      else if (sourceName === "Naukri") { sourceIcon = "N"; sourceClass = "b-nk"; }
+      else { sourceIcon = "<span style='font-weight:900;font-family:sans-serif;'>in</span>"; }
+      
+      h+='<a href="'+c.li+'" target="_blank" class="b-li '+sourceClass+'">' + sourceIcon + ' View on ' + sourceName + '</a>';
       h+='<button class="b-contact" onclick="openContact('+c.id+')"><i class="bx bx-send"></i> Contact</button>';
       h+='<button class="b-sl'+(inSL?" on":"")+'" onclick="toggleSL('+c.id+')">'+(inSL?"&#9733; Shortlisted":"&#9734; Shortlist")+'</button>';
       h+='</div></div></div>';
@@ -458,6 +504,7 @@
     if(btn){btn.disabled=true;btn.textContent="Adding...";}
     fetch("{% url 'add-sourced-candidate' %}",{
       method:"POST",
+      credentials: "same-origin",
       headers:{"Content-Type":"application/json","X-CSRFToken":getCsrf()},
       body:JSON.stringify({name:c.name,email:c.email,title:c.title,company:c.company,location:c.loc,experience:c.yrs+" years",skills:c.skills,linkedin:c.li})
     }).then(function(r){return r.json();}).then(function(d){
@@ -552,7 +599,8 @@
     
     fetch("{% url 'parse-and-scrape' %}", {
         method: "POST",
-        body: formData
+        body: formData,
+        credentials: "same-origin"
     })
     .then(function(r){ return r.json(); })
     .then(function(data) {
@@ -561,7 +609,7 @@
             return;
         }
         
-        toast("Parsed! Title: " + data.extracted_title + " | Scraping the web...", "ok");
+        toast("Parsed! Title: " + data.extracted_title + " | Sourcing from multi-site engines...", "ok");
         
         // Auto-fill filters from Python backend extraction
         el("f-title").value = data.extracted_title;
@@ -583,7 +631,7 @@
                 c.id = newIdBase + i;
                 DATA.unshift(c);
             }
-            toast("Successfully scraped " + data.candidates.length + " REAL profiles from DuckDuckGo/LinkedIn!", "ok");
+            toast("Successfully sourced " + data.candidates.length + " REAL profiles from GitHub & Enterprise Engines!", "ok");
         } else {
             toast("No live profiles scraped, falling back to local database.", "err");
         }
@@ -603,7 +651,8 @@
     var l=el("f-loc").value.trim();
     var url="https://www.linkedin.com/search/results/people/?keywords="+encodeURIComponent(kw)+"&origin=FACETED_SEARCH";
     if(l) url+="&geoUrn="+encodeURIComponent(l);
-    el("li-main-btn").href=url; el("li-panel-btn").href=url;
+    var l_main = el("li-main-btn"); if (l_main) l_main.href = url;
+    var l_panel = el("li-panel-btn"); if (l_panel) l_panel.href = url;
   }
 
   /* ===== TOAST ===== */

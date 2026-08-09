@@ -4,6 +4,28 @@ An enterprise-grade, multi-tenant Applicant Tracking System (ATS), B2B Sales CRM
 
 ---
 
+## 🌟 Featured MVP Dashboards
+
+### 1. Global Executive Hub
+<p align="center">
+  <img src="docs/assets/executive_dashboard.jpg" width="100%" alt="Global Executive Hub">
+</p>
+*Real-time executive telemetry, total revenue metrics, sales cycle velocity, and active server infrastructure monitoring—all controlled via the universal Cmd+K palette.*
+
+### 2. AI Candidate Sourcing Engine
+<p align="center">
+  <img src="docs/assets/sourcing_engine.jpg" width="100%" alt="AI Candidate Sourcing Engine">
+</p>
+*Multi-platform sourcing matrix utilizing GitHub API and enterprise integrations. Drag-and-drop Job Description processing with intelligent semantic skill extraction.*
+
+### 3. Enterprise Developer API & Webhooks
+<p align="center">
+  <img src="docs/assets/api_dashboard.jpg" width="100%" alt="API Console">
+</p>
+*Screen-only interactive developer interface featuring real-time webhook payload simulators, delivery logs, and full API key lifecycle management for Enterprise tenants.*
+
+---
+
 <p align="center">
   <img src="app_track/tracking_app/static/tracking_app/assets/full_application_showcase_1780489286010.png" width="100%" alt="Transform.io Full Application Showcase">
 </p>

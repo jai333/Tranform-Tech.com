@@ -442,6 +442,44 @@
 <section class="showcase-section">
     <div class="container">
 
+        <!-- Google Maps AI Lead Scraper Showcase -->
+        <div class="showcase-row" data-reveal style="margin-bottom: 6rem;">
+            <div class="showcase-col-text">
+                <div class="label-tag label-cyan">AI PROSPECTING SUITE</div>
+                <h2 class="showcase-h2">Google Maps AI<br>Lead Scraper.</h2>
+                <p class="showcase-p">Turn the entire world into your B2B pipeline. Extract leads, reviews, and contact info instantly, auto-grouped into intelligent folders and scored by AI.</p>
+                <ul class="showcase-checklist">
+                    <li>
+                        <div class="sc-check"><i class='bx bx-bot'></i></div>
+                        <div><strong>Instant AI Scoring</strong><span>Predicts lead value out of 100 before you even reach out</span></div>
+                    </li>
+                    <li>
+                        <div class="sc-check"><i class='bx bx-folder'></i></div>
+                        <div><strong>Automated Folders</strong><span>Leads are automatically categorized based on your search queries</span></div>
+                    </li>
+                    <li>
+                        <div class="sc-check"><i class='bx bx-trending-up'></i></div>
+                        <div><strong>Direct CRM Pipeline</strong><span>1-click import moves prospects straight to your active sales funnel</span></div>
+                    </li>
+                </ul>
+                {% if user.is_authenticated %}
+                <a href="{% url 'gmaps-lead-scraper' %}" class="btn-showcase" style="background:var(--primary); color:black; border:none; border-radius: 8px; padding: 12px 24px; font-weight:700;">Launch Scraper →</a>
+                {% else %}
+                <a href="{% url 'register' %}" class="btn-showcase" style="background:var(--primary); color:black; border:none; border-radius: 8px; padding: 12px 24px; font-weight:700;">Get Started Free →</a>
+                {% endif %}
+            </div>
+            <div class="showcase-col-visual">
+                <div class="showcase-frame" style="border: 1px solid rgba(0, 229, 255, 0.3); box-shadow: 0 0 40px rgba(0, 229, 255, 0.1);">
+                    <img src="{% static 'tracking_app/assets/gmaps_scraper_exotic_ui.jpg' %}" alt="Google Maps AI Lead Scraper Dashboard" class="showcase-img">
+                    <div class="sf-glow" style="background: radial-gradient(circle, rgba(0,229,255,0.4) 0%, transparent 60%);"></div>
+                    <div class="sf-badge sf-badge-top" style="background: rgba(0,229,255,0.15); border-color: rgba(0,229,255,0.3);">
+                        <i class='bx bxs-map-pin' style="color:var(--primary);"></i>
+                        <span style="color:white; font-weight:600;">Worldwide Reach</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- ATS Showcase -->
         <div class="showcase-row" data-reveal>
             <div class="showcase-col-text">
@@ -670,7 +708,7 @@
                         <div><strong>Zero-Friction Integration</strong><span>Play nicely with any external service</span></div>
                     </li>
                 </ul>
-                <a href="{% url 'developer-settings' %}" class="btn-showcase btn-showcase-cyan">Explore Developer Settings →</a>
+                <a href="{% url 'developer_settings' %}" class="btn-showcase btn-showcase-cyan">Explore Developer Settings →</a>
             </div>
             <div class="showcase-col-visual">
                 <div class="showcase-frame showcase-frame-cyan" style="border: 1px solid rgba(0, 229, 255, 0.2); padding: 0; overflow: hidden;">
