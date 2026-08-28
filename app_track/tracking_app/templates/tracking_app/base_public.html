@@ -322,6 +322,43 @@
     }
 
 </style>
+
+<style>
+/* EXTREME MOBILE RESET */
+@media screen and (max-width: 1024px) {
+    html, body {
+        width: 100% !important;
+        max-width: 100vw !important;
+        overflow-x: hidden !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    .container, .nav-content, .hero-cine-inner, .main-content {
+        width: 100% !important;
+        max-width: 100vw !important;
+        overflow-x: hidden !important;
+        box-sizing: border-box !important;
+    }
+    .nav-links {
+        display: none !important; /* Hide completely on mobile for now to isolate issue */
+    }
+    .hero-cine-inner {
+        display: block !important;
+    }
+    .hero-cine-text {
+        width: 100% !important;
+        max-width: 100vw !important;
+    }
+    .hero-cine-visual {
+        display: none !important;
+    }
+    .cine-h1, .section-h2 {
+        font-size: 2rem !important;
+        word-wrap: break-word !important;
+    }
+}
+</style>
+
 </head>
 
 <body>
