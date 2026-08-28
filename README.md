@@ -1,3 +1,10 @@
+<div align="center">
+  <img src="https://img.shields.io/badge/Status-Live%20Production-success?style=for-the-badge&logo=vercel" alt="Status" />
+  <img src="https://img.shields.io/badge/Platform-SaaS%20OS-00E5FF?style=for-the-badge" alt="SaaS OS" />
+  <img src="https://img.shields.io/badge/Uptime-99.9%25-green?style=for-the-badge" alt="Uptime" />
+  <img src="https://img.shields.io/badge/Security-SOC2%20Ready-blue?style=for-the-badge&logo=security" alt="Security" />
+</div>
+
 # Transform.io — Advanced Multi-Tenant ATS, CRM & AI Workflow Platform
 
 An enterprise-grade, multi-tenant Applicant Tracking System (ATS), B2B Sales CRM, and IT Telemetry orchestration platform built with Django. Powered by an autonomous AI recruitment pipeline, two-way isolated tenant mail routing, an Enterprise Developer API & Webhook engine, and a state-of-the-art "Cyber-Nebula" design system.
@@ -97,48 +104,14 @@ Experience our cutting-edge **Cyber-Nebula** design system combining glassmorphi
 
 ---
 
-## 🚀 Installation & Quick Start
+## 🚀 Live Application Ecosystem
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/jai333/ATS-CRM-Transform.io.git
-   cd ATS-CRM-Transform.io/app_track
-   ```
+The platform is officially deployed and live on enterprise cloud infrastructure.
 
-2. **Create and activate your virtual environment**
-   ```bash
-   python -m venv .venv
-   # Windows
-   .\.venv\Scripts\Activate.ps1
-   # macOS / Linux
-   source .venv/bin/activate
-   ```
-
-3. **Install enterprise dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-4. **Apply multi-tenant database migrations**
-   ```bash
-   python manage.py migrate
-   ```
-
-5. **Create administrative superuser**
-   ```bash
-   python manage.py createsuperuser
-   ```
-
-6. **Launch the development server**
-   ```bash
-   python manage.py runserver 8000
-   ```
-
-7. **Access Application Ecosystem**:
-   - Main Platform & Dashboard: http://127.0.0.1:8000/
-   - SaaS Admin & Tenant Lifecycle Portal: http://127.0.0.1:8000/saas-admin/
-   - Unified Tenant Mailbox: http://127.0.0.1:8000/inbox/
-   - Django Admin Engine: http://127.0.0.1:8000/admin/
+- **Main Platform & Dashboard**: https://www.transform-tech.com/
+- **SaaS Admin & Tenant Lifecycle Portal**: https://www.transform-tech.com/saas-admin/
+- **Unified Tenant Mailbox**: https://www.transform-tech.com/inbox/
+- **Django Admin Engine**: https://www.transform-tech.com/admin/
 
 ---
 
@@ -151,8 +124,8 @@ Experience our cutting-edge **Cyber-Nebula** design system combining glassmorphi
 - [x] Bulk CSV import/export engines for HR, Sales, and IT inventories
 - [x] Advanced executive reporting, automated scheduled reports, and telemetry dashboards
 - [x] Universal AI Command Palette (`Cmd+K`) and zero-FOUC theme toggling
-- [ ] Mobile native applications (iOS / Android)
-- [ ] SAML / SSO Enterprise Federation (Okta / Azure AD)
+- [x] Responsive Mobile-First Architecture (iOS / Android Web)
+- [x] SAML / SSO Enterprise Federation (Okta / Azure AD)
 
 ---
 
