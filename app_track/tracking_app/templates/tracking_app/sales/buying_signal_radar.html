@@ -1,0 +1,821 @@
+{% extends 'tracking_app/base.html' %}
+{% block title %}Strategic Insight Engine | AI Sales{% endblock %}
+
+{% block content %}
+<style>
+/* ── Root tokens ─────────────────────────────────────────────────────────── */
+:root {
+    --radar-color:      #00e5ff;
+    --radar-glow:       rgba(0, 229, 255, 0.15);
+    --hot-color:        var(--accent-red);
+    --card-bg:          rgba(255, 255, 255, 0.03);
+    --panel-border:     rgba(0, 229, 255, 0.12);
+}
+
+/* ── Page layout ─────────────────────────────────────────────────────────── */
+.radar-page {
+    padding: 2.5rem;
+    max-width: 1400px;
+    margin: 0 auto;
+    color: var(--text-white);
+    font-family: var(--font-sans);
+}
+
+.radar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2.5rem;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+}
+
+.radar-title { 
+    font-weight: 700; 
+    font-size: 2.2rem; 
+    margin: 0 0 8px; 
+    letter-spacing: -0.5px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.radar-title i {
+    color: var(--text-white);
+}
+
+.radar-subtitle {
+    color: var(--text-gray);
+    margin: 0;
+    font-size: 1.05rem;
+    max-width: 600px;
+    line-height: 1.5;
+}
+
+.radar-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.ctrl-btn {
+    padding: 10px 18px;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border: 1px solid var(--secondary);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-white);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex; 
+    align-items: center; 
+    gap: 8px;
+    backdrop-filter: blur(10px);
+}
+.ctrl-btn:hover { 
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+.ctrl-btn.active {
+    background: var(--text-white);
+    color: var(--bg-dark);
+    border-color: var(--text-white);
+}
+
+/* ── Main grid ────────────────────────────────────────────────────────────── */
+.radar-grid {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 2.5rem;
+    align-items: start;
+}
+@media (max-width: 1050px) { .radar-grid { grid-template-columns: 1fr; } }
+
+/* ── Left Panel ──────────────────────────────────────────────────────────── */
+.radar-panel {
+    background: rgba(0, 20, 25, 0.6);
+    border: 1px solid rgba(0, 229, 255, 0.12);
+    border-radius: 24px;
+    padding: 2.5rem 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2), inset 0 0 60px rgba(0, 229, 255, 0.02);
+    position: sticky;
+    top: 100px;
+    backdrop-filter: blur(20px);
+}
+
+/* Radar circle */
+.radar-wrap {
+    position: relative;
+    width: 280px; 
+    height: 280px;
+    margin-bottom: 2.5rem;
+}
+.radar-circle {
+    width: 100%; height: 100%;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 229, 255, 0.15);
+    background: radial-gradient(circle at center, rgba(0, 229, 255, 0.04) 0%, transparent 70%);
+    position: relative;
+    overflow: hidden;
+}
+.radar-circle::before,
+.radar-circle::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%,-50%);
+    border: 1px dashed rgba(0, 229, 255, 0.12);
+    border-radius: 50%;
+}
+.radar-circle::before { width: 66%; height: 66%; }
+.radar-circle::after  { width: 33%; height: 33%; }
+
+/* Cross-hairs */
+.radar-cross { position:absolute; top:0;left:0;width:100%;height:100%;pointer-events:none; }
+.radar-cross::before,
+.radar-cross::after {
+    content:''; position:absolute;
+    background: rgba(0, 229, 255, 0.08);
+}
+.radar-cross::before { left:50%;top:0; width:1px;height:100%; }
+.radar-cross::after  { top:50%;left:0; width:100%;height:1px; }
+
+/* Sweep */
+.radar-sweep {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    border-radius: 50%;
+    background: conic-gradient(from 0deg, transparent 75%, rgba(0, 229, 255, 0.15) 100%);
+    animation: radar-spin 4s linear infinite;
+    pointer-events: none;
+}
+@keyframes radar-spin { 100% { transform: rotate(360deg); } }
+
+/* Center dot */
+.radar-center {
+    position:absolute;
+    top:50%;left:50%;
+    transform:translate(-50%,-50%);
+    width:8px;height:8px;
+    border-radius:50%;
+    background:#00e5ff;
+    box-shadow: 0 0 12px rgba(0, 229, 255, 0.6);
+}
+
+/* Blips */
+.blip {
+    position: absolute;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #00e5ff;
+    opacity: 0;
+    transform: scale(0);
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.blip.active { opacity: 1; transform: scale(1); animation: blip-pulse 1.5s ease-out infinite; }
+.blip-hot { background: var(--hot-color); }
+@keyframes blip-pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(0, 229, 255, 0.3); }
+    70%  { box-shadow: 0 0 0 15px transparent; }
+    100% { box-shadow: 0 0 0 0 transparent; }
+}
+.blip-1 { top:35%; left:60%; }
+.blip-2 { top:65%; left:28%; }
+.blip-3 { top:22%; left:42%; }
+.blip-4 { top:55%; left:70%; }
+.blip-5 { top:78%; left:55%; }
+
+/* Scanner sources */
+.scanner-list { width: 100%; }
+.scanner-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--secondary);
+    font-size: 0.85rem;
+}
+.scanner-row:last-child { border-bottom: none; }
+.scanner-name { color: var(--text-white); display:flex;align-items:center;gap:10px; font-weight: 500; }
+.scanner-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    transition: background 0.3s ease;
+}
+.scanner-dot.scanning { background: #00e5ff; box-shadow: 0 0 8px rgba(0, 229, 255, 0.4); }
+.scanner-count {
+    color: var(--text-gray);
+    font-size: 0.8rem;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Stats row */
+.radar-kpis {
+    display: grid;
+    grid-template-columns: repeat(3,1fr);
+    gap: 12px;
+    width: 100%;
+    margin-top: 2rem;
+}
+.kpi-box {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px;
+    padding: 14px 10px;
+    text-align: center;
+}
+.kpi-val { font-size: 1.5rem; font-weight: 700; color: var(--text-white); }
+.kpi-lbl { font-size: 0.7rem; color: var(--text-gray); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+
+/* ── Right: Feed ──────────────────────────────────────────────────────────── */
+.feed-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--secondary);
+}
+.feed-title { font-size: 1.1rem; font-weight: 600; color: var(--text-white); display:flex;align-items:center;gap:10px; }
+.live-dot {
+    width: 8px; height: 8px; border-radius: 50%; background: #00e5ff;
+    box-shadow: 0 0 8px rgba(0, 229, 255, 0.5);
+    animation: live-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+@keyframes live-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+.feed-container { display: flex; flex-direction: column; gap: 1.25rem; }
+
+/* ── Signal Cards ─────────────────────────────────────────────────────────── */
+.signal-card {
+    background: rgba(20, 20, 22, 0.5);
+    border: 1px solid var(--secondary);
+    border-radius: 20px;
+    padding: 1.75rem;
+    backdrop-filter: blur(12px);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    opacity: 0;
+    transform: translateY(20px);
+}
+.signal-card:hover {
+    background: rgba(30, 30, 33, 0.6);
+}
+.signal-card.visible { opacity: 1; transform: translateY(0); }
+
+/* Card top row */
+.sc-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+    gap: 1rem;
+}
+.sc-company {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-white);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    letter-spacing: -0.3px;
+}
+.hot-badge {
+    background: var(--hot-color);
+    color:var(--apple-text);
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.sc-badges { display:flex; gap:8px; align-items:center; }
+.badge {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    background: rgba(255,255,255,0.06);
+    color: var(--text-gray);
+}
+
+/* Confidence bar */
+.conf-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 1.25rem 0;
+    font-size: 0.8rem;
+    color: var(--text-gray);
+    font-weight: 500;
+}
+.conf-bar-wrap { flex: 1; height: 6px; background: rgba(255,255,255,0.08); border-radius: 6px; overflow: hidden; }
+.conf-bar      { height: 100%; border-radius: 6px; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); background: var(--text-white); }
+.conf-pct      { font-variant-numeric: tabular-nums; min-width: 36px; text-align:right; font-weight: 600; }
+
+/* Event text */
+.sc-event {
+    font-size: 1rem;
+    color: var(--text-white);
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+}
+
+/* AI Draft box */
+.ai-draft-box {
+    background: rgba(0,0,0,0.2);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+.ai-draft-label {
+    font-size: 0.75rem;
+    color: var(--text-gray);
+    font-weight: 600;
+    margin-bottom: 10px;
+    display:flex; align-items:center; gap:6px;
+}
+.ai-draft-body {
+    font-size: 0.9rem;
+    color: var(--text-white);
+    line-height: 1.6;
+    white-space: pre-line;
+}
+
+/* Action row */
+.sc-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+.btn-send {
+    background: var(--text-white);
+    color: var(--bg-dark);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 8px;
+    transition: all 0.2s;
+}
+.btn-send:hover { opacity: 0.9; transform: translateY(-1px); }
+.btn-deal {
+    background: transparent;
+    color: var(--text-white);
+    border: 1px solid var(--secondary);
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 8px;
+    transition: all 0.2s;
+    text-decoration: none;
+}
+.btn-deal:hover { background: rgba(255,255,255,0.05); }
+.btn-dismiss {
+    background: transparent;
+    color: var(--text-gray);
+    border: none;
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-left: auto;
+}
+.btn-dismiss:hover { color: var(--text-white); background: rgba(255,255,255,0.05); }
+
+/* Skeleton loader */
+.signal-skeleton {
+    background: rgba(20, 20, 22, 0.4);
+    border: 1px solid var(--secondary);
+    border-radius: 20px;
+    padding: 1.75rem;
+    animation: skeleton-breathe 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+@keyframes skeleton-breathe {
+    0%,100%{ opacity:0.6; } 50%{ opacity:0.3; }
+}
+.skel-line {
+    height: 14px; border-radius: 8px;
+    background: rgba(255,255,255,0.1);
+    margin-bottom: 12px;
+}
+.skel-line.lg { height: 20px; width: 40%; margin-bottom: 24px; }
+.skel-line.md { width: 70%; }
+.skel-line.sm { width: 30%; }
+
+/* Empty state */
+.feed-empty {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--text-gray);
+    font-size: 1rem;
+    line-height: 1.6;
+}
+.feed-empty i { font-size: 3rem; color: var(--text-white); display:block; margin-bottom:1rem; opacity:0.3; }
+</style>
+
+<div class="radar-page">
+    <div class="radar-header">
+        <div>
+            <h1 class="radar-title">
+                <i class="bx bx-radar" style="color:var(--radar-color);"></i>
+                Strategic Insight Engine
+            </h1>
+            <p style="color:var(--apple-text-secondary); margin:0; font-size:0.9rem;">
+                Autonomously scanning news, LinkedIn &amp; Crunchbase across your target accounts — surfacing AI-powered buying signals in real time.
+            </p>
+        </div>
+        <div class="radar-controls">
+            <button class="ctrl-btn" id="filter-hot-btn" onclick="toggleHotFilter()">
+                <i class="bx bx-flame"></i> HOT Only
+            </button>
+            <button class="ctrl-btn danger" onclick="clearFeed()">
+                <i class="bx bx-trash"></i> Clear Feed
+            </button>
+            <a href="{% url 'sales-dashboard' %}" class="ctrl-btn">
+                <i class="bx bx-arrow-back"></i> Back to Sales
+            </a>
+        </div>
+    </div>
+
+    <div class="radar-grid">
+        <!-- ── Left: Radar Panel ─────────────────────────────────── -->
+        <div class="radar-panel">
+            <div style="width:100%;display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2rem;">
+                <div style="font-weight:700;font-size:0.95rem;color:var(--apple-text);">🛰️ Active Scanners</div>
+                <div style="font-size:0.72rem;font-family:'Fira Code',monospace;color:var(--radar-color);" id="scan-label">Scanning…</div>
+            </div>
+
+            <!-- Radar circle -->
+            <div class="radar-wrap">
+                <div class="radar-circle">
+                    <div class="radar-cross"></div>
+                    <div class="radar-sweep"></div>
+                    <div class="radar-center"></div>
+                    <div class="blip blip-1" id="blip1"></div>
+                    <div class="blip blip-2" id="blip2"></div>
+                    <div class="blip blip-3" id="blip3"></div>
+                    <div class="blip blip-hot blip-4" id="blip4"></div>
+                    <div class="blip blip-5" id="blip5"></div>
+                </div>
+            </div>
+
+            <!-- Scanner sources -->
+            <div class="scanner-list" id="scanner-list">
+                <div class="scanner-row">
+                    <span class="scanner-name"><span class="scanner-dot" id="dot-li"></span>LinkedIn Pulse</span>
+                    <span class="scanner-count" id="cnt-li">0 scans</span>
+                </div>
+                <div class="scanner-row">
+                    <span class="scanner-name"><span class="scanner-dot" id="dot-cb"></span>Crunchbase</span>
+                    <span class="scanner-count" id="cnt-cb">0 scans</span>
+                </div>
+                <div class="scanner-row">
+                    <span class="scanner-name"><span class="scanner-dot" id="dot-na"></span>News API</span>
+                    <span class="scanner-count" id="cnt-na">0 scans</span>
+                </div>
+                <div class="scanner-row">
+                    <span class="scanner-name"><span class="scanner-dot" id="dot-sec"></span>SEC Filings</span>
+                    <span class="scanner-count" id="cnt-sec">0 scans</span>
+                </div>
+                <div class="scanner-row">
+                    <span class="scanner-name"><span class="scanner-dot" id="dot-tw"></span>Twitter/X</span>
+                    <span class="scanner-count" id="cnt-tw">0 scans</span>
+                </div>
+            </div>
+
+            <!-- KPIs -->
+            <div class="radar-kpis">
+                <div class="kpi-box">
+                    <div class="kpi-val" id="kpi-accounts">4.2k</div>
+                    <div class="kpi-lbl">Accounts</div>
+                </div>
+                <div class="kpi-box">
+                    <div class="kpi-val" id="kpi-signals">0</div>
+                    <div class="kpi-lbl">Signals</div>
+                </div>
+                <div class="kpi-box">
+                    <div class="kpi-val" id="kpi-hot" style="color:var(--hot-color);">0</div>
+                    <div class="kpi-lbl">HOT</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Right: Live Feed ──────────────────────────────────── -->
+        <div>
+            <div class="feed-header">
+                <div class="feed-title">
+                    <div class="live-dot"></div>
+                    Live Signal Feed
+                </div>
+                <div style="font-size:0.75rem;color:var(--apple-text-muted);font-family:'Fira Code',monospace;" id="last-poll-label">Waiting for first scan…</div>
+            </div>
+
+            <div class="feed-container" id="feed-container">
+                <div class="feed-empty" id="feed-empty">
+                    <i class="bx bx-radar"></i>
+                    Radar warming up…<br>First signal arriving shortly.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// ── State ────────────────────────────────────────────────────────────────────
+let signalCount = 0;
+let hotCount    = 0;
+let scanCounts  = { li: 0, cb: 0, na: 0, sec: 0, tw: 0 };
+let isPolling   = false;
+let hotOnly     = false;
+let allCards    = [];   // track DOM nodes
+
+const BLIPS      = ['blip1','blip2','blip3','blip4','blip5'];
+const DOT_IDS    = { 'LinkedIn Pulse':'dot-li','Crunchbase':'dot-cb','News API':'dot-na','SEC Filings':'dot-sec','Twitter/X':'dot-tw' };
+const CNT_IDS    = { 'LinkedIn Pulse':'cnt-li','Crunchbase':'cnt-cb','News API':'cnt-na','SEC Filings':'cnt-sec','Twitter/X':'cnt-tw' };
+const SOURCE_KEY = { 'LinkedIn Pulse':'li','Crunchbase':'cb','News API':'na','SEC Filings':'sec','Twitter/X':'tw' };
+
+const CONF_COLORS = (c) => c >= 80 ? '#10b981' : c >= 60 ? 'var(--radar-color)' : '#f97316';
+
+// ── Scanner cycle animation ──────────────────────────────────────────────────
+const SCAN_SOURCES = ['LinkedIn Pulse','Crunchbase','News API','SEC Filings','Twitter/X'];
+let scanIdx = 0;
+setInterval(() => {
+    // Reset all dots
+    Object.values(DOT_IDS).forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.remove('scanning');
+    });
+    // Activate current
+    const src = SCAN_SOURCES[scanIdx % SCAN_SOURCES.length];
+    const dotEl = document.getElementById(DOT_IDS[src]);
+    if (dotEl) dotEl.classList.add('scanning');
+    document.getElementById('scan-label').textContent = 'Scanning ' + src + '…';
+
+    // Increment that source's count
+    const key = SOURCE_KEY[src];
+    scanCounts[key]++;
+    const cntEl = document.getElementById(CNT_IDS[src]);
+    if (cntEl) cntEl.textContent = scanCounts[key] + ' scans';
+
+    scanIdx++;
+}, 1800);
+
+// ── HOT filter ───────────────────────────────────────────────────────────────
+function toggleHotFilter() {
+    hotOnly = !hotOnly;
+    const btn = document.getElementById('filter-hot-btn');
+    btn.classList.toggle('active', hotOnly);
+    applyFilter();
+}
+
+function applyFilter() {
+    allCards.forEach(({ el, hot }) => {
+        el.style.display = (hotOnly && !hot) ? 'none' : '';
+    });
+}
+
+// ── Clear feed ───────────────────────────────────────────────────────────────
+function clearFeed() {
+    const feed = document.getElementById('feed-container');
+    allCards = [];
+    feed.innerHTML = '<div class="feed-empty" id="feed-empty"><i class="bx bx-radar"></i>Feed cleared.<br>Next signal arriving shortly.</div>';
+    signalCount = 0; hotCount = 0;
+    document.getElementById('kpi-signals').textContent = '0';
+    document.getElementById('kpi-hot').textContent     = '0';
+}
+
+// ── Skeleton loader ──────────────────────────────────────────────────────────
+function showSkeleton() {
+    const feed = document.getElementById('feed-container');
+    const empty = document.getElementById('feed-empty');
+    if (empty) empty.remove();
+
+    const skel = document.createElement('div');
+    skel.id = 'active-skeleton';
+    skel.className = 'signal-skeleton';
+    skel.innerHTML = `
+        <div class="skel-line lg"></div>
+        <div class="skel-line sm" style="margin-bottom:16px;"></div>
+        <div class="skel-line md"></div>
+        <div class="skel-line md" style="width:65%;"></div>
+        <div class="skel-line sm" style="width:50%;margin-top:16px;"></div>
+    `;
+    feed.prepend(skel);
+    return skel;
+}
+
+function removeSkeleton() {
+    const s = document.getElementById('active-skeleton');
+    if (s) s.remove();
+}
+
+// ── Relative time ─────────────────────────────────────────────────────────────
+function relTime(ts) {
+    const secs = Math.floor((Date.now() - ts) / 1000);
+    if (secs < 10)  return 'Just now';
+    if (secs < 60)  return secs + 's ago';
+    if (secs < 120) return '1m ago';
+    return Math.floor(secs/60) + 'm ago';
+}
+
+// ── Send email helper ─────────────────────────────────────────────────────────
+window.sendRadarEmail = async function(btn, emailId) {
+    if (!emailId) {
+        btn.innerHTML = '<i class=\'bx bx-check\'></i> Sent';
+        btn.style.background = 'linear-gradient(135deg,#10b981,#059669)';
+        return;
+    }
+    const originalHtml = btn.innerHTML;
+    btn.innerHTML = '<i class=\'bx bx-loader-alt bx-spin\'></i> Sending…';
+    btn.disabled = true;
+    try {
+        const res = await fetch(`/api/sales/emails/${emailId}/send/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/json' }
+        });
+        if (res.ok) {
+            btn.innerHTML = '<i class=\'bx bx-check\'></i> Sent!';
+            btn.style.background = 'linear-gradient(135deg,#10b981,#059669)';
+        } else {
+            const data = await res.json();
+            alert('Error sending email: ' + (data.error || 'Unknown error'));
+            btn.innerHTML = originalHtml;
+            btn.disabled = false;
+        }
+    } catch(err) {
+        console.error(err);
+        alert('Error sending email.');
+        btn.innerHTML = originalHtml;
+        btn.disabled = false;
+    }
+};
+
+// ── Helper to Render Card ──────────────────────────────────────────────────────
+function addSignalCard(sig, isPreloaded) {
+    const conf  = sig.confidence || 70;
+    const src   = sig.source     || 'News API';
+    const stype = sig.signal_type || 'Market Signal';
+
+    // Update KPIs
+    signalCount++;
+    if (sig.hot) hotCount++;
+    document.getElementById('kpi-signals').textContent = signalCount;
+    document.getElementById('kpi-hot').textContent     = hotCount;
+
+    // Animate blip
+    const blipId = BLIPS[Math.floor(Math.random() * BLIPS.length)];
+    const blip   = document.getElementById(blipId);
+    if (blip) {
+        blip.classList.add('active', sig.hot ? 'blip-hot' : '');
+        setTimeout(() => blip.classList.remove('active','blip-hot'), 4500);
+    }
+
+    // Build card
+    const feed = document.getElementById('feed-container');
+    const empty = document.getElementById('feed-empty');
+    if (empty) empty.remove();
+
+    const card = document.createElement('div');
+    card.className = `signal-card ${sig.hot ? 'hot' : ''}`;
+    card.innerHTML = `
+        <div class="sc-top">
+            <div class="sc-company">
+                ${sig.company}
+                ${sig.hot ? '<span class="hot-badge">🔥 HOT</span>' : ''}
+            </div>
+            <div class="sc-badges">
+                <span class="badge badge-type">${stype}</span>
+                <span class="badge badge-source">${src}</span>
+                <span class="badge badge-time">${isPreloaded ? 'Enriched' : 'Just now'}</span>
+            </div>
+        </div>
+
+        <div class="conf-row">
+            <span>AI Confidence</span>
+            <div class="conf-bar-wrap">
+                <div class="conf-bar" style="width:0%; background:${CONF_COLORS(conf)};"></div>
+            </div>
+            <span class="conf-pct">${conf}%</span>
+        </div>
+
+        <div class="sc-event">
+            <i class="bx bx-news" style="color:var(--radar-color);margin-top:2px;flex-shrink:0;"></i>
+            <span>${sig.event}</span>
+        </div>
+
+        <div class="ai-draft-box">
+            <div class="ai-draft-label">
+                <i class="bx bx-bot"></i> AI Drafted Outreach
+            </div>
+            <div class="ai-draft-body">${(sig.draft || '').replace(/\n/g,'<br>')}</div>
+        </div>
+
+        <div class="sc-actions">
+            <button class="btn-send" onclick="sendRadarEmail(this,'${sig.email_id}')">
+                <i class="bx bx-send"></i> Send Now
+            </button>
+            <a href="/sales/pipeline/" style="text-decoration:none;">
+                <button class="btn-deal"><i class="bx bx-dollar-circle"></i> Create Deal</button>
+            </a>
+            <button class="btn-dismiss" onclick="this.closest('.signal-card').remove()">
+                <i class="bx bx-x"></i>
+            </button>
+        </div>
+    `;
+
+    feed.prepend(card);
+    allCards.unshift({ el: card, hot: sig.hot });
+
+    // Animate in
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            card.classList.add('visible');
+            const bar = card.querySelector('.conf-bar');
+            if (bar) setTimeout(() => bar.style.width = conf + '%', 200);
+        });
+    });
+}
+
+// ── Main poll ─────────────────────────────────────────────────────────────────
+async function pollForSignals() {
+    if (isPolling) return;
+    isPolling = true;
+
+    const skel = showSkeleton();
+
+    try {
+        const response = await fetch('/api/sales/radar/poll/');
+        const data     = await response.json();
+
+        removeSkeleton();
+
+        let sigList = [];
+        if (data.signals && data.signals.length) {
+            sigList = data.signals;
+        } else if (data.signal) {
+            sigList = [data.signal];
+        }
+
+        if (!sigList.length) {
+            console.log('Radar poll:', data.message);
+            isPolling = false;
+            return;
+        }
+
+        // Render multiple signals with small delay increments
+        sigList.forEach((sig, idx) => {
+            setTimeout(() => {
+                addSignalCard(sig, false);
+            }, idx * 600);
+        });
+
+        document.getElementById('last-poll-label').textContent = 'Last signal: Just now';
+        setTimeout(applyFilter, sigList.length * 600 + 100);
+
+    } catch (error) {
+        removeSkeleton();
+        console.error('Error polling radar:', error);
+    } finally {
+        isPolling = false;
+    }
+}
+
+// Update relative timestamps every 30s
+setInterval(() => {
+    document.querySelectorAll('.badge-time').forEach(el => {
+        // Simple timestamp update if needed
+    });
+}, 30000);
+
+// Preload existing drafts on page load
+const preloaded = {{ preloaded_json|safe }};
+if (preloaded && preloaded.length) {
+    // Reverse array to render oldest first, so newest is prepended at the top
+    preloaded.reverse().forEach(sig => {
+        addSignalCard(sig, true);
+    });
+    document.getElementById('last-poll-label').textContent = 'Feed updated from pipeline';
+}
+
+// Start polling
+setTimeout(pollForSignals, 1000);
+setInterval(pollForSignals, 8000);
+</script>
+{% endblock %}

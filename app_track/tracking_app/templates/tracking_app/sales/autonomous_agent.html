@@ -1,0 +1,471 @@
+{% extends 'tracking_app/base.html' %}
+{% load static %}
+
+{% block title %}Autonomous Agent Command Center | Transform.io{% endblock %}
+
+{% block extra_styles %}
+<style>
+    /* ─── Layout ─────────────────────────────────────────── */
+    .page-wrap { max-width: 1300px; margin: 0 auto; padding: 32px 24px; display: flex; flex-direction: column; gap: 24px; min-height: calc(100vh - 75px); }
+
+    /* ─── Top Tab Bar ────────────────────────────────────── */
+    .dash-tabs {
+        display: flex; flex-wrap: wrap; gap: 8px;
+        background: var(--apple-card-bg);
+        border: 1px solid var(--apple-border);
+        border-radius: 12px; padding: 6px;
+        overflow-x: auto; scrollbar-width: none;
+    }
+    .dash-tabs::-webkit-scrollbar { display: none; }
+    .dash-tab {
+        display: inline-flex; align-items: center; gap: 7px;
+        padding: 9px 16px; border-radius: 8px;
+        font-size: 0.82rem; font-weight: 600; font-family: var(--font-mono, 'Fira Code', monospace);
+        color: var(--apple-text-secondary); text-decoration: none;
+        border: 1px solid transparent; transition: all 0.18s ease; cursor: pointer;
+    }
+    .dash-tab:hover {
+        color: var(--apple-accent); background: rgba(0, 229, 255, 0.06);
+        border-color: rgba(0, 229, 255, 0.2);
+    }
+    .dash-tab.active {
+        color: var(--apple-accent); background: rgba(0, 229, 255, 0.1);
+        border-color: rgba(0, 229, 255, 0.3); box-shadow: 0 0 12px rgba(0,229,255,0.1);
+    }
+    .dash-tab i { font-size: 1.1rem; }
+
+    /* ─── Header ─────────────────────────────────────────── */
+    .hero-header {
+        margin-bottom: 8px;
+        display: flex; justify-content: space-between; align-items: flex-end;
+    }
+    .hero-header h1 {
+        font-size: 2.2rem; font-weight: 800; letter-spacing: -1px;
+        color: var(--apple-text); margin-bottom: 8px;
+        display: flex; align-items: center; gap: 12px;
+    }
+    .hero-header h1 i { color: var(--apple-accent); font-size: 1.8rem; text-shadow: 0 0 20px rgba(0,229,255,0.4); }
+    .hero-header p {
+        color: var(--apple-text-secondary); font-size: 0.95rem; font-family: var(--font-mono, 'Fira Code', monospace); max-width: 600px;
+    }
+
+    .status-badge {
+        display: inline-flex; align-items: center; gap: 8px;
+        padding: 8px 16px; border-radius: 20px;
+        background: rgba(0,255,136,0.1); border: 1px solid rgba(0,255,136,0.3);
+        color: #00ff88; font-family: var(--font-mono, 'Fira Code', monospace); font-size: 0.85rem; font-weight: 600;
+    }
+    .status-dot {
+        width: 8px; height: 8px; border-radius: 50%; background: #00ff88;
+        box-shadow: 0 0 10px #00ff88; animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 rgba(0,255,136,0.4); }
+        70% { box-shadow: 0 0 0 6px rgba(0,255,136,0); }
+        100% { box-shadow: 0 0 0 0 rgba(0,255,136,0); }
+    }
+
+    /* ─── Main Grid Layout ───────────────────────────────── */
+    .agent-grid {
+        display: grid; grid-template-columns: 380px 1fr; gap: 24px; flex-grow: 1;
+    }
+
+    @media (max-width: 900px) {
+        .agent-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ─── Target Acquisition Panel ───────────────────────── */
+    .panel {
+        background: var(--apple-card-bg); border: 1px solid var(--apple-border);
+        border-radius: 16px; padding: 24px;
+        box-shadow: var(--apple-shadow);
+        display: flex; flex-direction: column;
+    }
+    .panel-header {
+        font-family: var(--font-mono, 'Fira Code', monospace); font-size: 0.9rem; font-weight: 600;
+        color: var(--apple-text-secondary); text-transform: uppercase; letter-spacing: 1px;
+        margin-bottom: 24px; display: flex; align-items: center; gap: 10px;
+        border-bottom: 1px solid var(--apple-border); padding-bottom: 16px;
+    }
+    .panel-header i { color: var(--apple-accent); font-size: 1.2rem; }
+
+    .form-group { margin-bottom: 20px; }
+    .form-label {
+        display: block; font-family: var(--font-mono, 'Fira Code', monospace); font-size: 0.75rem;
+        color: var(--apple-text-secondary); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .form-input {
+        width: 100%; padding: 12px 16px; border-radius: 8px;
+        background: var(--apple-input-bg); border: 1px solid var(--apple-border);
+        color: var(--apple-text); font-size: 0.95rem;
+        transition: all 0.2s ease;
+    }
+    .form-input:focus {
+        outline: none; border-color: var(--apple-accent); background: var(--apple-input-bg);
+        box-shadow: 0 0 0 3px rgba(0,229,255,0.1);
+    }
+
+    .deploy-btn {
+        width: 100%; padding: 16px; border-radius: 12px;
+        background: linear-gradient(135deg, var(--apple-accent), #0099ff);
+        color: #000; font-family: var(--font-mono, 'Fira Code', monospace); font-weight: 800; font-size: 1rem;
+        text-transform: uppercase; letter-spacing: 1px;
+        border: none; cursor: pointer; transition: all 0.3s ease;
+        display: flex; justify-content: center; align-items: center; gap: 10px;
+        margin-top: 10px; box-shadow: 0 8px 24px rgba(0,229,255,0.3);
+    }
+    .deploy-btn:hover {
+        transform: translateY(-2px); box-shadow: 0 12px 32px rgba(0,229,255,0.4);
+        filter: brightness(1.1);
+    }
+    .deploy-btn:active { transform: translateY(0); }
+    .deploy-btn i { font-size: 1.2rem; }
+    .deploy-btn.loading { opacity: 0.8; cursor: not-allowed; pointer-events: none; }
+    .deploy-btn.loading i { animation: spin 1s linear infinite; }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+
+    /* ─── Execution Terminal Panel ───────────────────────── */
+    .terminal-panel {
+        background: #0d0f12; border: 1px solid var(--apple-border);
+        border-radius: 16px; overflow: hidden;
+        display: flex; flex-direction: column;
+        box-shadow: inset 0 0 60px rgba(0,0,0,0.5), 0 10px 30px rgba(0,0,0,0.2);
+    }
+    .terminal-header {
+        background: rgba(255,255,255,0.02); border-bottom: 1px solid rgba(255,255,255,0.08);
+        padding: 12px 24px; display: flex; justify-content: space-between; align-items: center;
+    }
+    .terminal-title {
+        font-family: var(--font-mono, 'Fira Code', monospace); font-size: 0.8rem; color: rgba(255,255,255,0.55);
+        display: flex; align-items: center; gap: 8px;
+    }
+    .terminal-actions { display: flex; gap: 8px; }
+    .term-dot { width: 12px; height: 12px; border-radius: 50%; }
+    .term-dot.red { background: #ff5f56; }
+    .term-dot.yellow { background: #ffbd2e; }
+    .term-dot.green { background: #27c93f; }
+
+    .terminal-body {
+        flex-grow: 1; padding: 24px; overflow-y: auto;
+        font-family: var(--font-mono, 'Fira Code', monospace); font-size: 0.85rem; line-height: 1.6;
+        color: #a9b1d6; position: relative; min-height: 400px;
+    }
+    .terminal-body::-webkit-scrollbar { width: 8px; }
+    .terminal-body::-webkit-scrollbar-track { background: transparent; }
+    .terminal-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+    .log-entry { margin-bottom: 8px; display: flex; gap: 12px; opacity: 0; animation: fadeInLog 0.3s forwards; }
+    @keyframes fadeInLog { to { opacity: 1; } }
+    
+    .log-time { color: #565f89; flex-shrink: 0; }
+    .log-prefix { color: #bb9af7; font-weight: 600; flex-shrink: 0; }
+    .log-msg { color: #c0caf5; word-break: break-word; }
+    
+    .log-entry.info .log-prefix { color: #7aa2f7; }
+    .log-entry.success .log-prefix { color: #9ece6a; }
+    .log-entry.success .log-msg { color: #9ece6a; }
+    .log-entry.error .log-prefix { color: #f7768e; }
+    .log-entry.error .log-msg { color: #f7768e; }
+    .log-entry.warning .log-prefix { color: #e0af68; }
+    .log-entry.highlight .log-msg { color: #00e5ff; text-shadow: 0 0 10px rgba(0,229,255,0.3); }
+
+    .cursor {
+        display: inline-block; width: 8px; height: 15px; background: #00e5ff;
+        animation: blink 1s step-end infinite; vertical-align: middle; margin-left: 4px;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    .terminal-overlay {
+        position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+        background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+        background-size: 100% 2px, 3px 100%; pointer-events: none; z-index: 10; opacity: 0.15;
+    }
+
+    /* ─── Metrics ────────────────────────────────────────── */
+    .metrics-bar {
+        display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 16px;
+    }
+    .metric-card {
+        background: var(--apple-input-bg); border: 1px solid var(--apple-border);
+        border-radius: 12px; padding: 16px; text-align: center;
+    }
+    .metric-value {
+        font-size: 1.5rem; font-weight: 800; font-family: var(--font-mono, 'Fira Code', monospace); color: var(--apple-accent);
+        margin-bottom: 4px;
+    }
+    .metric-label {
+        font-size: 0.7rem; font-family: var(--font-mono, 'Fira Code', monospace); color: var(--apple-text-secondary); text-transform: uppercase; letter-spacing: 1px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-wrap">
+    
+    <!-- Navigation -->
+    <nav class="dash-tabs" style="margin-bottom: 2rem;">
+        <a href="{% url 'sales-dashboard' %}" class="dash-tab">
+            <i class='bx bx-bar-chart-alt-2'></i> Pipeline
+        </a>
+        <a href="{% url 'sales-buying-radar' %}" class="dash-tab">
+            <i class='bx bx-radar'></i> Strategic Insight Engine
+        </a>
+        <a href="{% url 'autonomous-agent' %}" class="dash-tab active">
+            <i class='bx bx-bot'></i> Auto-Agent
+        </a>
+    </nav>
+
+    <!-- Header -->
+    <div class="hero-header">
+        <div>
+            <h1><i class='bx bx-network-chart'></i> Autonomous Sales Agent</h1>
+            <p>Provide lead coordinates. The AI orchestrates multi-channel outreach, generates tailored pitches, and books meetings completely autonomously.</p>
+        </div>
+        <div class="status-badge" id="agent-status-badge">
+            <div class="status-dot"></div>
+            SYSTEM ONLINE: READY
+        </div>
+    </div>
+
+    <!-- Main Grid -->
+    <div class="agent-grid">
+        
+        <!-- Target Form -->
+        <div class="panel">
+            <div class="panel-header">
+                <i class='bx bx-target-lock'></i> Target Acquisition
+            </div>
+            
+            <form id="agentForm" onsubmit="event.preventDefault(); deployAgent();">
+                <div class="form-group">
+                    <label class="form-label">Contact Name</label>
+                    <input type="text" id="contact_name" class="form-input" placeholder="e.g. Sarah Connor" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Company Name</label>
+                    <input type="text" id="company_name" class="form-input" placeholder="e.g. Cyberdyne Systems">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Email Address</label>
+                    <input type="email" id="email" class="form-input" placeholder="sarah@example.com">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Phone Number</label>
+                    <input type="tel" id="phone" class="form-input" placeholder="+1234567890">
+                </div>
+                
+                <p style="font-size: 0.75rem; color: var(--apple-text-muted); font-family: var(--font-mono, monospace); margin-bottom: 20px;">
+                    * Requires either Email or Phone to initiate sequence.
+                </p>
+
+                <button type="submit" class="deploy-btn" id="deployBtn">
+                    <i class='bx bx-power-off'></i> Deploy Agent
+                </button>
+            </form>
+
+            <div class="metrics-bar">
+                <div class="metric-card">
+                    <div class="metric-value" id="stat-emails">0</div>
+                    <div class="metric-label">Emails</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="stat-sms">0</div>
+                    <div class="metric-label">SMS</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="stat-calls">0</div>
+                    <div class="metric-label">Calls</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">100%</div>
+                    <div class="metric-label">Autonomy</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Terminal -->
+        <div class="terminal-panel">
+            <div class="terminal-header">
+                <div class="terminal-actions">
+                    <div class="term-dot red"></div>
+                    <div class="term-dot yellow"></div>
+                    <div class="term-dot green"></div>
+                </div>
+                <div class="terminal-title">
+                    <i class='bx bx-terminal'></i> T-800 ORCHESTRATION ENGINE - root@transform-io:~
+                </div>
+                <div style="width: 52px;"></div>
+            </div>
+            
+            <div class="terminal-body" id="terminalOutput">
+                <div class="terminal-overlay"></div>
+                <div class="log-entry info">
+                    <span class="log-time">[SYSTEM]</span>
+                    <span class="log-prefix">INIT:</span>
+                    <span class="log-msg">Transform.io Sales Intelligence Kernel v4.2 loaded.</span>
+                </div>
+                <div class="log-entry info">
+                    <span class="log-time">[SYSTEM]</span>
+                    <span class="log-prefix">MODELS:</span>
+                    <span class="log-msg">Gemini Flash / Claude 3.5 Sonnet connected and standing by.</span>
+                </div>
+                <div class="log-entry info">
+                    <span class="log-time">[SYSTEM]</span>
+                    <span class="log-prefix">AWAITING TARGET:</span>
+                    <span class="log-msg">Input lead coordinates to commence automated outreach sequence.</span>
+                </div>
+                <div id="cursor-line"><span class="cursor"></span></div>
+            </div>
+        </div>
+        
+    </div>
+</div>
+
+<script>
+    let pollingInterval = null;
+    let currentLeadId = null;
+    let knownLogIds = new Set();
+    const terminal = document.getElementById('terminalOutput');
+    const cursorLine = document.getElementById('cursor-line');
+
+    function appendLog(level, prefix, message, time = null) {
+        const entry = document.createElement('div');
+        entry.className = `log-entry ${level.toLowerCase()}`;
+        
+        const timeStr = time ? time : new Date().toLocaleTimeString('en-US', { hour12: false });
+        
+        entry.innerHTML = `
+            <span class="log-time">[${timeStr}]</span>
+            <span class="log-prefix">${prefix}</span>
+            <span class="log-msg">${message}</span>
+        `;
+        
+        terminal.insertBefore(entry, cursorLine);
+        terminal.scrollTop = terminal.scrollHeight;
+    }
+
+    async function deployAgent() {
+        const btn = document.getElementById('deployBtn');
+        const statusBadge = document.getElementById('agent-status-badge');
+        
+        const payload = {
+            contact_name: document.getElementById('contact_name').value,
+            company_name: document.getElementById('company_name').value,
+            email: document.getElementById('email').value,
+            phone: document.getElementById('phone').value,
+        };
+
+        if (!payload.email && !payload.phone) {
+            alert("Please provide at least an Email or Phone number.");
+            return;
+        }
+
+        btn.classList.add('loading');
+        btn.innerHTML = "<i class='bx bx-loader-alt'></i> Initializing Sequence...";
+        
+        statusBadge.innerHTML = `<div class="status-dot" style="background:#ffbd2e; box-shadow:0 0 10px #ffbd2e"></div> SYSTEM ENGAGED: EXECUTING`;
+        statusBadge.style.color = '#ffbd2e';
+        statusBadge.style.background = 'rgba(255,189,46,0.1)';
+        statusBadge.style.borderColor = 'rgba(255,189,46,0.3)';
+
+        appendLog('highlight', 'EXEC:', `Target Locked: ${payload.contact_name} at ${payload.company_name || 'Unknown'}`);
+        appendLog('info', 'COMM:', 'Initializing outbound protocols...');
+
+        try {
+            const response = await fetch("{% url 'api-deploy-autonomous-agent' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                appendLog('success', 'SYS:', data.message || 'Agent successfully deployed to background task.');
+                currentLeadId = data.lead_id;
+                
+                // Reset metrics
+                document.getElementById('stat-emails').innerText = '0';
+                document.getElementById('stat-sms').innerText = '0';
+                document.getElementById('stat-calls').innerText = '0';
+                knownLogIds.clear();
+
+                // Start polling
+                if (pollingInterval) clearInterval(pollingInterval);
+                pollingInterval = setInterval(pollLogs, 2000);
+                
+            } else {
+                throw new Error(data.message || 'Unknown error occurred.');
+            }
+
+        } catch (error) {
+            appendLog('error', 'ERR:', `Deployment failed - ${error.message}`);
+            resetUI();
+        }
+    }
+
+    async function pollLogs() {
+        if (!currentLeadId) return;
+
+        try {
+            const response = await fetch(`/api/sales/leads/${currentLeadId}/agent/logs/`);
+            if (response.ok) {
+                const data = await response.json();
+                
+                const logs = data.logs.reverse();
+                
+                logs.forEach(log => {
+                    const logKey = `${log.created_at}-${log.message}`;
+                    if (!knownLogIds.has(logKey)) {
+                        knownLogIds.add(logKey);
+                        appendLog(log.level || 'info', `${log.channel || 'SYS'}:`, log.message, log.created_at);
+                        
+                        if (log.message.includes('Email sent')) {
+                            const el = document.getElementById('stat-emails');
+                            el.innerText = parseInt(el.innerText) + 1;
+                        }
+                        if (log.message.includes('SMS sent')) {
+                            const el = document.getElementById('stat-sms');
+                            el.innerText = parseInt(el.innerText) + 1;
+                        }
+                        if (log.message.includes('Call initiated')) {
+                            const el = document.getElementById('stat-calls');
+                            el.innerText = parseInt(el.innerText) + 1;
+                        }
+                        
+                        if (log.message.includes('Outreach sequence completed') || log.message.includes('[COMPLETED]') || log.message.includes('Outreach [COMPLETED]')) {
+                            clearInterval(pollingInterval);
+                            resetUI(true);
+                        }
+                    }
+                });
+            }
+        } catch (err) {
+            console.error("Polling error", err);
+        }
+    }
+
+    function resetUI(success = false) {
+        const btn = document.getElementById('deployBtn');
+        const statusBadge = document.getElementById('agent-status-badge');
+        
+        btn.classList.remove('loading');
+        btn.innerHTML = "<i class='bx bx-power-off'></i> Deploy Agent";
+        
+        if (success) {
+            statusBadge.innerHTML = `<div class="status-dot"></div> SEQUENCE COMPLETE`;
+        } else {
+            statusBadge.innerHTML = `<div class="status-dot"></div> SYSTEM ONLINE: READY`;
+            statusBadge.style.color = '#00ff88';
+            statusBadge.style.background = 'rgba(0,255,136,0.1)';
+            statusBadge.style.borderColor = 'rgba(0,255,136,0.3)';
+        }
+    }
+</script>
+{% endblock %}

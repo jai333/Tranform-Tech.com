@@ -28,12 +28,12 @@
         
         .panel { background: var(--bg-elevated); border: 1px solid var(--secondary); border-radius: 12px; overflow: hidden; margin-bottom: 24px; }
         .panel-header { padding: 16px 20px; border-bottom: 1px solid var(--secondary); display: flex; justify-content: space-between; align-items: center; }
-        .panel-title { font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 1.5px; text-transform: uppercase; color: white; display: flex; align-items: center; gap: 8px; }
+        .panel-title { font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--apple-text); display: flex; align-items: center; gap: 8px; }
         .panel-body { padding: 20px; }
 
         /* Score & Badges */
         .large-score { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; }
-        .score-circle { width: 70px; height: 70px; border-radius: 50%; border: 3px solid var(--primary); display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: var(--font-mono); font-weight: 800; color: white; background: rgba(0,229,255,0.06); box-shadow: 0 0 16px rgba(0,229,255,0.15); }
+        .score-circle { width: 70px; height: 70px; border-radius: 50%; border: 3px solid var(--primary); display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: var(--font-mono); font-weight: 800; color: var(--apple-text); background: rgba(0,229,255,0.06); box-shadow: 0 0 16px rgba(0,229,255,0.15); }
         .score-circle .num { font-size: 1.5rem; line-height: 1; }
         .score-circle .lbl { font-size: 0.55rem; color: var(--text-dark-gray); text-transform: uppercase; margin-top: 2px; }
 
@@ -50,7 +50,7 @@
             border-radius: 12px; padding: 20px; margin-top: 16px; }
         .composer-controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
         .composer-select { background: var(--bg-surface); border: 1px solid var(--secondary);
-            border-radius: 8px; color: white; padding: 7px 12px; font-size: 0.8rem;
+            border-radius: 8px; color: var(--apple-text); padding: 7px 12px; font-size: 0.8rem;
             outline: none; cursor: pointer; transition: border-color .2s; }
         .composer-select:focus, .composer-select:hover { border-color: var(--primary); }
         .btn-draft { background: var(--primary); color: #000; font-weight: 700; font-size: 0.82rem;
@@ -65,7 +65,7 @@
             border-radius: 10px; padding: 20px; margin-top: 16px; display: none;
             animation: slideDown .25s ease; }
         @keyframes slideDown { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
-        .preview-subject { font-weight: 700; color: white; margin-bottom: 12px;
+        .preview-subject { font-weight: 700; color: var(--apple-text); margin-bottom: 12px;
             border-bottom: 1px solid var(--secondary); padding-bottom: 10px;
             font-size: 0.92rem; display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
         .preview-subj-text { flex: 1; }
@@ -91,7 +91,7 @@
         .email-list-item { border-bottom: 1px solid rgba(255,255,255,0.04); padding: 12px 0; }
         .email-list-item:last-child { border-bottom: none; }
         .email-meta { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-dark-gray); font-family: var(--font-mono); margin-bottom: 4px; }
-        .email-subj { font-weight: 600; color: white; font-size: 0.85rem; }
+        .email-subj { font-weight: 600; color: var(--apple-text); font-size: 0.85rem; }
         .email-status { font-size: 0.7rem; text-transform: uppercase; font-family: var(--font-mono); padding: 1px 6px; border-radius: 4px; background:var(--apple-row-hover); color: var(--text-gray); }
         .email-status.sent { background: rgba(58,123,213,0.15); color: #3a7bd5; }
         .email-status.opened { background: rgba(0,229,255,0.12); color: var(--primary); }
@@ -101,7 +101,7 @@
         .info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 0.85rem; }
         .info-row:last-child { border-bottom: none; }
         .info-lbl { color: var(--text-gray); }
-        .info-val { color: white; font-weight: 500; text-align: right; }
+        .info-val { color: var(--apple-text); font-weight: 500; text-align: right; }
 
         .btn-sm { padding: 6px 12px; font-size: 0.8rem; border-radius: 6px; border: 1px solid var(--secondary); background: none; color: var(--text-gray); cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; transition: all 0.2s; }
         .btn-sm:hover { border-color: var(--primary); color: var(--primary); }
@@ -142,7 +142,7 @@
             <span class="lbl">ICP Score</span>
         </div>
         <div>
-            <h1 style="font-size:1.8rem;font-weight:800;color:white;margin-bottom:6px;">
+            <h1 style="font-size:1.8rem;font-weight:800;color:var(--apple-text);margin-bottom:6px;">
                 {{ lead.contact_name }}
                 {% if lead.is_hot %}🔥{% endif %}
             </h1>
@@ -170,7 +170,7 @@
                 <div class="panel-body">
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
                         <div>
-                            <h3 style="font-size:0.85rem;color:white;margin-bottom:8px;">🎯 Detected Pain Points</h3>
+                            <h3 style="font-size:0.85rem;color:var(--apple-text);margin-bottom:8px;">🎯 Detected Pain Points</h3>
                             {% if lead.pain_points %}
                                 <div class="tag-list">
                                     {% for pain in lead.pain_points %}
@@ -182,7 +182,7 @@
                             {% endif %}
                         </div>
                         <div>
-                            <h3 style="font-size:0.85rem;color:white;margin-bottom:8px;">💻 Technology Stack</h3>
+                            <h3 style="font-size:0.85rem;color:var(--apple-text);margin-bottom:8px;">💻 Technology Stack</h3>
                             {% if lead.tech_stack %}
                                 <div class="tag-list">
                                     {% for tech in lead.tech_stack %}
@@ -197,7 +197,7 @@
 
                     {% if lead.icp_score_breakdown %}
                     <div style="margin-top:24px;border-top:1px solid var(--secondary);padding-top:20px;">
-                        <h3 style="font-size:0.85rem;color:white;margin-bottom:12px;font-family:var(--font-mono);letter-spacing:1px;text-transform:uppercase;">ICP Scoring Factors Breakdown</h3>
+                        <h3 style="font-size:0.85rem;color:var(--apple-text);margin-bottom:12px;font-family:var(--font-mono);letter-spacing:1px;text-transform:uppercase;">ICP Scoring Factors Breakdown</h3>
                         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
                             {% for factor, score in lead.icp_score_breakdown.items %}
                             <div class="chart-row">
@@ -225,7 +225,7 @@
                     <!-- AI Cold Outreach Generator widget -->
                     <div class="email-composer">
                         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-                            <div style="font-size:0.9rem;color:white;font-weight:700;display:flex;align-items:center;gap:8px;">
+                            <div style="font-size:0.9rem;color:var(--apple-text);font-weight:700;display:flex;align-items:center;gap:8px;">
                                 🤖 AI Cold Outreach Generator
                             </div>
                             <span style="font-size:0.7rem;color:var(--text-dark-gray);font-family:var(--font-mono);">personalised · 5-step · A/B variants</span>
@@ -286,7 +286,7 @@
 
                     <!-- Sent Emails List -->
                     <div style="margin-top:24px;">
-                        <h3 style="font-size:0.85rem;color:white;margin-bottom:12px;">Email Timeline</h3>
+                        <h3 style="font-size:0.85rem;color:var(--apple-text);margin-bottom:12px;">Email Timeline</h3>
                         {% if emails %}
                             {% for email in emails %}
                             <div class="email-list-item">
@@ -361,7 +361,7 @@
                 </div>
                 <div class="panel-body">
                     {% if deal %}
-                        <div style="font-size:0.85rem;color:white;margin-bottom:8px;">
+                        <div style="font-size:0.85rem;color:var(--apple-text);margin-bottom:8px;">
                             <strong>Stage:</strong> {{ deal.get_stage_display }}<br>
                             <strong>Value:</strong> ${{ deal.deal_value_monthly }}/mo<br>
                             <strong>AI Win Prob:</strong> {{ deal.close_probability|floatformat:0 }}%
@@ -381,7 +381,7 @@
                 </div>
                 <div class="panel-body">
                     {% for db in demo_bookings %}
-                    <div style="font-size:0.8rem;color:white;border-bottom:1px solid rgba(255,255,255,0.04);padding-bottom:10px;margin-bottom:10px;">
+                    <div style="font-size:0.8rem;color:var(--apple-text);border-bottom:1px solid rgba(255,255,255,0.04);padding-bottom:10px;margin-bottom:10px;">
                         <strong>Date:</strong> {{ db.scheduled_at|date:"M d, Y H:i" }}<br>
                         <strong>Status:</strong> <span style="color:var(--primary);">{{ db.get_status_display }}</span>
                         {% if db.main_pain_point %}

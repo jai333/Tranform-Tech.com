@@ -35,7 +35,7 @@
         --color-itops: #00a6fb;
         --bg-itops-tag: rgba(0, 166, 251, 0.08);
     }
-    body.light-theme {
+    [data-theme="light"] body {
         --card-bg: rgba(0, 0, 0, 0.02);
         --card-border: rgba(0, 0, 0, 0.08);
         
@@ -66,7 +66,7 @@
         z-index: -15; pointer-events: none;
         opacity: 0; transition: opacity 0.4s ease;
     }
-    body.light-theme .bg-gradient {
+    [data-theme="light"] body .bg-gradient {
         background: radial-gradient(circle at top left, #dbeafe 0%, #f0f4f8 60%, #e9ecef 100%);
         opacity: 1;
     }

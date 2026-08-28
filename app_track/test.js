@@ -1,0 +1,846 @@
+        (function(){
+            var t = localStorage.getItem('theme');
+            if(t === 'light') document.documentElement.classList.add('light-theme');
+        })();
+    <style>
+        body { padding-top: 75px; background: var(--bg-base); }
+
+        /* ── Shared btn-sm ─────────────────────────────────────── */
+        .btn-sm { padding: 6px 12px; font-size: 0.78rem; border-radius: 7px; border: 1px solid var(--secondary); background: none; color: var(--text-gray); cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; transition: all 0.2s; }
+        .btn-sm:hover { border-color: var(--primary); color: var(--primary); }
+        .btn-sm.cyan { background: var(--primary); color: #000; border-color: var(--primary); font-weight: 700; }
+
+        /* ── Page layout ───────────────────────────────────────── */
+        .gmaps-page {
+            display: grid;
+            grid-template-columns: 340px 1fr;
+            gap: 22px;
+            align-items: start;
+            max-width: 1500px;
+            margin: 0 auto;
+            padding: 28px 24px 80px;
+        }
+        @media (max-width: 900px) { .gmaps-page { grid-template-columns: 1fr; } }
+
+        /* ── Panel ─────────────────────────────────────────────── */
+        .gm-panel {
+            background: var(--bg-elevated);
+            border: 1px solid var(--secondary);
+            border-radius: 18px;
+            overflow: hidden;
+        }
+        .gm-panel-hdr {
+            padding: 18px 22px 14px;
+            border-bottom: 1px solid var(--secondary);
+            display: flex; align-items: center; gap: 12px;
+        }
+        .gm-panel-hdr .ic {
+            width: 38px; height: 38px; border-radius: 11px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px;
+            background: rgba(0,229,255,0.1); color: var(--primary);
+        }
+        .gm-panel-hdr h2 { font-size: 0.95rem; font-weight: 700; color: white; margin: 0; }
+        .gm-panel-hdr p  { font-size: 0.72rem; color: var(--text-gray); margin: 2px 0 0; }
+        .gm-panel-body { padding: 22px; }
+
+        /* ── Form fields ───────────────────────────────────────── */
+        .fg { margin-bottom: 16px; }
+        .fg label {
+            display: block;
+            font-size: 0.68rem; font-family: var(--font-mono);
+            letter-spacing: 1.5px; text-transform: uppercase;
+            color: var(--text-gray); margin-bottom: 7px;
+        }
+        .fc {
+            width: 100%; background: rgba(0,0,0,0.3);
+            border: 1px solid var(--secondary); border-radius: 9px;
+            color: #e0e0e0; font-size: 0.875rem; padding: 10px 13px;
+            outline: none; box-sizing: border-box;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            font-family: var(--font-sans);
+        }
+        .fc:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0,229,255,0.07); }
+        .fc::placeholder { color: var(--text-dark-gray); }
+        select.fc option { background: #12121f; }
+
+        /* Range */
+        .rng-row { display: flex; align-items: center; gap: 12px; }
+        .rng-row input[type=range] { flex: 1; accent-color: var(--primary); cursor: pointer; }
+        .rng-val { font-family: var(--font-mono); font-size: 0.82rem; color: var(--primary); min-width: 30px; text-align: center; }
+
+        /* Search btn */
+        .btn-search {
+            width: 100%; background: linear-gradient(135deg,#00E5FF,#0099FF);
+            color: #000; font-weight: 800; font-size: 0.9rem;
+            border: none; border-radius: 11px; padding: 13px;
+            cursor: pointer; display: flex; align-items: center;
+            justify-content: center; gap: 10px;
+            transition: opacity 0.2s, transform 0.15s;
+        }
+        .btn-search:hover  { opacity: 0.9; transform: translateY(-1px); }
+        .btn-search:active { transform: translateY(0); }
+        .btn-search:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+        /* No-key warning */
+        .nokey {
+            background: rgba(255,159,10,0.07); border: 1px solid rgba(255,159,10,0.25);
+            border-radius: 11px; padding: 13px 16px; margin-bottom: 18px;
+            display: flex; gap: 10px; align-items: flex-start;
+        }
+        .nokey i { color: #FF9F0A; font-size: 1rem; margin-top: 2px; flex-shrink: 0; }
+        .nokey p { margin: 0; font-size: 0.78rem; color: #FF9F0A; line-height: 1.55; }
+        .nokey a { color: inherit; text-decoration: underline; }
+        .nokey code { font-family: var(--font-mono); font-size: 0.75rem; background: rgba(255,159,10,0.15); padding: 1px 5px; border-radius: 4px; }
+
+        /* ── Results header ───────────────────────────────────── */
+        .res-hdr {
+            padding: 15px 22px;
+            border-bottom: 1px solid var(--secondary);
+            display: flex; align-items: center; justify-content: space-between;
+            flex-wrap: wrap; gap: 10px;
+        }
+        .res-stat { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: var(--text-gray); }
+        .res-stat .n { font-family: var(--font-mono); font-size: 1.05rem; font-weight: 700; color: var(--primary); }
+        .res-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+        .btn-import {
+            font-size: 0.8rem; padding: 8px 16px; border-radius: 9px;
+            background: var(--primary); color: #000; border: none;
+            font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+            transition: opacity 0.2s;
+        }
+        .btn-import:hover { opacity: 0.85; }
+        .btn-import:disabled { opacity: 0.35; cursor: not-allowed; }
+
+        /* ── Progress ──────────────────────────────────────────── */
+        .prog-wrap { display: none; padding: 16px 22px; border-bottom: 1px solid var(--secondary); }
+        .prog-wrap.on { display: block; }
+        .prog-lbl { font-size: 0.75rem; color: var(--text-gray); font-family: var(--font-mono); margin-bottom: 9px; display: flex; align-items: center; gap: 7px; }
+        .prog-lbl .spin { display: inline-block; animation: spin 1s linear infinite; color: var(--primary); }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .prog-bar { height: 3px; background: rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden; }
+        .prog-fill { height: 100%; background: linear-gradient(90deg,#00E5FF,#0099FF); width: 0%; transition: width 0.4s ease; box-shadow: 0 0 6px rgba(0,229,255,0.35); }
+
+        /* ── Results body ──────────────────────────────────────── */
+        .res-body { padding: 20px 22px; }
+        .empty-st { text-align: center; padding: 56px 20px; color: var(--text-gray); }
+        .empty-st i { font-size: 2.8rem; color: var(--text-dark-gray); display: block; margin-bottom: 14px; }
+        .empty-st h3 { margin: 0 0 7px; font-size: 1.05rem; }
+        .empty-st p  { margin: 0; font-size: 0.83rem; }
+
+        /* ── Leads Grid ────────────────────────────────────────── */
+        .leads-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+
+        /* ── Lead Card ─────────────────────────────────────────── */
+        .lc {
+            background: rgba(0,0,0,0.2);
+            border: 1px solid var(--secondary);
+            border-radius: 13px; padding: 16px 18px;
+            position: relative; cursor: pointer;
+            transition: border-color 0.2s, transform 0.15s, box-shadow 0.2s;
+        }
+        .lc:hover { border-color: rgba(0,229,255,0.3); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,229,255,0.07); }
+        .lc.sel { border-color: var(--primary); background: rgba(0,229,255,0.04); box-shadow: 0 0 0 2px rgba(0,229,255,0.13); }
+
+        .lc-chk {
+            position: absolute; top: 13px; right: 13px;
+            width: 18px; height: 18px; border-radius: 5px;
+            border: 1.5px solid var(--secondary); background: transparent;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.15s;
+        }
+        .lc.sel .lc-chk { background: var(--primary); border-color: var(--primary); }
+        .lc-chk i { font-size: 10px; color: #000; display: none; }
+        .lc.sel .lc-chk i { display: block; }
+
+        .lc-av {
+            width: 40px; height: 40px; border-radius: 11px;
+            background: linear-gradient(135deg,rgba(0,229,255,0.14),rgba(0,80,200,0.1));
+            border: 1px solid rgba(0,229,255,0.15);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem; color: var(--primary); font-weight: 700;
+            font-family: var(--font-mono); margin-bottom: 11px;
+        }
+        .lc-name { font-size: 0.88rem; font-weight: 700; color: white; margin: 0 0 4px; padding-right: 26px; line-height: 1.3; }
+        .lc-cat {
+            font-size: 0.68rem; font-family: var(--font-mono); color: var(--primary);
+            background: rgba(0,229,255,0.08); border: 1px solid rgba(0,229,255,0.15);
+            border-radius: 4px; padding: 2px 7px; display: inline-block; margin-bottom: 10px;
+        }
+        .lc-stars { color: #FFCC00; font-size: 0.72rem; }
+        .lc-rnum  { font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-gray); }
+        .lc-meta  { display: flex; flex-direction: column; gap: 5px; margin-top: 9px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 10px; }
+        .lc-row   { display: flex; align-items: flex-start; gap: 7px; font-size: 0.75rem; color: var(--text-gray); line-height: 1.4; }
+        .lc-row i { font-size: 0.8rem; color: var(--text-dark-gray); margin-top: 1px; flex-shrink: 0; }
+        .lc-row a { color: var(--primary); text-decoration: none; word-break: break-all; }
+        .lc-row a:hover { text-decoration: underline; }
+
+        /* ── Import Toast ──────────────────────────────────────── */
+        .toast {
+            display: none; position: fixed; bottom: 28px; right: 28px; z-index: 9999;
+            background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.32);
+            border-radius: 13px; padding: 15px 20px; color: #10b981;
+            font-size: 0.875rem; max-width: 300px;
+            box-shadow: 0 14px 36px rgba(0,0,0,0.5); backdrop-filter: blur(10px);
+        }
+        .toast.on { display: flex; gap: 11px; align-items: center; }
+        .toast i { font-size: 1.3rem; flex-shrink: 0; }
+
+        /* ── Map Styles ─────────────────────────────────────────── */
+        #scraper-map {
+            width: 100%;
+            height: 350px;
+            background: #0B0E14;
+            border-bottom: 1px solid var(--secondary);
+            display: none;
+            z-index: 1;
+        }
+        .gmap-marker {
+            width: 14px;
+            height: 14px;
+            background: var(--primary);
+            border-radius: 50%;
+            border: 2px solid #0B0E14;
+            box-shadow: 0 0 10px var(--primary), 0 0 20px rgba(0, 229, 255, 0.4);
+            animation: pulse-marker 2s infinite;
+        }
+        @keyframes pulse-marker {
+            0% { box-shadow: 0 0 0 0 rgba(0, 229, 255, 0.6); }
+            70% { box-shadow: 0 0 0 8px rgba(0, 229, 255, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 229, 255, 0); }
+        }
+
+        /* ── History ───────────────────────────────────────────── */
+        .hist-item {
+            padding: 9px 12px; border-radius: 8px; cursor: pointer;
+            border: 1px solid var(--secondary); display: flex; align-items: center; gap: 9px;
+            transition: border-color 0.2s; margin-bottom: 6px;
+        }
+        .hist-item:hover { border-color: rgba(0,229,255,0.3); }
+        .hist-item:last-child { margin-bottom: 0; }
+    </style>
+</head>
+<body>
+
+    <!-- Floating Voice Command Button -->
+    <button onclick="activateVoiceCommand()" style="position:fixed; bottom:30px; right:30px; width:60px; height:60px; border-radius:50%; background:var(--brand-primary); color:black; border:none; box-shadow:0 10px 25px rgba(0,229,255,0.4); z-index:9999; font-size:1.8rem; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'" title="Voice Command (Cmd+Shift+V)">
+        <i class='bx bx-microphone'></i>
+    </button>
+
+
+<!-- ── Navbar ────────────────────────────────────────────────── -->
+<nav class="navbar">
+    <div class="container nav-content">
+        <a class="logo" href="{% url 'home' %}">
+            <img src="{% static 'tracking_app/assets/logo-333.png' %}" alt="Transform.io" height="32" onerror="this.style.display='none'">
+            <span>Transform<span class="text-cyan">.io</span></span>
+        </a>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <span style="font-size:0.75rem;color:var(--text-gray);"><span class="live-dot"></span>AI Sales System</span>
+            <a href="{% url 'sales-dashboard' %}" class="btn-sm" style="text-decoration:none;"><i class='bx bx-arrow-back'></i> Dashboard</a>
+            <a href="{% url 'lead-list' %}" class="btn-sm" style="text-decoration:none;"><i class='bx bx-user-plus'></i> Leads</a>
+            <a href="{% url 'import-leads' %}" class="btn-sm" style="text-decoration:none;"><i class='bx bx-import'></i> CSV Import</a>
+            <button id="theme-toggle" class="btn btn-primary btn-lg" title="Toggle theme" style="width:42px;height:42px;padding:0;display:flex;align-items:center;justify-content:center;border-radius:50%;"><i id="theme-icon" class="fas fa-moon"></i></button>
+        </div>
+    </div>
+</nav>
+
+<!-- ── Page Header ───────────────────────────────────────────── -->
+<div style="max-width:1500px;margin:0 auto;padding:22px 24px 0;">
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+        <div style="width:46px;height:46px;border-radius:13px;background:linear-gradient(135deg,rgba(0,229,255,0.15),rgba(0,80,200,0.1));border:1px solid rgba(0,229,255,0.2);display:flex;align-items:center;justify-content:center;font-size:1.4rem;">🗺️</div>
+        <div>
+            <h1 style="margin:0;font-size:1.5rem;font-weight:900;color:white;">Google Maps Lead Scraper</h1>
+            <p style="margin:3px 0 0;color:var(--text-gray);font-size:0.82rem;">Find real businesses matching your ICP — powered by SerpAPI · results auto-scored by AI</p>
+        </div>
+    </div>
+</div>
+
+<!-- ── Main Layout ───────────────────────────────────────────── -->
+<div class="gmaps-page">
+
+    <!-- LEFT: Filters -->
+    <div>
+        <div class="gm-panel">
+            <div class="gm-panel-hdr">
+                <div class="ic"><i class="bx bx-filter-alt"></i></div>
+                <div>
+                    <h2>Search Filters</h2>
+                    <p>Target your ideal customer profile</p>
+                </div>
+            </div>
+            <div class="gm-panel-body">
+
+                {% if not serp_key_set %}
+                <div class="nokey">
+                    <i class="bx bx-error-circle"></i>
+                    <p>
+                        <strong>SERP_API_KEY not set.</strong><br>
+                        Sign up free at <a href="https://serpapi.com" target="_blank">serpapi.com</a> (100 searches/mo free),
+                        then add <code>SERP_API_KEY=sk_live_xxx</code> to your <code>.env</code> and restart the server.
+                    </p>
+                </div>
+                {% endif %}
+
+                <div class="fg">
+                    <label>🔍 Keyword / Business Type</label>
+                    <input type="text" id="gm-keyword" class="fc" placeholder="e.g. IT staffing agency, dental clinic, law firm">
+                </div>
+
+                <div class="fg">
+                    <label>📍 City / Location</label>
+                    <input type="text" id="gm-location" class="fc" placeholder="e.g. New York, NY  ·  London, UK  ·  Dubai">
+                </div>
+
+                <div class="fg">
+                    <label>🏷️ Category Filter (optional)</label>
+                    <select id="gm-category" class="fc">
+                        <option value="">— Any Category —</option>
+                        <option value="restaurant">Restaurant / Food</option>
+                        <option value="hotel">Hotel / Hospitality</option>
+                        <option value="law firm">Law Firm</option>
+                        <option value="accounting firm">Accounting / Finance</option>
+                        <option value="marketing agency">Marketing Agency</option>
+                        <option value="IT company">IT / Tech Company</option>
+                        <option value="staffing agency">Staffing / Recruiting</option>
+                        <option value="real estate agency">Real Estate</option>
+                        <option value="healthcare clinic">Healthcare / Clinic</option>
+                        <option value="gym fitness">Gym / Fitness</option>
+                        <option value="retail store">Retail Store</option>
+                        <option value="construction">Construction / Contractor</option>
+                        <option value="consulting firm">Consulting Firm</option>
+                        <option value="auto dealer">Auto Dealer</option>
+                        <option value="salon spa">Salon / Spa / Beauty</option>
+                        <option value="school education">School / Education</option>
+                        <option value="logistics company">Logistics / Freight</option>
+                        <option value="manufacturing">Manufacturing</option>
+                    </select>
+                </div>
+
+                <div class="fg">
+                    <label>⭐ Minimum Rating: <span id="gm-rating-val" style="color:var(--primary);">0</span></label>
+                    <div class="rng-row">
+                        <input type="range" id="gm-rating" min="0" max="5" step="0.5" value="0"
+                            oninput="document.getElementById('gm-rating-val').textContent=this.value">
+                        <span class="rng-val" id="gm-rating-v2">Any</span>
+                    </div>
+                </div>
+
+                <div class="fg">
+                    <label>📦 Max Results: <span id="gm-max-val" style="color:var(--primary);">20</span></label>
+                    <div class="rng-row">
+                        <input type="range" id="gm-max" min="5" max="100" step="5" value="20"
+                            oninput="document.getElementById('gm-max-val').textContent=this.value">
+                        <span class="rng-val">100</span>
+                    </div>
+                </div>
+
+                <button class="btn-search" id="btn-search" {% if not serp_key_set %}disabled{% endif %}>
+                    <i class="bx bx-search-alt"></i>
+                    Search Google Maps
+                </button>
+
+                <div style="margin-top:15px;padding:13px;background:rgba(0,0,0,0.2);border-radius:9px;font-size:0.73rem;color:var(--text-gray);line-height:1.65;">
+                    <strong style="color:white;font-size:0.75rem;">How it works</strong><br>
+                    1. Searches real Google Maps listings<br>
+                    2. Filters by rating, category, location<br>
+                    3. Select &amp; import to your lead pipeline<br>
+                    4. AI ICP scoring fires automatically ✨
+                </div>
+            </div>
+        </div>
+
+        <!-- Search history -->
+        <div id="hist-panel" style="display:none;margin-top:16px;" class="gm-panel">
+            <div class="gm-panel-hdr">
+                <div class="ic"><i class="bx bx-history"></i></div>
+                <div><h2>Recent Searches</h2><p>Click to repeat</p></div>
+            </div>
+            <div style="padding:14px 16px;" id="hist-list"></div>
+        </div>
+    </div>
+
+    <!-- RIGHT: Results -->
+    <div class="gm-panel" style="min-height:560px;">
+
+        <div class="res-hdr">
+            <div class="res-stat">
+                <span class="n" id="stat-count">0</span> <span>found</span>
+                &nbsp;·&nbsp;
+                <span class="n" id="stat-sel">0</span> <span>selected</span>
+            </div>
+            <div class="res-actions">
+                <button class="btn-sm" id="btn-sel-all" onclick="selAll()"><i class="bx bx-check-square"></i> Select All</button>
+                <button class="btn-sm" id="btn-desel" onclick="deselAll()" style="display:none;"><i class="bx bx-square"></i> Deselect</button>
+                <button class="btn-import" id="btn-import" disabled onclick="doImport()"><i class="bx bx-import"></i> Import Selected</button>
+            </div>
+        </div>
+
+        <div id="scraper-map"></div>
+
+        <div class="prog-wrap" id="prog">
+            <div class="prog-lbl"><i class="bx bx-loader-alt spin"></i><span id="prog-txt">Searching Google Maps…</span></div>
+            <div class="prog-bar"><div class="prog-fill" id="prog-fill"></div></div>
+        </div>
+
+        <div class="res-body" id="res-body">
+            <div class="empty-st" id="empty-st">
+                <i class="bx bxs-map-pin"></i>
+                <h3>Ready to scrape</h3>
+                <p>Set your filters and click <strong>Search Google Maps</strong></p>
+            </div>
+            <div class="leads-grid" id="leads-grid" style="display:none;"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+    <i class="bx bx-check-circle"></i>
+    <div>
+        <strong id="toast-title"></strong><br>
+        <span id="toast-body" style="font-size:0.78rem;opacity:0.8;"></span>
+    </div>
+</div>
+
+// ── State ────────────────────────────────────────────────────────────
+let results   = [];
+let selected  = new Set();
+let history   = JSON.parse(localStorage.getItem('gmaps_hist') || '[]');
+let scraperMap = null;
+let mapMarkers = null;
+
+// ── Initialize Map ───────────────────────────────────────────────────
+function initMap() {
+    if (scraperMap) return;
+    document.getElementById('scraper-map').style.display = 'block';
+    
+    // Initialize map
+    scraperMap = L.map('scraper-map', {
+        zoomControl: false,
+        attributionControl: false
+    }).setView([20, 0], 2);
+
+    // Add Dark Matter tile layer
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        subdomains: 'abcd',
+        maxZoom: 20
+    }).addTo(scraperMap);
+    
+    // Add Layer Group for markers
+    mapMarkers = L.layerGroup().addTo(scraperMap);
+}
+
+// ── Rating label ─────────────────────────────────────────────────────
+document.getElementById('gm-rating').addEventListener('input', function() {
+    const v = parseFloat(this.value);
+    document.getElementById('gm-rating-v2').textContent = v === 0 ? 'Any' : v + '+';
+});
+
+// ── History ──────────────────────────────────────────────────────────
+function saveHist(kw, loc) {
+    history = [{kw,loc}, ...history.filter(h=>!(h.kw===kw&&h.loc===loc))].slice(0,6);
+    localStorage.setItem('gmaps_hist', JSON.stringify(history));
+    renderHist();
+}
+function renderHist() {
+    const p = document.getElementById('hist-panel');
+    const l = document.getElementById('hist-list');
+    if (!history.length) { p.style.display='none'; return; }
+    p.style.display='';
+    l.innerHTML = history.map(h=>`
+        <div class="hist-item" onclick="loadHist('${esc(h.kw)}','${esc(h.loc)}')">
+            <i class="bx bxs-map" style="color:var(--primary);font-size:1rem;flex-shrink:0;"></i>
+            <div>
+                <div style="font-size:0.8rem;color:white;font-weight:600;">${esc(h.kw)}</div>
+                <div style="font-size:0.7rem;color:var(--text-gray);">${esc(h.loc)}</div>
+            </div>
+        </div>`).join('');
+}
+function loadHist(kw, loc) {
+    document.getElementById('gm-keyword').value  = kw;
+    document.getElementById('gm-location').value = loc;
+}
+renderHist();
+
+// ── Helpers ──────────────────────────────────────────────────────────
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+function stars(r){ const f=Math.floor(r), h=r-f>=0.5?1:0; return '★'.repeat(f)+(h?'½':'')+'☆'.repeat(5-f-h); }
+function csrf(){ return document.cookie.split(';').map(c=>c.trim()).find(c=>c.startsWith('csrftoken='))?.split('=')[1]||''; }
+
+// ── Progress ─────────────────────────────────────────────────────────
+function progStart(txt) {
+    const p=document.getElementById('prog'); p.classList.add('on');
+    document.getElementById('prog-txt').textContent = txt||'Searching…';
+    const f=document.getElementById('prog-fill');
+    f.style.width='0%';
+    setTimeout(()=>f.style.width='35%',80);
+    setTimeout(()=>f.style.width='65%',900);
+    setTimeout(()=>f.style.width='85%',2200);
+}
+function progEnd(txt) {
+    document.getElementById('prog-fill').style.width='100%';
+    document.getElementById('prog-txt').textContent = txt||'Done!';
+    setTimeout(()=>document.getElementById('prog').classList.remove('on'), 700);
+}
+
+// ── Render Results ────────────────────────────────────────────────────
+function renderResults(data) {
+    results  = data;
+    selected = new Set();
+    updateStats();
+    
+    // Init map if first time
+    initMap();
+    mapMarkers.clearLayers();
+    const bounds = L.latLngBounds();
+
+    const grid  = document.getElementById('leads-grid');
+    const empty = document.getElementById('empty-st');
+    if (!data.length) {
+        grid.style.display='none';
+        empty.style.display='block';
+        empty.innerHTML=`<i class="bx bx-search-alt"></i><h3>No results found</h3><p>Try different keywords or a broader location / lower rating.</p>`;
+        return;
+    }
+    empty.style.display='none';
+    grid.style.display='grid';
+    grid.innerHTML = data.map((b,i)=>{
+        // Add Marker
+        if (b.lat && b.lng) {
+            const icon = L.divIcon({
+                className: 'gmap-marker',
+                iconSize: [14, 14],
+                iconAnchor: [7, 7]
+            });
+            L.marker([b.lat, b.lng], {icon: icon})
+             .bindPopup(`<b style="color:black;">${esc(b.name)}</b><br><span style="color:black;">${esc(b.category||'')}</span>`)
+             .addTo(mapMarkers);
+            bounds.extend([b.lat, b.lng]);
+        }
+
+        const init = (b.name||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+        const rtg  = b.rating ? parseFloat(b.rating).toFixed(1) : null;
+        const rev  = b.reviews ? parseInt(b.reviews).toLocaleString() : null;
+        return `
+        <div class="lc" id="c${i}" onclick="tog(${i})">
+            <div class="lc-chk"><i class="bx bx-check"></i></div>
+            <div class="lc-av">${esc(init)}</div>
+            <div class="lc-name">${esc(b.name)}</div>
+            ${b.category?`<div class="lc-cat">${esc(b.category)}</div>`:''}
+            ${rtg?`<div style="display:flex;align-items:center;gap:6px;margin:4px 0 0;">
+                <span class="lc-stars">${stars(parseFloat(rtg))}</span>
+                <span class="lc-rnum">${rtg}${rev?` (${rev})`:''}  </span>
+            </div>`:''}
+            <div class="lc-meta">
+                ${b.address ?`<div class="lc-row"><i class="bx bx-map-pin"></i>${esc(b.address)}</div>`:''}
+                ${b.phone   ?`<div class="lc-row" style="align-items:center; justify-content:space-between; width:100%;">
+                    <div style="display:flex; align-items:center; gap:7px;">
+                        <i class="bx bx-phone"></i>${esc(b.phone)}
+                    </div>
+                    <div style="display:flex; gap:4px;">
+                        <button class="btn-sm" style="padding:4px 8px; font-size:0.7rem; color:var(--primary); border-color:rgba(0,229,255,0.3);" onclick="event.stopPropagation(); openDialer('${esc(b.phone)}', '${esc(b.name)}')"><i class='bx bx-phone-call'></i></button>
+                        <button class="btn-sm" style="padding:4px 8px; font-size:0.7rem; color:var(--primary); border-color:rgba(0,229,255,0.3);" onclick="event.stopPropagation(); openSMS('${esc(b.phone)}', '${esc(b.name)}')"><i class='bx bx-message-rounded-dots'></i></button>
+                    </div>
+                </div>`:''}
+                ${b.website ?`<div class="lc-row"><i class="bx bx-globe"></i><a href="${esc(b.website)}" onclick="event.stopPropagation()" target="_blank">${esc(b.website.replace(/^https?:\/\//,'').split('/')[0])}</a></div>`:''}
+                ${b.maps_url?`<div class="lc-row"><i class="bx bxl-google"></i><a href="${esc(b.maps_url)}" onclick="event.stopPropagation()" target="_blank">View on Maps</a></div>`:''}
+            </div>
+        </div>`;
+    }).join('');
+
+    // Fit map to markers
+    if (bounds.isValid()) {
+        scraperMap.fitBounds(bounds, {padding: [30, 30], maxZoom: 14});
+    }
+}
+
+// ── Selection ────────────────────────────────────────────────────────
+function tog(i) {
+    const c = document.getElementById('c'+i);
+    if (selected.has(i)) { selected.delete(i); c.classList.remove('sel'); }
+    else                  { selected.add(i);    c.classList.add('sel'); }
+    updateStats();
+}
+function selAll()   { results.forEach((_,i)=>{ selected.add(i); document.getElementById('c'+i)?.classList.add('sel'); }); updateStats(); }
+function deselAll() { results.forEach((_,i)=>{ selected.delete(i); document.getElementById('c'+i)?.classList.remove('sel'); }); updateStats(); }
+function updateStats() {
+    document.getElementById('stat-count').textContent = results.length;
+    document.getElementById('stat-sel').textContent   = selected.size;
+    document.getElementById('btn-import').disabled    = selected.size === 0;
+    document.getElementById('btn-desel').style.display     = selected.size > 0 ? '' : 'none';
+    document.getElementById('btn-sel-all').style.display   = (selected.size === results.length && results.length > 0) ? 'none' : '';
+}
+
+// ── Toast ────────────────────────────────────────────────────────────
+function showToast(title, body) {
+    const t = document.getElementById('toast');
+    document.getElementById('toast-title').textContent = title;
+    document.getElementById('toast-body').textContent  = body;
+    t.classList.add('on');
+    setTimeout(()=>t.classList.remove('on'), 5500);
+}
+
+// ── Search ───────────────────────────────────────────────────────────
+document.getElementById('btn-search').addEventListener('click', async ()=>{
+    const kw  = document.getElementById('gm-keyword').value.trim();
+    const loc = document.getElementById('gm-location').value.trim();
+    const cat = document.getElementById('gm-category').value;
+    const rat = document.getElementById('gm-rating').value;
+    const mx  = document.getElementById('gm-max').value;
+
+    if (!kw || !loc) { alert('Please enter a Keyword and Location.'); return; }
+
+    const btn = document.getElementById('btn-search');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="bx bx-loader-alt" style="animation:spin 1s linear infinite;"></i> Searching…';
+
+    progStart(`Searching "${kw}" in ${loc}…`);
+    document.getElementById('leads-grid').style.display='none';
+    document.getElementById('empty-st').style.display='none';
+
+    try {
+        const r = await fetch('/api/sales/gmaps/scrape/', {
+            method: 'POST',
+            headers: {'Content-Type':'application/json','X-CSRFToken':csrf()},
+            body: JSON.stringify({keyword:kw, location:loc, category:cat, min_rating:parseFloat(rat), max_results:parseInt(mx)})
+        });
+        const d = await r.json();
+        if (d.error) {
+            progEnd('Error');
+            document.getElementById('empty-st').innerHTML=`<i class="bx bx-error-circle" style="color:#FF453A;"></i><h3 style="color:#FF453A;">Scrape Failed</h3><p>${esc(d.error)}</p>`;
+            document.getElementById('empty-st').style.display='block';
+        } else {
+            progEnd(`Found ${d.results.length} businesses!`);
+            renderResults(d.results);
+            saveHist(kw, loc);
+        }
+    } catch(e) {
+        progEnd('Network error');
+        document.getElementById('empty-st').innerHTML=`<i class="bx bx-error-circle" style="color:#FF453A;"></i><h3 style="color:#FF453A;">Network Error</h3><p>Could not reach the server. Check console for details.</p>`;
+        document.getElementById('empty-st').style.display='block';
+        console.error(e);
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bx bx-search-alt"></i> Search Google Maps';
+    }
+});
+
+// ── Import ───────────────────────────────────────────────────────────
+async function doImport() {
+    const businesses = [...selected].map(i=>results[i]);
+    if (!businesses.length) return;
+    
+    const kw  = document.getElementById('gm-keyword').value.trim();
+    const loc = document.getElementById('gm-location').value.trim();
+    
+    const btn = document.getElementById('btn-import');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="bx bx-loader-alt" style="animation:spin 1s linear infinite;"></i> Importing…';
+    progStart(`Importing ${businesses.length} leads & running AI scoring…`);
+    try {
+        const r = await fetch('/api/sales/gmaps/import/', {
+            method:'POST',
+            headers:{'Content-Type':'application/json','X-CSRFToken':csrf()},
+            body: JSON.stringify({businesses, keyword: kw, location: loc})
+        });
+        const d = await r.json();
+        progEnd('Import complete!');
+        showToast(`✓ ${d.created} leads imported!`, `${d.skipped} skipped (already in DB) · ${d.scored} AI-scored`);
+        deselAll();
+    } catch(e) {
+        progEnd('Import failed');
+        alert('Import failed. Please try again.');
+        console.error(e);
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bx bx-import"></i> Import Selected';
+    }
+}
+
+// ── Enter key trigger ─────────────────────────────────────────────────
+['gm-keyword','gm-location'].forEach(id=>{
+    document.getElementById(id).addEventListener('keydown', e=>{ if(e.key==='Enter') document.getElementById('btn-search').click(); });
+});
+
+<!-- ── Comm Modal (Dialer/SMS) ──────────────────────────────────────── -->
+<div id="comm-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); backdrop-filter:blur(5px); z-index:10000; align-items:center; justify-content:center;">
+    <div style="background:var(--bg-elevated); border:1px solid var(--secondary); border-radius:18px; width:100%; max-width:400px; box-shadow:0 20px 40px rgba(0,0,0,0.5); overflow:hidden;">
+        <div style="padding:16px 20px; border-bottom:1px solid var(--secondary); display:flex; justify-content:space-between; align-items:center; background:linear-gradient(135deg, rgba(0,229,255,0.05), transparent);">
+            <div>
+                <h3 id="comm-title" style="margin:0; font-size:1.1rem; color:white;">Communicate</h3>
+                <div id="comm-subtitle" style="font-size:0.75rem; color:var(--text-gray); margin-top:2px;"></div>
+            </div>
+            <button class="btn-sm" onclick="document.getElementById('comm-modal').style.display='none'" style="border:none;"><i class="bx bx-x" style="font-size:1.4rem;"></i></button>
+        </div>
+        
+        <div id="comm-body" style="padding:24px;">
+            <!-- Content injected via JS -->
+        </div>
+    </div>
+</div>
+
+function openDialer(phone, name) {
+    document.getElementById('comm-modal').style.display = 'flex';
+    document.getElementById('comm-title').innerHTML = `<i class="bx bx-phone" style="color:var(--primary);"></i> Calling ${name}`;
+    document.getElementById('comm-subtitle').textContent = phone;
+    
+    document.getElementById('comm-body').innerHTML = `
+        <div style="text-align:center; padding:20px 0;">
+            <div style="width:80px; height:80px; border-radius:50%; background:rgba(0,229,255,0.1); border:2px solid var(--primary); display:flex; align-items:center; justify-content:center; margin:0 auto 20px; font-size:2rem; color:var(--primary); box-shadow: 0 0 20px rgba(0,229,255,0.3); animation:pulse-marker 1.5s infinite;">
+                <i class="bx bxs-phone-call"></i>
+            </div>
+            <div style="font-size:1.2rem; color:white; font-family:var(--font-mono);">${phone}</div>
+            <div style="font-size:0.8rem; color:var(--text-gray); margin-top:8px;" id="dialer-status">Connecting via Twilio...</div>
+            
+            <div style="display:flex; justify-content:center; gap:15px; margin-top:30px;">
+                <button class="btn-sm" style="width:50px; height:50px; border-radius:50%; font-size:1.2rem; background:rgba(255,255,255,0.1); border:none;"><i class="bx bx-microphone-off"></i></button>
+                <button class="btn-sm" onclick="document.getElementById('comm-modal').style.display='none'" style="width:50px; height:50px; border-radius:50%; font-size:1.4rem; background:#ef4444; color:white; border:none; box-shadow:0 4px 10px rgba(239,68,68,0.4);"><i class="bx bxs-phone-off"></i></button>
+                <button class="btn-sm" style="width:50px; height:50px; border-radius:50%; font-size:1.2rem; background:rgba(255,255,255,0.1); border:none;"><i class="bx bx-dialpad"></i></button>
+            </div>
+        </div>
+    `;
+    
+    setTimeout(() => {
+        if(document.getElementById('dialer-status')) {
+            document.getElementById('dialer-status').textContent = 'Ringing...';
+        }
+    }, 1500);
+}
+
+function openSMS(phone, name) {
+    document.getElementById('comm-modal').style.display = 'flex';
+    document.getElementById('comm-title').innerHTML = `<i class="bx bx-message-rounded-dots" style="color:var(--primary);"></i> SMS ${name}`;
+    document.getElementById('comm-subtitle').textContent = phone;
+    
+    document.getElementById('comm-body').innerHTML = `
+        <div style="display:flex; flex-direction:column; gap:15px; height:250px;">
+            <div style="flex:1; overflow-y:auto; padding-right:5px; display:flex; flex-direction:column; gap:10px;" id="sms-chat">
+                <div style="align-self:center; font-size:0.7rem; color:var(--text-dark-gray);">Today</div>
+            </div>
+            
+            <div style="display:flex; gap:8px;">
+                <input type="text" id="sms-input" class="fc" placeholder="Type a message..." style="flex:1;" onkeydown="if(event.key==='Enter') sendSMS()">
+                <button class="btn-search" onclick="sendSMS()" style="width:40px; padding:0; background:var(--primary); color:black;"><i class="bx bx-send"></i></button>
+            </div>
+        </div>
+    `;
+    setTimeout(() => document.getElementById('sms-input').focus(), 100);
+}
+
+function sendSMS() {
+    const inp = document.getElementById('sms-input');
+    const msg = inp.value.trim();
+    if(!msg) return;
+    
+    const chat = document.getElementById('sms-chat');
+    chat.innerHTML += `
+        <div style="align-self:flex-end; background:var(--primary); color:black; padding:8px 12px; border-radius:12px 12px 0 12px; font-size:0.85rem; max-width:85%;">
+            ${msg.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+        </div>
+        <div style="align-self:flex-end; font-size:0.65rem; color:var(--text-dark-gray); margin-top:-6px;">Delivered</div>
+    `;
+    inp.value = '';
+    chat.scrollTop = chat.scrollHeight;
+}
+
+<!-- Voice-Activated Command Center UI -->
+<div id="voice-command-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 10000; background: rgba(0,0,0,0.7); backdrop-filter: blur(15px); align-items: center; justify-content: center; flex-direction: column;">
+    
+    <div style="text-align: center; max-width: 600px; width: 100%;">
+        <!-- Equalizer Animation -->
+        <div id="voice-equalizer" style="display: flex; gap: 8px; justify-content: center; height: 60px; margin-bottom: 2rem;">
+            <div class="eq-bar" style="width: 8px; background: var(--brand-primary); border-radius: 4px; animation: eq 1s ease-in-out infinite;"></div>
+            <div class="eq-bar" style="width: 8px; background: #0ea5e9; border-radius: 4px; animation: eq 1.2s ease-in-out infinite 0.2s;"></div>
+            <div class="eq-bar" style="width: 8px; background: var(--brand-primary); border-radius: 4px; animation: eq 0.8s ease-in-out infinite 0.4s;"></div>
+            <div class="eq-bar" style="width: 8px; background: #8b5cf6; border-radius: 4px; animation: eq 1.1s ease-in-out infinite 0.1s;"></div>
+            <div class="eq-bar" style="width: 8px; background: var(--brand-primary); border-radius: 4px; animation: eq 0.9s ease-in-out infinite 0.3s;"></div>
+        </div>
+
+        <!-- Transcription Text -->
+        <h2 id="voice-transcript" style="color: #fff; font-size: 2rem; font-weight: 300; margin-bottom: 1rem; min-height: 40px; transition: all 0.3s;">Listening...</h2>
+        
+        <!-- Execution Log -->
+        <div id="voice-execution-log" style="opacity: 0; transition: opacity 0.5s; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 1.5rem; text-align: left; margin-top: 2rem;">
+            <div class="voice-log-item" style="display:flex; align-items:center; gap:10px; margin-bottom:12px; color:rgba(255,255,255,0.6);"><i class="bx bx-loader-alt bx-spin" style="color:var(--brand-primary);"></i> Parsing intent...</div>
+        </div>
+        
+        <p style="color: rgba(255,255,255,0.4); font-size: 0.85rem; margin-top: 2rem;">Press <kbd style="background:rgba(255,255,255,0.1); padding:2px 6px; border-radius:4px;">ESC</kbd> to cancel</p>
+    </div>
+</div>
+<style>
+    @keyframes eq { 0%, 100% { height: 20%; } 50% { height: 100%; } }
+    @keyframes fadeUpVoice { to { opacity:1; transform:translateY(0); } }
+</style>
+    document.addEventListener('keydown', function(e) {
+        // Support both Cmd+J and Cmd+Shift+V for backwards compatibility
+        if ((e.metaKey || e.ctrlKey) && (e.key === 'j' || e.key === 'J')) {
+            e.preventDefault();
+            activateVoiceCommand();
+        }
+        if ((e.metaKey || e.ctrlKey) && e.shiftKey && (e.key === 'v' || e.key === 'V')) {
+            e.preventDefault();
+            activateVoiceCommand();
+        }
+        if (e.key === 'Escape') {
+            document.getElementById('voice-command-overlay').style.display = 'none';
+        }
+    });
+
+    function activateVoiceCommand() {
+        const overlay = document.getElementById('voice-command-overlay');
+        const transcript = document.getElementById('voice-transcript');
+        const execLog = document.getElementById('voice-execution-log');
+        const eq = document.getElementById('voice-equalizer');
+        
+        overlay.style.display = 'flex';
+        transcript.innerHTML = 'Listening...';
+        transcript.style.color = 'rgba(255,255,255,0.5)';
+        execLog.style.opacity = '0';
+        eq.style.display = 'flex';
+        execLog.innerHTML = '<div class="voice-log-item" style="display:flex; align-items:center; gap:10px; margin-bottom:12px; color:rgba(255,255,255,0.6);"><i class="bx bx-loader-alt bx-spin" style="color:var(--brand-primary);"></i> Parsing intent...</div>';
+        
+        // Phase 1: Transcribing
+        setTimeout(() => {
+            transcript.style.color = '#fff';
+            typeWriterEffectVoice(transcript, '"Move Acme Corp to Proposal Sent, draft a follow-up email, and remind me to call tomorrow."');
+        }, 1500);
+        
+        // Phase 2: Execution
+        setTimeout(() => {
+            eq.style.display = 'none';
+            execLog.style.opacity = '1';
+            
+            setTimeout(() => addLogItemVoice('<i class="bx bx-check-circle" style="color:#10b981;"></i> Intent parsed successfully'), 800);
+            setTimeout(() => addLogItemVoice('<i class="bx bx-check-circle" style="color:#10b981;"></i> Pipeline Stage updated to: Proposal Sent'), 1800);
+            setTimeout(() => addLogItemVoice('<i class="bx bx-check-circle" style="color:#10b981;"></i> Email draft created: "Follow-up on Acme Proposal"'), 2800);
+            setTimeout(() => addLogItemVoice('<i class="bx bx-check-circle" style="color:#10b981;"></i> Task created: Call Acme Corp tomorrow @ 10:00 AM'), 3800);
+            setTimeout(() => {
+                transcript.innerHTML = '<i class="bx bx-check-circle" style="color:#10b981; margin-right: 10px;"></i>Action Completed';
+                setTimeout(() => { overlay.style.display = 'none'; }, 2500);
+            }, 4500);
+        }, 4500);
+    }
+    
+    function typeWriterEffectVoice(element, text, speed=30) {
+        element.innerHTML = '';
+        let i = 0;
+        function type() {
+            if (i < text.length) {
+                element.innerHTML += text.charAt(i);
+                i++;
+                setTimeout(type, speed);
+            }
+        }
+        type();
+    }
+    function addLogItemVoice(html) {
+        const logItem = document.createElement('div');
+        logItem.className = 'voice-log-item';
+        logItem.style.cssText = 'display:flex; align-items:center; gap:10px; margin-bottom:12px; color:#fff; animation: fadeUpVoice 0.3s ease-out forwards; opacity:0; transform:translateY(10px);';
+        logItem.innerHTML = html;
+        document.getElementById('voice-execution-log').appendChild(logItem);
+    }
+
+</body>
+</html>

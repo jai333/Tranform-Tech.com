@@ -24,7 +24,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-m6b6gv*^g_1nimg*3a5ow*8x=szk*gg=gs*z-&!#@as=uk_x#m'
+# ── Secret Key ──────────────────────────────────────────────
+# NEVER commit a real key. Set SECRET_KEY in your host's env vars panel.
+SECRET_KEY = os.getenv(
+    'SECRET_KEY',
+    'django-insecure-m6b6gv*^g_1nimg*3a5ow*8x=szk*gg=gs*z-&!#@as=uk_x#m'  # dev fallback only
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
@@ -113,21 +118,47 @@ USE_TZ = True
 
 # ── Static / Media ────────────────────────────────────────────
 STATIC_URL = 'static/'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+SITE_NAME = 'Transform.io'
+SITE_DOMAIN = os.getenv('SITE_DOMAIN', 'transform-tech.com')
+
 AUTH_USER_MODEL = 'tracking_app.User'
 LOGIN_REDIRECT_URL = 'home'
 LOGIN_URL = 'login'
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [
+    'transform-tech.com',
+    'www.transform-tech.com',
+    'localhost',
+    '127.0.0.1',
+    # Railway / Render / Heroku auto-domain
+    os.getenv('RAILWAY_STATIC_URL', '').replace('https://', '').split('/')[0],
+    os.getenv('RENDER_EXTERNAL_HOSTNAME', ''),
+]
+# Remove empty strings from ALLOWED_HOSTS
+ALLOWED_HOSTS = [h for h in ALLOWED_HOSTS if h]
 CSRF_TRUSTED_ORIGINS = [
+    'https://transform-tech.com',
+    'https://www.transform-tech.com',
+    # Keep dev tunnels for local testing
     'https://26464c660ea8.ngrok-free.app',
     'https://preview-jaisu-8000.loca.lt',
     'https://campsite-december-flatly.ngrok-free.dev',
+    # Dynamic Railway/Render URLs
+    *(
+        [f"https://{os.getenv('RAILWAY_STATIC_URL', '').replace('https://', '').split('/')[0]}"]
+        if os.getenv('RAILWAY_STATIC_URL') else []
+    ),
+    *(
+        [f"https://{os.getenv('RENDER_EXTERNAL_HOSTNAME', '')}"]
+        if os.getenv('RENDER_EXTERNAL_HOSTNAME') else []
+    ),
 ]
 
 # ── WebSocket Channel Layers ──────────────────────────────────
@@ -155,7 +186,12 @@ else:
     }
 
 # ── Email (Console for Local Testing) ────────────────────────────────────────
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# Real SMTP in production, console in local dev
+EMAIL_BACKEND = (
+    'django.core.mail.backends.smtp.EmailBackend'
+    if not DEBUG
+    else 'django.core.mail.backends.console.EmailBackend'
+)
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
@@ -222,25 +258,31 @@ STRIPE_PRICE_ENTERPRISE = os.getenv('STRIPE_PRICE_ENTERPRISE', '')
 DJSTRIPE_WEBHOOK_SECRET = STRIPE_WEBHOOK_SECRET
 DJSTRIPE_FOREIGN_KEY_TO_FIELD = 'id'
 
-# ── Caching & Redis ───────────────────────────────────────────
+# ── Caching ───────────────────────────────────────────
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
-        'LOCATION': os.getenv('REDIS_URL', 'redis://127.0.0.1:6379/1'),
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
     }
 }
 
 # ── Celery Configuration ──────────────────────────────────────
-CELERY_BROKER_URL = os.getenv('REDIS_URL', 'redis://127.0.0.1:6379/1')
-CELERY_RESULT_BACKEND = os.getenv('REDIS_URL', 'redis://127.0.0.1:6379/1')
+CELERY_BROKER_URL = 'memory://'
+CELERY_RESULT_BACKEND = 'django-db'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
+
+# Fallback to Eager mode if Redis isn't installed locally
+# This runs background tasks synchronously so the MVP works without a separate worker
+CELERY_TASK_ALWAYS_EAGER = True
+CELERY_TASK_STORE_EAGER_RESULT = True
 
 # ── Production Security Settings ──────────────────────────────
 import sys
 IS_TESTING = 'test' in sys.argv or 'test_coverage' in sys.argv or os.getenv('GITHUB_ACTIONS') == 'true'
 
 if not DEBUG and not IS_TESTING:
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True

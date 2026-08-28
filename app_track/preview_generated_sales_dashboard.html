@@ -1,4 +1,4 @@
-{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;600&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="{% static 'tracking_app/transform.css' %}?v=401">
+    <link rel="stylesheet" href="/static/tracking_app/transform.css?v=401">
     <!-- ▸ Apply saved theme before render to avoid flash of wrong theme -->
     <script>
         (function(){
@@ -234,21 +234,21 @@
         }
 
         /* ── Light Theme Overrides ── */
-        [data-theme="light"] body .kpi-value,
-        [data-theme="light"] body .panel-title,
-        [data-theme="light"] body .lead-name,
-        [data-theme="light"] body .alert-title,
-        [data-theme="light"] body .email-stat .num,
-        [data-theme="light"] body .activity-item-title {
+        body.light-theme .kpi-value,
+        body.light-theme .panel-title,
+        body.light-theme .lead-name,
+        body.light-theme .alert-title,
+        body.light-theme .email-stat .num,
+        body.light-theme .activity-item-title {
             color: var(--text-white);
         }
-        [data-theme="light"] body .lead-row,
-        [data-theme="light"] body .deal-row,
-        [data-theme="light"] body .alert-item,
-        [data-theme="light"] body .activity-item {
+        body.light-theme .lead-row,
+        body.light-theme .deal-row,
+        body.light-theme .alert-item,
+        body.light-theme .activity-item {
             border-bottom-color: var(--secondary);
         }
-        [data-theme="light"] body .email-stat {
+        body.light-theme .email-stat {
             border-right-color: var(--secondary);
         }
     </style>
@@ -258,13 +258,13 @@
 <!-- ── Navbar ───────────────────────────────────────────────── -->
 <nav class="navbar">
     <div class="container nav-content">
-        <a class="logo" href="{% url 'home' %}">
-            <img src="{% static 'tracking_app/assets/logo-333.png' %}" alt="Transform.io" height="32" onerror="this.style.display='none'">
+        <a class="logo" href="/">
+            <img src="/static/tracking_app/assets/logo-333.png" alt="Transform.io" height="32" onerror="this.style.display='none'">
             <span>Transform<span class="text-cyan">.io</span></span>
         </a>
         <div style="display:flex;align-items:center;gap:16px;">
             <span style="font-size:0.75rem;color:var(--text-gray);"><span class="live-dot"></span>AI Sales Dashboard</span>
-            <a href="{% url 'it-helpdesk-list' %}" class="btn-brand ghost"><i class='bx bx-arrow-back'></i> Back to App</a>
+            <a href="/it/tickets/" class="btn-brand ghost"><i class='bx bx-arrow-back'></i> Back to App</a>
             <button id="theme-toggle" class="btn btn-primary btn-lg" title="Toggle light/dark theme" style="width: 50px; height: 50px; padding: 0; display: flex; align-items: center; justify-content: center; border-radius: 50%;"><i id="theme-icon" class="fas fa-moon"></i></button>
         </div>
 </nav>
@@ -281,53 +281,50 @@
             <p style="color:var(--text-gray);font-size:0.875rem;"><span class="live-dot"></span>Live pipeline — automated by AI</p>
         </div>
         <div style="display:flex;gap:10px;">
-            <a href="{% url 'lead-create' %}" class="btn-brand primary"><i class='bx bx-plus'></i> Add Lead</a>
-            <a href="{% url 'demo-booking' %}" class="btn-brand ghost"><i class='bx bx-calendar'></i> Demo Page</a>
+            <a href="/sales/leads/new/" class="btn-brand primary"><i class='bx bx-plus'></i> Add Lead</a>
+            <a href="/demo/" class="btn-brand ghost"><i class='bx bx-calendar'></i> Demo Page</a>
         </div>
     </div>
 
     <!-- ── Horizontal Tab Navigation ─────────────────────── -->
     <div class="dash-tabs" role="tablist">
-        <a href="{% url 'sales-dashboard' %}" class="dash-tab active" role="tab">
+        <a href="/sales/" class="dash-tab active" role="tab">
             <i class='bx bx-bar-chart-alt-2'></i> Dashboard
         </a>
-        <a href="{% url 'sales-analytics' %}" class="dash-tab" role="tab">
+        <a href="/sales/analytics/" class="dash-tab" role="tab">
             <i class='bx bx-trending-up'></i> Analytics
         </a>
         <div class="tab-sep"></div>
-        <a href="{% url 'deal-pipeline' %}" class="dash-tab" role="tab">
+        <a href="/sales/pipeline/" class="dash-tab" role="tab">
             <i class='bx bx-git-pull-request'></i> Deal Pipeline
         </a>
-        <a href="{% url 'lead-list' %}" class="dash-tab" role="tab">
+        <a href="/sales/leads/" class="dash-tab" role="tab">
             <i class='bx bx-user-plus'></i> Leads
         </a>
-        <a href="{% url 'lead-create' %}" class="dash-tab" role="tab">
+        <a href="/sales/leads/new/" class="dash-tab" role="tab">
             <i class='bx bx-plus-circle'></i> Add Lead
         </a>
-        <a href="{% url 'gmaps-lead-scraper' %}" class="dash-tab" role="tab" style="color:#00E5FF;">
+        <a href="/sales/leads/google-maps/" class="dash-tab" role="tab" style="color:#00E5FF;">
             <i class='bx bxs-map-pin'></i> Maps Scraper
         </a>
-        <a href="{% url 'sales-buying-radar' %}" class="dash-tab" role="tab" style="color:#a78bfa;">
-            <i class='bx bx-radar'></i> Strategic Insight Engine
-        </a>
-        <a href="{% url 'autonomous-agent' %}" class="dash-tab" role="tab" style="color:#00ff88;">
-            <i class='bx bx-terminal'></i> Autonomous Agent
+        <a href="/sales/buying-signals/" class="dash-tab" role="tab" style="color:var(--brand-primary); border-color:rgba(0, 229, 255, 0.2); background:rgba(0, 229, 255, 0.05);">
+            <i class='bx bx-radar bx-burst'></i> Strategic Insights
         </a>
         <div class="tab-sep"></div>
-        <a href="{% url 'demo-booking' %}" class="dash-tab" role="tab" target="_blank">
+        <a href="/demo/" class="dash-tab" role="tab" target="_blank">
             <i class='bx bx-calendar-check'></i> Demo Booking
         </a>
         <a href="/admin/" class="dash-tab" role="tab" target="_blank">
             <i class='bx bx-cog'></i> Admin
         </a>
         <div class="tab-sep"></div>
-        <a href="{% url 'job-list' %}" class="dash-tab" role="tab">
+        <a href="/jobs/" class="dash-tab" role="tab">
             <i class='bx bx-briefcase'></i> Jobs
         </a>
-        <a href="{% url 'candidate-list' %}" class="dash-tab" role="tab">
+        <a href="/candidates/" class="dash-tab" role="tab">
             <i class='bx bx-group'></i> Candidates
         </a>
-        <a href="{% url 'interview-list' %}" class="dash-tab" role="tab">
+        <a href="/interviews/" class="dash-tab" role="tab">
             <i class='bx bx-video'></i> Interviews
         </a>
     </div>
@@ -337,26 +334,26 @@
         <div class="kpi-card">
             <i class='bx bx-user-plus kpi-icon'></i>
             <div class="kpi-label">Total Leads</div>
-            <div class="kpi-value">{{ total_leads }}</div>
-            <div class="kpi-sub">{{ qualified_leads }} qualified (ICP ≥65)</div>
+            <div class="kpi-value"></div>
+            <div class="kpi-sub"> qualified (ICP ≥65)</div>
         </div>
         <div class="kpi-card">
             <i class='bx bx-mail-send kpi-icon'></i>
             <div class="kpi-label">Emails Sent (30d)</div>
-            <div class="kpi-value">{{ emails_sent }}</div>
-            <div class="kpi-sub">{{ open_rate }}% open · {{ reply_rate }}% reply</div>
+            <div class="kpi-value"></div>
+            <div class="kpi-sub">% open · % reply</div>
         </div>
         <div class="kpi-card">
             <i class='bx bx-calendar-check kpi-icon'></i>
             <div class="kpi-label">Demos This Month</div>
-            <div class="kpi-value">{{ demos_this_month }}</div>
-            <div class="kpi-sub">{{ active_sequences }} active sequences</div>
+            <div class="kpi-value"></div>
+            <div class="kpi-sub"> active sequences</div>
         </div>
         <div class="kpi-card green">
             <i class='bx bx-dollar-circle kpi-icon'></i>
             <div class="kpi-label">MRR Won</div>
-            <div class="kpi-value">${{ mrr_won }}</div>
-            <div class="kpi-sub">${{ pipeline_value }} in pipeline</div>
+            <div class="kpi-value">$</div>
+            <div class="kpi-sub">$ in pipeline</div>
         </div>
     </div>
 
@@ -364,33 +361,14 @@
     <div class="panel mb-section">
         <div class="panel-header">
             <span class="panel-title">Pipeline Stages</span>
-            <a href="{% url 'deal-pipeline' %}" class="btn-brand subtle">View Kanban →</a>
+            <a href="/sales/pipeline/" class="btn-brand subtle">View Kanban →</a>
         </div>
         <div class="panel-body">
             <div class="pipeline-bar">
-                {% for stage in pipeline_stages %}
-                {% if stage.count > 0 %}
-                <div class="pipeline-segment seg-{{ stage.key }}" style="width: {{ stage.pct }}%;" title="{{ stage.label }}: {{ stage.count }} deals ({{ stage.pct|floatformat:0 }}%)"></div>
-                {% endif %}
-                {% endfor %}
+                
             </div>
             <div class="pipeline-stages">
-                {% for stage in pipeline_stages %}
-                <div class="stage-pill">
-                    <span style="display:inline-block;width:7px;height:7px;border-radius:50%;
-                        {% if stage.key == 'lead' %}background:#555;
-                        {% elif stage.key == 'outreach' %}background:#3a7bd5;
-                        {% elif stage.key == 'replied' %}background:#00a6fb;
-                        {% elif stage.key == 'demo_booked' %}background:#00E5FF;
-                        {% elif stage.key == 'demo_done' %}background:#00c9a7;
-                        {% elif stage.key == 'proposal' %}background:#FFCC00;
-                        {% elif stage.key == 'negotiation' %}background:#FF9500;
-                        {% elif stage.key == 'won' %}background:#34C759;
-                        {% elif stage.key == 'lost' %}background:#FF3B30;
-                        {% endif %}"></span>
-                    {{ stage.label }} <span class="count">{{ stage.count }}</span>
-                </div>
-                {% endfor %}
+                
             </div>
         </div>
     </div>
@@ -402,34 +380,16 @@
         <div class="panel">
             <div class="panel-header">
                 <span class="panel-title">🔥 Hot Leads</span>
-                <a href="{% url 'lead-list' %}?min_score=65" class="btn-brand subtle">All leads →</a>
+                <a href="/sales/leads/?min_score=65" class="btn-brand subtle">All leads →</a>
             </div>
             <div class="panel-body">
-                {% if hot_leads %}
-                    {% for lead in hot_leads %}
-                    <div class="lead-row">
-                        <div style="flex:1;">
-                            <div class="lead-name">
-                                <a href="{% url 'lead-detail' lead.id %}" style="color:white;text-decoration:none;">
-                                    {{ lead.contact_name }}
-                                    {% if lead.is_hot %}<span class="fire-badge">🔥</span>{% endif %}
-                                </a>
-                            </div>
-                            <div class="lead-company">{{ lead.company_name }} · {{ lead.status }}</div>
-                        </div>
-                        <div style="text-align:right;">
-                            <div class="lead-score">{{ lead.icp_score|floatformat:0 }}/100</div>
-                            <div style="font-size:0.68rem;color:var(--text-dark-gray);">{{ lead.email_opens }} opens</div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                {% else %}
+                
                     <div style="text-align:center;padding:32px;color:var(--text-gray);">
                         <i class='bx bx-search-alt' style="font-size:2rem;display:block;margin-bottom:8px;"></i>
                         No hot leads yet.<br>
-                        <a href="{% url 'lead-create' %}" class="btn-brand primary" style="margin-top:14px;display:inline-flex;">+ Add First Lead</a>
+                        <a href="/sales/leads/new/" class="btn-brand primary" style="margin-top:14px;display:inline-flex;">+ Add First Lead</a>
                     </div>
-                {% endif %}
+                
             </div>
         </div>
 
@@ -437,32 +397,15 @@
         <div class="panel">
             <div class="panel-header">
                 <span class="panel-title">⚡ AI Alerts</span>
-                <span style="font-size:0.72rem;color:var(--text-dark-gray);">{{ alerts|length }} unread</span>
+                <span style="font-size:0.72rem;color:var(--text-dark-gray);">0 unread</span>
             </div>
             <div class="panel-body" id="alerts-container">
-                {% if alerts %}
-                    {% for alert in alerts %}
-                    <div class="alert-item" id="alert-{{ alert.id }}">
-                        <div class="alert-icon">
-                            {% if alert.alert_type == 'hot_lead' %}🔥
-                            {% elif alert.alert_type == 'cold_deal' %}⚠️
-                            {% elif alert.alert_type == 'demo_reminder' %}📅
-                            {% elif alert.alert_type == 'reply_received' %}💬
-                            {% else %}✅{% endif %}
-                        </div>
-                        <div style="flex:1;">
-                            <div class="alert-title">{{ alert.title }}</div>
-                            <div class="alert-body">{{ alert.body }}</div>
-                        </div>
-                        <button class="dismiss-btn" onclick="dismissAlert({{ alert.id }})" title="Dismiss">✕</button>
-                    </div>
-                    {% endfor %}
-                {% else %}
+                
                     <div style="text-align:center;padding:32px;color:var(--text-gray);">
                         <i class='bx bx-check-shield' style="font-size:2rem;display:block;margin-bottom:8px;color:var(--accent-green);"></i>
                         All caught up — no alerts!
                     </div>
-                {% endif %}
+                
             </div>
         </div>
     </div>
@@ -477,30 +420,30 @@
             </div>
             <div class="email-stats-row">
                 <div class="email-stat">
-                    <div class="num">{{ emails_sent }}</div>
+                    <div class="num"></div>
                     <div class="lbl">Sent</div>
                 </div>
                 <div class="email-stat">
-                    <div class="num">{{ emails_opened }}</div>
+                    <div class="num"></div>
                     <div class="lbl">Opened</div>
-                    <div class="rate">{{ open_rate }}%</div>
+                    <div class="rate">%</div>
                 </div>
                 <div class="email-stat">
-                    <div class="num">{{ emails_replied }}</div>
+                    <div class="num"></div>
                     <div class="lbl">Replied</div>
-                    <div class="rate">{{ reply_rate }}%</div>
+                    <div class="rate">%</div>
                 </div>
             </div>
             <div class="panel-body">
                 <div class="stat-bar-row">
                     <div class="stat-bar-label">Open rate</div>
-                    <div class="stat-bar-track"><div class="stat-bar-fill" style="width:{{ open_rate }}%;"></div></div>
-                    <div class="stat-bar-val">{{ open_rate }}%</div>
+                    <div class="stat-bar-track"><div class="stat-bar-fill" style="width:%;"></div></div>
+                    <div class="stat-bar-val">%</div>
                 </div>
                 <div class="stat-bar-row">
                     <div class="stat-bar-label">Reply rate</div>
-                    <div class="stat-bar-track"><div class="stat-bar-fill" style="width:{{ reply_rate }}%;background:#34C759;"></div></div>
-                    <div class="stat-bar-val">{{ reply_rate }}%</div>
+                    <div class="stat-bar-track"><div class="stat-bar-fill" style="width:%;background:#34C759;"></div></div>
+                    <div class="stat-bar-val">%</div>
                 </div>
                 <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--secondary);">
                     <p style="font-size:0.72rem;color:var(--text-gray);">Industry avg open rate is 22%. Reply rate &gt; 5% is excellent for cold outreach.</p>
@@ -512,31 +455,15 @@
         <div class="panel">
             <div class="panel-header">
                 <span class="panel-title">💼 Active Deals</span>
-                <a href="{% url 'deal-pipeline' %}" class="btn-brand subtle">Full pipeline →</a>
+                <a href="/sales/pipeline/" class="btn-brand subtle">Full pipeline →</a>
             </div>
             <div class="panel-body">
-                {% if recent_deals %}
-                    {% for deal in recent_deals %}
-                    <div class="deal-row">
-                        <div>
-                            <div style="font-size:0.875rem;color:white;">
-                                <a href="{% url 'deal-detail' deal.id %}" style="color:white;text-decoration:none;">{{ deal.lead.company_name }}</a>
-                            </div>
-                            <div style="font-size:0.72rem;color:var(--text-gray);">{{ deal.lead.contact_name }}</div>
-                        </div>
-                        <span class="deal-stage-badge">{{ deal.stage }}</span>
-                        <div style="text-align:right;">
-                            <div class="deal-value">${{ deal.deal_value_monthly }}/mo</div>
-                            <div style="font-size:0.68rem;color:var(--text-dark-gray);">{{ deal.close_probability|floatformat:0 }}% close</div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                {% else %}
+                
                     <div style="text-align:center;padding:32px;color:var(--text-gray);">
                         <i class='bx bx-git-pull-request' style="font-size:2rem;display:block;margin-bottom:8px;"></i>
                         No active deals yet.<br>Score a lead to create one.
                     </div>
-                {% endif %}
+                
             </div>
         </div>
     </div>
@@ -715,41 +642,41 @@
         <div class="panel-body">
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px;">
                 <div>
-                    {% with total_leads as base %}
+                    
                     <div class="funnel-row">
                         <div class="funnel-label">All Leads</div>
-                        <div class="funnel-bar" style="width:100%;">{{ total_leads }}</div>
+                        <div class="funnel-bar" style="width:100%;"></div>
                     </div>
                     <div class="funnel-row">
                         <div class="funnel-label">Qualified</div>
-                        <div class="funnel-bar" style="width:{% if total_leads %}{{ qualified_leads|floatformat:0 }}%{% else %}0%{% endif %};background:linear-gradient(90deg,#3a7bd5,rgba(58,123,213,0.3));">{{ qualified_leads }}</div>
+                        <div class="funnel-bar" style="width:0%;background:linear-gradient(90deg,#3a7bd5,rgba(58,123,213,0.3));"></div>
                     </div>
                     <div class="funnel-row">
                         <div class="funnel-label">In Sequence</div>
-                        <div class="funnel-bar" style="width:{% if total_leads %}{{ active_sequences|floatformat:0 }}%{% else %}0%{% endif %};background:linear-gradient(90deg,#00a6fb,rgba(0,166,251,0.3));">{{ active_sequences }}</div>
+                        <div class="funnel-bar" style="width:0%;background:linear-gradient(90deg,#00a6fb,rgba(0,166,251,0.3));"></div>
                     </div>
                     <div class="funnel-row">
                         <div class="funnel-label">Demos</div>
-                        <div class="funnel-bar" style="width:{% if total_leads %}{{ demos_this_month|floatformat:0 }}%{% else %}0%{% endif %};">{{ demos_this_month }}</div>
+                        <div class="funnel-bar" style="width:0%;"></div>
                     </div>
                     <div class="funnel-row" style="margin-top: 16px;">
                         <div class="funnel-label">Deals Won</div>
-                        <div class="funnel-bar" style="width:{% if total_leads %}{{ deals_won|floatformat:0 }}%{% else %}0%{% endif %};background:linear-gradient(90deg,#32d74b,rgba(50,215,75,0.3));">{{ deals_won }}</div>
+                        <div class="funnel-bar" style="width:0%;background:linear-gradient(90deg,#32d74b,rgba(50,215,75,0.3));"></div>
                     </div>
                     <div class="funnel-row">
                         <div class="funnel-label" style="color:var(--text-dark-gray);">Deals Lost</div>
-                        <div class="funnel-bar" style="width:{% if total_leads %}{{ deals_lost|floatformat:0 }}%{% else %}0%{% endif %};background:linear-gradient(90deg,var(--accent-red),rgba(255,59,48,0.3));color:white;">{{ deals_lost }}</div>
+                        <div class="funnel-bar" style="width:0%;background:linear-gradient(90deg,var(--accent-red),rgba(255,59,48,0.3));color:white;"></div>
                     </div>
-                    {% endwith %}
+                    
                 </div>
                 <div style="border-left:1px solid var(--secondary);padding-left:32px;">
                     <div style="font-family:var(--font-mono);font-size:0.68rem;color:var(--text-dark-gray);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:14px;">Quick Actions</div>
                     <div class="quick-actions">
-                        <a href="{% url 'lead-create' %}" class="btn-brand ghost"><i class='bx bx-plus'></i> Add Lead Manually</a>
-                        <a href="{% url 'lead-list' %}" class="btn-brand ghost"><i class='bx bx-list-ul'></i> View All Leads</a>
-                        <a href="{% url 'deal-pipeline' %}" class="btn-brand ghost"><i class='bx bx-git-pull-request'></i> Deal Pipeline</a>
-                        <a href="{% url 'demo-booking' %}" class="btn-brand ghost" target="_blank"><i class='bx bx-calendar-check'></i> Open Demo Page</a>
-                        <a href="{% url 'sales-analytics' %}" class="btn-brand ghost"><i class='bx bx-bar-chart'></i> Analytics</a>
+                        <a href="/sales/leads/new/" class="btn-brand ghost"><i class='bx bx-plus'></i> Add Lead Manually</a>
+                        <a href="/sales/leads/" class="btn-brand ghost"><i class='bx bx-list-ul'></i> View All Leads</a>
+                        <a href="/sales/pipeline/" class="btn-brand ghost"><i class='bx bx-git-pull-request'></i> Deal Pipeline</a>
+                        <a href="/demo/" class="btn-brand ghost" target="_blank"><i class='bx bx-calendar-check'></i> Open Demo Page</a>
+                        <a href="/sales/analytics/" class="btn-brand ghost"><i class='bx bx-bar-chart'></i> Analytics</a>
                     </div>
                 </div>
             </div>
@@ -842,6 +769,6 @@ function getCookie(name) {
     return cookieValue;
 }
 </script>
-<script src="{% static 'tracking_app/transform.js' %}"></script>
+<script src="/static/tracking_app/transform.js"></script>
 </body>
 </html>

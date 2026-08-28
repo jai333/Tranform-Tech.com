@@ -613,3 +613,159 @@ class AccountActivity(models.Model):
 
     def __str__(self):
         return f"{self.get_activity_type_display()} – {self.subject}"
+
+
+# -----------------------------------------------------------------
+# LAYER 9 — Autonomous AI Sales Outreach Agent
+# -----------------------------------------------------------------
+
+class OutreachCampaign(models.Model):
+    """A named outreach campaign grouping multiple agent-driven runs."""
+    STATUS_CHOICES = [
+        ("draft",    "Draft"),
+        ("active",   "Active"),
+        ("paused",   "Paused"),
+        ("complete", "Complete"),
+        ("archived", "Archived"),
+    ]
+    PERSONALIZATION_CHOICES = [
+        ("quick",    "Quick (Fast, template-based)"),
+        ("standard", "Standard (AI-personalized per lead)"),
+        ("deep",     "Deep (Research + multi-signal context)"),
+    ]
+
+    name        = models.CharField(max_length=250)
+    description = models.TextField(blank=True)
+    goal        = models.CharField(max_length=300, blank=True)
+    status      = models.CharField(max_length=20, choices=STATUS_CHOICES, default="active")
+    channel_email = models.BooleanField(default=True)
+    channel_sms   = models.BooleanField(default=True)
+    channel_call  = models.BooleanField(default=False)
+    personalization_level = models.CharField(max_length=20, choices=PERSONALIZATION_CHOICES, default="standard")
+    enroll_in_sequence = models.BooleanField(default=True)
+    sequence_days = models.JSONField(default=list)
+    leads_targeted   = models.IntegerField(default=0)
+    emails_sent      = models.IntegerField(default=0)
+    sms_sent         = models.IntegerField(default=0)
+    calls_initiated  = models.IntegerField(default=0)
+    replies_received = models.IntegerField(default=0)
+    demos_booked     = models.IntegerField(default=0)
+    tenant     = models.ForeignKey("tracking_app.Tenant", on_delete=models.CASCADE, null=True, blank=True, related_name="outreach_campaigns")
+    created_by = models.ForeignKey("tracking_app.User", on_delete=models.SET_NULL, null=True, blank=True, related_name="campaigns_created")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return self.name
+
+    @property
+    def reply_rate(self):
+        if self.emails_sent == 0:
+            return 0.0
+        return round(self.replies_received / self.emails_sent * 100, 1)
+
+
+class AgentOutreachRun(models.Model):
+    """A single autonomous outreach execution for one lead across all channels."""
+    STATUS_CHOICES = [
+        ("queued",    "Queued"),
+        ("running",   "Running"),
+        ("completed", "Completed"),
+        ("partial",   "Partial (some channels failed)"),
+        ("failed",    "Failed"),
+        ("skipped",   "Skipped"),
+    ]
+    CHANNEL_STATUS = [
+        ("pending",   "Pending"),
+        ("sent",      "Sent"),
+        ("initiated", "Initiated"),
+        ("completed", "Completed"),
+        ("no_answer", "No Answer"),
+        ("failed",    "Failed"),
+        ("skipped",   "Skipped"),
+    ]
+
+    campaign = models.ForeignKey(OutreachCampaign, on_delete=models.CASCADE, related_name="runs", null=True, blank=True)
+    lead     = models.ForeignKey(Lead, on_delete=models.CASCADE, related_name="agent_runs")
+    tenant   = models.ForeignKey("tracking_app.Tenant", on_delete=models.CASCADE, null=True, blank=True, related_name="agent_runs")
+    status      = models.CharField(max_length=20, choices=STATUS_CHOICES, default="queued")
+    icp_score   = models.FloatField(default=0.0)
+    skip_reason = models.CharField(max_length=300, blank=True, null=True)
+
+    email_enabled = models.BooleanField(default=True)
+    email_subject = models.CharField(max_length=400, blank=True)
+    email_body    = models.TextField(blank=True)
+    email_status  = models.CharField(max_length=20, default="pending", choices=CHANNEL_STATUS)
+    email_sent_at = models.DateTimeField(null=True, blank=True)
+    email_opened  = models.BooleanField(default=False)
+    email_clicked = models.BooleanField(default=False)
+    email_replied = models.BooleanField(default=False)
+
+    sms_enabled = models.BooleanField(default=True)
+    sms_body    = models.TextField(blank=True)
+    sms_status  = models.CharField(max_length=20, default="pending", choices=CHANNEL_STATUS)
+    sms_sent_at = models.DateTimeField(null=True, blank=True)
+    sms_sid     = models.CharField(max_length=100, blank=True, null=True)
+
+    call_enabled          = models.BooleanField(default=False)
+    call_script           = models.TextField(blank=True)
+    call_status           = models.CharField(max_length=20, default="pending", choices=CHANNEL_STATUS)
+    call_sid              = models.CharField(max_length=100, blank=True, null=True)
+    call_initiated_at     = models.DateTimeField(null=True, blank=True)
+    call_duration_seconds = models.IntegerField(default=0)
+
+    sequence_enrolled = models.BooleanField(default=False)
+    sequence_step     = models.IntegerField(default=0)
+    next_follow_up_at = models.DateTimeField(null=True, blank=True)
+    started_at        = models.DateTimeField(null=True, blank=True)
+    completed_at      = models.DateTimeField(null=True, blank=True)
+    created_at        = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"AgentRun -> {self.lead.contact_name} @ {self.lead.company_name} [{self.status}]"
+
+    @property
+    def duration_seconds(self):
+        if self.started_at and self.completed_at:
+            return (self.completed_at - self.started_at).total_seconds()
+        return None
+
+
+class OutreachAgentLog(models.Model):
+    """Time-series brain log powering the real-time Command Center activity feed."""
+    LEVEL_CHOICES = [
+        ("info",    "Info"),
+        ("success", "Success"),
+        ("warning", "Warning"),
+        ("error",   "Error"),
+        ("ai",      "AI Decision"),
+    ]
+    CHANNEL_CHOICES = [
+        ("email",  "Email"),
+        ("sms",    "SMS"),
+        ("call",   "Call"),
+        ("system", "System"),
+        ("ai",     "AI"),
+    ]
+
+    run    = models.ForeignKey(AgentOutreachRun, on_delete=models.CASCADE, related_name="logs", null=True, blank=True)
+    lead   = models.ForeignKey(Lead, on_delete=models.SET_NULL, null=True, blank=True, related_name="agent_logs")
+    tenant = models.ForeignKey("tracking_app.Tenant", on_delete=models.CASCADE, null=True, blank=True, related_name="agent_logs")
+    level   = models.CharField(max_length=10, choices=LEVEL_CHOICES, default="info")
+    channel = models.CharField(max_length=20, blank=True, choices=CHANNEL_CHOICES)
+    message = models.TextField()
+    meta    = models.JSONField(default=dict, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        lead_str = self.lead.contact_name if self.lead else "-"
+        return f"[{self.level.upper()}] {lead_str}: {self.message[:80]}"

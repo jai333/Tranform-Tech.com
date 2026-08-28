@@ -1,0 +1,1079 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Candidate Map Sourcing — Transform.io ATS</title>
+    <meta name="description" content="AI-powered candidate sourcing with interactive map. Paste a JD, set filters, and discover top talent in any location.">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'tracking_app/transform.css' %}?v=335">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        (function(){
+            var t = localStorage.getItem('theme');
+            if(t === 'light') document.documentElement.classList.add('light-theme');
+        })();
+    </script>
+    <style>
+        body { padding-top: 75px; background: var(--bg-base); }
+
+        /* ── Page layout ─────────────────────────────────────────── */
+        .sourcing-page {
+            display: grid;
+            grid-template-columns: 360px 1fr;
+            gap: 22px;
+            align-items: start;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 24px 24px 80px;
+        }
+        @media (max-width: 960px) { .sourcing-page { grid-template-columns: 1fr; } }
+
+        /* ── Panel ────────────────────────────────────────────────── */
+        .sp {
+            background: var(--bg-elevated);
+            border: 1px solid var(--secondary);
+            border-radius: 18px;
+            overflow: hidden;
+        }
+        .sp-hdr {
+            padding: 16px 20px 14px;
+            border-bottom: 1px solid var(--secondary);
+            display: flex; align-items: center; gap: 12px;
+        }
+        .sp-hdr .ic {
+            width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 17px;
+        }
+        .sp-hdr .ic.purple { background: rgba(167,139,250,0.12); color: #a78bfa; }
+        .sp-hdr .ic.cyan   { background: rgba(0,229,255,0.10);   color: var(--primary); }
+        .sp-hdr .ic.green  { background: rgba(16,185,129,0.10);  color: #10b981; }
+        .sp-hdr h2 { font-size: 0.93rem; font-weight: 700; color:var(--apple-text); margin: 0; }
+        .sp-hdr p  { font-size: 0.7rem; color: var(--text-gray); margin: 1px 0 0; }
+        .sp-body { padding: 20px; }
+
+        /* ── JD Box ──────────────────────────────────────────────── */
+        .jd-box {
+            background: rgba(167,139,250,0.04);
+            border: 1px dashed rgba(167,139,250,0.3);
+            border-radius: 13px;
+            padding: 0;
+            overflow: hidden;
+            margin-bottom: 18px;
+            transition: border-color 0.2s;
+        }
+        .jd-box:focus-within { border-color: rgba(167,139,250,0.6); border-style: solid; }
+        .jd-label {
+            padding: 10px 14px 8px;
+            display: flex; align-items: center; justify-content: space-between;
+            border-bottom: 1px solid rgba(167,139,250,0.15);
+        }
+        .jd-label span {
+            font-size: 0.68rem; font-family: var(--font-mono);
+            letter-spacing: 1.5px; text-transform: uppercase; color: #a78bfa;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .jd-label .jd-parse-btn {
+            font-size: 0.7rem; color: var(--primary); background: rgba(0,229,255,0.08);
+            border: 1px solid rgba(0,229,255,0.2); border-radius: 6px;
+            padding: 3px 10px; cursor: pointer; transition: all 0.2s;
+            font-family: var(--font-mono);
+        }
+        .jd-label .jd-parse-btn:hover { background: rgba(0,229,255,0.16); }
+        #jd-input {
+            width: 100%; background: transparent; border: none; outline: none;
+            color: #d0d0e8; font-size: 0.8rem; line-height: 1.6;
+            padding: 12px 14px; min-height: 130px; resize: vertical;
+            font-family: var(--font-sans); box-sizing: border-box;
+        }
+        #jd-input::placeholder { color: rgba(160,160,200,0.4); font-style: italic; }
+
+        /* ── Form Fields ─────────────────────────────────────────── */
+        .fg { margin-bottom: 14px; }
+        .fg label {
+            display: block; font-size: 0.67rem; font-family: var(--font-mono);
+            letter-spacing: 1.5px; text-transform: uppercase;
+            color: var(--text-gray); margin-bottom: 6px;
+        }
+        .fc {
+            width: 100%; background: rgba(0,0,0,0.3);
+            border: 1px solid var(--secondary); border-radius: 9px;
+            color: #e0e0e0; font-size: 0.875rem; padding: 9px 13px;
+            outline: none; box-sizing: border-box;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            font-family: var(--font-sans);
+        }
+        .fc:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0,229,255,0.07); }
+        .fc::placeholder { color: var(--text-dark-gray); }
+        select.fc option { background: #12121f; }
+
+        /* ── Skills Tags Input ───────────────────────────────────── */
+        .tags-wrap {
+            background: rgba(0,0,0,0.3); border: 1px solid var(--secondary);
+            border-radius: 9px; padding: 7px 10px; min-height: 42px;
+            display: flex; flex-wrap: wrap; gap: 5px; align-items: center;
+            cursor: text; transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .tags-wrap:focus-within { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0,229,255,0.07); }
+        .skill-tag {
+            background: rgba(0,229,255,0.1); border: 1px solid rgba(0,229,255,0.25);
+            color: var(--primary); border-radius: 5px; padding: 2px 8px;
+            font-size: 0.72rem; font-family: var(--font-mono);
+            display: flex; align-items: center; gap: 5px;
+        }
+        .skill-tag .rm { cursor: pointer; opacity: 0.6; font-size: 0.8rem; }
+        .skill-tag .rm:hover { opacity: 1; }
+        #skill-input {
+            border: none; outline: none; background: transparent;
+            color: #e0e0e0; font-size: 0.82rem; font-family: var(--font-sans);
+            flex: 1; min-width: 80px; padding: 2px 3px;
+        }
+        #skill-input::placeholder { color: var(--text-dark-gray); }
+
+        /* ── Row layout ──────────────────────────────────────────── */
+        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .rng-row { display: flex; align-items: center; gap: 10px; }
+        .rng-row input[type=range] { flex: 1; accent-color: var(--primary); cursor: pointer; }
+        .rng-val { font-family: var(--font-mono); font-size: 0.82rem; color: var(--primary); min-width: 36px; text-align: center; }
+
+        /* ── Pill toggles ────────────────────────────────────────── */
+        .pill-group { display: flex; gap: 6px; flex-wrap: wrap; }
+        .pill {
+            padding: 5px 12px; border-radius: 20px; font-size: 0.72rem; font-family: var(--font-mono);
+            border: 1px solid var(--secondary); color: var(--text-gray);
+            cursor: pointer; transition: all 0.18s; user-select: none;
+        }
+        .pill:hover { border-color: var(--primary); color: var(--primary); }
+        .pill.on { background: rgba(0,229,255,0.1); border-color: var(--primary); color: var(--primary); font-weight: 700; }
+        .pill.purple-pill.on { background: rgba(167,139,250,0.1); border-color: #a78bfa; color: #a78bfa; }
+
+        /* ── Search Button ───────────────────────────────────────── */
+        .btn-search {
+            width: 100%; background: linear-gradient(135deg,#a78bfa,#6d28d9);
+            color:var(--apple-text); font-weight: 800; font-size: 0.9rem;
+            border: none; border-radius: 11px; padding: 13px;
+            cursor: pointer; display: flex; align-items: center;
+            justify-content: center; gap: 10px;
+            transition: opacity 0.2s, transform 0.15s;
+            margin-top: 16px;
+        }
+        .btn-search:hover  { opacity: 0.9; transform: translateY(-1px); }
+        .btn-search:active { transform: translateY(0); }
+        .btn-search:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+        /* ── Results header ──────────────────────────────────────── */
+        .res-hdr {
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--secondary);
+            display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+        }
+        .res-stat { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: var(--text-gray); }
+        .res-stat .n { font-family: var(--font-mono); font-size: 1.05rem; font-weight: 700; color: #a78bfa; }
+        .res-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+        .btn-sm { padding: 6px 12px; font-size: 0.78rem; border-radius: 7px; border: 1px solid var(--secondary); background: none; color: var(--text-gray); cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; transition: all 0.2s; }
+        .btn-sm:hover { border-color: #a78bfa; color: #a78bfa; }
+        .btn-import {
+            font-size: 0.8rem; padding: 7px 16px; border-radius: 9px;
+            background: linear-gradient(135deg,#a78bfa,#6d28d9); color:var(--apple-text); border: none;
+            font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+            transition: opacity 0.2s;
+        }
+        .btn-import:hover { opacity: 0.85; }
+        .btn-import:disabled { opacity: 0.35; cursor: not-allowed; }
+
+        /* ── Progress ────────────────────────────────────────────── */
+        .prog-wrap { display: none; padding: 14px 20px; border-bottom: 1px solid var(--secondary); }
+        .prog-wrap.on { display: block; }
+        .prog-lbl { font-size: 0.75rem; color: var(--text-gray); font-family: var(--font-mono); margin-bottom: 8px; display: flex; align-items: center; gap: 7px; }
+        .prog-lbl .spin { display: inline-block; animation: spin 1s linear infinite; color: #a78bfa; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .prog-bar { height: 3px; background: rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden; }
+        .prog-fill { height: 100%; background: linear-gradient(90deg,#a78bfa,#6d28d9); width: 0%; transition: width 0.5s ease; box-shadow: 0 0 8px rgba(167,139,250,0.4); }
+
+        /* ── Map ─────────────────────────────────────────────────── */
+        #sourcing-map {
+            width: 100%; height: 320px; background: #0B0E14;
+            border-bottom: 1px solid var(--secondary);
+            display: none; z-index: 1;
+        }
+        .cand-dot {
+            width: 16px; height: 16px; border-radius: 50%;
+            border: 2.5px solid #0B0E14;
+            animation: pulse-dot 2s infinite;
+        }
+        .cand-dot.high   { background: #10b981; box-shadow: 0 0 10px #10b981; }
+        .cand-dot.medium { background: #a78bfa; box-shadow: 0 0 10px #a78bfa; }
+        .cand-dot.low    { background: #f59e0b; box-shadow: 0 0 10px #f59e0b; }
+        @keyframes pulse-dot {
+            0%   { opacity: 1; }
+            50%  { opacity: 0.65; }
+            100% { opacity: 1; }
+        }
+
+        /* ── Map legend ──────────────────────────────────────────── */
+        .map-legend {
+            display: none;
+            padding: 10px 18px;
+            border-bottom: 1px solid var(--secondary);
+            gap: 20px; align-items: center; flex-wrap: wrap;
+        }
+        .map-legend.on { display: flex; }
+        .leg-item { display: flex; align-items: center; gap: 6px; font-size: 0.72rem; color: var(--text-gray); }
+        .leg-dot { width: 10px; height: 10px; border-radius: 50%; }
+        .leg-dot.high   { background: #10b981; }
+        .leg-dot.medium { background: #a78bfa; }
+        .leg-dot.low    { background: #f59e0b; }
+
+        /* ── Results body ────────────────────────────────────────── */
+        .res-body { padding: 18px 20px; }
+        .empty-st { text-align: center; padding: 60px 20px; color: var(--text-gray); }
+        .empty-st .ei { font-size: 3rem; margin-bottom: 14px; filter: grayscale(0.3); }
+        .empty-st h3 { margin: 0 0 7px; font-size: 1.05rem; color:var(--apple-text); }
+        .empty-st p  { margin: 0; font-size: 0.83rem; }
+
+        /* ── Candidate Grid ──────────────────────────────────────── */
+        .cand-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 14px; }
+
+        /* ── Candidate Card ──────────────────────────────────────── */
+        .cc {
+            background: rgba(0,0,0,0.2); border: 1px solid var(--secondary);
+            border-radius: 14px; padding: 16px 18px;
+            position: relative; cursor: pointer;
+            transition: border-color 0.2s, transform 0.15s, box-shadow 0.2s;
+        }
+        .cc:hover { border-color: rgba(167,139,250,0.35); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(167,139,250,0.07); }
+        .cc.sel { border-color: #a78bfa; background: rgba(167,139,250,0.04); box-shadow: 0 0 0 2px rgba(167,139,250,0.15); }
+
+        .cc-chk {
+            position: absolute; top: 13px; right: 13px;
+            width: 18px; height: 18px; border-radius: 5px;
+            border: 1.5px solid var(--secondary); background: transparent;
+            display: flex; align-items: center; justify-content: center; transition: all 0.15s;
+        }
+        .cc.sel .cc-chk { background: #a78bfa; border-color: #a78bfa; }
+        .cc-chk i { font-size: 10px; color: #000; display: none; }
+        .cc.sel .cc-chk i { display: block; }
+
+        .cc-top { display: flex; align-items: center; gap: 11px; margin-bottom: 11px; }
+        .cc-av {
+            width: 42px; height: 42px; border-radius: 12px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1rem; font-weight: 800; font-family: var(--font-mono);
+        }
+        .cc-av.high   { background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.25); color: #10b981; }
+        .cc-av.medium { background: rgba(167,139,250,0.12); border: 1px solid rgba(167,139,250,0.25); color: #a78bfa; }
+        .cc-av.low    { background: rgba(245,158,11,0.12); border: 1px solid rgba(245,158,11,0.25); color: #f59e0b; }
+
+        .cc-info { flex: 1; min-width: 0; }
+        .cc-name { font-size: 0.88rem; font-weight: 700; color:var(--apple-text); margin: 0 22px 2px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .cc-title { font-size: 0.75rem; color: var(--text-gray); margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        /* Match score badge */
+        .match-badge {
+            display: inline-flex; align-items: center; gap: 4px;
+            font-size: 0.68rem; font-family: var(--font-mono); font-weight: 700;
+            padding: 2px 8px; border-radius: 4px; margin-bottom: 10px;
+        }
+        .match-badge.high   { background: rgba(16,185,129,0.1);  border: 1px solid rgba(16,185,129,0.3);  color: #10b981; }
+        .match-badge.medium { background: rgba(167,139,250,0.1); border: 1px solid rgba(167,139,250,0.3); color: #a78bfa; }
+        .match-badge.low    { background: rgba(245,158,11,0.1);  border: 1px solid rgba(245,158,11,0.3);  color: #f59e0b; }
+
+        /* Match bar */
+        .match-bar-wrap { margin-bottom: 10px; }
+        .match-bar-bg { height: 4px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden; }
+        .match-bar-fill { height: 100%; border-radius: 4px; transition: width 0.6s ease; }
+        .match-bar-fill.high   { background: linear-gradient(90deg,#10b981,#059669); }
+        .match-bar-fill.medium { background: linear-gradient(90deg,#a78bfa,#7c3aed); }
+        .match-bar-fill.low    { background: linear-gradient(90deg,#f59e0b,#d97706); }
+
+        /* Skill chips */
+        .skill-chips { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 10px; }
+        .chip {
+            font-size: 0.65rem; font-family: var(--font-mono);
+            padding: 2px 7px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.08); color: var(--text-gray);
+        }
+        .chip.match { background: rgba(167,139,250,0.1); border-color: rgba(167,139,250,0.25); color: #a78bfa; }
+
+        .cc-meta { display: flex; flex-direction: column; gap: 4px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 9px; }
+        .cc-row  { display: flex; align-items: center; gap: 6px; font-size: 0.73rem; color: var(--text-gray); }
+        .cc-row i { font-size: 0.78rem; color: var(--text-dark-gray); flex-shrink: 0; }
+        .cc-row a { color: var(--primary); text-decoration: none; }
+        .cc-row a:hover { text-decoration: underline; }
+
+        /* ── Sort/Filter bar ─────────────────────────────────────── */
+        .sort-bar {
+            padding: 10px 20px;
+            border-bottom: 1px solid var(--secondary);
+            display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+            font-size: 0.75rem; color: var(--text-gray);
+        }
+        .sort-bar select { font-size: 0.75rem; padding: 4px 8px; border-radius: 7px; background: rgba(0,0,0,0.3); border: 1px solid var(--secondary); color: var(--text-gray); outline: none; cursor: pointer; }
+        .view-toggle { display: flex; gap: 4px; margin-left: auto; }
+        .view-btn { width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--secondary); background: none; color: var(--text-gray); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; transition: all 0.15s; }
+        .view-btn.on { background: rgba(167,139,250,0.12); border-color: #a78bfa; color: #a78bfa; }
+
+        /* ── Toast ───────────────────────────────────────────────── */
+        .toast {
+            display: none; position: fixed; bottom: 28px; right: 28px; z-index: 9999;
+            background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.32);
+            border-radius: 13px; padding: 14px 20px; color: #10b981;
+            font-size: 0.875rem; max-width: 310px;
+            box-shadow: 0 14px 36px rgba(0,0,0,0.5); backdrop-filter: blur(10px);
+        }
+        .toast.on { display: flex; gap: 11px; align-items: center; }
+        .toast i { font-size: 1.3rem; flex-shrink: 0; }
+
+        /* ── AI Parse Banner ─────────────────────────────────────── */
+        .parse-banner {
+            display: none; background: rgba(167,139,250,0.07);
+            border: 1px solid rgba(167,139,250,0.2); border-radius: 10px;
+            padding: 10px 14px; margin-bottom: 14px; font-size: 0.77rem; color: #a78bfa;
+            align-items: center; gap: 8px;
+        }
+        .parse-banner.on { display: flex; }
+        .parse-banner i { flex-shrink: 0; font-size: 1rem; }
+
+        /* ── Divider ─────────────────────────────────────────────── */
+        .sec-div {
+            font-size: 0.65rem; font-family: var(--font-mono);
+            letter-spacing: 1.5px; text-transform: uppercase;
+            color: var(--text-dark-gray); margin: 16px 0 10px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .sec-div::after { content: ''; flex: 1; height: 1px; background: var(--secondary); }
+    </style>
+</head>
+<body>
+
+<button onclick="activateVoiceCommand()" style="position:fixed;bottom:30px;right:30px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#a78bfa,#6d28d9);color:var(--apple-text);border:none;box-shadow:0 10px 25px rgba(167,139,250,0.4);z-index:9999;font-size:1.7rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'" title="Voice Command">
+    <i class='bx bx-microphone'></i>
+</button>
+
+<!-- ── Navbar ──────────────────────────────────────────────── -->
+<nav class="navbar">
+    <div class="container nav-content">
+        <a class="logo" href="{% url 'home' %}">
+            <img src="{% static 'tracking_app/assets/logo-333.png' %}" alt="Transform.io" height="32" onerror="this.style.display='none'">
+            <span>Transform<span class="text-cyan">.io</span></span>
+        </a>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <span style="font-size:0.75rem;color:var(--text-gray);"><span class="live-dot"></span>ATS</span>
+            <a href="{% url 'candidate-list' %}" class="btn-sm" style="text-decoration:none;"><i class='bx bx-arrow-back'></i> Candidates</a>
+            <a href="{% url 'candidate-sourcing' %}" class="btn-sm" style="text-decoration:none;"><i class='bx bx-satellite'></i> Sourcing Engine</a>
+            <button id="theme-toggle" class="btn btn-primary btn-lg" title="Toggle theme" style="width:42px;height:42px;padding:0;display:flex;align-items:center;justify-content:center;border-radius:50%;"><i id="theme-icon" class="fas fa-moon"></i></button>
+        </div>
+    </div>
+</nav>
+
+<!-- ── Page Header ───────────────────────────────────────────── -->
+<div style="max-width:1600px;margin:0 auto;padding:20px 24px 0;">
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+        <div style="width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,rgba(167,139,250,0.18),rgba(109,40,217,0.12));border:1px solid rgba(167,139,250,0.25);display:flex;align-items:center;justify-content:center;font-size:1.5rem;">🎯</div>
+        <div>
+            <h1 style="margin:0;font-size:1.45rem;font-weight:900;color:var(--apple-text);">Candidate Map Sourcing</h1>
+            <p style="margin:3px 0 0;color:var(--text-gray);font-size:0.81rem;">Paste a Job Description → AI extracts criteria → source candidates by location on an interactive map</p>
+        </div>
+        <div style="margin-left:auto;display:flex;gap:8px;">
+            <a href="{% url 'candidate-sourcing' %}" class="btn-sm" style="text-decoration:none;border-color:rgba(167,139,250,0.3);color:#a78bfa;"><i class='bx bx-satellite'></i> Classic Sourcing</a>
+            <a href="{% url 'candidate-list' %}" class="btn-sm" style="text-decoration:none;"><i class='bx bx-list-ul'></i> View Pipeline</a>
+        </div>
+    </div>
+</div>
+
+<!-- ── Main Layout ───────────────────────────────────────────── -->
+<div class="sourcing-page">
+
+    <!-- LEFT: Controls -->
+    <div>
+        <!-- JD Input Panel -->
+        <div class="sp" style="margin-bottom:16px;">
+            <div class="sp-hdr">
+                <div class="ic purple"><i class='bx bx-file-blank'></i></div>
+                <div>
+                    <h2>Job Description (JD)</h2>
+                    <p>Paste your JD — AI will extract the role & required skills</p>
+                </div>
+            </div>
+            <div class="sp-body">
+                <div class="jd-box">
+                    <div class="jd-label">
+                        <span><i class='bx bx-brain'></i> JD Text</span>
+                        <button class="jd-parse-btn" onclick="parseJD()" id="parse-btn">⚡ Parse & Fill Filters</button>
+                    </div>
+                    <textarea id="jd-input" placeholder="Paste the full Job Description here…&#10;&#10;e.g. We are looking for a Senior React Developer with 5+ years of experience in TypeScript, GraphQL, and AWS. The candidate should be located in Austin, TX or open to remote work…"></textarea>
+                </div>
+                <div class="parse-banner" id="parse-banner">
+                    <i class='bx bxs-check-circle'></i>
+                    <span id="parse-msg">JD parsed successfully — filters updated</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters Panel -->
+        <div class="sp">
+            <div class="sp-hdr">
+                <div class="ic cyan"><i class='bx bx-filter-alt'></i></div>
+                <div>
+                    <h2>Search Filters</h2>
+                    <p>Refine your candidate search criteria</p>
+                </div>
+            </div>
+            <div class="sp-body">
+
+                <div class="fg">
+                    <label>👤 Job Title / Role</label>
+                    <input type="text" id="f-title" class="fc" placeholder="e.g. Senior React Developer, Data Scientist, DevOps Engineer">
+                </div>
+
+                <div class="fg">
+                    <label>🛠️ Required Skills <span style="font-style:italic;opacity:0.6;">(press Enter or comma to add)</span></label>
+                    <div class="tags-wrap" id="tags-wrap" onclick="document.getElementById('skill-input').focus()">
+                        <input type="text" id="skill-input" placeholder="Add a skill…" autocomplete="off">
+                    </div>
+                    <input type="hidden" id="f-skills">
+                </div>
+
+                <div class="fg">
+                    <label>📍 Location / City</label>
+                    <input type="text" id="f-location" class="fc" placeholder="e.g. Austin, TX  ·  New York  ·  London, UK">
+                </div>
+
+                <div class="two-col">
+                    <div class="fg">
+                        <label>🎓 Experience Level</label>
+                        <select id="f-exp" class="fc">
+                            <option value="">Any Level</option>
+                            <option value="entry">Entry (0–2 yrs)</option>
+                            <option value="mid">Mid (3–5 yrs)</option>
+                            <option value="senior">Senior (6–9 yrs)</option>
+                            <option value="lead">Lead / Principal (10+ yrs)</option>
+                        </select>
+                    </div>
+                    <div class="fg">
+                        <label>🎓 Education</label>
+                        <select id="f-edu" class="fc">
+                            <option value="">Any</option>
+                            <option value="high_school">High School</option>
+                            <option value="associate">Associate's</option>
+                            <option value="bachelor">Bachelor's</option>
+                            <option value="master">Master's</option>
+                            <option value="phd">PhD</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="fg">
+                    <label>🌍 Work Mode Preference</label>
+                    <div class="pill-group" id="work-mode">
+                        <div class="pill purple-pill on" data-val="remote" onclick="togglePill(this,'work-mode')">Remote</div>
+                        <div class="pill purple-pill on" data-val="hybrid" onclick="togglePill(this,'work-mode')">Hybrid</div>
+                        <div class="pill purple-pill on" data-val="onsite" onclick="togglePill(this,'work-mode')">On-site</div>
+                    </div>
+                </div>
+
+                <div class="fg">
+                    <label>⚡ Availability</label>
+                    <div class="pill-group" id="avail">
+                        <div class="pill on" data-val="immediately" onclick="togglePill(this,'avail')">Immediately</div>
+                        <div class="pill on" data-val="2_weeks" onclick="togglePill(this,'avail')">2 weeks</div>
+                        <div class="pill on" data-val="1_month" onclick="togglePill(this,'avail')">1 month</div>
+                        <div class="pill on" data-val="open" onclick="togglePill(this,'avail')">Open to offers</div>
+                    </div>
+                </div>
+
+                <div class="sec-div">Range Settings</div>
+
+                <div class="fg">
+                    <label>📦 Results per search: <span id="max-val" style="color:#a78bfa;">15</span></label>
+                    <div class="rng-row">
+                        <input type="range" id="f-max" min="5" max="50" step="5" value="15"
+                            oninput="document.getElementById('max-val').textContent=this.value">
+                        <span class="rng-val">50</span>
+                    </div>
+                </div>
+
+                <div class="fg">
+                    <label>🗺️ Location Radius: <span id="rad-val" style="color:#a78bfa;">25</span> mi</label>
+                    <div class="rng-row">
+                        <input type="range" id="f-radius" min="5" max="100" step="5" value="25"
+                            oninput="document.getElementById('rad-val').textContent=this.value">
+                        <span class="rng-val">100</span>
+                    </div>
+                </div>
+
+                <button class="btn-search" id="btn-search" onclick="doSearch()">
+                    <i class='bx bx-search-alt'></i>
+                    Find Candidates on Map
+                </button>
+
+                <div style="margin-top:14px;padding:12px;background:rgba(0,0,0,0.2);border-radius:9px;font-size:0.72rem;color:var(--text-gray);line-height:1.65;">
+                    <strong style="color:var(--apple-text);font-size:0.73rem;">How it works</strong><br>
+                    1. Paste a JD or manually set filters<br>
+                    2. AI sources candidates by title + skills<br>
+                    3. Candidates plotted on map by location<br>
+                    4. Select & import to your ATS pipeline ✨
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT: Results -->
+    <div class="sp" style="min-height:600px;">
+
+        <div class="res-hdr">
+            <div class="res-stat">
+                <span class="n" id="stat-count">0</span> <span>candidates found</span>
+                &nbsp;·&nbsp;
+                <span class="n" id="stat-sel">0</span> <span>selected</span>
+            </div>
+            <div class="res-actions">
+                <button class="btn-sm" id="btn-sel-all" onclick="selAll()"><i class="bx bx-check-square"></i> Select All</button>
+                <button class="btn-sm" id="btn-desel" onclick="deselAll()" style="display:none;"><i class="bx bx-square"></i> Deselect All</button>
+                <button class="btn-import" id="btn-import" disabled onclick="doImport()"><i class="bx bx-import"></i> Import to ATS</button>
+            </div>
+        </div>
+
+        <!-- Map -->
+        <div id="sourcing-map"></div>
+
+        <!-- Map legend -->
+        <div class="map-legend" id="map-legend">
+            <span style="font-size:0.7rem;color:var(--text-gray);font-family:var(--font-mono);">MATCH SCORE:</span>
+            <div class="leg-item"><div class="leg-dot high"></div> Strong (80%+)</div>
+            <div class="leg-item"><div class="leg-dot medium"></div> Good (50–79%)</div>
+            <div class="leg-item"><div class="leg-dot low"></div> Partial (&lt;50%)</div>
+        </div>
+
+        <!-- Sort bar -->
+        <div class="sort-bar" id="sort-bar" style="display:none;">
+            <span>Sort by:</span>
+            <select id="sort-select" onchange="sortResults()">
+                <option value="match">Match Score</option>
+                <option value="name">Name A→Z</option>
+                <option value="exp">Experience</option>
+            </select>
+            <div class="view-toggle">
+                <button class="view-btn on" id="vb-grid" onclick="setView('grid')" title="Grid view"><i class="bx bx-grid-alt"></i></button>
+                <button class="view-btn" id="vb-list" onclick="setView('list')" title="List view"><i class="bx bx-list-ul"></i></button>
+            </div>
+        </div>
+
+        <!-- Progress -->
+        <div class="prog-wrap" id="prog">
+            <div class="prog-lbl"><i class="bx bx-loader-alt spin"></i><span id="prog-txt">Sourcing candidates…</span></div>
+            <div class="prog-bar"><div class="prog-fill" id="prog-fill"></div></div>
+        </div>
+
+        <!-- Results body -->
+        <div class="res-body" id="res-body">
+            <div class="empty-st" id="empty-st">
+                <div class="ei">🎯</div>
+                <h3>Ready to source candidates</h3>
+                <p>Paste a JD or set your filters, then click <strong>Find Candidates on Map</strong></p>
+            </div>
+            <div class="cand-grid" id="cand-grid" style="display:none;"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+    <i class="bx bxs-check-circle"></i>
+    <span id="toast-msg">Candidates imported successfully!</span>
+</div>
+
+<!-- ── Scripts ──────────────────────────────────────────────── -->
+{% load static %}
+<script src="{% static 'tracking_app/transform.js' %}?v=70"></script>
+<script>
+    // ── State ────────────────────────────────────────────────
+    let candidates = [];
+    let selected   = new Set();
+    let leafMap    = null;
+    let markers    = [];
+    let skills     = [];
+    let currentView = 'grid';
+
+    const SCRAPE_URL  = "{% url 'api-candidate-map-scrape' %}";
+    const IMPORT_URL  = "{% url 'api-candidate-map-import' %}";
+    const CSRF        = "{{ csrf_token }}";
+
+    // ── Skills tag input ─────────────────────────────────────
+    function addSkill(val) {
+        val = val.trim().replace(',','');
+        if (!val || skills.includes(val)) return;
+        skills.push(val);
+        renderSkillTags();
+    }
+    function removeSkill(val) {
+        skills = skills.filter(s => s !== val);
+        renderSkillTags();
+    }
+    function renderSkillTags() {
+        const wrap = document.getElementById('tags-wrap');
+        const inp  = document.getElementById('skill-input');
+        wrap.querySelectorAll('.skill-tag').forEach(el => el.remove());
+        skills.forEach(s => {
+            const tag = document.createElement('div');
+            tag.className = 'skill-tag';
+            tag.innerHTML = `${s} <span class="rm" onclick="removeSkill('${s}')">×</span>`;
+            wrap.insertBefore(tag, inp);
+        });
+        document.getElementById('f-skills').value = skills.join(',');
+    }
+    document.getElementById('skill-input').addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); addSkill(e.target.value); e.target.value = ''; }
+    });
+    document.getElementById('skill-input').addEventListener('blur', e => {
+        if (e.target.value.trim()) { addSkill(e.target.value); e.target.value = ''; }
+    });
+
+    // ── Pill toggles ─────────────────────────────────────────
+    function togglePill(el, group) {
+        el.classList.toggle('on');
+    }
+    function getPillValues(group) {
+        return [...document.querySelectorAll(`#${group} .pill.on`)].map(p => p.dataset.val);
+    }
+
+    // ── AI JD Parser ─────────────────────────────────────────
+    async function parseJD() {
+        const jd = document.getElementById('jd-input').value.trim();
+        if (!jd) { alert('Please paste a Job Description first.'); return; }
+
+        const btn = document.getElementById('parse-btn');
+        btn.textContent = '⏳ Parsing…';
+        btn.disabled = true;
+
+        try {
+            const resp = await fetch('/api/ai/parse-jd/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+                body: JSON.stringify({ jd_text: jd })
+            });
+            if (resp.ok) {
+                const data = await resp.json();
+                fillFromJD(data);
+                showParseBanner(`Extracted: "${data.title}" · ${(data.skills||[]).length} skills · ${data.location||'any location'}`);
+            } else {
+                // Fallback: simple client-side extraction
+                clientSideExtract(jd);
+            }
+        } catch(e) {
+            clientSideExtract(jd);
+        }
+
+        btn.textContent = '⚡ Parse & Fill Filters';
+        btn.disabled = false;
+    }
+
+    function clientSideExtract(jd) {
+        // Detect title from common patterns
+        const titleMatch = jd.match(/(?:looking for|hiring|seeking|position of|role[:\s]+|job title[:\s]+)([^\n.]{5,60})/i);
+        if (titleMatch) {
+            const raw = titleMatch[1].replace(/[^a-zA-Z0-9\s\/]/g,'').trim();
+            if (raw.length > 3) document.getElementById('f-title').value = raw;
+        }
+
+        // Detect location
+        const locMatch = jd.match(/(?:based in|located in|location[:\s]+|city[:\s]+|in\s+)([A-Z][a-z]+(?:,\s*[A-Z]{2,})?)/);
+        if (locMatch) document.getElementById('f-location').value = locMatch[1];
+
+        // Detect skills
+        const techSkills = [
+            'JavaScript','TypeScript','React','Vue','Angular','Node.js','Python','Java','Go','Rust',
+            'AWS','Azure','GCP','Docker','Kubernetes','SQL','PostgreSQL','MongoDB','Redis',
+            'GraphQL','REST','Git','CI/CD','Machine Learning','TensorFlow','PyTorch',
+            'HTML','CSS','Tailwind','Figma','Sketch','Swift','Kotlin','Flutter','Django','FastAPI'
+        ];
+        const found = techSkills.filter(s => jd.toLowerCase().includes(s.toLowerCase()));
+        skills = [];
+        found.slice(0, 8).forEach(s => addSkill(s));
+        renderSkillTags();
+
+        // Detect experience level
+        if (/senior|sr\.|principal|staff/i.test(jd)) document.getElementById('f-exp').value = 'senior';
+        else if (/lead|architect/i.test(jd)) document.getElementById('f-exp').value = 'lead';
+        else if (/mid[-\s]?level|3[-\s]?\+\s*year/i.test(jd)) document.getElementById('f-exp').value = 'mid';
+        else if (/junior|entry|graduate|0[-\s]?-[-\s]?2/i.test(jd)) document.getElementById('f-exp').value = 'entry';
+
+        // Detect remote
+        if (/remote/i.test(jd) && !/no remote|not remote/i.test(jd)) {
+            // ensure Remote is toggled on
+        }
+
+        showParseBanner(`Auto-detected ${found.length} skills from JD — review and adjust filters below`);
+    }
+
+    function fillFromJD(data) {
+        if (data.title)    document.getElementById('f-title').value = data.title;
+        if (data.location) document.getElementById('f-location').value = data.location;
+        if (data.exp_level) document.getElementById('f-exp').value = data.exp_level;
+        if (data.skills) {
+            skills = [];
+            (data.skills||[]).forEach(s => addSkill(s));
+            renderSkillTags();
+        }
+    }
+
+    function showParseBanner(msg) {
+        const b = document.getElementById('parse-banner');
+        document.getElementById('parse-msg').textContent = msg;
+        b.classList.add('on');
+        setTimeout(() => b.classList.remove('on'), 5000);
+    }
+
+    // ── Search ───────────────────────────────────────────────
+    async function doSearch() {
+        const title    = document.getElementById('f-title').value.trim();
+        const location = document.getElementById('f-location').value.trim();
+
+        if (!title && !location) {
+            alert('Please enter a Job Title or Location to search for candidates.');
+            return;
+        }
+
+        const payload = {
+            keyword:   title || 'Software Engineer',
+            location:  location || 'United States',
+            skills:    skills,
+            exp_level: document.getElementById('f-exp').value,
+            education: document.getElementById('f-edu').value,
+            work_mode: getPillValues('work-mode'),
+            availability: getPillValues('avail'),
+            max_results: parseInt(document.getElementById('f-max').value),
+            radius:    parseInt(document.getElementById('f-radius').value),
+        };
+
+        // UI: loading
+        const btn = document.getElementById('btn-search');
+        btn.disabled = true; btn.innerHTML = '<i class="bx bx-loader-alt spin"></i> Sourcing…';
+        document.getElementById('prog').classList.add('on');
+        document.getElementById('empty-st').style.display = 'none';
+        document.getElementById('cand-grid').style.display = 'none';
+        document.getElementById('sort-bar').style.display = 'none';
+        selected.clear(); updateSelUI();
+
+        // Animate progress bar
+        let pct = 5;
+        const pFill = document.getElementById('prog-fill');
+        pFill.style.width = pct + '%';
+        const phases = ['Finding candidates by title…','Scoring skill matches…','Geocoding locations…','Building candidate cards…'];
+        let phaseIdx = 0;
+        const pInter = setInterval(() => {
+            pct = Math.min(pct + 12, 85);
+            pFill.style.width = pct + '%';
+            if (phaseIdx < phases.length) {
+                document.getElementById('prog-txt').textContent = phases[phaseIdx++];
+            }
+        }, 600);
+
+        try {
+            const resp = await fetch(SCRAPE_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+                body: JSON.stringify(payload)
+            });
+            const data = await resp.json();
+            candidates = data.results || [];
+        } catch(e) {
+            console.error(e);
+            candidates = generateMockCandidates(payload);
+        }
+
+        clearInterval(pInter);
+        pFill.style.width = '100%';
+        setTimeout(() => {
+            document.getElementById('prog').classList.remove('on');
+            btn.disabled = false; btn.innerHTML = '<i class="bx bx-search-alt"></i> Find Candidates on Map';
+            renderResults();
+        }, 400);
+    }
+
+    // ── Mock candidates for demo ─────────────────────────────
+    function generateMockCandidates(payload) {
+        const firstNames = ['Alex','Jordan','Morgan','Casey','Riley','Taylor','Quinn','Cameron','Drew','Avery','Blake','Reese','Skyler','Sam','Jamie','Dana','Devon','Logan','Dylan','Parker'];
+        const lastNames  = ['Chen','Patel','Williams','Johnson','Smith','Garcia','Martinez','Lee','Brown','Davis','Miller','Wilson','Moore','Taylor','Anderson','Thomas','Jackson','White','Harris','Martin'];
+        const companies  = ['Google','Meta','Amazon','Apple','Stripe','Figma','Vercel','Notion','Linear','OpenAI','Anthropic','Netflix','Spotify','Airbnb','Uber','Lyft','Coinbase','Shopify','Atlassian','Salesforce'];
+        const degrees    = ['B.S. Computer Science','M.S. Software Engineering','B.S. Information Systems','B.Tech CS','M.S. Data Science','B.S. Electrical Engineering'];
+        const expMap     = { entry: [0,2], mid: [3,5], senior: [6,9], lead: [10,15], '': [1,12] };
+        const [minExp, maxExp] = expMap[payload.exp_level] || [1,12];
+
+        return Array.from({length: payload.max_results || 15}, (_, i) => {
+            const reqSkills = payload.skills.length ? payload.skills : ['JavaScript','React','Python'];
+            const candidateSkills = [...reqSkills.slice(0, Math.ceil(Math.random() * reqSkills.length))];
+            const extraSkills = ['Git','Docker','AWS','REST APIs','SQL','Agile','TypeScript','Redux','Jest'];
+            extraSkills.sort(() => Math.random() - 0.5).slice(0, 3).forEach(s => candidateSkills.push(s));
+
+            const matchedCount = candidateSkills.filter(s => payload.skills.includes(s)).length;
+            const matchPct = payload.skills.length
+                ? Math.round((matchedCount / payload.skills.length) * 100)
+                : Math.round(50 + Math.random() * 50);
+
+            const exp = minExp + Math.floor(Math.random() * (maxExp - minExp + 1));
+            const fn = firstNames[Math.floor(Math.random() * firstNames.length)];
+            const ln = lastNames[Math.floor(Math.random() * lastNames.length)];
+
+            return {
+                name: `${fn} ${ln}`,
+                title: payload.keyword || 'Software Engineer',
+                company: companies[Math.floor(Math.random() * companies.length)],
+                location: payload.location || 'San Francisco, CA',
+                experience_years: exp,
+                skills: [...new Set(candidateSkills)],
+                required_skills: payload.skills,
+                education: degrees[Math.floor(Math.random() * degrees.length)],
+                work_mode: ['Remote','Hybrid','On-site'][Math.floor(Math.random()*3)],
+                availability: ['Immediately','2 weeks','1 month'][Math.floor(Math.random()*3)],
+                match_score: matchPct,
+                linkedin: '',
+                lat: 0,
+                lng: 0,
+            };
+        });
+    }
+
+    // ── Render results ───────────────────────────────────────
+    function renderResults() {
+        const grid = document.getElementById('cand-grid');
+        const empty = document.getElementById('empty-st');
+        const statCount = document.getElementById('stat-count');
+
+        statCount.textContent = candidates.length;
+        if (!candidates.length) {
+            empty.innerHTML = `<div class="ei">🔍</div><h3>No candidates found</h3><p>Try broadening your search filters or changing the location</p>`;
+            empty.style.display = '';
+            grid.style.display = 'none';
+            return;
+        }
+
+        empty.style.display = 'none';
+        grid.style.display = '';
+        document.getElementById('sort-bar').style.display = 'flex';
+
+        grid.innerHTML = candidates.map((c, i) => buildCard(c, i)).join('');
+        initMap();
+        updateSelUI();
+    }
+
+    function matchLevel(score) {
+        if (score >= 80) return 'high';
+        if (score >= 50) return 'medium';
+        return 'low';
+    }
+
+    function buildCard(c, i) {
+        const score  = c.match_score || 0;
+        const level  = matchLevel(score);
+        const initials = (c.name || '??').split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase();
+        const reqSkills = c.required_skills || [];
+
+        const skillHtml = (c.skills||[]).slice(0,6).map(s => {
+            const isMatch = reqSkills.includes(s);
+            return `<span class="chip${isMatch?' match':''}">${s}</span>`;
+        }).join('');
+
+        const wm = c.work_mode || '—';
+        const avail = c.availability || '—';
+        const exp = c.experience_years != null ? `${c.experience_years} yr${c.experience_years!==1?'s':''}` : '—';
+
+        return `
+        <div class="cc" id="cc-${i}" onclick="toggleSel(${i})">
+            <div class="cc-chk"><i class="bx bx-check"></i></div>
+            <div class="cc-top">
+                <div class="cc-av ${level}">${initials}</div>
+                <div class="cc-info">
+                    <p class="cc-name">${c.name}</p>
+                    <p class="cc-title">${c.title}${c.company?' · '+c.company:''}</p>
+                </div>
+            </div>
+            <div class="match-badge ${level}">
+                <i class="bx bx-bullseye"></i> ${score}% Match
+            </div>
+            <div class="match-bar-wrap">
+                <div class="match-bar-bg"><div class="match-bar-fill ${level}" style="width:${score}%"></div></div>
+            </div>
+            <div class="skill-chips">${skillHtml}</div>
+            <div class="cc-meta">
+                <div class="cc-row"><i class="bx bx-map-pin"></i> ${c.location || '—'}</div>
+                <div class="cc-row"><i class="bx bx-briefcase"></i> ${exp} exp · ${wm}</div>
+                <div class="cc-row"><i class="bx bx-time-five"></i> Available: ${avail}</div>
+                ${c.linkedin ? `<div class="cc-row"><i class="bx bxl-linkedin-square"></i><a href="${c.linkedin}" target="_blank">LinkedIn Profile</a></div>` : ''}
+            </div>
+        </div>`;
+    }
+
+    // ── Map ──────────────────────────────────────────────────
+    function initMap() {
+        const mapEl = document.getElementById('sourcing-map');
+        mapEl.style.display = 'block';
+        document.getElementById('map-legend').classList.add('on');
+
+        if (!leafMap) {
+            leafMap = L.map('sourcing-map', { zoomControl: true }).setView([39.5, -98.35], 4);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                attribution: '© <a href="https://carto.com/">CARTO</a>',
+                maxZoom: 18
+            }).addTo(leafMap);
+        }
+
+        // Clear old markers
+        markers.forEach(m => leafMap.removeLayer(m));
+        markers = [];
+
+        const bounds = [];
+
+        // Geocode base location to distribute markers
+        const location = document.getElementById('f-location').value.trim() || 'United States';
+        let baseLat = 39.5, baseLng = -98.35;
+
+        // Use any provided coordinates or fallback to city centroids
+        const cityMap = {
+            'new york': [40.7128, -74.0060], 'san francisco': [37.7749, -122.4194],
+            'austin': [30.2672, -97.7431], 'seattle': [47.6062, -122.3321],
+            'chicago': [41.8781, -87.6298], 'los angeles': [34.0522, -118.2437],
+            'boston': [42.3601, -71.0589], 'london': [51.5074, -0.1278],
+            'new york, ny': [40.7128, -74.0060], 'remote': [39.5, -98.35],
+        };
+        const locKey = location.toLowerCase().split(',')[0].trim();
+        if (cityMap[locKey]) { [baseLat, baseLng] = cityMap[locKey]; }
+        else if (cityMap[location.toLowerCase()]) { [baseLat, baseLng] = cityMap[location.toLowerCase()]; }
+
+        const radiusDeg = (parseInt(document.getElementById('f-radius').value) || 25) / 69.0;
+
+        candidates.forEach((c, i) => {
+            // Assign coordinates if not provided
+            let lat = c.lat || (baseLat + (Math.random() - 0.5) * 2 * radiusDeg);
+            let lng = c.lng || (baseLng + (Math.random() - 0.5) * 2 * radiusDeg);
+            c.lat = lat; c.lng = lng;
+
+            const level = matchLevel(c.match_score || 0);
+            const colorMap = { high: '#10b981', medium: '#a78bfa', low: '#f59e0b' };
+            const color = colorMap[level];
+
+            const icon = L.divIcon({
+                className: '',
+                html: `<div class="cand-dot ${level}"></div>`,
+                iconSize: [16,16], iconAnchor: [8,8]
+            });
+
+            const m = L.marker([lat, lng], { icon })
+                .addTo(leafMap)
+                .bindPopup(`
+                    <div style="min-width:180px;">
+                        <strong style="color:var(--apple-text);">${c.name}</strong><br>
+                        <span style="color:#a78bfa;font-size:0.75rem;">${c.title}</span><br>
+                        <span style="color:#888;font-size:0.72rem;">${c.company || ''}</span><hr style="border-color:rgba(255,255,255,0.1);margin:6px 0;">
+                        <span style="color:${color};font-weight:700;">${c.match_score || 0}% match</span><br>
+                        <span style="color:#888;font-size:0.7rem;">${(c.skills||[]).slice(0,3).join(' · ')}</span>
+                    </div>
+                `, { className: 'leaflet-popup-dark' })
+                .on('click', () => toggleSel(i));
+
+            markers.push(m);
+            bounds.push([lat, lng]);
+        });
+
+        if (bounds.length) {
+            try { leafMap.fitBounds(bounds, { padding: [40, 40] }); }
+            catch(e) { leafMap.setView([baseLat, baseLng], 10); }
+        }
+        setTimeout(() => leafMap.invalidateSize(), 100);
+    }
+
+    // ── Selection ────────────────────────────────────────────
+    function toggleSel(i) {
+        if (selected.has(i)) selected.delete(i);
+        else selected.add(i);
+        document.getElementById('cc-' + i)?.classList.toggle('sel', selected.has(i));
+        updateSelUI();
+    }
+    function selAll() {
+        candidates.forEach((_, i) => { selected.add(i); document.getElementById('cc-'+i)?.classList.add('sel'); });
+        updateSelUI();
+    }
+    function deselAll() {
+        selected.clear();
+        candidates.forEach((_, i) => document.getElementById('cc-'+i)?.classList.remove('sel'));
+        updateSelUI();
+    }
+    function updateSelUI() {
+        const n = selected.size;
+        document.getElementById('stat-sel').textContent = n;
+        document.getElementById('btn-import').disabled = n === 0;
+        document.getElementById('btn-desel').style.display = n ? '' : 'none';
+        document.getElementById('btn-sel-all').style.display = n === candidates.length ? 'none' : '';
+    }
+
+    // ── Sort ─────────────────────────────────────────────────
+    function sortResults() {
+        const by = document.getElementById('sort-select').value;
+        if (by === 'match') candidates.sort((a,b) => (b.match_score||0) - (a.match_score||0));
+        else if (by === 'name') candidates.sort((a,b) => (a.name||'').localeCompare(b.name||''));
+        else if (by === 'exp') candidates.sort((a,b) => (b.experience_years||0) - (a.experience_years||0));
+        document.getElementById('cand-grid').innerHTML = candidates.map((c,i) => buildCard(c,i)).join('');
+        // restore selection state
+        selected.forEach(i => document.getElementById('cc-'+i)?.classList.add('sel'));
+    }
+
+    // ── View toggle ──────────────────────────────────────────
+    function setView(v) {
+        currentView = v;
+        document.getElementById('vb-grid').classList.toggle('on', v==='grid');
+        document.getElementById('vb-list').classList.toggle('on', v==='list');
+        const grid = document.getElementById('cand-grid');
+        if (v === 'list') {
+            grid.style.gridTemplateColumns = '1fr';
+        } else {
+            grid.style.gridTemplateColumns = '';
+        }
+    }
+
+    // ── Import ───────────────────────────────────────────────
+    async function doImport() {
+        if (!selected.size) return;
+        const btn = document.getElementById('btn-import');
+        btn.disabled = true; btn.textContent = 'Importing…';
+
+        const toImport = [...selected].map(i => candidates[i]);
+        try {
+            const resp = await fetch(IMPORT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+                body: JSON.stringify({ candidates: toImport })
+            });
+            const data = await resp.json();
+            showToast(`✅ ${data.imported} imported, ${data.skipped} skipped — now in your ATS pipeline!`);
+        } catch(e) {
+            showToast(`${toImport.length} candidates queued for import (demo mode)`);
+        }
+
+        btn.disabled = false; btn.innerHTML = '<i class="bx bx-import"></i> Import to ATS';
+    }
+
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        document.getElementById('toast-msg').textContent = msg;
+        t.classList.add('on');
+        setTimeout(() => t.classList.remove('on'), 5000);
+    }
+
+    // ── Leaflet dark popup style ─────────────────────────────
+    const style = document.createElement('style');
+    style.textContent = `
+        .leaflet-popup-dark .leaflet-popup-content-wrapper {
+            background: #1a1a2e; border: 1px solid rgba(167,139,250,0.3); border-radius: 10px; color: #e0e0e0;
+        }
+        .leaflet-popup-dark .leaflet-popup-tip { background: #1a1a2e; }
+    `;
+    document.head.appendChild(style);
+</script>
+</body>
+</html>

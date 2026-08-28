@@ -54,3 +54,13 @@ Thumbs.db
 # Project specific
 static/admin/
 static/rest_framework/ 
+# Production artifacts
+staticfiles/
+.env.production
+*.env
+
+# Secrets — never commit
+secrets/
+
+# Railway
+.railway/

@@ -57,9 +57,13 @@ urlpatterns = [
     path('candidates/<int:pk>/update/', views.CandidateUpdateView.as_view(), name='candidate-update'),
     path('candidates/<int:pk>/delete/', views.CandidateDeleteView.as_view(), name='candidate-delete'),
     path('candidates/sourcing/', views.candidate_sourcing, name='candidate-sourcing'),
+    path('candidates/map-sourcing/', views.candidate_gmaps_scraper, name='candidate-map-sourcing'),
+    path('candidates/api/map-scrape/', views.api_candidate_gmaps_scrape, name='api-candidate-map-scrape'),
+    path('candidates/api/map-import/', views.api_candidate_gmaps_import, name='api-candidate-map-import'),
     path('candidates/api/add-sourced/', views.add_sourced_candidate, name='add-sourced-candidate'),
     path('candidates/api/parse-and-scrape/', views.parse_and_scrape, name='parse-and-scrape'),
     path('candidates/api/search-web-candidates/', views.search_web_candidates, name='search-web-candidates'),
+    path('candidates/api/import-ghost-profile/', views.import_ghost_profile, name='import-ghost-profile'),
     
     # Job URLs
     path('jobs/', views.JobListView.as_view(), name='job-list'),
@@ -117,6 +121,7 @@ urlpatterns = [
     path('it/tickets/', views.it_helpdesk_list, name='it-helpdesk-list'),
     path('it/tickets/new/', views.it_ticket_create, name='it-ticket-create'),
     path('it/tickets/<int:pk>/', views.it_ticket_detail, name='it-ticket-detail'),
+    path('it/api/tickets/<int:pk>/ai-heal/', views.api_it_ai_heal, name='api-it-ai-heal'),
     path('it/assets/', views.it_asset_list, name='it-asset-list'),
     path('it/assets/new/', views.it_asset_create, name='it-asset-create'),
     path('it/vendors/new/', views.it_vendor_create, name='it-vendor-create'),
@@ -194,5 +199,7 @@ urlpatterns = [
     path('api/mail/save/', views.save_mail_settings, name='save-mail-settings'),
     path('api/webhooks/<int:endpoint_id>/simulate/', views.simulate_webhook_payload, name='simulate-webhook-payload'),
 
+    path('sales/buying-signals/', views.sales_buying_radar, name='sales-buying-radar'),
+    path('api/sales/radar/poll/', views.api_sales_radar_poll, name='api-sales-radar-poll'),
     *sales_urlpatterns,
 ]

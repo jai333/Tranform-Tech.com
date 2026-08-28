@@ -442,44 +442,6 @@
 <section class="showcase-section">
     <div class="container">
 
-        <!-- Google Maps AI Lead Scraper Showcase -->
-        <div class="showcase-row" data-reveal style="margin-bottom: 6rem;">
-            <div class="showcase-col-text">
-                <div class="label-tag label-cyan">AI PROSPECTING SUITE</div>
-                <h2 class="showcase-h2">Google Maps AI<br>Lead Scraper.</h2>
-                <p class="showcase-p">Turn the entire world into your B2B pipeline. Extract leads, reviews, and contact info instantly, auto-grouped into intelligent folders and scored by AI.</p>
-                <ul class="showcase-checklist">
-                    <li>
-                        <div class="sc-check"><i class='bx bx-bot'></i></div>
-                        <div><strong>Instant AI Scoring</strong><span>Predicts lead value out of 100 before you even reach out</span></div>
-                    </li>
-                    <li>
-                        <div class="sc-check"><i class='bx bx-folder'></i></div>
-                        <div><strong>Automated Folders</strong><span>Leads are automatically categorized based on your search queries</span></div>
-                    </li>
-                    <li>
-                        <div class="sc-check"><i class='bx bx-trending-up'></i></div>
-                        <div><strong>Direct CRM Pipeline</strong><span>1-click import moves prospects straight to your active sales funnel</span></div>
-                    </li>
-                </ul>
-                {% if user.is_authenticated %}
-                <a href="{% url 'gmaps-lead-scraper' %}" class="btn-showcase" style="background:var(--primary); color:black; border:none; border-radius: 8px; padding: 12px 24px; font-weight:700;">Launch Scraper →</a>
-                {% else %}
-                <a href="{% url 'register' %}" class="btn-showcase" style="background:var(--primary); color:black; border:none; border-radius: 8px; padding: 12px 24px; font-weight:700;">Get Started Free →</a>
-                {% endif %}
-            </div>
-            <div class="showcase-col-visual">
-                <div class="showcase-frame" style="border: 1px solid rgba(0, 229, 255, 0.3); box-shadow: 0 0 40px rgba(0, 229, 255, 0.1);">
-                    <img src="{% static 'tracking_app/assets/gmaps_scraper_exotic_ui.jpg' %}" alt="Google Maps AI Lead Scraper Dashboard" class="showcase-img">
-                    <div class="sf-glow" style="background: radial-gradient(circle, rgba(0,229,255,0.4) 0%, transparent 60%);"></div>
-                    <div class="sf-badge sf-badge-top" style="background: rgba(0,229,255,0.15); border-color: rgba(0,229,255,0.3);">
-                        <i class='bx bxs-map-pin' style="color:var(--primary);"></i>
-                        <span style="color:white; font-weight:600;">Worldwide Reach</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <!-- ATS Showcase -->
         <div class="showcase-row" data-reveal>
             <div class="showcase-col-text">
@@ -513,6 +475,44 @@
                     <div class="sf-badge sf-badge-top">
                         <i class='bx bx-brain' style="color:#8b5cf6;"></i>
                         <span>94% Match Score</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Google Maps AI Lead Scraper Showcase -->
+        <div class="showcase-row" data-reveal style="margin-bottom: 6rem;">
+            <div class="showcase-col-text">
+                <div class="label-tag label-cyan">AI PROSPECTING SUITE</div>
+                <h2 class="showcase-h2">Google Maps AI<br>Lead Scraper.</h2>
+                <p class="showcase-p">Turn the entire world into your B2B pipeline. Extract leads, reviews, and contact info instantly, auto-grouped into intelligent folders and scored by AI.</p>
+                <ul class="showcase-checklist">
+                    <li>
+                        <div class="sc-check"><i class='bx bx-bot'></i></div>
+                        <div><strong>Instant AI Scoring</strong><span>Predicts lead value out of 100 before you even reach out</span></div>
+                    </li>
+                    <li>
+                        <div class="sc-check"><i class='bx bx-folder'></i></div>
+                        <div><strong>Automated Folders</strong><span>Leads are automatically categorized based on your search queries</span></div>
+                    </li>
+                    <li>
+                        <div class="sc-check"><i class='bx bx-trending-up'></i></div>
+                        <div><strong>Direct CRM Pipeline</strong><span>1-click import moves prospects straight to your active sales funnel</span></div>
+                    </li>
+                </ul>
+                {% if user.is_authenticated %}
+                <a href="{% url 'gmaps-lead-scraper' %}" class="btn-showcase" style="background:var(--primary); color:black; border:none; border-radius: 8px; padding: 12px 24px; font-weight:700;">Launch Scraper →</a>
+                {% else %}
+                <a href="{% url 'register' %}" class="btn-showcase" style="background:var(--primary); color:black; border:none; border-radius: 8px; padding: 12px 24px; font-weight:700;">Get Started Free →</a>
+                {% endif %}
+            </div>
+            <div class="showcase-col-visual">
+                <div class="showcase-frame" style="border: 1px solid rgba(0, 229, 255, 0.3); box-shadow: 0 0 40px rgba(0, 229, 255, 0.1);">
+                    <img src="{% static 'tracking_app/assets/gmaps_scraper_exotic_ui.jpg' %}" alt="Google Maps AI Lead Scraper Dashboard" class="showcase-img">
+                    <div class="sf-glow" style="background: radial-gradient(circle, rgba(0,229,255,0.4) 0%, transparent 60%);"></div>
+                    <div class="sf-badge sf-badge-top" style="background: rgba(0,229,255,0.15); border-color: rgba(0,229,255,0.3);">
+                        <i class='bx bxs-map-pin' style="color:var(--primary);"></i>
+                        <span style="color:var(--apple-text); font-weight:600;">Worldwide Reach</span>
                     </div>
                 </div>
             </div>
@@ -552,6 +552,82 @@
             </div>
         </div>
 
+        <!-- ═══════════════════════════════════════════════════════════════
+             STRATEGIC INSIGHT ENGINE — AI Radar Showcase
+             ═══════════════════════════════════════════════════════════════ -->
+        <div class="showcase-row showcase-reverse" data-reveal data-delay="100">
+            <div class="showcase-col-text">
+                <div class="label-tag" style="color: #00e5ff; border-color: rgba(0,229,255,0.25); background: rgba(0,229,255,0.06);">STRATEGIC INTELLIGENCE</div>
+                <h2 class="showcase-h2">Live Buying Signals.<br><span style="color: #00e5ff;">AI-Powered Radar.</span></h2>
+                <p class="showcase-p">Our Strategic Insight Engine autonomously scans LinkedIn, Crunchbase, SEC filings, and real-time news feeds — surfacing actionable buying signals with AI-scored confidence and auto-drafted outreach emails. No simulation. Real intelligence.</p>
+                <ul class="showcase-checklist">
+                    <li>
+                        <div class="sc-check" style="background: rgba(0,229,255,0.1); color: #00e5ff;"><i class='bx bx-radar'></i></div>
+                        <div><strong>Live News Scanning</strong><span>SerpAPI-powered search across Google News, Crunchbase & SEC filings in real time</span></div>
+                    </li>
+                    <li>
+                        <div class="sc-check" style="background: rgba(0,229,255,0.1); color: #00e5ff;"><i class='bx bx-brain'></i></div>
+                        <div><strong>AI Buying Signal Scoring</strong><span>Automatically scores leads from 0-100 based on exact ICP match</span></div>
+                    </li>
+                </ul>
+                <a href="{% url 'sales-buying-radar' %}" class="btn-showcase btn-showcase-cyan" style="min-width:260px; justify-content:center; letter-spacing:0.3px;"><i class='bx bx-radar' style="font-size:1rem; margin-right:4px;"></i>Launch Strategic Insight Engine →</a>
+            </div>
+            <div class="showcase-col-visual">
+                <div class="showcase-frame" style="border: 1px solid rgba(0,229,255,0.2); overflow: hidden;">
+                    <img src="{% static 'tracking_app/assets/strategic_insight_radar.jpg' %}" alt="Strategic Insight Engine Radar" class="showcase-img">
+                    <div class="sf-glow" style="background: radial-gradient(circle, rgba(0,229,255,0.15) 0%, transparent 70%);"></div>
+                    <div class="sf-badge sf-badge-top" style="border-color: rgba(0,229,255,0.3);">
+                        <span class="status-dot" style="width:6px;height:6px;border-radius:50%;background:#00e5ff;box-shadow:0 0 8px #00e5ff;display:inline-block;"></span>
+                        <span>Scanning Live Web</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════════════
+             AUTONOMOUS AGENT COMMAND CENTER Showcase
+             ═══════════════════════════════════════════════════════════════ -->
+        <div class="showcase-row" data-reveal data-delay="100">
+            <div class="showcase-col-text">
+                <div class="label-tag" style="color: #00ff88; border-color: rgba(0,255,136,0.25); background: rgba(0,255,136,0.06);">AUTONOMOUS EXECUTION</div>
+                <h2 class="showcase-h2">Deploy. Orchestrate.<br><span style="color: #00ff88;">Close Autonomously.</span></h2>
+                <p class="showcase-p">Transform.io's proprietary Autonomous AI Sales Agent takes over the entire outreach pipeline. It reads buying signals, drafts hyper-personalized emails, sends Twilio SMS, and initiates Polly Voice calls entirely on its own.</p>
+                <ul class="showcase-checklist">
+                    <li>
+                        <div class="sc-check" style="background: rgba(0,255,136,0.1); color: #00ff88;"><i class='bx bx-phone-call'></i></div>
+                        <div><strong>Twilio Voice & SMS Integration</strong><span>Executes real voice calls and texts via the Twilio API</span></div>
+                    </li>
+                    <li>
+                        <div class="sc-check" style="background: rgba(0,255,136,0.1); color: #00ff88;"><i class='bx bx-terminal'></i></div>
+                        <div><strong>Live Execution Logs</strong><span>Watch the AI agent's thought process and actions stream in real time</span></div>
+                    </li>
+                    <li>
+                        <div class="sc-check" style="background: rgba(0,255,136,0.1); color: #00ff88;"><i class='bx bx-calendar-star'></i></div>
+                        <div><strong>Auto Meeting Booking</strong><span>Agent detects interest signals and schedules demos without human intervention</span></div>
+                    </li>
+                </ul>
+                {% if user.is_authenticated %}
+                <a href="{% url 'autonomous-agent' %}" class="btn-showcase" style="background: #00c96b; color: #000; border-color: #00c96b; font-weight: 700;">Open Agent Command Center →</a>
+                {% else %}
+                <a href="{% url 'register' %}" class="btn-showcase" style="background: #00c96b; color: #000; border-color: #00c96b; font-weight: 700;">Get Started Free →</a>
+                {% endif %}
+            </div>
+            <div class="showcase-col-visual">
+                <div class="showcase-frame" style="border: 1px solid rgba(0,255,136,0.2); overflow: hidden;">
+                    <img src="{% static 'tracking_app/assets/ai_agent_command_center.jpg' %}" alt="Autonomous AI Agent Command Center" class="showcase-img">
+                    <div class="sf-glow" style="background: radial-gradient(circle, rgba(0,255,136,0.15) 0%, transparent 70%);"></div>
+                    <div class="sf-badge sf-badge-top" style="border-color: rgba(0,255,136,0.3);">
+                        <span class="status-dot" style="width:6px;height:6px;border-radius:50%;background:#00ff88;box-shadow:0 0 8px #00ff88;display:inline-block;"></span>
+                        <span>Agent Active</span>
+                    </div>
+                    <div class="sf-badge sf-badge-bottom" style="border-color: rgba(0,255,136,0.3);">
+                        <i class='bx bx-check-circle' style="color:#00ff88;"></i>
+                        <span>Real AI Execution</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Mail & Workflow Automation Showcase -->
         <div class="showcase-row" data-reveal data-delay="100">
             <div class="showcase-col-text">
@@ -586,6 +662,71 @@
             </div>
         </div>
 
+
+        <!-- ═══════════════════════════════════════════════════════════════
+             VOICE COMMAND SHOWCASE
+             ═══════════════════════════════════════════════════════════════ -->
+        <div class="showcase-row" data-reveal data-delay="100">
+            <div class="showcase-col-text">
+                <div class="label-tag" style="color: #00e5ff; border-color: rgba(0,229,255,0.25); background: rgba(0,229,255,0.06);">AI VOICE NAVIGATION</div>
+                <h2 class="showcase-h2">Control the Platform.<br><span style="color: #00e5ff;">With Your Voice.</span></h2>
+                <p class="showcase-p">Press <kbd style="background:rgba(0,229,255,0.1); border:1px solid rgba(0,229,255,0.25); border-radius:6px; padding:2px 8px; font-family:monospace; color:#00e5ff;">Cmd + J</kbd> anywhere on the platform to open the Voice Command overlay — then just speak. The AI engine recognises natural language and navigates you across the entire platform hands-free.</p>
+                <ul class="showcase-checklist">
+                    <li>
+                        <div class="sc-check" style="background: rgba(0,229,255,0.1); color: #00e5ff;"><i class='bx bx-microphone'></i></div>
+                        <div><strong>Natural Language Navigation</strong><span>Say "open sales", "go to candidates", "buying signals" — and it jumps there</span></div>
+                    </li>
+                    <li>
+                        <div class="sc-check" style="background: rgba(0,229,255,0.1); color: #00e5ff;"><i class='bx bx-brain'></i></div>
+                        <div><strong>Intent-Based Routing</strong><span>Fuzzy-matches your words to the right page — no exact phrasing needed</span></div>
+                    </li>
+                    <li>
+                        <div class="sc-check" style="background: rgba(0,229,255,0.1); color: #00e5ff;"><i class='bx bx-search-alt-2'></i></div>
+                        <div><strong>Hybrid Search Fallback</strong><span>If not a nav command, populates the global search bar with your spoken query</span></div>
+                    </li>
+                </ul>
+                <button class="btn-showcase btn-showcase-cyan" onclick="if(window.openVoiceOverlay)window.openVoiceOverlay(); else if(window.toggleVoiceCommand)window.toggleVoiceCommand();" style="min-width:240px; justify-content:center;">
+                    <i class='bx bx-microphone' style="font-size:1.1rem; margin-right:6px;"></i>Try Voice Command → <kbd style="margin-left:8px; background:rgba(255,255,255,0.15); border:none; border-radius:4px; padding:2px 7px; font-family:monospace; font-size:0.75rem; color:white;">⌘J</kbd>
+                </button>
+            </div>
+            <div class="showcase-col-visual">
+                <div class="showcase-frame" style="border: 1px solid rgba(0,229,255,0.2); overflow:hidden; background: linear-gradient(135deg, rgba(0,229,255,0.03), rgba(0,0,0,0.5));">
+                    <!-- Animated UI mockup of voice command -->
+                    <div style="padding: 1.75rem; font-family: sans-serif;">
+                        <!-- Keyboard shortcut badge -->
+                        <div style="text-align:center; margin-bottom:1.25rem;">
+                            <span style="font-size:0.65rem; letter-spacing:3px; text-transform:uppercase; color:rgba(0,229,255,0.6); font-weight:700;">⌘ J — VOICE COMMAND</span>
+                        </div>
+                        <!-- Mic orb -->
+                        <div style="width:80px; height:80px; border-radius:50%; margin:0 auto 1rem; display:flex; align-items:center; justify-content:center; position:relative; background:rgba(0,229,255,0.12); border:2px solid rgba(0,229,255,0.4); box-shadow:0 0 30px rgba(0,229,255,0.25);">
+                            <i class="bx bx-microphone" style="font-size:2.2rem; color:#00e5ff;"></i>
+                            <div style="position:absolute; inset:-8px; border-radius:50%; border:2px solid rgba(0,229,255,0.2); animation:voice-pulse-ring 1.5s ease-out infinite; pointer-events:none;"></div>
+                        </div>
+                        <!-- Listening status -->
+                        <div style="background:rgba(0,229,255,0.05); border:1px solid rgba(0,229,255,0.15); border-radius:8px; padding:8px 14px; margin-bottom:1rem; display:flex; align-items:center; justify-content:center; gap:10px;">
+                            <div style="width:7px;height:7px;border-radius:50%;background:#00e5ff;box-shadow:0 0 10px #00e5ff;flex-shrink:0;"></div>
+                            <span style="font-size:0.8rem; color:#00e5ff; font-weight:600;">Listening...</span>
+                            <span style="font-size:0.75rem; color:rgba(255,255,255,0.4); font-style:italic;">"open buying signals"</span>
+                        </div>
+                        <!-- Destination -->
+                        <div style="background:rgba(0,255,136,0.08); border:1px solid rgba(0,255,136,0.25); border-radius:10px; padding:9px 16px; margin-bottom:1rem; color:#00ff88; font-size:0.82rem; font-weight:600; text-align:center;">→ Navigating to 📡 Strategic Insight Engine...</div>
+                        <!-- Command hints grid -->
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px;">
+                            <div style="background:rgba(255,255,255,0.03); border-radius:7px; padding:7px 10px; font-size:0.72rem; color:rgba(255,255,255,0.4);">"open sales"</div>
+                            <div style="background:rgba(255,255,255,0.03); border-radius:7px; padding:7px 10px; font-size:0.72rem; color:rgba(255,255,255,0.4);">"go to candidates"</div>
+                            <div style="background:rgba(255,255,255,0.03); border-radius:7px; padding:7px 10px; font-size:0.72rem; color:rgba(255,255,255,0.4);">"buying signals"</div>
+                            <div style="background:rgba(255,255,255,0.03); border-radius:7px; padding:7px 10px; font-size:0.72rem; color:rgba(255,255,255,0.4);">"open inbox"</div>
+                        </div>
+                    </div>
+                    <div class="sf-glow" style="background: radial-gradient(circle, rgba(0,229,255,0.12) 0%, transparent 70%);"></div>
+                    <div class="sf-badge sf-badge-top" style="border-color: rgba(0,229,255,0.3);">
+                        <span class="status-dot" style="width:6px;height:6px;border-radius:50%;background:#00e5ff;box-shadow:0 0 8px #00e5ff;display:inline-block;"></span>
+                        <span style="color:var(--apple-text);">Voice AI Active</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Command+K Global Search Showcase -->
         <div class="showcase-row showcase-reverse" data-reveal data-delay="100">
             <div class="showcase-col-text">
@@ -606,7 +747,7 @@
                         <div><strong>Lightning Navigation</strong><span>Jump directly to specialized dashboards in one keystroke</span></div>
                     </li>
                 </ul>
-                <button class="btn-showcase btn-showcase-cyan" onclick="if(window.toggleCmdK){window.toggleCmdK();}else{document.dispatchEvent(new KeyboardEvent('keydown', {key: 'k', metaKey: true}));}">Try Cmd+K Now →</button>
+                <button class="btn-showcase btn-showcase-cyan" onclick="if(window.toggleCmdK){window.toggleCmdK();}else{document.dispatchEvent(new KeyboardEvent('keydown', {key: 'k', metaKey: true}));}" style="min-width:220px; justify-content:center;"><i class='bx bx-command' style="font-size:1rem; margin-right:6px;"></i>Open Command Palette <kbd style="margin-left:8px; background:rgba(255,255,255,0.15); border:none; border-radius:4px; padding:2px 7px; font-family:monospace; font-size:0.75rem; color:white;">⌘K</kbd></button>
             </div>
             <div class="showcase-col-visual">
                 <div class="showcase-frame showcase-frame-cyan">
@@ -1884,6 +2025,42 @@
 .light-theme .section-p { color: #475569; }
 .light-theme .showcase-h2 { color: #0f172a; }
 .light-theme .showcase-p { color: #475569; }
+
+/* ── ENTERPRISE LIGHT THEME POLISH ──────────────────────────────── */
+/* Label tags in light mode */
+.light-theme .label-tag { color: #0891b2; border-color: rgba(8,145,178,0.3); background: rgba(8,145,178,0.06); }
+.light-theme .label-tag.label-red { color: #dc2626; border-color: rgba(220,38,38,0.25); background: rgba(220,38,38,0.05); }
+.light-theme .label-tag.label-purple { color: #7c3aed; border-color: rgba(124,58,237,0.25); background: rgba(124,58,237,0.05); }
+.light-theme .label-tag.label-blue { color: #1d4ed8; border-color: rgba(29,78,216,0.25); background: rgba(29,78,216,0.05); }
+/* Checklist icons */
+.light-theme .sc-check { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+/* showcase frames in light */
+.light-theme .showcase-frame { background: #ffffff !important; box-shadow: 0 20px 60px rgba(8,145,178,0.1), 0 4px 20px rgba(0,0,0,0.06); }
+/* sf-badge */
+.light-theme .sf-badge { background: rgba(255,255,255,0.98) !important; border: 1px solid rgba(8,145,178,0.2) !important; color: #0f172a !important; box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+/* Showcase buttons enterprise-grade */
+.light-theme .btn-showcase { box-shadow: 0 4px 16px rgba(99,102,241,0.25); }
+.light-theme .btn-showcase-cyan { background: linear-gradient(135deg, #0891b2, #06b6d4) !important; color: #ffffff !important; box-shadow: 0 4px 16px rgba(8,145,178,0.35) !important; }
+.light-theme .btn-showcase-cyan:hover { background: linear-gradient(135deg, #0e7490, #0891b2) !important; box-shadow: 0 8px 28px rgba(8,145,178,0.5) !important; transform: translateY(-2px); }
+/* Voice showcase mockup */
+.light-theme .voice-mockup-panel { background: linear-gradient(135deg, #f0f9ff, #e0f2fe) !important; border-color: rgba(8,145,178,0.2) !important; }
+
+/* ── NAV HEADER ENTERPRISE ──────────────────────────────────────── */
+/* Ensure the main nav text is readable in light */
+[data-theme="light"] .nav-link { color: rgba(0,0,0,0.75) !important; }
+[data-theme="light"] .nav-link:hover { color: #0891b2 !important; }
+
+/* ── BUTTON SYSTEM ENTERPRISE ───────────────────────────────────── */
+/* Make sure all .btn-showcase variants look polished in light */
+[data-theme="light"] .btn-showcase-blue { box-shadow: 0 4px 16px rgba(37,99,235,0.3) !important; }
+[data-theme="light"] .btn-showcase-indigo { box-shadow: 0 4px 16px rgba(99,102,241,0.3) !important; }
+
+/* ── ENTERPRISE HERO LIGHT FIXES ──────────────────────────────── */
+[data-theme="light"] .hero-eyebrow-text { color: #0891b2; }
+
+/* Voice section mockup items in light */
+[data-theme="light"] .voice-item { background: rgba(8,145,178,0.04); border-color: rgba(8,145,178,0.12); }
+[data-theme="light"] .voice-item span { color: rgba(0,0,0,0.65); }
 
 /* ── Responsive ─────────────────────────────────────────── */
 @media (max-width: 1200px) {

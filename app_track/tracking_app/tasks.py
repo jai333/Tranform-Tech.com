@@ -287,3 +287,37 @@ def push_notification(user_id: int, title: str, body: str, url: str = "#",
     except Exception as e:
         logger.error("push_notification error: %s", e)
         return {"error": str(e)}
+
+
+# ─────────────────────────────────────────────────────────────
+# Task: Run Autonomous Sales Agent Outreach
+# ─────────────────────────────────────────────────────────────
+
+@shared_task(name="tracking_app.tasks.run_autonomous_agent")
+def run_autonomous_agent(lead_id, campaign_id=None, channels=None, tenant_id=None):
+    """
+    Background task to run the Autonomous AI Sales Outreach Agent for a specific lead.
+    """
+    from tracking_app.outreach_agent import run_full_outreach
+
+    # We do a direct try-except. Tracking_app tenant resolution handled within.
+    try:
+        # Note: Tenant fetching can be done inside run_full_outreach or here
+        from tracking_app.models import Tenant
+        tenant = None
+        if tenant_id:
+            try:
+                tenant = Tenant.objects.get(id=tenant_id)
+            except Tenant.DoesNotExist:
+                pass
+                
+        result = run_full_outreach(
+            lead_id=lead_id,
+            campaign_id=campaign_id,
+            channels=channels,
+            tenant=tenant
+        )
+        return result
+    except Exception as e:
+        logger.error(f"Failed to run autonomous agent for lead {lead_id}: {e}")
+        return {"status": "error", "message": str(e)}

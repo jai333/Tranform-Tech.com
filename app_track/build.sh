@@ -1,12 +1,12 @@
-#!/usr/bin/env bash
-# Exit on error
-set -o errexit
-
-# Install dependencies
+#!/bin/bash
+set -e
+echo "==> Installing dependencies..."
 pip install -r requirements.txt
 
-# Convert static asset files
-python manage.py collectstatic --no-input
+echo "==> Collecting static files..."
+python manage.py collectstatic --no-input --clear
 
-# Apply any outstanding database migrations
-python manage.py migrate
+echo "==> Running migrations..."
+python manage.py migrate --no-input
+
+echo "==> Build complete."

@@ -52,7 +52,7 @@ def _call_openai(system_prompt: str, user_prompt: str, model: str = "gpt-4o-mini
 
 def _call_openai_json(system_prompt: str, user_prompt: str) -> dict:
     """Same as _call_openai but parses the result as JSON."""
-    raw = _call_openai(system_prompt, user_prompt, model="gpt-4o-mini")
+    raw = _call_openai(system_prompt, user_prompt, model="gemini-1.5-flash")
     try:
         # Strip markdown code fences if present
         clean = raw.strip().removeprefix("```json").removeprefix("```").removesuffix("```").strip()

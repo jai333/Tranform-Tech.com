@@ -290,28 +290,15 @@
 
 <script>
 (function() {
-  /* ===== DATA ===== */
-  var DATA = [
-    {id:1,  name:"Priya Sharma",     title:"Senior Software Engineer", company:"Google",     loc:"San Francisco, CA", yrs:7,  level:"senior",    avail:"Open to offers",   skills:["Python","Machine Learning","AWS","Docker","TensorFlow"], score:96, email:"priya.sharma@example.com",  li:"https://www.linkedin.com/search/results/people/?keywords=Priya+Sharma+Software+Engineer",   edu:"MS CS, Stanford",        about:"7+ yrs in ML infra at Google. Led 8-person teams. Seeking leadership roles."},
-    {id:2,  name:"James Owusu",      title:"DevOps Engineer",          company:"Amazon",     loc:"Seattle, WA",        yrs:5,  level:"mid",       avail:"Actively looking", skills:["AWS","Kubernetes","Docker","Terraform","CI/CD"],           score:92, email:"j.owusu@example.com",       li:"https://www.linkedin.com/search/results/people/?keywords=James+Owusu+DevOps",               edu:"BS CS, Univ. Washington", about:"5 yrs building cloud-native pipelines at scale. Seeking next challenge."},
-    {id:3,  name:"Sofia Rossi",      title:"Product Manager",          company:"Microsoft",  loc:"Remote",             yrs:6,  level:"mid",       avail:"Open to offers",   skills:["Product Management","Agile","SQL","Roadmapping","OKRs"],   score:89, email:"sofia.rossi@example.com",   li:"https://www.linkedin.com/search/results/people/?keywords=Sofia+Rossi+Product+Manager",      edu:"MBA, Wharton",           about:"Led B2B SaaS product launches at Microsoft. Specialises in growth strategy."},
-    {id:4,  name:"David Chen",       title:"Data Scientist",           company:"Meta",       loc:"New York, NY",       yrs:4,  level:"mid",       avail:"Actively looking", skills:["Python","Machine Learning","SQL","PySpark","Statistics"],  score:91, email:"david.chen@example.com",    li:"https://www.linkedin.com/search/results/people/?keywords=David+Chen+Data+Scientist",       edu:"MS Data Science, NYU",   about:"Built recommendation models serving 2B+ users at Meta."},
-    {id:5,  name:"Aisha Patel",      title:"Cybersecurity Analyst",    company:"Cisco",      loc:"Austin, TX",         yrs:5,  level:"mid",       avail:"Open to offers",   skills:["Cybersecurity","SIEM","Python","Threat Intelligence"],     score:88, email:"aisha.patel@example.com",   li:"https://www.linkedin.com/search/results/people/?keywords=Aisha+Patel+Cybersecurity",       edu:"BS InfoSec, UT Austin",  about:"CISSP certified. Managed SOC ops for 500+ enterprise clients at Cisco."},
-    {id:6,  name:"Marco Bianchi",    title:"Full Stack Developer",     company:"Salesforce", loc:"Chicago, IL",        yrs:3,  level:"junior",    avail:"Actively looking", skills:["React","Node.js","JavaScript","MongoDB","TypeScript"],     score:85, email:"m.bianchi@example.com",     li:"https://www.linkedin.com/search/results/people/?keywords=Marco+Bianchi+Full+Stack+Developer",edu:"BS SE, UIUC",           about:"3 yrs building Salesforce integrations. Strong React and Node.js skills."},
-    {id:7,  name:"Fatima Al-Rashid", title:"HR Business Partner",      company:"Deloitte",   loc:"Boston, MA",         yrs:8,  level:"senior",    avail:"Open to offers",   skills:["HR","Talent Acquisition","Employee Relations","HRIS"],    score:82, email:"fatima.ar@example.com",     li:"https://www.linkedin.com/search/results/people/?keywords=Fatima+AlRashid+HR+Business+Partner",edu:"MS HRM, Boston Univ.", about:"8 yrs HRBP at Big 4. Expert at scaling orgs from 50 to 500+ people."},
-    {id:8,  name:"Ryan Kim",         title:"Cloud Architect",          company:"IBM",        loc:"San Jose, CA",       yrs:10, level:"principal", avail:"Open to offers",   skills:["AWS","Azure","GCP","Kubernetes","Terraform"],             score:94, email:"ryan.kim@example.com",      li:"https://www.linkedin.com/search/results/people/?keywords=Ryan+Kim+Cloud+Architect",        edu:"BS CS, UC Berkeley",     about:"Principal Architect at IBM. Designed hybrid cloud for Fortune 100 companies."},
-    {id:9,  name:"Lena Muller",      title:"UX Product Designer",      company:"Adobe",      loc:"Remote",             yrs:5,  level:"mid",       avail:"Actively looking", skills:["Figma","User Research","Prototyping","Design Systems"],   score:87, email:"lena.muller@example.com",   li:"https://www.linkedin.com/search/results/people/?keywords=Lena+Muller+UX+Designer",         edu:"BA Design, RISD",        about:"5 yrs at Adobe building design systems used by millions of users."},
-    {id:10, name:"Carlos Mendes",    title:"Data Engineer",            company:"Netflix",    loc:"Los Angeles, CA",    yrs:6,  level:"mid",       avail:"Open to offers",   skills:["Python","Apache Spark","SQL","Kafka","AWS","dbt"],        score:90, email:"c.mendes@example.com",      li:"https://www.linkedin.com/search/results/people/?keywords=Carlos+Mendes+Data+Engineer",     edu:"BS CS, UCLA",            about:"Processed 10PB+ daily data at Netflix using Spark and Kafka pipelines."},
-    {id:11, name:"Nicole Thompson",  title:"Sales Director",           company:"Oracle",     loc:"Dallas, TX",         yrs:12, level:"principal", avail:"Open to offers",   skills:["Sales","Enterprise SaaS","CRM","Salesforce","Negotiation"],score:86,email:"n.thompson@example.com",   li:"https://www.linkedin.com/search/results/people/?keywords=Nicole+Thompson+Sales+Director",  edu:"MBA, Kellogg",           about:"12-yr enterprise sales career. $50M+ quota consistently exceeded at Oracle."},
-    {id:12, name:"Ahmed Hassan",     title:"Backend Engineer",         company:"Stripe",     loc:"San Francisco, CA",  yrs:4,  level:"mid",       avail:"Actively looking", skills:["Go","Java","PostgreSQL","Microservices","gRPC","Redis"],  score:93, email:"ahmed.hassan@example.com",  li:"https://www.linkedin.com/search/results/people/?keywords=Ahmed+Hassan+Backend+Engineer",   edu:"BS CS, MIT",             about:"4 yrs at Stripe on payments infrastructure processing $1T+/yr."}
-  ];
-
+  /* ===== DATA — starts empty, populated by real API ===== */
+  var DATA = [];
   var COLORS = ["#00E5FF","#10b981","#f59e0b","#6366f1","#ec4899","#f97316","#8b5cf6","#14b8a6","#ef4444","#84cc16","#0ea5e9","#a78bfa"];
   var selSkills  = [];
   var shortlisted= [];
   var addedDB    = {};
   var sortMode   = "match";
-  var pool       = DATA.slice();
+  var pool       = [];
+  var isSearching = false;
 
   /* ===== HELPERS ===== */
   function ini(n){ return n.split(" ").map(function(w){return w.charAt(0)||"";}).join("").substring(0,2).toUpperCase(); }
@@ -319,62 +306,79 @@
   function el(id){ return document.getElementById(id); }
   function getCsrf(){ var m=document.cookie.match(/csrftoken=([^;]+)/); return m?m[1]:""; }
 
-  /* ===== MOCK EXTERNAL SOURCING (LinkedIn API Simulation) ===== */
-  function generateMocks(t, l, co, ex, av, skills) {
-    var names = ["Sarah Jenkins", "Michael Chang", "Emily Davis", "Robert Wilson", "Jessica Taylor", "William Martinez", "Ashley Anderson", "David Thomas", "Amanda Jackson", "Joseph White", "Melissa Harris", "John Clark", "Priya Patel", "Arjun Singh", "Fatima Ali", "Carlos Ruiz"];
-    var baseTitle = (t || (skills.length ? skills[0] + " Specialist" : "Software Engineer")).replace(/\b\w/g, c=>c.toUpperCase());
-    var baseLoc = (l || "Remote").replace(/\b\w/g, c=>c.toUpperCase());
-    var baseComp = (co || "Tech Solutions Inc.").replace(/\b\w/g, c=>c.toUpperCase());
-    
-    var newMocks = [];
-    var count = 3 + Math.floor(Math.random()*4); // 3 to 6 candidates
-    for(var i=0; i<count; i++) {
-      var nm = names[Math.floor(Math.random()*names.length)];
-      var lastNameInitial = String.fromCharCode(65 + Math.floor(Math.random() * 26));
-      nm = nm.split(" ")[0] + " " + lastNameInitial + ".";
-      
-      var yrs = ex === "junior" ? 1 + Math.floor(Math.random()*2) : 
-                ex === "mid" ? 3 + Math.floor(Math.random()*3) : 
-                ex === "senior" ? 6 + Math.floor(Math.random()*4) : 
-                ex === "principal" ? 10 + Math.floor(Math.random()*5) : 
-                4 + Math.floor(Math.random()*6);
-      
-      var avail = av === "actively" ? "Actively looking" : 
-                  av === "open" ? "Open to offers" : 
-                  (Math.random()>0.5 ? "Actively looking" : "Open to offers");
-      
-      var sk = skills.length > 0 ? skills.slice() : ["JavaScript", "Python", "Agile"];
-      if(sk.length < 3) sk.push("Cloud", "Problem Solving");
-      
-      var newId = DATA.length + 200 + Math.floor(Math.random()*9000);
-      var c = {
-        id: newId,
-        name: nm,
-        title: baseTitle,
-        company: baseComp,
-        loc: baseLoc,
-        yrs: yrs,
-        level: ex || "mid",
-        avail: avail,
-        skills: sk,
-        score: 88 + Math.floor(Math.random()*11), // 88 to 98
-        email: nm.toLowerCase().replace(" ",".") + "@example.com",
-        li: "https://www.linkedin.com/search/results/people/?keywords=" + encodeURIComponent(nm + " " + baseTitle),
-        edu: "BS/BA Degree",
-        about: "Sourced via LinkedIn Integration. Experienced " + baseTitle + " with " + yrs + " years in the industry. Skilled in " + sk.join(", ") + "."
-      };
-      newMocks.push(c);
-    }
-    return newMocks;
+  /* ===== REAL API SEARCH — always call backend, never simulate ===== */
+  function runRealSearch(title, location, skills, onDone) {
+    if (isSearching) return;
+    isSearching = true;
+
+    var btn = el("apply-btn");
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i>&nbsp;Sourcing Live Candidates...'; }
+
+    showSearching();
+
+    fetch("{% url 'search-web-candidates' %}", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-CSRFToken": getCsrf() },
+      credentials: "same-origin",
+      body: JSON.stringify({ title: title || "Software Engineer", location: location || "Remote", skills: skills || [] })
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(data) {
+      isSearching = false;
+      if (btn) { btn.disabled = false; btn.innerHTML = '<i class="bx bx-search-alt"></i>&nbsp;Apply Filters'; }
+
+      if (data.success && data.candidates && data.candidates.length > 0) {
+        // Assign unique IDs and merge
+        var base = Date.now();
+        for (var i = 0; i < data.candidates.length; i++) {
+          data.candidates[i].id = base + i;
+          // Ensure all required fields exist
+          data.candidates[i].yrs   = data.candidates[i].yrs   || 1;
+          data.candidates[i].edu   = data.candidates[i].edu   || "See Profile";
+          data.candidates[i].avail = data.candidates[i].avail || "Open to offers";
+          data.candidates[i].level = data.candidates[i].level || "mid";
+          data.candidates[i].skills= data.candidates[i].skills|| [];
+          data.candidates[i].about = data.candidates[i].about || "";
+          data.candidates[i].source= data.candidates[i].source|| "GitHub";
+        }
+        DATA = data.candidates;
+        pool = DATA.slice();
+        toast("✅ Sourced " + DATA.length + " real profiles from GitHub API", "ok");
+        buildLiUrl();
+        doSort(false);
+      } else {
+        DATA = [];
+        pool = [];
+        renderCards([]);
+        toast("No profiles found for these criteria. Try different keywords.", "err");
+      }
+      if (onDone) onDone();
+    })
+    .catch(function(err) {
+      isSearching = false;
+      if (btn) { btn.disabled = false; btn.innerHTML = '<i class="bx bx-search-alt"></i>&nbsp;Apply Filters'; }
+      DATA = []; pool = [];
+      renderCards([]);
+      toast("Network error connecting to sourcing engine. Check connection.", "err");
+      if (onDone) onDone();
+    });
   }
 
-  /* ===== FILTER ===== */
+  /* ===== FILTER (local filter on already-fetched DATA) ===== */
   function doFilter(){
     var t  = (el("f-title").value||"").trim().toLowerCase();
     var l  = (el("f-loc").value||"").trim().toLowerCase();
     var co = (el("f-comp").value||"").trim().toLowerCase();
     var ex = el("f-exp").value;
     var av = el("f-avail").value;
+
+    // If DATA is empty OR user has changed meaningful search terms, call real API
+    var hasSearchTerms = t || l || selSkills.length > 0;
+
+    if (DATA.length === 0 && hasSearchTerms) {
+      runRealSearch(t || (selSkills[0]||"Software Engineer"), l, selSkills);
+      return;
+    }
 
     pool = DATA.filter(function(c){
       if(t  && c.title.toLowerCase().indexOf(t)===-1 && c.name.toLowerCase().indexOf(t)===-1 && c.about.toLowerCase().indexOf(t)===-1) return false;
@@ -388,54 +392,11 @@
       if(av==="open"      && c.avail.toLowerCase().indexOf("open")===-1)     return false;
       if(selSkills.length>0){
         var ok=false;
-        for(var i=0;i<selSkills.length;i++){ if(c.skills.some(s => s.toLowerCase().includes(selSkills[i].toLowerCase()))){ok=true;break;} }
+        for(var i=0;i<selSkills.length;i++){ if(c.skills.some(function(s){return s.toLowerCase().includes(selSkills[i].toLowerCase());})){ok=true;break;} }
         if(!ok) return false;
       }
       return true;
     });
-    
-    // If filter yields no local results, fetch from our Hybrid Sourcing Engine!
-    if(pool.length === 0 && (t || l || co || ex || av || selSkills.length > 0)) {
-        toast("Sourcing live candidates from web engines...", "ok");
-        
-        var reqData = {
-            title: t || "Professional Candidate",
-            location: l || "Remote",
-            skills: selSkills.length > 0 ? selSkills : []
-        };
-        
-        fetch("{% url 'search-web-candidates' %}", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRFToken": getCsrf()
-            },
-            body: JSON.stringify(reqData)
-        })
-        .then(function(res) { return res.json(); })
-        .then(function(data) {
-            if (data.success && data.candidates) {
-                var newIdBase = DATA.length + 900;
-                for(var i=0; i<data.candidates.length; i++) {
-                    var c = data.candidates[i];
-                    c.id = newIdBase + i;
-                    DATA.unshift(c);
-                    pool.push(c);
-                }
-                toast("Sourced " + data.candidates.length + " matching profiles from GitHub & Web!", "ok");
-                doSort(false);
-                buildLiUrl();
-            } else {
-                toast("Could not source external candidates.", "err");
-            }
-        })
-        .catch(function(err) {
-            console.error(err);
-            toast("Error sourcing external candidates.", "err");
-        });
-        return; // async handling
-    }
-
     doSort(false);
   }
 
@@ -448,6 +409,18 @@
     renderCards(s);
   }
 
+  /* ===== SEARCHING STATE ===== */
+  function showSearching() {
+    el("hd-cnt").textContent = "...";
+    el("main-cnt").textContent = "...";
+    el("fp-cnt").textContent = "...";
+    el("empty-box").style.display = "none";
+    el("card-box").innerHTML = '<div style="padding:3rem; text-align:center; color:var(--apple-text-muted);">' +
+      '<i class="bx bx-loader-alt bx-spin" style="font-size:2.5rem; color:var(--brand-primary); display:block; margin-bottom:1rem;"></i>' +
+      '<div style="font-size:0.95rem; font-weight:600; color:var(--apple-text);">Sourcing live candidates from GitHub API...</div>' +
+      '<div style="font-size:0.78rem; margin-top:6px;">Fetching real profiles based on your criteria</div></div>';
+  }
+
   /* ===== RENDER ===== */
   function renderCards(list){
     var n=list.length;
@@ -455,11 +428,24 @@
     el("main-cnt").textContent= n;
     el("fp-cnt").textContent  = n;
     var box=el("card-box"), emp=el("empty-box");
+
+    // If no data and no search done, show the welcome state
+    if (!n && DATA.length === 0 && !isSearching) {
+      box.innerHTML = '<div style="text-align:center; padding:4rem 2rem; background:var(--apple-card-bg); border:1px solid var(--apple-border); border-radius:13px;">' +
+        '<i class="bx bx-satellite" style="font-size:3rem; color:var(--brand-primary); margin-bottom:1rem; display:block;"></i>' +
+        '<h3 style="color:var(--apple-text); margin-bottom:.5rem;">Search for Real Candidates</h3>' +
+        '<p style="color:var(--apple-text-muted); font-size:.85rem; max-width:420px; margin:0 auto 1.5rem;">Enter a job title, location, or select skills — then click <strong style="color:var(--brand-primary);">Apply Filters</strong> to source live profiles from GitHub.</p>' +
+        '<button onclick="el('apply-btn').click()" style="background:linear-gradient(135deg,var(--brand-primary),#0099bb); color:#000; border:none; border-radius:9px; padding:10px 24px; font-size:.88rem; font-weight:800; cursor:pointer; font-family:inherit;">Source Candidates Now →</button>' +
+        '</div>';
+      emp.style.display = "none";
+      return;
+    }
+
     if(!n){ box.innerHTML=""; emp.style.display="block"; return; }
     emp.style.display="none";
     var h="";
     for(var i=0;i<list.length;i++){
-      var c=list[i], cc=clr(c.id);
+      var c=list[i], cc=clr(i+1);
       var inDB=addedDB[c.id];
       var inSL=shortlisted.some(function(s){return s.id===c.id;});
       var sk=c.skills.slice(0,5).map(function(s){return '<span class="csk">'+s+'</span>';}).join("");
@@ -479,16 +465,13 @@
       h+='<span class="apill '+ap+'">'+c.avail+'</span>';
       h+='<div class="cbtns">';
       h+='<button class="b-add" id="pb'+c.id+'" onclick="addPipe('+c.id+')" '+(inDB?'disabled':'')+'>'+(inDB?'&#10003; In Pipeline':'+ Add to Pipeline')+'</button>';
-      
-      var sourceName = c.source || "LinkedIn";
-      var sourceIcon = "in";
-      var sourceClass = "b-li";
-      if (sourceName === "GitHub") { sourceIcon = "<i class='bx bxl-github'></i>"; sourceClass = "b-gh"; }
-      else if (sourceName === "Reddit") { sourceIcon = "<i class='bx bxl-reddit'></i>"; sourceClass = "b-rd"; }
-      else if (sourceName === "Naukri") { sourceIcon = "N"; sourceClass = "b-nk"; }
-      else { sourceIcon = "<span style='font-weight:900;font-family:sans-serif;'>in</span>"; }
-      
-      h+='<a href="'+c.li+'" target="_blank" class="b-li '+sourceClass+'">' + sourceIcon + ' View on ' + sourceName + '</a>';
+
+      var sourceName = c.source || "GitHub";
+      var sourceIcon, sourceClass;
+      if (sourceName === "GitHub") { sourceIcon = '<i class='bx bxl-github'></i>'; sourceClass = "b-gh"; }
+      else { sourceIcon = '<span style='font-weight:900;font-family:sans-serif;'>in</span>'; sourceClass = "b-li"; }
+
+      h+='<a href="'+c.li+'" target="_blank" class="'+sourceClass+'">'+sourceIcon+' View on '+sourceName+'</a>';
       h+='<button class="b-contact" onclick="openContact('+c.id+')"><i class="bx bx-send"></i> Contact</button>';
       h+='<button class="b-sl'+(inSL?" on":"")+'" onclick="toggleSL('+c.id+')">'+(inSL?"&#9733; Shortlisted":"&#9734; Shortlist")+'</button>';
       h+='</div></div></div>';
@@ -538,7 +521,7 @@
     var lst=el("sld-list");
     if(!n){lst.innerHTML='<div style="color:var(--apple-text-muted);font-size:.76rem;padding:4px 0;">Nothing shortlisted yet.</div>';return;}
     lst.innerHTML=shortlisted.map(function(s){
-      var c_=clr(s.id);
+      var c_=COLORS[0];
       return '<div class="sld-it"><div class="sld-av" style="background:'+c_+';color:#000;">'+ini(s.name)+'</div><div style="flex:1"><div style="font-size:.76rem;color:var(--apple-text);font-weight:600;">'+s.name+'</div><div style="font-size:.66rem;color:var(--apple-text-muted);">'+s.title+'</div></div><button onclick="toggleSL('+s.id+')" style="background:none;border:none;color:var(--apple-text-muted);cursor:pointer;font-size:.85rem;padding:0 4px;">&times;</button></div>';
     }).join("");
   }
@@ -573,75 +556,87 @@
     el("c-modal").classList.remove("open");
   };
 
-  /* ===== IMPORT LINKEDIN PROFILE ===== */
+  /* ===== IMPORT GITHUB / LINKEDIN PROFILE (Real backend) ===== */
   window.importProfile=function(){
     var url=(el("li-import-url").value||"").trim();
-    if(!url||url.indexOf("linkedin.com/in/")===-1){toast("Please paste a valid linkedin.com/in/... URL","err");return;}
-    var slug=url.split("/in/")[1].replace(/\/?$/,"").replace(/\?.*/,"");
-    var parts=slug.split("-"), nm=parts.slice(0,2).map(function(w){return w.charAt(0).toUpperCase()+w.slice(1);}).join(" ");
-    var newId=DATA.length+100+Math.floor(Math.random()*999);
-    DATA.unshift({id:newId,name:nm||"LinkedIn Contact",title:"Imported — Edit needed",company:"Unknown",loc:"Unknown",yrs:0,level:"mid",avail:"Open to offers",skills:[],score:80,email:slug.toLowerCase().replace(/-/g,".")+".li@example.com",li:url,edu:"See LinkedIn",about:"Imported from LinkedIn. Click 'View on LinkedIn' to see full profile."});
-    el("li-import-url").value="";
-    doFilter(); window.open(url,"_blank");
-    toast("Imported "+nm+" from LinkedIn","ok");
+    if(!url){toast("Please paste a GitHub or LinkedIn profile URL","err");return;}
+    if(url.indexOf("github.com/")===-1 && url.indexOf("linkedin.com/in/")===-1){
+      toast("Please provide a GitHub or LinkedIn URL","err"); return;
+    }
+    toast("Importing profile via Ghost Profiler AI...","ok");
+    fetch("{% url 'import-ghost-profile' %}",{
+      method:"POST",
+      credentials:"same-origin",
+      headers:{"Content-Type":"application/json","X-CSRFToken":getCsrf()},
+      body:JSON.stringify({url:url})
+    }).then(function(r){return r.json();}).then(function(d){
+      if(d.success && d.profile){
+        var p=d.profile;
+        var newId = Date.now();
+        var candidate = {
+          id:newId, name:p.name, title:"Imported Profile", company:p.company,
+          loc:p.location, yrs:3, level:"mid", avail:"Open to offers",
+          skills:p.skills, score:p.score, email:p.email,
+          li:url, edu:"See Profile", about:p.about, source: url.indexOf("github.com")!==-1 ? "GitHub" : "LinkedIn"
+        };
+        DATA.unshift(candidate);
+        pool = DATA.slice();
+        doSort(false);
+        el("li-import-url").value="";
+        toast("Imported " + p.name + " — Score: " + p.score + "%","ok");
+      } else {
+        toast("Error: " + (d.error||"Could not import profile"),"err");
+      }
+    }).catch(function(){
+      toast("Network error during import","err");
+    });
   };
 
-  /* ===== PARSE CV / JD (Live Python Backend & Real Scraping) ===== */
+  /* ===== PARSE CV / JD (Real backend) ===== */
   window.parseCV=function(){
     var fileInput = el("cv-upload");
     if(!fileInput.files || fileInput.files.length === 0) return;
-    
     var file = fileInput.files[0];
-    toast("Uploading " + file.name + " to Python backend for text parsing...", "ok");
-    
+    toast("Uploading " + file.name + " to Python backend...", "ok");
     var formData = new FormData();
     formData.append("cv_file", file);
-    
+    showSearching();
     fetch("{% url 'parse-and-scrape' %}", {
-        method: "POST",
-        body: formData,
-        credentials: "same-origin"
+        method: "POST", body: formData, credentials: "same-origin"
     })
     .then(function(r){ return r.json(); })
     .then(function(data) {
-        if(!data.success) {
-            toast("Parsing failed: " + (data.error || "Unknown error"), "err");
-            return;
-        }
-        
-        toast("Parsed! Title: " + data.extracted_title + " | Sourcing from multi-site engines...", "ok");
-        
-        // Auto-fill filters from Python backend extraction
+        if(!data.success) { toast("Parsing failed: " + (data.error || "Unknown error"), "err"); renderCards([]); return; }
+        toast("Parsed! Sourcing matches for: " + data.extracted_title, "ok");
         el("f-title").value = data.extracted_title;
         selSkills = data.extracted_skills || [];
-        
-        // Update UI for chips
         document.querySelectorAll(".chip").forEach(function(c){
             var sk = c.getAttribute("data-skill").toLowerCase();
-            if(selSkills.some(s => s.toLowerCase() === sk)) c.classList.add("active");
+            if(selSkills.some(function(s){return s.toLowerCase()===sk;})) c.classList.add("active");
             else c.classList.remove("active");
         });
         el("skill-cnt").textContent = selSkills.length > 0 ? "("+selSkills.length+" selected)" : "";
-        
-        // Inject REAL scraped candidates into the UI
         if(data.candidates && data.candidates.length > 0) {
-            var newIdBase = DATA.length + 800;
-            for(var i=0; i<data.candidates.length; i++) {
-                var c = data.candidates[i];
-                c.id = newIdBase + i;
-                DATA.unshift(c);
+            var base = Date.now();
+            for(var i=0; i<data.candidates.length; i++){
+              data.candidates[i].id = base + i;
+              data.candidates[i].yrs   = data.candidates[i].yrs   || 1;
+              data.candidates[i].edu   = data.candidates[i].edu   || "See Profile";
+              data.candidates[i].avail = data.candidates[i].avail || "Open to offers";
             }
-            toast("Successfully sourced " + data.candidates.length + " REAL profiles from GitHub & Enterprise Engines!", "ok");
+            DATA = data.candidates;
+            pool = DATA.slice();
+            toast("Sourced " + DATA.length + " real profiles!", "ok");
+            buildLiUrl(); doSort(false);
         } else {
-            toast("No live profiles scraped, falling back to local database.", "err");
+            toast("No live profiles found. Try different criteria.", "err");
+            renderCards([]);
         }
-        
-        doFilter();
         fileInput.value = "";
     })
     .catch(function(err) {
-        toast("Server error during real CV parsing.", "err");
-        fileInput.value = "";
+        toast("Server error during CV parsing.", "err");
+        renderCards([]); fileInput.value = "";
     });
   };
 
@@ -651,7 +646,6 @@
     var l=el("f-loc").value.trim();
     var url="https://www.linkedin.com/search/results/people/?keywords="+encodeURIComponent(kw)+"&origin=FACETED_SEARCH";
     if(l) url+="&geoUrn="+encodeURIComponent(l);
-    var l_main = el("li-main-btn"); if (l_main) l_main.href = url;
     var l_panel = el("li-panel-btn"); if (l_panel) l_panel.href = url;
   }
 
@@ -661,35 +655,38 @@
     t.className="t "+(type||"ok");
     t.innerHTML='<i class="bx '+(type==="ok"?"bx-check-circle":"bx-error-circle")+'" style="color:'+(type==="ok"?"var(--brand-primary)":"#ef4444")+'"></i> '+msg;
     box.appendChild(t);
-    setTimeout(function(){t.style.transition=".25s";t.style.opacity="0";},3000);
-    setTimeout(function(){if(t.parentNode)t.parentNode.removeChild(t);},3300);
+    setTimeout(function(){t.style.transition=".25s";t.style.opacity="0";},3500);
+    setTimeout(function(){if(t.parentNode)t.parentNode.removeChild(t);},3800);
   }
 
   /* ===== WIRE UP EVENTS ===== */
-  /* Live text inputs */
-  ["f-title","f-loc","f-comp"].forEach(function(id){
-    el(id).addEventListener("input",doFilter);
+  [el("f-exp"),el("f-avail")].forEach(function(inp){
+    if(inp) inp.addEventListener("change", doFilter);
   });
-  /* Dropdowns */
-  ["f-exp","f-avail"].forEach(function(id){
-    el(id).addEventListener("change",doFilter);
+
+  /* Apply button — triggers real API search */
+  el("apply-btn").addEventListener("click", function(){
+    var t = (el("f-title").value||"").trim();
+    var l = (el("f-loc").value||"").trim();
+    runRealSearch(t || (selSkills[0]||"Software Engineer"), l, selSkills);
   });
-  /* Apply button */
-  el("apply-btn").addEventListener("click",function(){ doFilter(); toast("Filters applied — "+pool.length+" candidates found","ok"); });
+
   /* Clear button */
   el("clear-btn").addEventListener("click",function(){
     el("f-title").value=""; el("f-loc").value=""; el("f-comp").value="";
     el("f-exp").value=""; el("f-avail").value=""; el("f-job").value="";
-    selSkills=[];
+    selSkills=[]; DATA=[]; pool=[];
     document.querySelectorAll(".chip").forEach(function(c){c.classList.remove("active");});
     el("skill-cnt").textContent="";
-    pool=DATA.slice(); sortMode="match";
+    sortMode="match";
     document.querySelectorAll(".s-btn").forEach(function(b){b.classList.remove("active");});
     document.querySelector('.s-btn[data-sort="match"]').classList.add("active");
-    doSort(false); buildLiUrl();
-    toast("Filters cleared — showing all "+DATA.length+" candidates","ok");
+    renderCards([]);
+    buildLiUrl();
+    toast("Filters cleared — enter criteria and click Apply","ok");
   });
-  /* Skill chips — event delegation on container */
+
+  /* Skill chips */
   el("chip-box").addEventListener("click",function(e){
     var chip=e.target.closest(".chip"); if(!chip) return;
     var sk=chip.getAttribute("data-skill");
@@ -697,8 +694,8 @@
     if(chip.classList.contains("active")) selSkills.push(sk);
     else { var idx=selSkills.indexOf(sk); if(idx>-1) selSkills.splice(idx,1); }
     el("skill-cnt").textContent=selSkills.length>0?"("+selSkills.length+" selected)":"";
-    doFilter();
   });
+
   /* Sort buttons */
   document.querySelectorAll(".s-btn").forEach(function(btn){
     btn.addEventListener("click",function(){
@@ -706,6 +703,7 @@
       this.classList.add("active"); sortMode=this.getAttribute("data-sort"); doSort(false);
     });
   });
+
   /* Auto-fill from job select */
   el("f-job").addEventListener("change",function(){
     var opt=this.options[this.selectedIndex];
@@ -722,15 +720,15 @@
         else c.classList.remove("active");
       });
       el("skill-cnt").textContent=arr.length>0?"("+arr.length+" selected)":"";
-      toast("Auto-filled "+arr.length+" skills from job posting","ok");
+      toast("Auto-filled from job posting — click Apply to source","ok");
     }
-    doFilter();
   });
+
   /* Close modal on bg click */
   el("c-modal").addEventListener("click",function(e){if(e.target===this)this.classList.remove("open");});
 
-  /* ===== INIT ===== */
-  doSort(false);
+  /* ===== INIT — show empty welcome state ===== */
+  renderCards([]);
   buildLiUrl();
 
 })(); /* end IIFE */

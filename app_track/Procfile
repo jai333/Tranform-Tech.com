@@ -1,3 +1,4 @@
-web: uvicorn ats_crm_project.asgi:application --host 0.0.0.0 --port ${PORT:-8000} --workers 4
-worker: celery -A ats_crm_project worker -l INFO
-beat: celery -A ats_crm_project beat -l INFO
+release: python manage.py migrate --no-input && python manage.py collectstatic --no-input --clear
+web: uvicorn ats_crm_project.asgi:application --host 0.0.0.0 --port ${PORT:-8000} --workers 4 --loop uvloop --http h11
+worker: celery -A ats_crm_project worker -l INFO --concurrency 2
+beat: celery -A ats_crm_project beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler
