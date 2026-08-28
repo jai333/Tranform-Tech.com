@@ -249,7 +249,13 @@
         .stats-row { grid-template-columns: 1fr; }
         .stat-block { border-right: none; border-bottom: 1px solid var(--card-border); }
     }
-    </style>
+    
+    /* Hard limits on glows */
+    .hero-glow-1, .hero-glow-2, .hero-glow-3, .talent-glow, .bg-gradient, .showcase-glow, .security-glow {
+        max-width: 100vw !important;
+    }
+
+</style>
 <script>
     (function(){
         const saved = localStorage.getItem('theme') || 'dark';
@@ -269,7 +275,13 @@
     .htmx-request.htmx-indicator {
         opacity: 1;
     }
-    </style>
+    
+    /* Hard limits on glows */
+    .hero-glow-1, .hero-glow-2, .hero-glow-3, .talent-glow, .bg-gradient, .showcase-glow, .security-glow {
+        max-width: 100vw !important;
+    }
+
+</style>
 
     {% block extra_head %}{% endblock %}
 
@@ -303,6 +315,12 @@
     }
     .nav-links::-webkit-scrollbar { display: none !important; }
 }
+
+    /* Hard limits on glows */
+    .hero-glow-1, .hero-glow-2, .hero-glow-3, .talent-glow, .bg-gradient, .showcase-glow, .security-glow {
+        max-width: 100vw !important;
+    }
+
 </style>
 </head>
 
