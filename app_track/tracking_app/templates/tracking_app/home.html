@@ -2401,6 +2401,9 @@ body:not(.light-theme) #spotlight-layer { opacity: 1; }
    PARTICLE MESH CANVAS
    ══════════════════════════════════════════════════════════════ */
 (function() {
+    // Disable on mobile — saves CPU, prevents blank loading gap
+    if (window.innerWidth < 1025) return;
+
     const canvas = document.getElementById('particle-canvas');
     const ctx = canvas.getContext('2d');
     let W, H, particles = [], mouse = { x: -9999, y: -9999 };
