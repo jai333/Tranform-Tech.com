@@ -1,0 +1,30 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>500 — Server Error | Transform-Tech</title>
+    <link rel="stylesheet" href="{% static 'tracking_app/transform.css' %}?v=505">
+    <style>
+        body { background: #08090f; color: #fff; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; font-family: system-ui, -apple-system, sans-serif; text-align: center; padding: 24px; }
+        .error-wrap { max-width: 540px; }
+        .error-code { font-size: 8rem; font-weight: 900; line-height: 1; background: linear-gradient(135deg, #FF3B30, #ff6b35); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 0; }
+        .error-title { font-size: 1.8rem; font-weight: 700; margin: 12px 0; }
+        .error-desc { color: rgba(255,255,255,0.5); font-size: 1rem; line-height: 1.7; margin-bottom: 36px; }
+        .error-btn { display: inline-block; background: linear-gradient(135deg, #00E5FF, #6366f1); color: #000; font-weight: 800; padding: 14px 36px; border-radius: 12px; text-decoration: none; font-size: 1rem; transition: opacity 0.2s; }
+        .error-btn:hover { opacity: 0.85; }
+        .error-link { display: block; margin-top: 16px; color: rgba(255,255,255,0.4); font-size: 0.9rem; text-decoration: none; }
+        .error-link:hover { color: #00E5FF; }
+    </style>
+</head>
+<body>
+    <div class="error-wrap">
+        <div class="error-code">500</div>
+        <h1 class="error-title">Something Went Wrong</h1>
+        <p class="error-desc">Our servers encountered an unexpected error. Our engineering team has been notified automatically. Please try again in a moment.</p>
+        <a href="/" class="error-btn">Go to Homepage</a>
+        <a href="javascript:location.reload()" class="error-link">↻ Try refreshing</a>
+    </div>
+</body>
+</html>
