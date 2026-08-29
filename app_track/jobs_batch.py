@@ -201,7 +201,7 @@ def extract_job_details(job_data):
     
     return {
         "title": title,
-        "company": "Transform.io",  # Default from job data
+        "company": "Transform-Tech",  # Default from job data
         "department": department,
         "description": sections["description"] + "\n\n" + sections["responsibilities"],
         "requirements": sections["qualifications"],

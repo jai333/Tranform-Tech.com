@@ -40,7 +40,7 @@ try:
         lead=test_lead,
         tenant=tenant,
         sender_email=tenant.mail_registered_email,
-        subject="✨ [Transform.io] Verification: Tenant Mail Integration Active!",
+        subject="✨ [Transform-Tech] Verification: Tenant Mail Integration Active!",
         body=f"Hello {tenant.name} Team...",
         status='sent',
         sent_at=timezone.now()

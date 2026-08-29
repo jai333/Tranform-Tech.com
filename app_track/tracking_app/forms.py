@@ -97,7 +97,7 @@ class JobForm(forms.ModelForm):
             }),
             'company': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'e.g., Transform.io'
+                'placeholder': 'e.g., Transform-Tech'
             }),
             'department': forms.TextInput(attrs={
                 'class': 'form-control',

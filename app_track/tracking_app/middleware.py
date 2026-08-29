@@ -1,7 +1,7 @@
 """
 tracking_app/middleware.py
 ─────────────────────────────────────────────────────────────
-Custom middleware for Transform.io
+Custom middleware for Transform-Tech
 
 Provides SaaS feature gating based on tenant subscription plan.
 """

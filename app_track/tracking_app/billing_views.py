@@ -1,7 +1,7 @@
 """
 tracking_app/billing_views.py
 ─────────────────────────────────────────────────────────────
-Stripe billing integration for Transform.io SaaS.
+Stripe billing integration for Transform-Tech SaaS.
 
 Endpoints:
   /billing/            — Pricing page for tenant admin

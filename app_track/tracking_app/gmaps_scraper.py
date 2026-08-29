@@ -55,7 +55,7 @@ def _geocode(location: str) -> tuple[float, float] | None:
         resp = requests.get(
             NOMINATIM_BASE,
             params={"q": location, "format": "json", "limit": 1},
-            headers={"User-Agent": "Transform.io-CRM/1.0 (contact@transform.io)"},
+            headers={"User-Agent": "Transform-Tech-CRM/1.0 (contact@transform.io)"},
             timeout=8,
         )
         resp.raise_for_status()
@@ -225,7 +225,7 @@ def _extract_email_from_website(website_url: str) -> str | None:
     
     try:
         # short timeout so it doesn't block bulk imports too long
-        resp = requests.get(url, timeout=3.0, headers={"User-Agent": "Mozilla/5.0 (Transform.io-CRM/1.0)"})
+        resp = requests.get(url, timeout=3.0, headers={"User-Agent": "Mozilla/5.0 (Transform-Tech-CRM/1.0)"})
         if resp.status_code == 200:
             emails = re.findall(r'[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+', resp.text)
             

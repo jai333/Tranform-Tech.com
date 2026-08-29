@@ -664,13 +664,13 @@ def api_dismiss_alert(request, alert_id):
 # ─────────────────────────────────────────────────────────────────
 
 SALES_CHAT_SYSTEM_PROMPT = """
-You are Alex, a friendly sales assistant for Transform.io — an AI-powered ATS and CRM
+You are Alex, a friendly sales assistant for Transform-Tech — an AI-powered ATS and CRM
 for recruiting teams and agencies.
 
 Your goals:
 1. Understand the visitor's recruiting challenges
 2. Qualify them naturally (team size, current tools, main pain)
-3. Get them excited about Transform.io
+3. Get them excited about Transform-Tech
 4. Book a 15-minute demo
 
 Key features to highlight when relevant:
@@ -719,7 +719,7 @@ def api_sales_chat(request):
         api_key = os.getenv('OPENAI_API_KEY', '')
         if not api_key:
             return JsonResponse({
-                'reply': "Hi! I'm Alex from Transform.io. I'd love to help you find the right plan. Could you tell me a bit about your recruiting team?",
+                'reply': "Hi! I'm Alex from Transform-Tech. I'd love to help you find the right plan. Could you tell me a bit about your recruiting team?",
                 'source': 'fallback'
             })
 
@@ -819,7 +819,7 @@ def demo_booking_page(request):
         })
 
     return render(request, 'tracking_app/sales/demo_booking.html', {
-        'page_title': 'Book a Free Demo — Transform.io',
+        'page_title': 'Book a Free Demo — Transform-Tech',
     })
 
 
@@ -1051,10 +1051,10 @@ def unified_inbox(request):
                     else:
                         connection = None
                         
-                    email_body = f"Hello {tenant.name} Team,\n\nYour Advanced Tenant Mail Integration is active and securely configured!\n\nRegistered Sender: {tenant.mail_sender_name or tenant.name} <{tenant.mail_registered_email}>\nSMTP Server: {tenant.mail_smtp_host}:{tenant.mail_smtp_port}\nData Isolation: LOCKED & ENFORCED.\n\nYou can now send cold outreach and receive AI-classified replies in two-way real time.\n\nBest,\nTransform.io Mail Engine"
+                    email_body = f"Hello {tenant.name} Team,\n\nYour Advanced Tenant Mail Integration is active and securely configured!\n\nRegistered Sender: {tenant.mail_sender_name or tenant.name} <{tenant.mail_registered_email}>\nSMTP Server: {tenant.mail_smtp_host}:{tenant.mail_smtp_port}\nData Isolation: LOCKED & ENFORCED.\n\nYou can now send cold outreach and receive AI-classified replies in two-way real time.\n\nBest,\nTransform-Tech Mail Engine"
 
                     msg = EmailMessage(
-                        subject="✨ [Transform.io] Verification: Tenant Mail Integration Active!",
+                        subject="✨ [Transform-Tech] Verification: Tenant Mail Integration Active!",
                         body=email_body,
                         from_email=tenant.mail_registered_email,
                         to=[tenant.mail_registered_email],
@@ -1074,7 +1074,7 @@ def unified_inbox(request):
                         lead=test_lead,
                         tenant=tenant,
                         sender_email=tenant.mail_registered_email,
-                        subject="✨ [Transform.io] Verification: Tenant Mail Integration Active!",
+                        subject="✨ [Transform-Tech] Verification: Tenant Mail Integration Active!",
                         body=email_body,
                         status='sent',
                         sent_at=timezone.now()
@@ -1094,7 +1094,7 @@ def unified_inbox(request):
                         email=recent_email,
                         lead=recent_email.lead,
                         tenant=tenant,
-                        raw_content=f"Hi {tenant.mail_sender_name or 'Team'},\n\nWe received your message from {tenant.mail_registered_email}. We are very interested in deploying Transform.io across our organization! Let's arrange a deep-dive call next week.\n\nBest,\n{recent_email.lead.contact_name}",
+                        raw_content=f"Hi {tenant.mail_sender_name or 'Team'},\n\nWe received your message from {tenant.mail_registered_email}. We are very interested in deploying Transform-Tech across our organization! Let's arrange a deep-dive call next week.\n\nBest,\n{recent_email.lead.contact_name}",
                         ai_intent='interested'
                     )
                     recent_email.replied_at = timezone.now()

@@ -101,7 +101,7 @@ Your task:
 2. Write a concise, one-sentence description of the event.
 3. Determine if it's a "hot" signal (true/false).
 4. Rate your confidence in this signal being actionable on a scale 0–100 (integer).
-5. Draft a highly personalized, concise cold email (3-4 sentences max) to an executive at {company_name} referencing this specific news event and pitching "Transform.io", an enterprise ATS & CRM platform.
+5. Draft a highly personalized, concise cold email (3-4 sentences max) to an executive at {company_name} referencing this specific news event and pitching "Transform-Tech", an enterprise ATS & CRM platform.
 
 Return EXACTLY a JSON object with the following structure, and nothing else. Do not use markdown blocks.
 {{
@@ -160,7 +160,7 @@ def generate_synthetic_signal_and_draft_email(company_name, industry=""):
     industry_context = f" in the {industry} industry" if industry else ""
 
     prompt = f"""
-You are an expert enterprise sales AI for 'Transform.io' (an ATS & CRM platform).
+You are an expert enterprise sales AI for 'Transform-Tech' (an ATS & CRM platform).
 We couldn't find recent news for '{company_name}'{industry_context}.
 
 Your task:
@@ -171,7 +171,7 @@ It should sound like a real internal initiative or unannounced event (e.g. "Plan
 2. Determine if it's a "hot" signal (true/false, roughly 30% should be hot).
 3. Rate your confidence in this signal being relevant on a scale 0–100 (integer).
 4. Pick a signal_type from: Funding Round, Expansion, Leadership Change, Hiring Surge, M&A Activity, Product Launch, Digital Transformation.
-5. Draft a highly personalized, concise cold email (3-4 sentences max) to an executive at {company_name} referencing this specific event and pitching Transform.io.
+5. Draft a highly personalized, concise cold email (3-4 sentences max) to an executive at {company_name} referencing this specific event and pitching Transform-Tech.
 
 Return EXACTLY a JSON object with the following structure, and nothing else. Do not use markdown blocks.
 {{
@@ -233,10 +233,10 @@ def _hardcoded_fallback(company_name):
     draft = (
         f"Hi there,\n\nI noticed {company_name} is {event.lower()} "
         f"This is a critical time for scaling your talent acquisition.\n\n"
-        f"Transform.io is an enterprise ATS & CRM platform designed specifically "
+        f"Transform-Tech is an enterprise ATS & CRM platform designed specifically "
         f"to streamline these exact scenarios. I'd love to show you how we can help "
         f"{company_name} achieve its growth goals more efficiently.\n\n"
-        f"Are you open to a brief chat next week?\n\nBest,\nThe Transform.io Team"
+        f"Are you open to a brief chat next week?\n\nBest,\nThe Transform-Tech Team"
     )
 
     return {

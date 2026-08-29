@@ -1,7 +1,7 @@
 """
 tracking_app/tasks.py
 ─────────────────────────────────────────────────────────────
-All background Celery tasks for Transform.io.
+All background Celery tasks for Transform-Tech.
 
 Tasks:
   - scan_sla_breaches        : Escalate overdue IT tickets every 15 min
@@ -205,7 +205,7 @@ def send_weekly_digest():
         }
 
         body = (
-            f"Transform.io Weekly Digest\n\n"
+            f"Transform-Tech Weekly Digest\n\n"
             f"Past 7 days:\n"
             f"• New IT Tickets: {stats['new_tickets']}\n"
             f"• New Candidates: {stats['new_candidates']}\n"
@@ -218,7 +218,7 @@ def send_weekly_digest():
         admins = User.objects.filter(is_superuser=True).values_list("email", flat=True)
         if admins:
             send_mail(
-                subject="Transform.io Weekly Digest",
+                subject="Transform-Tech Weekly Digest",
                 message=body,
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 recipient_list=list(admins),

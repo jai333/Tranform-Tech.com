@@ -92,7 +92,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('title', models.CharField(max_length=255)),
-                ('company', models.CharField(default='Transform.io', max_length=255)),
+                ('company', models.CharField(default='Transform-Tech', max_length=255)),
                 ('department', models.CharField(blank=True, max_length=255, null=True)),
                 ('description', models.TextField()),
                 ('requirements', models.TextField(blank=True, help_text='List job requirements and qualifications', null=True)),

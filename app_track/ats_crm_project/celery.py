@@ -1,7 +1,7 @@
 """
 ats_crm_project/celery.py
 ─────────────────────────────────────────────────────────────
-Celery application entrypoint for Transform.io.
+Celery application entrypoint for Transform-Tech.
 Broker: Redis (localhost:6379/0)
 Result backend: django-celery-results (stores in DB)
 Beat scheduler: django-celery-beat (schedule stored in DB, editable via admin)

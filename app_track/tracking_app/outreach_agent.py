@@ -23,8 +23,8 @@ logger = logging.getLogger(__name__)
 
 
 PRODUCT_CONTEXT = """
-You are an elite sales AI for Transform.io — an AI-powered ATS and CRM SaaS platform.
-Transform.io helps companies hire 3x faster with AI resume parsing, automated outreach,
+You are an elite sales AI for Transform-Tech — an AI-powered ATS and CRM SaaS platform.
+Transform-Tech helps companies hire 3x faster with AI resume parsing, automated outreach,
 smart interview scheduling, buying signal radar, and a full sales CRM in one platform.
 Pricing: Starter $49/mo, Growth $99/mo, Enterprise $199/mo. 14-day free trial available.
 Key value props: Saves 8+ hours/week, reduces time-to-hire by 60%, works for teams of 5-5000.
@@ -120,10 +120,10 @@ def generate_email_content(lead):
     body = (
         f"Hi {first_name},\n\n"
         f"I came across {company} and noticed you might be dealing with {pain_hints}.\n\n"
-        f"Transform.io is an AI-powered hiring & CRM platform that helps teams like yours "
+        f"Transform-Tech is an AI-powered hiring & CRM platform that helps teams like yours "
         f"reduce time-to-hire by 60% and automate the manual work that slows you down.\n\n"
         f"I'd love to show you a quick 15-minute demo. Would any time this week work?\n\n"
-        f"Best,\nThe Transform.io Team\nhttps://transform.io"
+        f"Best,\nThe Transform-Tech Team\nhttps://transform.io"
     )
     return {"subject": subject, "body": body, "ai": False}
 
@@ -141,7 +141,7 @@ def generate_sms_content(lead):
     if result and len(result) <= 200:
         return result[:160]
     return (
-        f"Hi {first_name}! Saw {company} is growing. Transform.io can help you hire 3x faster with AI. "
+        f"Hi {first_name}! Saw {company} is growing. Transform-Tech can help you hire 3x faster with AI. "
         f"Worth a 10-min chat?"
     )[:160]
 
@@ -159,7 +159,7 @@ def generate_call_script(lead):
     if result and len(result) > 30:
         return result
     return (
-        f"Hi {first_name}, this is Alex from Transform.io. "
+        f"Hi {first_name}, this is Alex from Transform-Tech. "
         f"I'm reaching out because we help companies in {industry} like {company} "
         f"reduce time-to-hire by 60 percent with our AI platform. "
         f"I'd love to show you a quick demo. Please call back or visit transform dot io. Thanks!"

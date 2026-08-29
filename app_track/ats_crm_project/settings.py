@@ -125,7 +125,7 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-SITE_NAME = 'Transform.io'
+SITE_NAME = 'Transform-Tech'
 SITE_DOMAIN = os.getenv('SITE_DOMAIN', 'transform-tech.com')
 
 AUTH_USER_MODEL = 'tracking_app.User'

@@ -67,7 +67,7 @@ def _call_openai_json(system_prompt: str, user_prompt: str) -> dict:
 # ─────────────────────────────────────────────────────────────────
 
 ICP_SYSTEM_PROMPT = """
-You are a B2B sales qualification AI for Transform.io — a full-service IT solutions
+You are a B2B sales qualification AI for Transform-Tech — a full-service IT solutions
 company offering 6 verticals:
 1. ATS & CRM with built-in interview scheduling
 2. Data Dashboards & Business Intelligence
@@ -94,7 +94,7 @@ def score_lead_icp(lead) -> dict:
     Returns {'score': float, 'breakdown': dict, 'reason': str}
     """
     prompt = f"""
-Score this lead on ICP fit for Transform.io (AI-powered ATS/CRM SaaS):
+Score this lead on ICP fit for Transform-Tech (AI-powered ATS/CRM SaaS):
 
 Contact: {lead.contact_name}
 Company: {lead.company_name}
@@ -142,9 +142,9 @@ Return ONLY valid JSON in this exact format:
 
 EMAIL_SDR_SYSTEM_PROMPT = """
 You are an expert B2B SDR (Sales Development Representative) writing cold outreach
-for Transform.io — a full-service IT solutions company.
+for Transform-Tech — a full-service IT solutions company.
 
-Transform.io services:
+Transform-Tech services:
 1. ATS & CRM — candidate tracking, AI resume parsing, job-match scoring, built-in interview scheduling
 2. Data Dashboards — real-time KPI dashboards, business intelligence, executive reporting
 3. Cybersecurity — SOC2/HIPAA compliance, zero-trust architecture, encrypted PII vaults, threat monitoring
@@ -172,7 +172,7 @@ def generate_cold_email(lead, step_number: int = 1, variant: str = "A") -> dict:
     Returns {'subject': str, 'body': str}
     """
     step_context = {
-        1: "First touch — introduce Transform.io's full IT services, reference their situation, soft ask",
+        1: "First touch — introduce Transform-Tech's full IT services, reference their situation, soft ask",
         2: "Follow-up — share a relevant stat or mini case study about one of our 6 service verticals",
         3: "Pain-focused — address a specific operational or technical pain point they likely have",
         4: "Social proof — mention a success story across any of our verticals (ATS, dashboards, cybersec, dev, automation, IT ops)",
@@ -211,7 +211,7 @@ def _fallback_email(lead, step_number: int, variant: str) -> dict:
     """
     Returns a realistic, ready-to-send cold email when OpenAI is unavailable.
     Covers all 5 sequence steps × 2 tone variants (A = formal, B = casual).
-    Pitches the full Transform.io service portfolio.
+    Pitches the full Transform-Tech service portfolio.
     """
     name    = lead.contact_name.split()[0] if lead.contact_name else "there"
     company = lead.company_name or "your company"
@@ -224,16 +224,16 @@ def _fallback_email(lead, step_number: int, variant: str) -> dict:
             "body": (
                 f"Hi {name},\n\n"
                 f"I came across {company} while researching {industry} companies that are scaling fast.\n\n"
-                f"We're Transform.io — a full-service IT solutions company. We help teams like yours with "
+                f"We're Transform-Tech — a full-service IT solutions company. We help teams like yours with "
                 f"custom ATS & CRM platforms with built-in interview scheduling, real-time data dashboards, "
                 f"cybersecurity audits, web & app development, workflow automation, and full IT operations. "
                 f"Essentially, you tell us the problem — we place the right resources and build the solution.\n\n"
                 f"Would a quick 15-minute intro call make sense this week?\n\n"
-                f"Best,\nThe Transform.io Team"
+                f"Best,\nThe Transform-Tech Team"
             ),
         },
         (1, "B"): {
-            "subject": f"Hey {name} — {company} + Transform.io could be a great fit",
+            "subject": f"Hey {name} — {company} + Transform-Tech could be a great fit",
             "body": (
                 f"Hey {name},\n\n"
                 f"Spotted {company} and had to reach out — you're exactly the kind of team we love working with.\n\n"
@@ -241,7 +241,7 @@ def _fallback_email(lead, step_number: int, variant: str) -> dict:
                 f"automation, and IT ops. Just tell us what's slowing you down and we'll put the right "
                 f"people on it — fast.\n\n"
                 f"Worth a 15-min chat? No sales deck, just a real conversation.\n\n"
-                f"Cheers,\nTransform.io"
+                f"Cheers,\nTransform-Tech"
             ),
         },
         (2, "A"): {
@@ -254,7 +254,7 @@ def _fallback_email(lead, step_number: int, variant: str) -> dict:
                 f"• An e-commerce brand shipped a custom dashboard in 3 weeks with our dev team\n\n"
                 f"We place expert resources across all 6 verticals — no agency middlemen. "
                 f"Happy to share a relevant case study for {company}?\n\n"
-                f"Best,\nThe Transform.io Team"
+                f"Best,\nThe Transform-Tech Team"
             ),
         },
         (2, "B"): {
@@ -266,7 +266,7 @@ def _fallback_email(lead, step_number: int, variant: str) -> dict:
                 f"hiring workflows, security monitoring, data reporting, or app maintenance. "
                 f"One {industry} team automated their entire onboarding pipeline in under 2 weeks.\n\n"
                 f"Want to see what that could look like for {company}? 15 minutes, you pick the time.\n\n"
-                f"Cheers,\nTransform.io"
+                f"Cheers,\nTransform-Tech"
             ),
         },
         (3, "A"): {
@@ -275,11 +275,11 @@ def _fallback_email(lead, step_number: int, variant: str) -> dict:
                 f"Hi {name},\n\n"
                 f"A pattern we see across {industry} teams: data lives in 5 different tools, security is an afterthought, "
                 f"internal apps are outdated, and nobody has a real-time view of what's happening.\n\n"
-                f"Transform.io was built to solve exactly this. We offer a unified approach — custom dashboards "
+                f"Transform-Tech was built to solve exactly this. We offer a unified approach — custom dashboards "
                 f"for visibility, ATS/CRM for hiring, cybersecurity for compliance, and automation to eliminate "
                 f"manual bottlenecks. All under one roof.\n\n"
                 f"Does this sound familiar at {company}? I'd love to discuss how we'd tackle it.\n\n"
-                f"Best,\nThe Transform.io Team"
+                f"Best,\nThe Transform-Tech Team"
             ),
         },
         (3, "B"): {
@@ -292,11 +292,11 @@ def _fallback_email(lead, step_number: int, variant: str) -> dict:
                 f"We consolidate that chaos: one partner for your ATS, dashboards, cybersec, dev work, "
                 f"and automation.\n\n"
                 f"Up for a quick look at how it works?\n\n"
-                f"Cheers,\nTransform.io"
+                f"Cheers,\nTransform-Tech"
             ),
         },
         (4, "A"): {
-            "subject": f"How a {industry} company transformed operations with Transform.io",
+            "subject": f"How a {industry} company transformed operations with Transform-Tech",
             "body": (
                 f"Hi {name},\n\n"
                 f"Quick success story: a {industry} company came to us with fragmented hiring, zero data visibility, "
@@ -307,7 +307,7 @@ def _fallback_email(lead, step_number: int, variant: str) -> dict:
                 f"• Automated email outreach sequences\n\n"
                 f"Result: 3× faster placements, 85% fewer security gaps, and their CEO finally had a single source of truth.\n\n"
                 f"I think {company} could see similar results. Open to a 15-minute call?\n\n"
-                f"Best,\nThe Transform.io Team"
+                f"Best,\nThe Transform-Tech Team"
             ),
         },
         (4, "B"): {
@@ -320,21 +320,21 @@ def _fallback_email(lead, step_number: int, variant: str) -> dict:
                 f"and a cybersecurity setup that their auditors loved.\n\n"
                 f"Think {company} might benefit from having one IT partner handle everything? "
                 f"Happy to do a walk-through, zero commitment.\n\n"
-                f"Cheers,\nTransform.io"
+                f"Cheers,\nTransform-Tech"
             ),
         },
         (5, "A"): {
-            "subject": f"Last note from Transform.io, {name}",
+            "subject": f"Last note from Transform-Tech, {name}",
             "body": (
                 f"Hi {name},\n\n"
-                f"I've reached out a few times about how Transform.io could help {company} across hiring, "
+                f"I've reached out a few times about how Transform-Tech could help {company} across hiring, "
                 f"dashboards, security, and IT operations — I don't want to keep filling your inbox "
                 f"if the timing isn't right.\n\n"
                 f"If you're open to revisiting this in the future, just reply 'later' and I'll follow up in 90 days. "
                 f"If any single service interests you (ATS, dashboards, cybersec, dev, automation, or IT ops), "
                 f"happy to focus on just that.\n\n"
                 f"Either way, wishing {company} all the best.\n\n"
-                f"Best,\nThe Transform.io Team"
+                f"Best,\nThe Transform-Tech Team"
             ),
         },
         (5, "B"): {
@@ -342,11 +342,11 @@ def _fallback_email(lead, step_number: int, variant: str) -> dict:
             "body": (
                 f"Hey {name},\n\n"
                 f"This is my last nudge, I promise. 😄\n\n"
-                f"If Transform.io isn't the right fit right now, totally fine — just reply 'not now' "
+                f"If Transform-Tech isn't the right fit right now, totally fine — just reply 'not now' "
                 f"and I'll check back in a few months. If even one of our 6 services "
                 f"(ATS, dashboards, cybersec, dev, automation, IT ops) sounds useful, I'd love to start there.\n\n"
                 f"Either way, thanks for your time, {name}. Rooting for {company}!\n\n"
-                f"Cheers,\nTransform.io"
+                f"Cheers,\nTransform-Tech"
             ),
         },
     }
@@ -363,7 +363,7 @@ def _fallback_email(lead, step_number: int, variant: str) -> dict:
 # ─────────────────────────────────────────────────────────────────
 
 REPLY_CLASSIFIER_SYSTEM_PROMPT = """
-You are an AI sales assistant for Transform.io (B2B SaaS ATS/CRM).
+You are an AI sales assistant for Transform-Tech (B2B SaaS ATS/CRM).
 A prospect has replied to one of our cold outreach emails.
 
 Classify their intent and draft an appropriate reply that moves them forward.
@@ -557,10 +557,10 @@ def generate_onboarding_health_notes(funnel) -> str:
         unused.append("creating their first job posting")
 
     if not unused:
-        return "Great job — you've hit all the key milestones! You're getting maximum value from Transform.io."
+        return "Great job — you've hit all the key milestones! You're getting maximum value from Transform-Tech."
 
     prompt = f"""
-A trial user has been using Transform.io for {funnel.days_in_trial} days.
+A trial user has been using Transform-Tech for {funnel.days_in_trial} days.
 They have NOT yet tried: {', '.join(unused)}.
 Their activation score is {funnel.activation_score}/100.
 Trial days remaining: {funnel.trial_days_remaining}.
@@ -571,7 +571,7 @@ Write a short, friendly in-app nudge (under 60 words) that:
 3. Ends with a direct CTA like "Try it now →"
 """
     return _call_openai(
-        "You are a helpful onboarding assistant for Transform.io SaaS. Be warm, brief, and specific.",
+        "You are a helpful onboarding assistant for Transform-Tech SaaS. Be warm, brief, and specific.",
         prompt
     )
 

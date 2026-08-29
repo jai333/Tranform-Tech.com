@@ -129,17 +129,17 @@ def api_twilio_sms_templates(request):
         {
             "id":    "follow_up",
             "label": "⚡ Quick Follow-Up",
-            "text":  "Hi {name}! Just following up on our earlier conversation. Would you be open to a quick 15-min call this week to explore how Transform.io can help? 🚀",
+            "text":  "Hi {name}! Just following up on our earlier conversation. Would you be open to a quick 15-min call this week to explore how Transform-Tech can help? 🚀",
         },
         {
             "id":    "demo_invite",
             "label": "📅 Demo Invite",
-            "text":  "Hi {name}, I'd love to show you how Transform.io's AI-powered ATS & CRM is helping teams like yours hire 3x faster. Can I grab 20 minutes on your calendar?",
+            "text":  "Hi {name}, I'd love to show you how Transform-Tech's AI-powered ATS & CRM is helping teams like yours hire 3x faster. Can I grab 20 minutes on your calendar?",
         },
         {
             "id":    "value_prop",
             "label": "💡 Value Prop",
-            "text":  "Hi {name}! Transform.io just launched AI-powered candidate sourcing + buying signal radar. Companies like yours are cutting time-to-hire by 60%. Worth a look?",
+            "text":  "Hi {name}! Transform-Tech just launched AI-powered candidate sourcing + buying signal radar. Companies like yours are cutting time-to-hire by 60%. Worth a look?",
         },
         {
             "id":    "check_in",
@@ -181,7 +181,7 @@ def api_ai_draft_sms(request):
         else:
             # Fallback without AI
             draft = (
-                f"Hi {name}! I wanted to reach out personally about how Transform.io "
+                f"Hi {name}! I wanted to reach out personally about how Transform-Tech "
                 f"is helping {company or 'companies like yours'} transform their hiring pipeline. "
                 f"Would love to connect — even a 10-min call could be worth it! 🚀"
             )
@@ -191,7 +191,7 @@ def api_ai_draft_sms(request):
         extra_ctx   = f"\n\nAdditional context: {context}" if context else ""
 
         prompt = (
-            f"Write a short, warm, personalized SMS (under 160 characters) from a sales rep at Transform.io "
+            f"Write a short, warm, personalized SMS (under 160 characters) from a sales rep at Transform-Tech "
             f"(an enterprise ATS & CRM) to {name}{company_ctx}. "
             f"It should be conversational, not salesy, and invite a quick conversation.{extra_ctx}\n"
             f"Return ONLY the SMS text, nothing else."

@@ -2724,8 +2724,8 @@ def company_data_manager(request):
                     lead=test_lead,
                     tenant=tenant,
                     sender_email=tenant.mail_registered_email,
-                    subject="✨ [Transform.io] Verification: Tenant Mail Integration Active!",
-                    body=f"Hello {tenant.name} Team,\n\nYour Advanced Tenant Mail Integration is active and securely configured!\n\nRegistered Sender: {tenant.mail_sender_name or tenant.name} <{tenant.mail_registered_email}>\nSMTP Server: {tenant.mail_smtp_host}:{tenant.mail_smtp_port}\nData Isolation: LOCKED & ENFORCED.\n\nYou can now send cold outreach and receive AI-classified replies in two-way real time.\n\nBest,\nTransform.io Mail Engine",
+                    subject="✨ [Transform-Tech] Verification: Tenant Mail Integration Active!",
+                    body=f"Hello {tenant.name} Team,\n\nYour Advanced Tenant Mail Integration is active and securely configured!\n\nRegistered Sender: {tenant.mail_sender_name or tenant.name} <{tenant.mail_registered_email}>\nSMTP Server: {tenant.mail_smtp_host}:{tenant.mail_smtp_port}\nData Isolation: LOCKED & ENFORCED.\n\nYou can now send cold outreach and receive AI-classified replies in two-way real time.\n\nBest,\nTransform-Tech Mail Engine",
                     status='sent',
                     sent_at=timezone.now()
                 )
@@ -4023,15 +4023,15 @@ def send_test_mail(request):
             timeout=10,
         )
         email = EmailMessage(
-            subject=f'✅ Transform.io Mail Integration Test — {tenant.name}',
+            subject=f'✅ Transform-Tech Mail Integration Test — {tenant.name}',
             body=(
                 f'Your mail integration for {tenant.name} is working correctly.\n\n'
                 f'SMTP Host: {tenant.mail_smtp_host}:{tenant.mail_smtp_port}\n'
                 f'TLS: {"Enabled" if tenant.mail_use_tls else "Disabled"}\n'
                 f'Sender: {tenant.mail_sender_name or tenant.mail_smtp_username}\n\n'
-                f'This is an automated verification email from Transform.io.'
+                f'This is an automated verification email from Transform-Tech.'
             ),
-            from_email=f'{tenant.mail_sender_name or "Transform.io"} <{tenant.mail_registered_email}>',
+            from_email=f'{tenant.mail_sender_name or "Transform-Tech"} <{tenant.mail_registered_email}>',
             to=[request.user.email or tenant.mail_registered_email],
             connection=conn,
         )
@@ -4065,7 +4065,7 @@ def simulate_webhook_payload(request, endpoint_id):
         'timestamp': _time.time(),
         'tenant': tenant.name if tenant else 'unknown',
         'data': {
-            'message': 'This is a live test payload from Transform.io Webhook Engine.',
+            'message': 'This is a live test payload from Transform-Tech Webhook Engine.',
             'endpoint_id': endpoint_id,
             'source': 'developer_portal_simulator'
         }
@@ -4389,7 +4389,7 @@ def api_candidate_gmaps_scrape(request):
     try:
         geo_resp = requests.get(
             f"https://nominatim.openstreetmap.org/search?q={requests.utils.quote(location)}&format=json&limit=1",
-            headers={'User-Agent': 'Transform.io-ATS/1.0'},
+            headers={'User-Agent': 'Transform-Tech-ATS/1.0'},
             timeout=5
         )
         if geo_resp.status_code == 200:
