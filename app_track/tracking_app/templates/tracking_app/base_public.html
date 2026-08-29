@@ -6,12 +6,74 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Transform.io — The One Platform for IT, Recruitment, Security & Development</title>
     <meta name="description" content="Transform.io is the unified platform for AI Sales, Cybersecurity, Recruiting & Sourcing, ATS-CRM with interviews, Web & App Development, Data Dashboards, and IT Management as a Service.">
+
+    <!-- DNS prefetch for fast external resource connections -->
+    <link rel="dns-prefetch" href="//fonts.googleapis.com">
+    <link rel="dns-prefetch" href="//fonts.gstatic.com">
+    <link rel="dns-prefetch" href="//unpkg.com">
+    <link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;600&family=Inter:wght@300;400;600;800;900&display=swap" rel="stylesheet">
-    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="{% static 'tracking_app/transform.css' %}?v=504">
+
+    <!-- CRITICAL: Main app CSS loads synchronously (it's local/CDN-cached) -->
+    <link rel="stylesheet" href="{% static 'tracking_app/transform.css' %}?v=505">
+
+    <!-- NON-BLOCKING: External CSS loads after page renders (no more white flash) -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;600&family=Inter:wght@300;400;600;800;900&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;600&family=Inter:wght@300;400;600;800;900&display=swap" rel="stylesheet"></noscript>
+
+    <link rel="preload" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet"></noscript>
+
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
+
+    <!-- Loading splash screen — hides FOUC (flash of unstyled content) -->
+    <style>
+    #page-loader {
+        position: fixed;
+        inset: 0;
+        z-index: 99999;
+        background: #08090f;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        transition: opacity 0.4s ease;
+    }
+    #page-loader.fade-out {
+        opacity: 0;
+        pointer-events: none;
+    }
+    .loader-logo {
+        font-size: 1.6rem;
+        font-weight: 900;
+        color: #fff;
+        letter-spacing: -0.03em;
+        margin-bottom: 28px;
+        font-family: system-ui, -apple-system, sans-serif;
+    }
+    .loader-logo span { color: #00E5FF; }
+    .loader-bar-wrap {
+        width: 160px;
+        height: 3px;
+        background: rgba(255,255,255,0.08);
+        border-radius: 99px;
+        overflow: hidden;
+    }
+    .loader-bar {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(90deg, #00E5FF, #6366f1);
+        border-radius: 99px;
+        animation: loader-fill 1.2s cubic-bezier(0.4,0,0.2,1) forwards;
+    }
+    @keyframes loader-fill {
+        0%   { width: 0%; }
+        60%  { width: 80%; }
+        100% { width: 100%; }
+    }
+    </style>
     <style>
     /* ══════════════════════════════════════════════════════════════
        PREMIUM HOME — Exotic glassmorphic theme variables
@@ -473,6 +535,12 @@ html, body {
 </head>
 
 <body>
+
+<!-- Page loader — shows during load, fades out when page is ready -->
+<div id="page-loader">
+    <div class="loader-logo">Transform<span>.io</span></div>
+    <div class="loader-bar-wrap"><div class="loader-bar"></div></div>
+</div>
 
 <!-- Ambient glow orbs -->
 <div class="orb orb-1"></div>
@@ -1031,6 +1099,23 @@ html, body {
     </script>
 
     <script>
+    // Page loader — dismiss when DOM + styles are ready
+    (function() {
+        function dismissLoader() {
+            var loader = document.getElementById('page-loader');
+            if (!loader) return;
+            loader.classList.add('fade-out');
+            setTimeout(function() { loader.style.display = 'none'; }, 450);
+        }
+        if (document.readyState === 'complete') {
+            dismissLoader();
+        } else {
+            window.addEventListener('load', dismissLoader);
+            // Failsafe: max 3s loader no matter what
+            setTimeout(dismissLoader, 3000);
+        }
+    })();
+
     // Mobile hamburger drawer
     (function() {
         var btn = document.getElementById('mobile-menu-btn');
