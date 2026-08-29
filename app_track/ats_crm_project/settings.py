@@ -196,7 +196,7 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', 'jaisukhwal41@gmail.com')
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', 'zgihpkfvtwliixrg')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 # ── AI / OpenAI ───────────────────────────────────────────────
@@ -267,7 +267,7 @@ CACHES = {
 }
 
 # ── Celery Configuration ──────────────────────────────────────
-CELERY_BROKER_URL = 'memory://'
+# CELERY_BROKER_URL = 'memory://'
 CELERY_RESULT_BACKEND = 'django-db'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
