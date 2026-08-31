@@ -103,82 +103,82 @@ def run_sales_alerts():
 @shared_task(name="tracking_app.tasks.sync_imap_inbox")
 def sync_imap_inbox():
     """
-    Connects to Gmail IMAP and checks for new replies.
-    Matches replies to existing OutreachEmail by subject threading.
-    Creates EmailReply records for matched messages.
+    Connects to IMAP servers for every Tenant that has mail configured.
+    Reads unread emails, matches them to OutreachEmail via threading,
+    and creates EmailReply records linked to that specific Tenant.
     """
     import imaplib
     import email as email_lib
     from email.header import decode_header
-    from django.conf import settings
-
-    try:
-        mail = imaplib.IMAP4_SSL("imap.gmail.com")
-        mail.login(settings.EMAIL_HOST_USER, settings.EMAIL_HOST_PASSWORD)
-        mail.select("INBOX")
-
-        # Search for unseen emails
-        _, message_ids = mail.search(None, "UNSEEN")
-        ids = message_ids[0].split()
-        processed = 0
-
-        for uid in ids[-20:]:  # Process at most last 20 unread
-            try:
-                _, msg_data = mail.fetch(uid, "(RFC822)")
-                raw_email = msg_data[0][1]
-                msg = email_lib.message_from_bytes(raw_email)
-
-                subject_raw = msg.get("Subject", "")
-                subject_parts = decode_header(subject_raw)
-                subject = " ".join(
-                    part.decode(enc or "utf-8") if isinstance(part, bytes) else part
-                    for part, enc in subject_parts
-                )
-                sender = msg.get("From", "")
-
-                # Extract plain text body
-                body = ""
-                if msg.is_multipart():
-                    for part in msg.walk():
-                        if part.get_content_type() == "text/plain":
-                            body = part.get_payload(decode=True).decode("utf-8", errors="ignore")
-                            break
-                else:
-                    body = msg.get_payload(decode=True).decode("utf-8", errors="ignore")
-
-                _store_reply(subject, sender, body[:2000])
-                processed += 1
-
-            except Exception as msg_err:
-                logger.warning("IMAP message processing error: %s", msg_err)
-
-        mail.logout()
-        logger.info("sync_imap_inbox: processed %d messages", processed)
-        return {"processed": processed}
-
-    except Exception as e:
-        logger.error("sync_imap_inbox error: %s", e)
-        return {"error": str(e)}
-
-
-def _store_reply(subject: str, sender: str, body: str):
-    """Match an incoming email to an OutreachEmail and create an EmailReply."""
+    from tracking_app.models import Tenant
     from tracking_app.sales_models import OutreachEmail, EmailReply
+    
+    tenants = Tenant.objects.exclude(mail_registered_email__isnull=True).exclude(mail_app_password__isnull=True)
+    
+    total_synced = 0
+    for tenant in tenants:
+        if not tenant.mail_imap_host:
+            continue
+            
+        try:
+            # Secure IMAP connection per Tenant
+            mail = imaplib.IMAP4_SSL(tenant.mail_imap_host, tenant.mail_imap_port or 993)
+            mail.login(tenant.mail_registered_email, tenant.mail_app_password)
+            mail.select("INBOX")
+            
+            # Fetch unread emails
+            status, messages = mail.search(None, "(UNSEEN)")
+            if status != "OK" or not messages[0]:
+                mail.logout()
+                continue
+                
+            for msg_id in messages[0].split():
+                res, msg_data = mail.fetch(msg_id, "(RFC822)")
+                if res != "OK":
+                    continue
+                    
+                for response_part in msg_data:
+                    if isinstance(response_part, tuple):
+                        msg = email_lib.message_from_bytes(response_part[1])
+                        
+                        subject, encoding = decode_header(msg.get("Subject", ""))[0]
+                        if isinstance(subject, bytes):
+                            subject = subject.decode(encoding or "utf-8", errors="replace")
+                            
+                        # Simple thread matching: check if Subject matches an OutreachEmail sent by this Tenant
+                        matched = OutreachEmail.objects.filter(
+                            tenant=tenant,
+                            subject__icontains=subject.replace("Re: ", "").replace("RE: ", "").strip()
+                        ).first()
+                        
+                        if matched:
+                            body = ""
+                            if msg.is_multipart():
+                                for part in msg.walk():
+                                    if part.get_content_type() == "text/plain":
+                                        body = part.get_payload(decode=True).decode("utf-8", errors="replace")
+                                        break
+                            else:
+                                body = msg.get_payload(decode=True).decode("utf-8", errors="replace")
+                                
+                            # Save the EmailReply for this Tenant's unified inbox
+                            if not EmailReply.objects.filter(email=matched, raw_content=body).exists():
+                                EmailReply.objects.create(
+                                    email=matched,
+                                    raw_content=body,
+                                    classified_intent="OTHER"
+                                )
+                                matched.status = "replied"
+                                matched.save(update_fields=["status"])
+                                logger.info(f"Stored IMAP reply to OutreachEmail #{matched.id} for Tenant {tenant.id}")
+                                total_synced += 1
+                                
+            mail.logout()
+        except Exception as e:
+            logger.error(f"IMAP Sync Error for Tenant {tenant.id}: {e}")
+            
+    return {"total_synced": total_synced}
 
-    # Try to find matching sent email by subject (strip Re: prefix)
-    clean_subject = subject.replace("Re:", "").replace("RE:", "").strip()
-    matched = OutreachEmail.objects.filter(subject__icontains=clean_subject).first()
-    if matched and not EmailReply.objects.filter(
-        email=matched, raw_content__startswith=body[:50]
-    ).exists():
-        EmailReply.objects.create(
-            email=matched,
-            raw_content=body,
-            classified_intent="OTHER",
-        )
-        matched.status = "replied"
-        matched.save(update_fields=["status"])
-        logger.info("Stored IMAP reply to OutreachEmail #%s", matched.id)
 
 
 # ─────────────────────────────────────────────────────────────

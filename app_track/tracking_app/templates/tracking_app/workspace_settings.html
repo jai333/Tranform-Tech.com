@@ -16,6 +16,41 @@
 
     <div class="row g-4">
         
+        
+        <!-- ADVANCED EMAIL SYNC SECTION -->
+        <div class="col-12">
+            <div class="dev-card">
+                <div class="dev-card-header">
+                    <div class="card-title"><i class="fa-solid fa-envelope text-info"></i> Advanced Email Sync (Unified Inbox)</div>
+                </div>
+                <div class="p-4">
+                    <p style="color: var(--apple-text-secondary);">Connect your corporate email (Google Workspace, Microsoft 365) via IMAP. Replies from Leads will automatically sync into your Unified Inbox.</p>
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label class="form-label" style="color: white;">IMAP Host</label>
+                            <input type="text" class="form-control" style="background: var(--apple-input-bg); border-color: var(--apple-border); color: white;" value="{{ request.user.tenant.mail_imap_host|default:'' }}" placeholder="imap.gmail.com">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" style="color: white;">IMAP Port</label>
+                            <input type="number" class="form-control" style="background: var(--apple-input-bg); border-color: var(--apple-border); color: white;" value="{{ request.user.tenant.mail_imap_port|default:'993' }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" style="color: white;">Email Address</label>
+                            <input type="email" class="form-control" style="background: var(--apple-input-bg); border-color: var(--apple-border); color: white;" value="{{ request.user.tenant.mail_registered_email|default:'' }}" placeholder="sales@yourcompany.com">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" style="color: white;">App Password</label>
+                            <input type="password" class="form-control" style="background: var(--apple-input-bg); border-color: var(--apple-border); color: white;" placeholder="••••••••••••••••">
+                            <div class="form-text" style="color: var(--apple-text-secondary);">For Google Workspace, use a generated App Password.</div>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <button class="btn btn-info" style="color: white;"><i class="fa-solid fa-plug"></i> Connect Inbox</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- SSO SECURITY SECTION -->
         <div class="col-12">
             <div class="dev-card">
