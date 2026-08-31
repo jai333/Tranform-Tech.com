@@ -63,3 +63,6 @@ uvicorn[standard]
 # Twilio — Voice & SMS
 twilio>=8.0.0
 requests==2.31.0
+djangorestframework
+markdown
+django-filter
