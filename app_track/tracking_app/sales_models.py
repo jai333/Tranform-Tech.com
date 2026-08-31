@@ -329,6 +329,10 @@ class Deal(models.Model):
     deal_value_monthly = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     deal_value_annual = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
+    churn_risk_score = models.IntegerField(default=0, help_text="0-100 score indicating churn probability based on cross-module AI analysis.")
+    churn_risk_level = models.CharField(max_length=20, default='low', choices=[('low', 'Low'), ('medium', 'Medium'), ('high', 'High')])
+    churn_analysis_summary = models.TextField(blank=True, null=True)
+
     close_probability = models.FloatField(default=0.0, help_text="AI-predicted probability 0.0–1.0")
     expected_close_date = models.DateField(null=True, blank=True)
     actual_close_date = models.DateField(null=True, blank=True)

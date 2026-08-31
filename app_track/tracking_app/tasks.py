@@ -364,3 +364,18 @@ def execute_automation_action(rule_id, tenant_id, action, payload):
             status='FAILED',
             error_message=str(e)
         )
+
+@shared_task(name="tracking_app.tasks.evaluate_account_churn")
+def evaluate_account_churn():
+    """
+    Daily task that evaluates the churn risk of all active Won deals.
+    """
+    from .sales_models import Deal
+    from .ai_churn_predictor import predict_deal_churn
+    
+    # Evaluate churn for deals that are 'won' (active clients)
+    deals = Deal.objects.filter(stage='won')
+    for deal in deals:
+        predict_deal_churn(deal.id)
+        
+    return {"evaluated_deals": deals.count()}
