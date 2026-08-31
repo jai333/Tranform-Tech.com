@@ -64,7 +64,7 @@ class Lead(models.Model):
     company_size = models.IntegerField(null=True, blank=True, help_text="Number of employees")
     industry = models.CharField(max_length=100, blank=True, null=True)
     company_website = models.URLField(blank=True, null=True)
-    company_location = models.CharField(max_length=150, blank=True, null=True)
+    company_location = models.CharField(max_length=255, blank=True, null=True)
 
     # Google Maps extra data
     gmaps_place_id = models.CharField(max_length=200, blank=True, null=True, unique=True)
@@ -573,7 +573,7 @@ class AccountContact(models.Model):
     account    = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='contacts')
     first_name = models.CharField(max_length=100)
     last_name  = models.CharField(max_length=100)
-    title      = models.CharField(max_length=150, blank=True)
+    title      = models.CharField(max_length=255, blank=True)
     email      = models.EmailField(blank=True)
     phone      = models.CharField(max_length=30, blank=True)
     linkedin   = models.URLField(blank=True, null=True)

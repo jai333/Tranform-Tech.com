@@ -5,12 +5,12 @@ from .models import User, JobSeekerApplication, Job
 class UserRegistrationForm(UserCreationForm):
     email = forms.EmailField()
     first_name = forms.CharField(
-        max_length=150,
+        max_length=255,
         required=True,
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Your first name'})
     )
     last_name = forms.CharField(
-        max_length=150,
+        max_length=255,
         required=True,
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Your last name'})
     )

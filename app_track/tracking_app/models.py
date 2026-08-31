@@ -214,11 +214,11 @@ class Tenant(models.Model):
 
     # Phase 3 — Advanced Tenant Mail Integration
     mail_registered_email = models.EmailField(blank=True, null=True, help_text="Registered corporate email address for sending and receiving")
-    mail_sender_name = models.CharField(max_length=150, blank=True, null=True, help_text="Sender display name (e.g., Nexus AI Sales)")
+    mail_sender_name = models.CharField(max_length=255, blank=True, null=True, help_text="Sender display name (e.g., Nexus AI Sales)")
     mail_reply_to = models.EmailField(blank=True, null=True, help_text="Dedicated inbound inbox for automated AI reply parsing")
-    mail_smtp_host = models.CharField(max_length=150, default='smtp.gmail.com', blank=True, null=True)
+    mail_smtp_host = models.CharField(max_length=255, default='smtp.gmail.com', blank=True, null=True)
     mail_smtp_port = models.IntegerField(default=587, blank=True, null=True)
-    mail_smtp_username = models.CharField(max_length=150, blank=True, null=True)
+    mail_smtp_username = models.CharField(max_length=255, blank=True, null=True)
     mail_smtp_password = models.CharField(max_length=255, blank=True, null=True)
     mail_use_tls = models.BooleanField(default=True)
     mail_auto_sync = models.BooleanField(default=True, help_text="Automatically parse and sync two-way email communications")
@@ -691,7 +691,7 @@ from .sales_models import (  # noqa: F401, E402
 
 class ITVendor(models.Model):
     name = models.CharField(max_length=200)
-    contact_name = models.CharField(max_length=150, null=True, blank=True)
+    contact_name = models.CharField(max_length=255, null=True, blank=True)
     contact_email = models.EmailField(null=True, blank=True)
     contact_phone = models.CharField(max_length=50, null=True, blank=True)
     support_portal_url = models.URLField(null=True, blank=True)
@@ -988,7 +988,7 @@ class ThreatIncident(models.Model):
     tenant = models.ForeignKey('Tenant', on_delete=models.SET_NULL, null=True, blank=True, related_name='incidents')
     reported_by = models.ForeignKey('User', on_delete=models.SET_NULL, null=True, blank=True, related_name='reported_incidents')
     assigned_to = models.ForeignKey('User', on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_incidents')
-    detection_source = models.CharField(max_length=150, blank=True, null=True)
+    detection_source = models.CharField(max_length=255, blank=True, null=True)
     file_hash = models.CharField(max_length=255, null=True, blank=True)
     affected_system = models.CharField(max_length=255, null=True, blank=True)
     ip_address = models.GenericIPAddressField(null=True, blank=True)
@@ -1066,7 +1066,7 @@ class ServiceRequest(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
 class TicketRoutingRule(models.Model):
-    name = models.CharField(max_length=150)
+    name = models.CharField(max_length=255)
     condition_category = models.CharField(max_length=50, choices=ITTicket.CATEGORY_CHOICES, null=True, blank=True)
     action_assign_to = models.ForeignKey('User', on_delete=models.SET_NULL, null=True, blank=True)
     is_active = models.BooleanField(default=True)
@@ -1132,10 +1132,10 @@ class DevProjectRequest(models.Model):
         ('flexible', 'Flexible / No Rush'),
     ]
 
-    contact_name = models.CharField(max_length=150)
+    contact_name = models.CharField(max_length=255)
     contact_email = models.EmailField()
     contact_phone = models.CharField(max_length=20, null=True, blank=True)
-    company_name = models.CharField(max_length=150, null=True, blank=True)
+    company_name = models.CharField(max_length=255, null=True, blank=True)
     project_type = models.CharField(max_length=50, choices=PROJECT_TYPE_CHOICES, default='other')
     project_title = models.CharField(max_length=300)
     description = models.TextField()
