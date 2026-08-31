@@ -28,5 +28,9 @@ RUN python manage.py collectstatic --no-input
 # Expose port
 EXPOSE 8000
 
-# Start the app (migrations happen via Railway releaseCommand, not here)
-CMD uvicorn ats_crm_project.asgi:application --host 0.0.0.0 --port $PORT --workers 4
+# Make startup script executable
+RUN chmod +x start.sh
+
+# Start: run migrations then launch the app
+CMD ["bash", "start.sh"]
+
