@@ -264,7 +264,16 @@ def stripe_webhook(request):
 
 
 def _handle_checkout_completed(session):
+    from django.core.cache import cache
     from tracking_app.models import Tenant
+    
+    session_id = session.get("id")
+    lock_key = f"stripe_checkout_{session_id}"
+    
+    if not cache.add(lock_key, "processed", 86400):
+        logger.info(f"Duplicate checkout session event ignored: {session_id}")
+        return
+        
     tenant_id = session.get("metadata", {}).get("tenant_id")
     plan = session.get("metadata", {}).get("plan", "starter")
     customer_id = session.get("customer")

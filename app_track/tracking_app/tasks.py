@@ -322,12 +322,18 @@ def run_autonomous_agent(lead_id, campaign_id=None, channels=None, tenant_id=Non
         logger.error(f"Failed to run autonomous agent for lead {lead_id}: {e}")
         return {"status": "error", "message": str(e)}
 
-@shared_task(name="tracking_app.tasks.execute_automation_action")
-def execute_automation_action(rule_id, tenant_id, action, payload):
-    """
-    Background worker that executes the specific action defined in the Workflow Builder.
-    """
+@shared_task(name="tracking_app.tasks.execute_automation_action", bind=True, max_retries=3)
+def execute_automation_action(self, rule_id, tenant_id, action, payload):
+    from django.core.cache import cache
     from .models import AutomationRule, AutomationLog, Tenant
+    import hashlib
+    import json
+    
+    payload_str = json.dumps(payload, sort_keys=True)
+    lock_key = f"wf_lock_{rule_id}_{tenant_id}_{hashlib.md5(payload_str.encode()).hexdigest()}"
+    
+    if not cache.add(lock_key, "running", 600):
+        return {"status": "skipped", "reason": "idempotency_lock_active"}
     
     try:
         rule = AutomationRule.objects.get(id=rule_id)
