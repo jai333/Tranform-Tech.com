@@ -4584,3 +4584,49 @@ def force_password_reset(request):
         return HttpResponse('<h1>❌ ERROR</h1><p>User JAi345 does not exist in the database yet.</p>')
     except Exception as e:
         return HttpResponse(f'<h1>❌ ERROR</h1><p>{str(e)}</p>')
+
+@login_required
+def workspace_settings(request):
+    tenant = request.user.tenant
+    if not tenant:
+        messages.error(request, "You must be in a workspace to access settings.")
+        return redirect('home')
+        
+    if not (request.user.is_superuser or request.user.is_staff or request.user.role == 'admin'):
+        messages.error(request, "Only Workspace Admins can access settings.")
+        return redirect('home')
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        
+        if action == 'update_branding':
+            tenant.primary_color = request.POST.get('primary_color', '#00E5FF')
+            tenant.logo_url = request.POST.get('logo_url', '')
+            tenant.portal_domain = request.POST.get('portal_domain', '')
+            tenant.save()
+            messages.success(request, "Workspace branding updated.")
+            
+        elif action == 'update_user_role':
+            user_id = request.POST.get('user_id')
+            try:
+                u = User.objects.get(id=user_id, tenant=tenant)
+                u.can_view_sales = request.POST.get('can_view_sales') == 'on'
+                u.can_view_ats = request.POST.get('can_view_ats') == 'on'
+                u.can_view_it = request.POST.get('can_view_it') == 'on'
+                u.can_view_executive = request.POST.get('can_view_executive') == 'on'
+                
+                assigned_role = request.POST.get('role', u.role)
+                u.role = assigned_role
+                u.save()
+                messages.success(request, f"Permissions updated for {u.username}.")
+            except User.DoesNotExist:
+                messages.error(request, "User not found in this workspace.")
+                
+        return redirect('workspace-settings')
+
+    users = User.objects.filter(tenant=tenant).order_by('-date_joined')
+    
+    return render(request, 'tracking_app/workspace_settings.html', {
+        'tenant': tenant,
+        'workspace_users': users
+    })
