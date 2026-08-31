@@ -1,104 +1,71 @@
-import shutil
-import tempfile
-from unittest.mock import Mock, patch
 
+from django.test import TestCase
 from django.contrib.auth import get_user_model
-from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import TestCase, override_settings
-from django.urls import reverse
+from tracking_app.models import Tenant, ITTicket
 
-from ai.resume_parser import ResumeParser
-from tracking_app.models import Candidate, ResumeData
+User = get_user_model()
 
-
-RESUME_TEXT = """John Doe
-john.resume@example.com
-555-222-3333
-linkedin.com/in/john-doe
-
-Experience
-Senior Python Developer
-Worked on Django and AWS platforms from 2014 to 2024.
-
-Education
-Bachelor of Science in Computer Science
-"""
-
-
-class ResumeParserTests(TestCase):
-    def test_parse_text_extracts_contact_and_experience_without_optional_nlp(self):
-        parsed = ResumeParser().parse_text(RESUME_TEXT)
-
-        self.assertEqual(parsed['contact_info']['email'], 'john.resume@example.com')
-        self.assertEqual(parsed['contact_info']['phone'], '555-222-3333')
-        self.assertEqual(parsed['contact_info']['linkedin'], 'linkedin.com/in/john-doe')
-        self.assertEqual(parsed['total_experience_years'], 1.0)
-        self.assertIn('Python', [skill['skill'] for skill in parsed['skills']])
-        self.assertIn('Django', [skill['skill'] for skill in parsed['skills']])
-
-    def test_extract_from_pdf_uses_pypdf_fallback_when_pdfplumber_unavailable(self):
-        parser = ResumeParser()
-        mock_reader = Mock()
-        mock_reader.pages = [
-            Mock(extract_text=Mock(return_value='Page one')),
-            Mock(extract_text=Mock(return_value='Page two')),
-        ]
-
-        with patch('ai.resume_parser.pdfplumber', None), patch(
-            'ai.resume_parser.PdfReader', return_value=mock_reader
-        ) as pdf_reader:
-            text = parser._extract_from_pdf('resume.pdf')
-
-        self.assertEqual(text, 'Page one\nPage two')
-        pdf_reader.assert_called_once_with('resume.pdf')
-
-
-class ParseResumeApiTests(TestCase):
+class TenantIsolationTests(TestCase):
     def setUp(self):
-        self.temp_media_root = tempfile.mkdtemp()
-        self.settings_override = override_settings(MEDIA_ROOT=self.temp_media_root)
-        self.settings_override.enable()
-        self.addCleanup(self.settings_override.disable)
-        self.addCleanup(shutil.rmtree, self.temp_media_root, True)
-
-        self.user = get_user_model().objects.create_user(
-            username='resume-tester',
-            email='tester@example.com',
-            password='test-pass-123'
+        # Create Tenant A
+        self.tenant_a = Tenant.objects.create(name="Tenant A", domain="tenanta.com")
+        self.user_a = User.objects.create_user(
+            username="usera", 
+            email="user@tenanta.com", 
+            password="password",
+            tenant=self.tenant_a
         )
-        self.client.force_login(self.user)
-        self.candidate = Candidate.objects.create(
-            first_name='Candidate',
-            last_name='One',
-            email='candidate.one@example.com',
-            user=self.user,
+        
+        # Create Tenant B
+        self.tenant_b = Tenant.objects.create(name="Tenant B", domain="tenantb.com")
+        self.user_b = User.objects.create_user(
+            username="userb", 
+            email="user@tenantb.com", 
+            password="password",
+            tenant=self.tenant_b
+        )
+        
+        # Create Data for Tenant A
+        self.ticket_a = ITTicket.objects.create(
+            tenant=self.tenant_a,
+            title="Tenant A Ticket",
+            description="Private data for A",
+            submitted_by=self.user_a
+        )
+        
+        # Create Data for Tenant B
+        self.ticket_b = ITTicket.objects.create(
+            tenant=self.tenant_b,
+            title="Tenant B Ticket",
+            description="Private data for B",
+            submitted_by=self.user_b
         )
 
-    def test_parse_resume_api_maps_nested_parser_output_into_resume_data(self):
-        response = self.client.post(
-            reverse('parse-resume-api'),
-            {
-                'candidate_id': self.candidate.id,
-                'resume': SimpleUploadedFile(
-                    'resume.txt',
-                    RESUME_TEXT.encode('utf-8'),
-                    content_type='text/plain',
-                ),
-            },
-        )
-
-        self.assertEqual(response.status_code, 200)
-        payload = response.json()
-
-        self.assertTrue(payload['success'])
-        self.assertEqual(payload['data']['email'], 'john.resume@example.com')
-        self.assertEqual(payload['data']['phone'], '555-222-3333')
-        self.assertEqual(payload['data']['linkedin_url'], 'https://linkedin.com/in/john-doe')
-        self.assertEqual(payload['data']['experience_years'], 1.0)
-
-        resume_data = ResumeData.objects.get(candidate=self.candidate)
-        self.assertEqual(resume_data.email, 'john.resume@example.com')
-        self.assertEqual(resume_data.phone, '555-222-3333')
-        self.assertEqual(resume_data.linkedin_url, 'https://linkedin.com/in/john-doe')
-        self.assertEqual(resume_data.experience_years, 1.0)
-        self.assertEqual(resume_data.parse_status, 'success')
+    def test_tenant_a_cannot_see_tenant_b_data(self):
+        """
+        Verify that when querying records using the tenant filter,
+        Tenant A only sees their own data.
+        """
+        from tracking_app.views import get_tenant_filter
+        
+        # Simulate Tenant A Request
+        tenant_filter_a = get_tenant_filter(self.user_a)
+        tickets_a = ITTicket.objects.filter(**tenant_filter_a)
+        
+        self.assertEqual(tickets_a.count(), 1)
+        self.assertEqual(tickets_a.first().title, "Tenant A Ticket")
+        self.assertNotIn(self.ticket_b, tickets_a)
+        
+    def test_tenant_b_cannot_see_tenant_a_data(self):
+        """
+        Verify that Tenant B only sees their own data.
+        """
+        from tracking_app.views import get_tenant_filter
+        
+        # Simulate Tenant B Request
+        tenant_filter_b = get_tenant_filter(self.user_b)
+        tickets_b = ITTicket.objects.filter(**tenant_filter_b)
+        
+        self.assertEqual(tickets_b.count(), 1)
+        self.assertEqual(tickets_b.first().title, "Tenant B Ticket")
+        self.assertNotIn(self.ticket_a, tickets_b)

@@ -68,3 +68,4 @@ markdown
 django-filter
 django-allauth
 python3-saml
+sentry-sdk==2.13.0
