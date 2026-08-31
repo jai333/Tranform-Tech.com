@@ -344,3 +344,8 @@ SOCIALACCOUNT_PROVIDERS = {
         # Configured via database or workspace settings
     }
 }
+
+# Stripe API Keys (Replace with your own in Railway)
+STRIPE_PUBLIC_KEY = os.getenv('STRIPE_PUBLIC_KEY', 'pk_test_dummy')
+STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY', 'sk_test_dummy')
+STRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET', 'whsec_dummy')
