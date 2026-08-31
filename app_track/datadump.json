@@ -74090,7 +74090,7 @@
                 "status": "open"
             },
             "status_code": null,
-            "response_body": "HTTPSConnectionPool(host='hooks.slack.com', port=443): Max retries exceeded with url: /services/T00/B00/XXX (Caused by NameResolutionError(\"HTTPSConnection(host='hooks.slack.com', port=443): Failed to resolve 'hooks.slack.com' ([Errno 8] nodename nor servname provided, or not known)\"))",
+            "response_body": "HTTPSConnectionPool(host='hooks.slack.com', port=443): Max retries exceeded with url: /services/T00/B00/XXX (Caused by NameResolutionError(\"HTTPSConne",
             "created_at": "2026-08-13T08:28:02.332Z"
         }
     },
@@ -74107,7 +74107,7 @@
                 "status": "open"
             },
             "status_code": null,
-            "response_body": "HTTPSConnectionPool(host='hooks.slack.com', port=443): Max retries exceeded with url: /services/T00/B00/XXX (Caused by NameResolutionError(\"HTTPSConnection(host='hooks.slack.com', port=443): Failed to resolve 'hooks.slack.com' ([Errno 8] nodename nor servname provided, or not known)\"))",
+            "response_body": "HTTPSConnectionPool(host='hooks.slack.com', port=443): Max retries exceeded with url: /services/T00/B00/XXX (Caused by NameResolutionError(\"HTTPSConne",
             "created_at": "2026-08-13T08:28:04.260Z"
         }
     },
