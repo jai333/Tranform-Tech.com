@@ -12,5 +12,6 @@ router.register(r'candidates', api_views.CandidateViewSet, basename='api-candida
 
 urlpatterns = [
     path('auth/token/', obtain_auth_token, name='api_token_auth'),
+    path('search/', api_views.global_search, name='api_global_search'),
     path('', include(router.urls)),
 ]
