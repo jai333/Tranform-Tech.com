@@ -1,0 +1,135 @@
+{% extends 'tracking_app/base.html' %}
+{% load static %}
+
+{% block title %}Workspace Settings — Transform-Tech{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0" style="color: white; font-weight: 800;">
+            <i class="fa-solid fa-building text-cyan"></i> Workspace Settings
+        </h2>
+        <span class="badge bg-primary bg-opacity-25 text-primary border border-primary px-3 py-2">
+            Tenant: {{ tenant.name }}
+        </span>
+    </div>
+
+    <div class="row g-4">
+        <!-- BRANDING SECTION -->
+        <div class="col-lg-4">
+            <div class="dev-card h-100">
+                <div class="dev-card-header">
+                    <div class="card-title"><i class="fa-solid fa-palette text-cyan"></i> Branding & Portal</div>
+                </div>
+                <div class="p-4">
+                    <form method="POST" action="{% url 'workspace-settings' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="update_branding">
+                        
+                        <div class="mb-3">
+                            <label class="form-label" style="color: var(--apple-text-secondary);">Custom Portal Domain</label>
+                            <input type="text" name="portal_domain" class="form-control" style="background: var(--apple-input-bg); border-color: var(--apple-border); color: white;" value="{{ tenant.portal_domain|default:'' }}" placeholder="e.g., portal.mycompany.com">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label" style="color: var(--apple-text-secondary);">Company Logo URL</label>
+                            <input type="url" name="logo_url" class="form-control" style="background: var(--apple-input-bg); border-color: var(--apple-border); color: white;" value="{{ tenant.logo_url|default:'' }}" placeholder="https://...">
+                            {% if tenant.logo_url %}
+                            <div class="mt-2 p-2 rounded" style="background: rgba(255,255,255,0.05); text-align: center;">
+                                <img src="{{ tenant.logo_url }}" style="max-height: 40px; max-width: 100%;">
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label" style="color: var(--apple-text-secondary);">Primary Brand Color</label>
+                            <div class="d-flex gap-2 align-items-center">
+                                <input type="color" name="primary_color" class="form-control form-control-color" value="{{ tenant.primary_color|default:'#00E5FF' }}" title="Choose your color">
+                                <span style="color: white; font-family: monospace;">{{ tenant.primary_color|default:'#00E5FF' }}</span>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-cyber w-100"><i class="fa-solid fa-save"></i> Save Branding</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- RBAC SECTION -->
+        <div class="col-lg-8">
+            <div class="dev-card h-100">
+                <div class="dev-card-header">
+                    <div class="card-title"><i class="fa-solid fa-users-gear text-warning"></i> Role-Based Access Control (RBAC)</div>
+                    <button class="btn btn-sm btn-cyber-outline"><i class="fa-solid fa-user-plus"></i> Invite User</button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover mb-0 align-middle" style="background: transparent;">
+                        <thead>
+                            <tr>
+                                <th style="color: var(--apple-text-secondary); border-bottom-color: var(--apple-border);">User</th>
+                                <th style="color: var(--apple-text-secondary); border-bottom-color: var(--apple-border);">Base Role</th>
+                                <th style="color: var(--apple-text-secondary); border-bottom-color: var(--apple-border);">Module Access (Strict)</th>
+                                <th style="color: var(--apple-text-secondary); border-bottom-color: var(--apple-border);">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for u in workspace_users %}
+                            <tr>
+                                <td style="border-bottom-color: var(--apple-border);">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #6366f1, #00E5FF); display: flex; align-items: center; justify-content: center; font-weight: bold; color: white;">
+                                            {{ u.username|make_list|first|upper }}
+                                        </div>
+                                        <div>
+                                            <div style="color: white; font-weight: 600;">{{ u.username }}</div>
+                                            <div style="font-size: 0.8rem; color: var(--apple-text-secondary);">{{ u.email }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td style="border-bottom-color: var(--apple-border);">
+                                    <span class="badge bg-dark border border-secondary text-light">{{ u.get_role_display|default:u.role }}</span>
+                                </td>
+                                <td style="border-bottom-color: var(--apple-border);">
+                                    <form method="POST" action="{% url 'workspace-settings' %}" class="d-flex gap-2 align-items-center m-0" id="form-{{ u.id }}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="update_user_role">
+                                        <input type="hidden" name="user_id" value="{{ u.id }}">
+                                        
+                                        <div class="form-check form-switch" title="Sales CRM">
+                                            <input class="form-check-input" type="checkbox" name="can_view_sales" {% if u.can_view_sales %}checked{% endif %}>
+                                            <label class="form-check-label" style="font-size:0.8rem; color: #10b981;">Sales</label>
+                                        </div>
+                                        <div class="form-check form-switch" title="ATS / Recruiting">
+                                            <input class="form-check-input" type="checkbox" name="can_view_ats" {% if u.can_view_ats %}checked{% endif %}>
+                                            <label class="form-check-label" style="font-size:0.8rem; color: #ec4899;">ATS</label>
+                                        </div>
+                                        <div class="form-check form-switch" title="IT Helpdesk">
+                                            <input class="form-check-input" type="checkbox" name="can_view_it" {% if u.can_view_it %}checked{% endif %}>
+                                            <label class="form-check-label" style="font-size:0.8rem; color: #6366f1;">IT</label>
+                                        </div>
+                                        <div class="form-check form-switch" title="Executive Dashboard">
+                                            <input class="form-check-input" type="checkbox" name="can_view_executive" {% if u.can_view_executive %}checked{% endif %}>
+                                            <label class="form-check-label" style="font-size:0.8rem; color: #f59e0b;">Exec</label>
+                                        </div>
+                                    </form>
+                                </td>
+                                <td style="border-bottom-color: var(--apple-border);">
+                                    <button type="submit" form="form-{{ u.id }}" class="btn btn-sm btn-outline-info">Save</button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.form-check-input:checked {
+    background-color: #00E5FF;
+    border-color: #00E5FF;
+}
+</style>
+{% endblock %}

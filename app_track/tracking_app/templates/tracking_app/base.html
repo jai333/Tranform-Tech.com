@@ -27,10 +27,10 @@
         /* ── CSS Custom Properties ─────────────────────────────────────────────── */
         :root {
             /* Brand */
-            --brand-primary: #00E5FF;
+            --brand-primary: var(--brand-primary);
             --brand-primary-dark: #00b3cc;
             --brand-primary-light: #66efff;
-            --brand-accent: #00E5FF;
+            --brand-accent: var(--brand-primary);
             --brand-success: #10b981;
             --brand-error: #ef4444;
             --brand-warning: #f59e0b;
@@ -313,9 +313,9 @@
         }
 
         nav ul.exotic-nav-pill > li > a.active {
-            color: #00E5FF !important;
+            color: var(--brand-primary) !important;
             background: linear-gradient(135deg, rgba(0, 229, 255, 0.22) 0%, rgba(14, 165, 233, 0.25) 100%) !important;
-            border: 1px solid #00E5FF !important;
+            border: 1px solid var(--brand-primary) !important;
             box-shadow: 0 0 25px rgba(0, 229, 255, 0.45), inset 0 1px 3px rgba(255, 255, 255, 0.2) !important;
             border-radius: 30px !important;
             font-weight: 800 !important;
@@ -1468,6 +1468,12 @@
 
     </style>
 
+
+    <style>
+        :root {
+            --brand-primary: {% if request.user.is_authenticated and request.user.tenant and request.user.tenant.primary_color %}{{ request.user.tenant.primary_color }}{% else %}var(--brand-primary){% endif %};
+        }
+    </style>
 </head>
 
 <body>
@@ -1478,7 +1484,13 @@
     <header id="main-header">
         <div class="header-content">
             <a href="/" class="logo" style="font-family: 'Fira Code', monospace; font-size: 1.1rem; gap: 8px;">
+                
+                {% if request.user.tenant and request.user.tenant.logo_url %}
+                <img src="{{ request.user.tenant.logo_url }}" alt="{{ request.user.tenant.name }} Logo" style="height: 48px; width: auto; max-width: 250px; border-radius: 4px; box-shadow: 0 0 10px rgba(0, 229, 255, 0.5); object-fit: contain;">
+                {% else %}
                 <img src="{% static 'tracking_app/assets/logo-333.png' %}" alt="Transform-Tech 333 Logo" style="height: 48px; width: auto; max-width: 250px; border-radius: 4px; box-shadow: 0 0 10px rgba(0, 229, 255, 0.5);">
+                {% endif %}
+
             </a>
 
             <nav>
@@ -1495,7 +1507,7 @@
                             </a>
                             <ul class="dropdown-content">
                                 <li><a href="{% url 'executive-dashboard' %}"><i class="fa-solid fa-chart-pie" style="color: #f59e0b;"></i> Executive Analytics</a></li>
-                                <li><a href="{% url 'automation-dashboard' %}"><i class="fa-solid fa-robot" style="color: #00E5FF;"></i> Workflow Automation</a></li>
+                                <li><a href="{% url 'automation-dashboard' %}"><i class="fa-solid fa-robot" style="color: var(--brand-primary);"></i> Workflow Automation</a></li>
                                 <li><a href="{% url 'ai-pipeline-dashboard' %}"><i class="fa-solid fa-chart-network" style="color: #a855f7;"></i> Recruitment Telemetry</a></li>
                             </ul>
                         </li>
@@ -1511,7 +1523,7 @@
                                 <li><a href="{% url 'it-helpdesk-list' %}"><i class="fa-solid fa-headset" style="color: #6366f1;"></i> Tickets</a></li>
                                 <li><a href="{% url 'it-asset-list' %}"><i class="fa-solid fa-server" style="color: #38bdf8;"></i> Assets & Vendors</a></li>
                                 {% if user.is_it_admin or user.is_superuser %}
-                                <li><a href="{% url 'it-admin-settings' %}"><i class="fa-solid fa-gear" style="color: #00E5FF;"></i> IT Admin Settings</a></li>
+                                <li><a href="{% url 'it-admin-settings' %}"><i class="fa-solid fa-gear" style="color: var(--brand-primary);"></i> IT Admin Settings</a></li>
                                 {% endif %}
                                 {% if user.is_it_agent or user.is_superuser %}
                                 <li><a href="{% url 'it-reports' %}"><i class="fa-solid fa-chart-bar" style="color: #10b981;"></i> IT Reports</a></li>
@@ -1570,7 +1582,7 @@
                         </li>
 
                         {% if user.is_superuser or user.can_view_it or user.is_staff or user.tenant %}
-                        <li><a href="{% url 'developer_settings' %}" class="{% if '/developer-settings/' in request.path %}active{% endif %}"><i class="fa-solid fa-code" style="color: #00E5FF; filter: drop-shadow(0 0 8px rgba(0, 229, 255, 0.8));"></i> <span>Developer API</span></a></li>
+                        <li><a href="{% url 'developer_settings' %}" class="{% if '/developer-settings/' in request.path %}active{% endif %}"><i class="fa-solid fa-code" style="color: var(--brand-primary); filter: drop-shadow(0 0 8px rgba(0, 229, 255, 0.8));"></i> <span>Developer API</span></a></li>
                         {% endif %}
 
                     {% endif %}
@@ -1650,7 +1662,7 @@
                         {% endif %}
                         {% if user.is_superuser %}
                         <div class="dropdown-divider"></div>
-                        <a href="{% url 'saas-admin' %}" class="user-dropdown-item" style="color: #00E5FF; font-weight: bold;">
+                        <a href="{% url 'saas-admin' %}" class="user-dropdown-item" style="color: var(--brand-primary); font-weight: bold;">
                             <i class="fa-solid fa-crown text-cyan"></i> SaaS Admin
                         </a>
                         {% endif %}
@@ -1885,7 +1897,7 @@
                                     }
                                 } else if (data.type === 'notification') {
                                     // Show toast notification
-                                    showToast(data.title, data.body, data.color || '#00E5FF', data.url || '#');
+                                    showToast(data.title, data.body, data.color || 'var(--brand-primary)', data.url || '#');
                                     // Increment badge
                                     const current = parseInt(notificationBadge.textContent || '0', 10);
                                     notificationBadge.textContent = current + 1;

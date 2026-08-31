@@ -3430,29 +3430,33 @@ Return JSON: {{"suggestions": [{{"title": "...", "url": "/...", "icon": "bx bx-.
 @require_tier('growth')
 @require_executive_access
 def executive_dashboard(request):
-    """A high-level dashboard aggregating stats from Sales, ATS, IT, and Security."""
-    if not (request.user.is_staff or getattr(request.user, 'is_admin_role', False) or getattr(request.user, 'can_view_executive', False)):
-        messages.error(request, "You don't have permission to view the executive dashboard.")
+    """A high-level dashboard aggregating stats from Sales,ATS,IT,and Security."""
+    if not (request.user.is_staff or getattr(request.user,'is_admin_role',False) or getattr(request.user,'can_view_executive',False)):
+        messages.error(request,"You don't have permission to view the executive dashboard.")
         return redirect('home')
         
-    from django.db.models import Sum, Count, Avg
+    from django.db.models import Sum,Count,Avg
     from django.db.models.functions import TruncMonth
-    from .sales_models import Deal, Account
-    from .models import Application, ITTicket, ThreatIncident, Candidate, Job, Notification
-    import json, datetime
+    from .sales_models import Deal,Account
+    from .models import Application,ITTicket,ThreatIncident,Candidate,Job,Notification
+    import json,datetime
 
     now = datetime.datetime.now()
+    tenant = request.user.tenant
+    tenant_filter = {'tenant': tenant} if tenant else {}
+    rel_tenant_filter = {'tenant': tenant} if tenant else {}
+
     one_year_ago = now - datetime.timedelta(days=365)
 
     # ── Sales Metrics ─────────────────────────────────────────────────────────
-    pipeline_aggr = Deal.objects.exclude(stage__in=['won', 'lost']).aggregate(total=Sum('deal_value_annual'))
-    revenue_aggr = Deal.objects.filter(stage='won').aggregate(total=Sum('deal_value_annual'))
+    pipeline_aggr = Deal.objects.filter(**tenant_filter,**tenant_filter).exclude(stage__in=['won','lost']).aggregate(total=Sum('deal_value_annual'))
+    revenue_aggr = Deal.objects.filter(**tenant_filter,stage='won').aggregate(total=Sum('deal_value_annual'))
     pipeline_value = pipeline_aggr['total'] or 0
     total_revenue = revenue_aggr['total'] or 0
 
     # Real monthly revenue from DB using TruncMonth
     monthly_rev_qs = (
-        Deal.objects.filter(stage='won', updated_at__gte=one_year_ago)
+        Deal.objects.filter(**tenant_filter,stage='won',updated_at__gte=one_year_ago)
         .annotate(month=TruncMonth('updated_at'))
         .values('month')
         .annotate(total=Sum('deal_value_annual'))
@@ -3461,54 +3465,54 @@ def executive_dashboard(request):
     rev_by_month = {entry['month'].strftime('%b %Y'): float(entry['total']) for entry in monthly_rev_qs}
     
     # Build 6-month historical + 3-month forecast arrays
-    months_historical = [(now - datetime.timedelta(days=30*i)).strftime('%b') for i in range(5, -1, -1)]
-    months_forecast   = [(now + datetime.timedelta(days=30*i)).strftime('%b') for i in range(1, 4)]
+    months_historical = [(now - datetime.timedelta(days=30*i)).strftime('%b') for i in range(5,-1,-1)]
+    months_forecast   = [(now + datetime.timedelta(days=30*i)).strftime('%b') for i in range(1,4)]
     all_months        = months_historical + months_forecast
 
     historical_revenue_values = []
-    for i in range(5, -1, -1):
+    for i in range(5,-1,-1):
         m = (now - datetime.timedelta(days=30*i)).strftime('%b %Y')
-        historical_revenue_values.append(rev_by_month.get(m, None))
+        historical_revenue_values.append(rev_by_month.get(m,None))
     # Fill any None values with interpolated percentage of total
     filled = []
-    for idx, v in enumerate(historical_revenue_values):
+    for idx,v in enumerate(historical_revenue_values):
         if v is None:
             pct = 0.4 + (idx * 0.1)
-            v = float(total_revenue) * min(pct, 1.0)
+            v = float(total_revenue) * min(pct,1.0)
         filled.append(v)
-    historical_revenue = filled + [None, None, None]
-    forecast_revenue = [None]*5 + [filled[-1]] + [float(total_revenue)*1.15, float(total_revenue)*1.28, float(total_revenue)*1.42]
+    historical_revenue = filled + [None,None,None]
+    forecast_revenue = [None]*5 + [filled[-1]] + [float(total_revenue)*1.15,float(total_revenue)*1.28,float(total_revenue)*1.42]
 
     # Year-over-year calculation
-    prev_year_rev = Deal.objects.filter(
+    prev_year_rev = Deal.objects.filter(**tenant_filter,
         stage='won',
         updated_at__year=now.year - 1
     ).aggregate(total=Sum('deal_value_annual'))['total'] or 0
     yoy_pct = ((float(total_revenue) - float(prev_year_rev)) / float(prev_year_rev) * 100) if prev_year_rev else 14.5
 
     # ── HR / ATS Metrics ──────────────────────────────────────────────────────
-    total_hires = Application.objects.filter(status='hired').count()
-    active_candidates = Application.objects.exclude(status__in=['hired', 'rejected', 'withdrawn']).count()
+    total_hires = Application.objects.filter(**tenant_filter, status='hired').count()
+    active_candidates = Application.objects.exclude(status__in=['hired','rejected','withdrawn']).count()
 
     # Hire Funnel (real counts per stage)
     hire_funnel = {
-        'applied':     Application.objects.filter(status='applied').count(),
-        'screening':   Application.objects.filter(status='screening').count(),
-        'interviewing': Application.objects.filter(status='interview').count(),
-        'offered':     Application.objects.filter(status='offer').count(),
+        'applied':     Application.objects.filter(**tenant_filter, status='applied').count(),
+        'screening':   Application.objects.filter(**tenant_filter, status='screening').count(),
+        'interviewing': Application.objects.filter(**tenant_filter, status='interview').count(),
+        'offered':     Application.objects.filter(**tenant_filter, status='offer').count(),
         'hired':       total_hires,
     }
     funnel_max = max(hire_funnel.values()) or 1
 
     # ── IT / Security Metrics ─────────────────────────────────────────────────
-    critical_tickets = ITTicket.objects.filter(priority='critical', status__in=['open', 'in_progress']).count()
-    active_threats   = ThreatIncident.objects.filter(status__in=['open', 'investigating']).count()
+    critical_tickets = ITTicket.objects.filter(**tenant_filter, priority='critical',status__in=['open','in_progress']).count()
+    active_threats   = ThreatIncident.objects.filter(**tenant_filter, status__in=['open','investigating']).count()
 
     # ── CSAT from real TicketSurvey data ──────────────────────────────────────
     from .models import TicketSurvey
-    survey_agg = TicketSurvey.objects.aggregate(avg=Avg('rating'), cnt=Count('id'))
+    survey_agg = TicketSurvey.objects.aggregate(avg=Avg('rating'),cnt=Count('id'))
     csat_score_raw = survey_agg['avg'] or 0.0
-    csat_score = round(csat_score_raw, 1)
+    csat_score = round(csat_score_raw,1)
     # Month-by-month CSAT trend (last 6 months)
     from django.db.models.functions import TruncMonth as TM2
     csat_monthly = (
@@ -3518,22 +3522,22 @@ def executive_dashboard(request):
         .annotate(avg=Avg('rating'))
         .order_by('month')
     )
-    csat_by_month = {e['month'].strftime('%b %Y'): round(float(e['avg']), 2) for e in csat_monthly}
+    csat_by_month = {e['month'].strftime('%b %Y'): round(float(e['avg']),2) for e in csat_monthly}
     csat_history = []
-    for i in range(5, -1, -1):
+    for i in range(5,-1,-1):
         m = (now - datetime.timedelta(days=30 * i)).strftime('%b %Y')
-        csat_history.append(csat_by_month.get(m, csat_score))
+        csat_history.append(csat_by_month.get(m,csat_score))
 
     # ── Avg Time-to-Fill (days from job open → hired application) ─────────────
     from .models import Job as JobModel
-    hired_apps = Application.objects.filter(status='hired').select_related('job')
+    hired_apps = Application.objects.filter(**tenant_filter, status='hired').select_related('job')
     ttf_days_list = []
     for app in hired_apps:
-        if app.job and hasattr(app.job, 'created_at') and app.applied_date:
+        if app.job and hasattr(app.job,'created_at') and app.applied_date:
             import datetime as _dt
             applied = app.applied_date
-            opened  = app.job.created_at.date() if hasattr(app.job.created_at, 'date') else app.job.created_at
-            delta = (applied - opened).days if hasattr(applied, '__sub__') else 0
+            opened  = app.job.created_at.date() if hasattr(app.job.created_at,'date') else app.job.created_at
+            delta = (applied - opened).days if hasattr(applied,'__sub__') else 0
             if delta >= 0:
                 ttf_days_list.append(delta)
     avg_time_to_fill = round(sum(ttf_days_list) / len(ttf_days_list)) if ttf_days_list else None
@@ -3541,12 +3545,12 @@ def executive_dashboard(request):
     # ── Pipeline month-over-month trend ───────────────────────────────────────
     prev_month_start = (now.replace(day=1) - datetime.timedelta(days=1)).replace(day=1)
     prev_month_end   = now.replace(day=1) - datetime.timedelta(seconds=1)
-    prev_pipeline = Deal.objects.exclude(stage__in=['won', 'lost']).filter(
+    prev_pipeline = Deal.objects.filter(**tenant_filter,**tenant_filter).exclude(stage__in=['won','lost']).filter(
         updated_at__gte=prev_month_start,
         updated_at__lte=prev_month_end,
     ).aggregate(total=Sum('deal_value_annual'))['total'] or 0
     if prev_pipeline and float(prev_pipeline) > 0:
-        pipeline_mom_pct = round(((float(pipeline_value) - float(prev_pipeline)) / float(prev_pipeline)) * 100, 1)
+        pipeline_mom_pct = round(((float(pipeline_value) - float(prev_pipeline)) / float(prev_pipeline)) * 100,1)
     else:
         pipeline_mom_pct = None
     pipeline_mom_dir = 'up' if (pipeline_mom_pct or 0) >= 0 else 'down'
@@ -3569,7 +3573,7 @@ def executive_dashboard(request):
 
     # ── Recent Cross-Platform Activity Feed ───────────────────────────────────
     recent_activity = []
-    for app in Application.objects.select_related('candidate', 'job').order_by('-applied_date')[:3]:
+    for app in Application.objects.select_related('candidate','job').order_by('-applied_date')[:3]:
         recent_activity.append({
             'icon': 'bx-user-check',
             'color': '#10b981',
@@ -3580,7 +3584,7 @@ def executive_dashboard(request):
         recent_activity.append({
             'icon': 'bx-dollar-circle',
             'color': '#0A84FF',
-            'text': f'Deal <strong>{deal.lead.company_name if hasattr(deal, "lead") and deal.lead else "Unknown"}</strong> moved to <strong>{deal.stage}</strong>',
+            'text': f'Deal <strong>{deal.lead.company_name if hasattr(deal,"lead") and deal.lead else "Unknown"}</strong> moved to <strong>{deal.stage}</strong>',
             'time': deal.updated_at,
         })
     for ticket in ITTicket.objects.order_by('-created_at')[:2]:

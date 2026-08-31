@@ -197,6 +197,7 @@ urlpatterns = [
     path('saas-admin/', views.saas_admin_dashboard, name='saas-admin'),
     path('company-users/', views.company_user_management, name='company-users'),
     # ── Mail Hub & Developer API Additions (Enterprise Evolution) ────────────
+    path('workspace/settings/', views.workspace_settings, name='workspace-settings'),
     path('developer/', views.developer_settings_dashboard, name='developer_settings'),
     path('api/mail/test/', views.send_test_mail, name='send-test-mail'),
     path('api/mail/save/', views.save_mail_settings, name='save-mail-settings'),

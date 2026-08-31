@@ -212,6 +212,11 @@ class Tenant(models.Model):
     subscription_plan = models.CharField(max_length=32, choices=PLAN_CHOICES, default='enterprise')
     stripe_customer_id = models.CharField(max_length=128, blank=True, null=True)
 
+    # --- Enterprise Branding & White-Labeling ---
+    primary_color = models.CharField(max_length=7, default="#00E5FF", help_text="Hex color code")
+    logo_url = models.URLField(blank=True, null=True, help_text="URL to company logo")
+    portal_domain = models.CharField(max_length=255, blank=True, null=True, help_text="Custom domain")
+
     # Phase 3 — Advanced Tenant Mail Integration
     mail_registered_email = models.EmailField(blank=True, null=True, help_text="Registered corporate email address for sending and receiving")
     mail_sender_name = models.CharField(max_length=255, blank=True, null=True, help_text="Sender display name (e.g., Nexus AI Sales)")

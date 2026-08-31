@@ -9,7 +9,7 @@
     <meta name="keywords" content="ATS, CRM, AI Recruiting, Cybersecurity, IT Management, SaaS, Enterprise Platform, HR Software, Sales CRM">
     <meta name="author" content="Transform-Tech">
     <meta name="robots" content="index, follow">
-    <meta name="theme-color" content="#00E5FF">
+    <meta name="theme-color" content="var(--brand-primary)">
 
     <!-- Open Graph (Facebook, LinkedIn, WhatsApp previews) -->
     <meta property="og:type" content="website">
@@ -75,7 +75,7 @@
         margin-bottom: 28px;
         font-family: system-ui, -apple-system, sans-serif;
     }
-    .loader-logo span { color: #00E5FF; }
+    .loader-logo span { color: var(--brand-primary); }
     .loader-bar-wrap {
         width: 160px;
         height: 3px;
@@ -86,7 +86,7 @@
     .loader-bar {
         height: 100%;
         width: 0%;
-        background: linear-gradient(90deg, #00E5FF, #6366f1);
+        background: linear-gradient(90deg, var(--brand-primary), #6366f1);
         border-radius: 99px;
         animation: loader-fill 1.2s cubic-bezier(0.4,0,0.2,1) forwards;
     }
@@ -106,7 +106,7 @@
         --transition-theme: background 0.35s ease, background-color 0.35s ease, color 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
         
         /* Service Colors */
-        --color-sales: #00E5FF;
+        --color-sales: var(--brand-primary);
         --bg-sales-tag: rgba(0, 229, 255, 0.08);
         --color-cyber: #FF3B30;
         --bg-cyber-tag: rgba(255, 59, 48, 0.08);
@@ -444,8 +444,8 @@ html, body {
     border-bottom: 1px solid rgba(255,255,255,0.08);
     transition: color 0.2s;
 }
-.mobile-nav-drawer a:hover { color: #00E5FF; }
-.mobile-nav-drawer a i { font-size: 1.3rem; color: #00E5FF; width: 28px; }
+.mobile-nav-drawer a:hover { color: var(--brand-primary); }
+.mobile-nav-drawer a i { font-size: 1.3rem; color: var(--brand-primary); width: 28px; }
 .mobile-nav-section {
     color: rgba(255,255,255,0.35);
     font-size: 0.7rem;
@@ -468,7 +468,7 @@ html, body {
     font-size: 1rem;
 }
 .mobile-btn-primary {
-    background: linear-gradient(135deg, #00E5FF, #6366f1);
+    background: linear-gradient(135deg, var(--brand-primary), #6366f1);
     color: #000 !important;
     font-weight: 800 !important;
 }
@@ -554,6 +554,12 @@ html, body {
 }
 </style>
 
+
+    <style>
+        :root {
+            --brand-primary: {% if request.user.is_authenticated and request.user.tenant and request.user.tenant.primary_color %}{{ request.user.tenant.primary_color }}{% else %}var(--brand-primary){% endif %};
+        }
+    </style>
 </head>
 
 <body>
@@ -885,7 +891,7 @@ html, body {
     <!-- ── FLOATING AI CHATBOX ── -->
     <div id="ai-chat-widget" style="position:fixed;bottom:20px;right:20px;z-index:9999;font-family:-apple-system,BlinkMacSystemFont,sans-serif;">
         <!-- Chat Toggle Button -->
-        <button id="chat-toggle-btn" style="width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#00E5FF,#0099FF);color:white;border:none;box-shadow:0 10px 25px rgba(0,229,255,0.3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:28px;transition:transform 0.3s ease;">
+        <button id="chat-toggle-btn" style="width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,var(--brand-primary),#0099FF);color:white;border:none;box-shadow:0 10px 25px rgba(0,229,255,0.3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:28px;transition:transform 0.3s ease;">
             <i class="bx bx-message-rounded-dots"></i>
         </button>
 
@@ -894,7 +900,7 @@ html, body {
             <!-- Header -->
             <div style="background:rgba(255,255,255,0.03);padding:15px 20px;border-bottom:1px solid var(--border-subtle);display:flex;justify-content:space-between;align-items:center;backdrop-filter:blur(10px);">
                 <div style="display:flex;align-items:center;gap:10px;">
-                    <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#00E5FF,#0099FF);display:flex;align-items:center;justify-content:center;color:white;"><i class="bx bx-bot"></i></div>
+                    <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--brand-primary),#0099FF);display:flex;align-items:center;justify-content:center;color:white;"><i class="bx bx-bot"></i></div>
                     <div>
                         <h5 style="margin:0;font-size:1rem;font-weight:600;color:var(--text-main);">AI Copilot</h5>
                         <small style="color:var(--text-gray);font-size:0.75rem;">Transform-Tech Assistant</small>
@@ -914,7 +920,7 @@ html, body {
             <div style="padding:15px;background:rgba(255,255,255,0.03);border-top:1px solid var(--border-subtle);">
                 <form id="chat-form" style="display:flex;gap:10px;">
                     <input type="text" id="chat-input" placeholder="Type a message..." style="flex:1;background:rgba(0,0,0,0.2);border:1px solid var(--border-subtle);border-radius:20px;padding:10px 16px;color:var(--text-main);outline:none;font-size:0.9rem;" autocomplete="off">
-                    <button type="submit" style="width:40px;height:40px;border-radius:50%;background:#00E5FF;color:black;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;"><i class="bx bx-send"></i></button>
+                    <button type="submit" style="width:40px;height:40px;border-radius:50%;background:var(--brand-primary);color:black;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;"><i class="bx bx-send"></i></button>
                 </form>
             </div>
         </div>
@@ -983,7 +989,7 @@ html, body {
                 
                 if (sender === 'user') {
                     div.style.alignSelf = 'flex-end';
-                    div.style.background = '#00E5FF';
+                    div.style.background = 'var(--brand-primary)';
                     div.style.color = 'black';
                     div.style.borderBottomRightRadius = '4px';
                 } else {
@@ -1029,18 +1035,18 @@ html, body {
     <div id="cmd-k-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); backdrop-filter:blur(8px); z-index:999999; align-items:flex-start; justify-content:center; padding-top:12vh;">
         <div id="cmd-k-modal" style="background:#0d1117; width:100%; max-width:650px; border-radius:18px; border:1px solid rgba(0,229,255,0.3); box-shadow:0 25px 60px -15px rgba(0,229,255,0.25); overflow:hidden; transform:scale(0.95); opacity:0; transition:all 0.2s cubic-bezier(0.16, 1, 0.3, 1);">
             <div style="display:flex; align-items:center; padding:16px 24px; border-bottom:1px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.02);">
-                <i class="bx bx-search-alt-2" style="font-size:1.6rem; color:#00E5FF; margin-right:12px;"></i>
+                <i class="bx bx-search-alt-2" style="font-size:1.6rem; color:var(--brand-primary); margin-right:12px;"></i>
                 <input type="text" id="cmd-k-input" placeholder="Type a command or jump to any platform dashboard..." 
                     style="flex:1; background:transparent; border:none; color:#fff; font-size:1.15rem; outline:none; padding:0;">
                 <div style="font-size:0.75rem; padding:4px 10px; border:1px solid rgba(255,255,255,0.2); border-radius:6px; color:#aaa; font-family:monospace; cursor:pointer;" onclick="toggleCmdK()">ESC</div>
             </div>
             
             <div id="cmd-k-results" style="max-height:420px; overflow-y:auto; padding:12px;">
-                <div style="font-size:0.75rem; text-transform:uppercase; letter-spacing:1px; color:#00E5FF; font-weight:700; padding:6px 12px; margin-bottom:4px;">Quick Navigation & Features</div>
+                <div style="font-size:0.75rem; text-transform:uppercase; letter-spacing:1px; color:var(--brand-primary); font-weight:700; padding:6px 12px; margin-bottom:4px;">Quick Navigation & Features</div>
                 <a href="{% url 'developer_settings' %}" class="cmd-k-item" style="display:flex; align-items:center; padding:12px 16px; border-radius:12px; color:#fff; text-decoration:none; margin-bottom:4px; background:rgba(0,229,255,0.05); border:1px solid rgba(0,229,255,0.15); transition:all 0.2s;">
-                    <div style="width:36px; height:36px; border-radius:10px; background:rgba(0,229,255,0.15); color:#00E5FF; display:flex; align-items:center; justify-content:center; margin-right:16px; font-size:1.3rem;"><i class='bx bx-data'></i></div>
+                    <div style="width:36px; height:36px; border-radius:10px; background:rgba(0,229,255,0.15); color:var(--brand-primary); display:flex; align-items:center; justify-content:center; margin-right:16px; font-size:1.3rem;"><i class='bx bx-data'></i></div>
                     <div style="flex:1;"><div style="font-weight:600; font-size:1rem;">Developer API & Webhooks Console</div><div style="font-size:0.8rem; color:#aaa;">Configure real-time HMAC streams & API architecture</div></div>
-                    <span style="font-size:0.7rem; background:#00E5FF22; color:#00E5FF; padding:4px 8px; border-radius:20px; border:1px solid #00E5FF44; font-weight:700;">DEVELOPER</span>
+                    <span style="font-size:0.7rem; background:var(--brand-primary)22; color:var(--brand-primary); padding:4px 8px; border-radius:20px; border:1px solid var(--brand-primary)44; font-weight:700;">DEVELOPER</span>
                 </a>
                 <a href="{% url 'saas-admin' %}" class="cmd-k-item" style="display:flex; align-items:center; padding:12px 16px; border-radius:12px; color:#fff; text-decoration:none; margin-bottom:4px; background:rgba(168,85,247,0.05); border:1px solid rgba(168,85,247,0.15); transition:all 0.2s;">
                     <div style="width:36px; height:36px; border-radius:10px; background:rgba(168,85,247,0.15); color:#a855f7; display:flex; align-items:center; justify-content:center; margin-right:16px; font-size:1.3rem;"><i class='bx bx-buildings'></i></div>
@@ -1060,8 +1066,8 @@ html, body {
             </div>
             
             <div style="padding:10px 24px; background:rgba(255,255,255,0.03); border-top:1px solid rgba(255,255,255,0.08); display:flex; align-items:center; justify-content:space-between; font-size:0.8rem; color:#888;">
-                <span>Press <kbd style="background:rgba(255,255,255,0.1); padding:2px 6px; border-radius:4px; font-family:monospace; color:#00E5FF;">Cmd + K</kbd> anywhere to toggle</span>
-                <span><i class='bx bx-planet' style="color:#00E5FF;"></i> Transform-Tech OS</span>
+                <span>Press <kbd style="background:rgba(255,255,255,0.1); padding:2px 6px; border-radius:4px; font-family:monospace; color:var(--brand-primary);">Cmd + K</kbd> anywhere to toggle</span>
+                <span><i class='bx bx-planet' style="color:var(--brand-primary);"></i> Transform-Tech OS</span>
             </div>
         </div>
     </div>
