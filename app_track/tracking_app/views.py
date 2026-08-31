@@ -3449,7 +3449,7 @@ def executive_dashboard(request):
     one_year_ago = now - datetime.timedelta(days=365)
 
     # ── Sales Metrics ─────────────────────────────────────────────────────────
-    pipeline_aggr = Deal.objects.filter(**tenant_filter,**tenant_filter).exclude(stage__in=['won','lost']).aggregate(total=Sum('deal_value_annual'))
+    pipeline_aggr = Deal.objects.filter(**tenant_filter).exclude(stage__in=['won','lost']).aggregate(total=Sum('deal_value_annual'))
     revenue_aggr = Deal.objects.filter(**tenant_filter,stage='won').aggregate(total=Sum('deal_value_annual'))
     pipeline_value = pipeline_aggr['total'] or 0
     total_revenue = revenue_aggr['total'] or 0
@@ -3545,7 +3545,7 @@ def executive_dashboard(request):
     # ── Pipeline month-over-month trend ───────────────────────────────────────
     prev_month_start = (now.replace(day=1) - datetime.timedelta(days=1)).replace(day=1)
     prev_month_end   = now.replace(day=1) - datetime.timedelta(seconds=1)
-    prev_pipeline = Deal.objects.filter(**tenant_filter,**tenant_filter).exclude(stage__in=['won','lost']).filter(
+    prev_pipeline = Deal.objects.filter(**tenant_filter).exclude(stage__in=['won','lost']).filter(
         updated_at__gte=prev_month_start,
         updated_at__lte=prev_month_end,
     ).aggregate(total=Sum('deal_value_annual'))['total'] or 0
