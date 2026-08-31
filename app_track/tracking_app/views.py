@@ -4311,14 +4311,19 @@ def api_sales_radar_poll(request):
     
     tenant = getattr(request.user, 'tenant', None)
     
+
     # Pick a random Lead to scan
     leads = list(Lead.objects.filter(tenant=tenant)[:50])
     if not leads:
-        return JsonResponse({'message': 'No leads available'})
-        
-    lead = random.choice(leads)
-    company = lead.company_name or 'Unknown Company'
-    industry = lead.industry or ''
+        # Generate a mock lead if none exist so the radar always works
+        company = "Acme Corp"
+        industry = "Technology"
+        lead = None
+    else:
+        lead = random.choice(leads)
+        company = lead.company_name or 'Unknown Company'
+        industry = lead.industry or ''
+
     
     # Step 1: Try real news search via SerpAPI
     news_text = search_company_news(company)
@@ -4335,17 +4340,18 @@ def api_sales_radar_poll(request):
     if not signal_data:
         return JsonResponse({'message': 'AI unavailable — no signal generated'})
     
-    # Save as a draft email
-    draft = OutreachEmail.objects.create(
-        tenant=tenant,
-        lead=lead,
-        subject=f"Re: {signal_data.get('signal_type', 'Market Signal')} at {company}",
-        body=signal_data.get('draft', ''),
-        variant="AI Radar Draft",
-        status="Draft"
-    )
-    
-    signal_data['email_id'] = draft.id
+
+    if lead:
+        draft = OutreachEmail.objects.create(
+            tenant=tenant,
+            lead=lead,
+            subject=f"Re: {signal_data.get('signal_type', 'Market Signal')} at {company}",
+            body=signal_data.get('draft', ''),
+            variant="AI Radar Draft",
+            status="Draft"
+        )
+        signal_data['email_id'] = draft.id
+
     signal_data.setdefault('company', company)
     
     return JsonResponse({'signal': signal_data})
