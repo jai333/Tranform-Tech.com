@@ -1312,3 +1312,35 @@ class WebhookLog(models.Model):
     
     def __str__(self):
         return f"{self.event_type} -> {self.endpoint.target_url} ({self.status_code})"
+
+# --- VISUAL WORKFLOW AUTOMATION ENGINE ---
+
+class AutomationRule(models.Model):
+    tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE, related_name='automation_rules')
+    name = models.CharField(max_length=255)
+    description = models.TextField(blank=True, null=True)
+    is_active = models.BooleanField(default=True)
+    
+    # E.g., 'lead.created', 'ticket.updated', 'candidate.applied'
+    trigger_type = models.CharField(max_length=100)
+    
+    # JSON array of conditions. E.g., [{"field": "value", "operator": "gt", "value": 50000}]
+    conditions = models.JSONField(default=list, blank=True)
+    
+    # JSON array of actions. E.g., [{"action_type": "send_email", "target": "admin@company.com", "template": "alert"}]
+    actions = models.JSONField(default=list, blank=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.name} ({self.trigger_type})"
+
+class AutomationLog(models.Model):
+    rule = models.ForeignKey(AutomationRule, on_delete=models.CASCADE, related_name='logs')
+    tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE)
+    event_type = models.CharField(max_length=100)
+    payload_snapshot = models.JSONField(blank=True, null=True)
+    status = models.CharField(max_length=20, choices=[('SUCCESS', 'Success'), ('FAILED', 'Failed')])
+    error_message = models.TextField(blank=True, null=True)
+    executed_at = models.DateTimeField(auto_now_add=True)

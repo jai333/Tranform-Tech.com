@@ -94,7 +94,7 @@ def register(request):
                 user.can_view_executive = True
             
             # Create a tenant for the user to isolate data
-            from .models import Tenant
+            from .models import Tenant, AutomationRule, AutomationLog
             tenant_name = f"{user.username}'s Workspace"
             tenant = Tenant.objects.create(name=tenant_name, subscription_plan='free')
             user.tenant = tenant
@@ -3054,7 +3054,7 @@ def account_detail(request, pk):
                 can_view_executive = request.POST.get('can_view_executive') == 'on'
 
                 # Get or create tenant for this account
-                from .models import Tenant
+                from .models import Tenant, AutomationRule, AutomationLog
                 tenant = account.tenant if hasattr(account, 'tenant') and account.tenant else None
 
                 new_user = User.objects.create_user(
@@ -3095,7 +3095,7 @@ def account_detail(request, pk):
             import csv
             import io
             import uuid
-            from .models import Tenant, Candidate, ITAsset
+            from .models import Tenant, AutomationRule, AutomationLog, Candidate, ITAsset
             from .sales_models import Account as SalesAccountModel
             
             upload_type = request.POST.get('upload_type')
@@ -3186,7 +3186,7 @@ def account_detail(request, pk):
 def account_create(request):
     """Create a new B2B Account and provision an initial Admin User."""
     from .sales_models import Account as SalesAccount
-    from .models import Tenant, User
+    from .models import Tenant, AutomationRule, AutomationLog, User
     import secrets
     import string
     
@@ -3701,7 +3701,7 @@ def automation_dashboard(request):
 @login_required
 def saas_admin_dashboard(request):
     """Super Admin view for managing all tenants and user permissions."""
-    from .models import Tenant, User
+    from .models import Tenant, AutomationRule, AutomationLog, User
     from django.contrib import messages
     from django.shortcuts import redirect
 
@@ -4629,4 +4629,53 @@ def workspace_settings(request):
     return render(request, 'tracking_app/workspace_settings.html', {
         'tenant': tenant,
         'workspace_users': users
+    })
+
+@login_required
+def workflow_builder(request):
+    """
+    Visual Workflow Builder UI
+    """
+    tenant = request.user.tenant
+    if not tenant:
+        messages.error(request, "You must be in a workspace to access Workflows.")
+        return redirect('home')
+
+    if not (request.user.is_superuser or request.user.is_staff or request.user.role == 'admin'):
+        messages.error(request, "Only Workspace Admins can access Workflows.")
+        return redirect('home')
+
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        trigger_type = request.POST.get('trigger_type')
+        
+        # In a real app we'd parse the dynamic UI JSON, here we mock it for MVP
+        field = request.POST.get('condition_field')
+        op = request.POST.get('condition_op')
+        val = request.POST.get('condition_value')
+        
+        action_type = request.POST.get('action_type')
+        
+        conditions = []
+        if field and op and val:
+            conditions.append({'field': field, 'operator': op, 'value': val})
+            
+        actions = []
+        if action_type:
+            actions.append({'action_type': action_type})
+            
+        AutomationRule.objects.create(
+            tenant=tenant,
+            name=name,
+            trigger_type=trigger_type,
+            conditions=conditions,
+            actions=actions
+        )
+        messages.success(request, "Workflow created successfully.")
+        return redirect('workflow-builder')
+
+    rules = AutomationRule.objects.filter(tenant=tenant).order_by('-created_at')
+    
+    return render(request, 'tracking_app/workflow_builder.html', {
+        'rules': rules
     })

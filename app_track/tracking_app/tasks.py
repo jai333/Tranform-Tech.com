@@ -321,3 +321,46 @@ def run_autonomous_agent(lead_id, campaign_id=None, channels=None, tenant_id=Non
     except Exception as e:
         logger.error(f"Failed to run autonomous agent for lead {lead_id}: {e}")
         return {"status": "error", "message": str(e)}
+
+@shared_task(name="tracking_app.tasks.execute_automation_action")
+def execute_automation_action(rule_id, tenant_id, action, payload):
+    """
+    Background worker that executes the specific action defined in the Workflow Builder.
+    """
+    from .models import AutomationRule, AutomationLog, Tenant
+    
+    try:
+        rule = AutomationRule.objects.get(id=rule_id)
+        tenant = Tenant.objects.get(id=tenant_id)
+        
+        action_type = action.get('action_type')
+        
+        # Example Actions
+        if action_type == 'send_email':
+            # e.g. trigger email via django.core.mail
+            pass
+        elif action_type == 'run_ai_agent':
+            lead_id = payload.get('id')
+            if lead_id and 'lead' in rule.trigger_type:
+                from .outreach_agent import run_full_outreach
+                run_full_outreach(lead_id=lead_id)
+                
+        # Log Success
+        AutomationLog.objects.create(
+            rule=rule,
+            tenant=tenant,
+            event_type=rule.trigger_type,
+            payload_snapshot=payload,
+            status='SUCCESS'
+        )
+        
+    except Exception as e:
+        # Log Failure
+        AutomationLog.objects.create(
+            rule_id=rule_id,
+            tenant_id=tenant_id,
+            event_type='UNKNOWN',
+            payload_snapshot=payload,
+            status='FAILED',
+            error_message=str(e)
+        )

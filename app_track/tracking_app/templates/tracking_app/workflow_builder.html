@@ -1,0 +1,139 @@
+{% extends 'tracking_app/base.html' %}
+{% load static %}
+
+{% block title %}Workflow Automation Builder — Transform-Tech{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0" style="color: white; font-weight: 800;">
+            <i class="fa-solid fa-bolt text-warning"></i> Visual Automation Engine
+        </h2>
+        <button class="btn btn-cyber" data-bs-toggle="modal" data-bs-target="#createRuleModal">
+            <i class="fa-solid fa-plus"></i> Create Workflow
+        </button>
+    </div>
+
+    <div class="row g-4">
+        {% for rule in rules %}
+        <div class="col-lg-4">
+            <div class="dev-card h-100" style="position: relative; overflow: hidden;">
+                <div style="position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: {% if rule.is_active %}#10b981{% else %}#ef4444{% endif %};"></div>
+                <div class="p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <h5 style="color: white; font-weight: 700; margin: 0;">{{ rule.name }}</h5>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" {% if rule.is_active %}checked{% endif %}>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3" style="background: rgba(0,0,0,0.2); border-radius: 8px; padding: 12px; border: 1px solid var(--apple-border);">
+                        <div style="font-size: 0.75rem; color: var(--apple-text-secondary); text-transform: uppercase; font-weight: bold; margin-bottom: 4px;">Trigger</div>
+                        <div style="color: #00E5FF; font-family: monospace;"><i class="fa-solid fa-bolt-lightning"></i> {{ rule.trigger_type }}</div>
+                    </div>
+
+                    <div class="mb-3" style="padding-left: 1rem; border-left: 2px solid var(--apple-border);">
+                        <div style="font-size: 0.75rem; color: var(--apple-text-secondary); text-transform: uppercase; font-weight: bold; margin-bottom: 4px;">Condition</div>
+                        {% for cond in rule.conditions %}
+                        <div style="color: #f59e0b; font-family: monospace;">
+                            <span style="color: white;">IF</span> {{ cond.field }} {{ cond.operator }} {{ cond.value }}
+                        </div>
+                        {% empty %}
+                        <div style="color: #a855f7; font-family: monospace;">ALWAYS RUN</div>
+                        {% endfor %}
+                    </div>
+
+                    <div style="background: rgba(16, 185, 129, 0.1); border-radius: 8px; padding: 12px; border: 1px solid rgba(16, 185, 129, 0.3);">
+                        <div style="font-size: 0.75rem; color: var(--apple-text-secondary); text-transform: uppercase; font-weight: bold; margin-bottom: 4px;">Action</div>
+                        {% for action in rule.actions %}
+                        <div style="color: #10b981; font-family: monospace;"><i class="fa-solid fa-play"></i> {{ action.action_type }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <div style="width: 64px; height: 64px; border-radius: 50%; background: rgba(245, 158, 11, 0.1); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px auto;">
+                <i class="fa-solid fa-bolt" style="font-size: 2rem; color: #f59e0b;"></i>
+            </div>
+            <h4 style="color: white;">No Automations Yet</h4>
+            <p style="color: var(--apple-text-secondary);">Create your first cross-platform workflow to automate your operations.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Create Rule Modal -->
+<div class="modal fade" id="createRuleModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content" style="background: var(--apple-bg); border: 1px solid var(--apple-border);">
+            <div class="modal-header" style="border-bottom: 1px solid var(--apple-border);">
+                <h5 class="modal-title" style="color: white;">Create New Automation</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{% url 'workflow-builder' %}">
+                {% csrf_token %}
+                <div class="modal-body" style="padding: 2rem;">
+                    <div class="mb-4">
+                        <label class="form-label" style="color: var(--apple-text-secondary);">Rule Name</label>
+                        <input type="text" name="name" class="form-control" style="background: var(--apple-input-bg); border-color: var(--apple-border); color: white;" required placeholder="e.g., High Value Deal Alert">
+                    </div>
+
+                    <div class="mb-4 p-3" style="background: rgba(0,229,255,0.05); border: 1px solid rgba(0,229,255,0.2); border-radius: 8px;">
+                        <label class="form-label" style="color: #00E5FF; font-weight: bold;">1. Select Trigger (WHEN)</label>
+                        <select name="trigger_type" class="form-select" style="background: var(--apple-input-bg); border-color: var(--apple-border); color: white;" required>
+                            <option value="">Choose event...</option>
+                            <optgroup label="Sales / CRM">
+                                <option value="lead.created">New Lead Created</option>
+                                <option value="deal.updated">Deal Stage Updated</option>
+                            </optgroup>
+                            <optgroup label="ATS / Recruiting">
+                                <option value="candidate.created">New Candidate Applied</option>
+                            </optgroup>
+                            <optgroup label="IT Helpdesk">
+                                <option value="ticket.created">New IT Ticket</option>
+                            </optgroup>
+                        </select>
+                    </div>
+
+                    <div class="mb-4 p-3" style="background: rgba(245,158,11,0.05); border: 1px solid rgba(245,158,11,0.2); border-radius: 8px;">
+                        <label class="form-label" style="color: #f59e0b; font-weight: bold;">2. Define Condition (IF)</label>
+                        <div class="row g-2">
+                            <div class="col-md-4">
+                                <input type="text" name="condition_field" class="form-control" style="background: var(--apple-input-bg); border-color: var(--apple-border); color: white;" placeholder="Field (e.g. value)">
+                            </div>
+                            <div class="col-md-4">
+                                <select name="condition_op" class="form-select" style="background: var(--apple-input-bg); border-color: var(--apple-border); color: white;">
+                                    <option value="equals">Equals</option>
+                                    <option value="contains">Contains</option>
+                                    <option value="gt">Greater Than</option>
+                                    <option value="lt">Less Than</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <input type="text" name="condition_value" class="form-control" style="background: var(--apple-input-bg); border-color: var(--apple-border); color: white;" placeholder="Value (e.g. 50000)">
+                            </div>
+                        </div>
+                        <div class="form-text" style="color: var(--apple-text-secondary);">Leave blank to run on every event.</div>
+                    </div>
+
+                    <div class="mb-4 p-3" style="background: rgba(16,185,129,0.05); border: 1px solid rgba(16,185,129,0.2); border-radius: 8px;">
+                        <label class="form-label" style="color: #10b981; font-weight: bold;">3. Select Action (THEN)</label>
+                        <select name="action_type" class="form-select" style="background: var(--apple-input-bg); border-color: var(--apple-border); color: white;" required>
+                            <option value="">Choose action...</option>
+                            <option value="send_email">Send Email Alert</option>
+                            <option value="run_ai_agent">Trigger Autonomous AI Outreach</option>
+                            <option value="assign_ticket">Auto-Assign Ticket</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid var(--apple-border);">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-cyber">Deploy Automation</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
