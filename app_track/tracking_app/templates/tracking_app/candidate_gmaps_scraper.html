@@ -347,7 +347,14 @@
             display: flex; align-items: center; gap: 8px;
         }
         .sec-div::after { content: ''; flex: 1; height: 1px; background: var(--secondary); }
-    </style>
+    
+        .leaflet-layer,
+        .leaflet-control-zoom-in,
+        .leaflet-control-zoom-out,
+        .leaflet-control-attribution {
+            filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
+        }
+</style>
 </head>
 <body>
 
@@ -360,7 +367,7 @@
     <div class="container nav-content">
         <a class="logo" href="{% url 'home' %}">
             <img src="{% static 'tracking_app/assets/logo-333.png' %}" alt="Transform-Tech" height="32" onerror="this.style.display='none'">
-            <span>Transform<span class="text-cyan">.io</span></span>
+            <span>Transform<span class="text-cyan">-Tech</span></span>
         </a>
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
             <span style="font-size:0.75rem;color:var(--text-gray);"><span class="live-dot"></span>ATS</span>
@@ -918,7 +925,7 @@
 
         if (!leafMap) {
             leafMap = L.map('sourcing-map', { zoomControl: true }).setView([39.5, -98.35], 4);
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '© <a href="https://carto.com/">CARTO</a>',
                 maxZoom: 18
             }).addTo(leafMap);

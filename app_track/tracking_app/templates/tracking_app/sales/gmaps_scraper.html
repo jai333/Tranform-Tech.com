@@ -234,7 +234,14 @@
         }
         .hist-item:hover { border-color: rgba(0,229,255,0.3); }
         .hist-item:last-child { margin-bottom: 0; }
-    </style>
+    
+        .leaflet-layer,
+        .leaflet-control-zoom-in,
+        .leaflet-control-zoom-out,
+        .leaflet-control-attribution {
+            filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
+        }
+</style>
 </head>
 <body>
 
@@ -243,7 +250,7 @@
     <div class="container nav-content">
         <a class="logo" href="{% url 'home' %}">
             <img src="{% static 'tracking_app/assets/logo-333.png' %}" alt="Transform-Tech" height="32" onerror="this.style.display='none'">
-            <span>Transform<span class="text-cyan">.io</span></span>
+            <span>Transform<span class="text-cyan">-Tech</span></span>
         </a>
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
             <span style="font-size:0.75rem;color:var(--text-gray);"><span class="live-dot"></span>AI Sales System</span>
@@ -434,7 +441,7 @@ function initMap() {
     }).setView([20, 0], 2);
 
     // Add Dark Matter tile layer
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         subdomains: 'abcd',
         maxZoom: 20
     }).addTo(scraperMap);
