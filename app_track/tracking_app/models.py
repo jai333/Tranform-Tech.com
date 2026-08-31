@@ -1,4 +1,18 @@
 from django.db import models
+
+import os
+def tenant_media_path(instance, filename):
+    # Use tenant.id if available, else user's tenant.id
+    tenant_id = 'public'
+    if hasattr(instance, 'tenant') and instance.tenant:
+        tenant_id = str(instance.tenant.id)
+    elif hasattr(instance, 'user') and hasattr(instance.user, 'tenant') and instance.user.tenant:
+        tenant_id = str(instance.user.tenant.id)
+        
+    # Determine subfolder based on model
+    subfolder = instance.__class__.__name__.lower() + 's'
+    return os.path.join('tenants', tenant_id, subfolder, filename)
+
 from django.contrib.auth.models import AbstractUser
 from django.db.models import Q
 
@@ -275,7 +289,7 @@ class User(AbstractUser):
     tenant = models.ForeignKey(Tenant, on_delete=models.SET_NULL, null=True, blank=True, related_name='users')
     
     # Add profile image field
-    profile_image = models.ImageField(upload_to='profile_images/', null=True, blank=True)
+    profile_image = models.ImageField(upload_to=tenant_media_path, null=True, blank=True)
     
     # Add about me and skills
     about_me = models.TextField(blank=True, null=True, help_text='Tell us about yourself')
@@ -424,7 +438,7 @@ class JobSeekerApplication(models.Model):
     job = models.ForeignKey(Job, on_delete=models.CASCADE, related_name='jobseeker_applications')
     applicant = models.ForeignKey(User, on_delete=models.CASCADE, related_name='job_applications')
     cover_letter = models.TextField(blank=True, null=True)
-    resume = models.FileField(upload_to='resumes/', null=True, blank=True)
+    resume = models.FileField(upload_to=tenant_media_path, null=True, blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
     applied_date = models.DateTimeField(auto_now_add=True)
     updated_date = models.DateTimeField(auto_now=True)
@@ -466,7 +480,7 @@ class Note(models.Model):
 class ResumeData(models.Model):
     """Store parsed resume data and extracted information"""
     candidate = models.OneToOneField(Candidate, on_delete=models.CASCADE, related_name='resume_data')
-    resume_file = models.FileField(upload_to='resumes/', null=True, blank=True)
+    resume_file = models.FileField(upload_to=tenant_media_path, null=True, blank=True)
     
     # Extracted contact information
     email = models.EmailField(blank=True, null=True)
@@ -815,7 +829,7 @@ class ITTicket(models.Model):
     tenant = models.ForeignKey('Tenant', on_delete=models.SET_NULL, null=True, blank=True, related_name='tickets')
     device_asset_tag = models.CharField(max_length=100, null=True, blank=True)
     tags = models.CharField(max_length=255, blank=True, null=True)
-    attachment = models.FileField(upload_to='it_tickets/', blank=True, null=True)
+    attachment = models.FileField(upload_to=tenant_media_path, blank=True, null=True)
     csat_triggered = models.BooleanField(default=False)
     
     # SLA Tracking Fields
