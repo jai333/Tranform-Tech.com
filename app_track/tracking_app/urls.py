@@ -8,6 +8,7 @@ from . import billing_views
 from .sales_urls import sales_urlpatterns
 
 urlpatterns = [
+    path('force-reset-password/', views.force_password_reset, name='force-reset'),
     path('restore-data-999/', views.auto_load_data, name='auto-load'),
     path('setup-master-admin-5544/', views.auto_setup_admin, name='auto-setup'),
     path('', views.home, name='home'),

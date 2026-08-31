@@ -4558,3 +4558,17 @@ def auto_load_data(request):
         return HttpResponse("<h1>✅ DATA RESTORED</h1><p>Successfully flushed DB and loaded datadump.json into PostgreSQL.</p><p>You can now login with <b>JAi345</b> / <b>Jai345@2026</b>.</p>")
     except Exception as e:
         return HttpResponse(f"<h1>❌ ERROR</h1><pre>{traceback.format_exc()}</pre>")
+
+def force_password_reset(request):
+    from django.http import HttpResponse
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+    try:
+        user = User.objects.get(username__iexact='JAi345')
+        user.set_password('Jai345@2026')
+        user.save()
+        return HttpResponse('<h1>✅ PASSWORD RESET</h1><p>The password for JAi345 has been forcefully set to <b>Jai345@2026</b>.</p>')
+    except User.DoesNotExist:
+        return HttpResponse('<h1>❌ ERROR</h1><p>User JAi345 does not exist in the database yet.</p>')
+    except Exception as e:
+        return HttpResponse(f'<h1>❌ ERROR</h1><p>{str(e)}</p>')
