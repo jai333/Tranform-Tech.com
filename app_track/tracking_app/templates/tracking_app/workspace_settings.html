@@ -15,6 +15,37 @@
     </div>
 
     <div class="row g-4">
+        
+        <!-- SSO SECURITY SECTION -->
+        <div class="col-12">
+            <div class="dev-card">
+                <div class="dev-card-header">
+                    <div class="card-title"><i class="fa-solid fa-shield-halved text-success"></i> Enterprise Security & SSO (SAML)</div>
+                    <span class="badge bg-success bg-opacity-25 text-success">Included in Enterprise Plan</span>
+                </div>
+                <div class="p-4">
+                    <p style="color: var(--apple-text-secondary);">Configure Single Sign-On using Azure AD, Okta, or Google Workspace to allow your employees to login seamlessly without passwords.</p>
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label class="form-label" style="color: white;">Identity Provider (IdP) Entity ID</label>
+                            <input type="text" class="form-control" style="background: var(--apple-input-bg); border-color: var(--apple-border); color: white;" placeholder="https://sts.windows.net/...">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" style="color: white;">SSO URL (Assertion Consumer Service)</label>
+                            <input type="text" class="form-control" style="background: var(--apple-input-bg); border-color: var(--apple-border); color: white;" placeholder="https://login.microsoftonline.com/...">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label" style="color: white;">X.509 Certificate</label>
+                            <textarea class="form-control" style="background: var(--apple-input-bg); border-color: var(--apple-border); color: white; font-family: monospace;" rows="4" placeholder="-----BEGIN CERTIFICATE-----"></textarea>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <button class="btn btn-success"><i class="fa-solid fa-cloud-arrow-up"></i> Save SAML Configuration</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- BRANDING SECTION -->
         <div class="col-lg-4">
             <div class="dev-card h-100">

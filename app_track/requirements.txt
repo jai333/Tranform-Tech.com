@@ -66,3 +66,5 @@ requests==2.31.0
 djangorestframework
 markdown
 django-filter
+django-allauth
+python3-saml

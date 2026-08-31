@@ -29,6 +29,7 @@ handler403 = 'tracking_app.views.error_403'
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/v1/', include('tracking_app.api_urls')),
+    path('accounts/', include('allauth.urls')),
     path('', include('tracking_app.urls')),
     path('video/', include('video.urls')),
     # ── SEO / crawlers ───────────────────────────────────────────────────────

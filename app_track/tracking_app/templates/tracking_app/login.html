@@ -298,6 +298,24 @@
                 </button>
             </form>
 
+        <div class="mt-4 mb-3" style="display: flex; align-items: center;">
+            <div style="flex: 1; height: 1px; background: rgba(255,255,255,0.1);"></div>
+            <div style="padding: 0 10px; color: var(--apple-text-secondary); font-size: 0.8rem;">OR SIGN IN WITH</div>
+            <div style="flex: 1; height: 1px; background: rgba(255,255,255,0.1);"></div>
+        </div>
+
+        <div class="d-grid gap-2">
+            <a href="{% url 'account_login' %}" class="btn btn-outline-light d-flex align-items-center justify-content-center" style="background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); padding: 12px; gap: 10px;">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google" style="width: 18px; height: 18px;">
+                Sign in with Google Workspace
+            </a>
+            <a href="{% url 'account_login' %}" class="btn btn-outline-light d-flex align-items-center justify-content-center" style="background: rgba(0,229,255,0.05); border-color: rgba(0,229,255,0.3); padding: 12px; gap: 10px; color: #00E5FF;">
+                <i class="fa-solid fa-building-shield"></i>
+                Enterprise SSO (SAML)
+            </a>
+        </div>
+
+
             <div class="auth-footer">
                 <p>No workspace yet? <a href="{% url 'register' %}">/INITIALIZE_NOW</a></p>
             </div>
