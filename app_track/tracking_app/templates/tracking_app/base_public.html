@@ -734,7 +734,7 @@ html, body {
         <div class="flex gap-sm" id="desktop-nav-actions">
             <button id="theme-toggle" class="btn btn-primary btn-sm" title="Toggle theme" style="width: 44px; height: 44px; padding: 0; display: flex; align-items: center; justify-content: center; margin-right: 0.5rem; border-radius: 50%;"><i id="theme-icon" class="fas fa-moon"></i></button>
             {% if user.is_authenticated %}
-            <a href="#services" class="btn btn-cyan font-mono">/DASHBOARD</a>
+            <a href="{% url 'executive-dashboard' %}" class="btn btn-cyan font-mono">/DASHBOARD</a>
             {% else %}
             <a href="{% url 'login' %}" style="color:var(--text-gray); margin-right:16px; padding-top:10px;" class="font-mono text-sm">/LOGIN</a>
             <a href="{% url 'register' %}" class="btn btn-outline font-mono">/GET_STARTED</a>
@@ -773,7 +773,7 @@ html, body {
 
     <div class="mobile-nav-cta">
         {% if user.is_authenticated %}
-        <a href="#services" class="mobile-btn-primary"><i class='bx bx-grid-alt'></i> Go to Dashboard</a>
+        <a href="{% url 'executive-dashboard' %}" class="mobile-btn-primary"><i class='bx bx-grid-alt'></i> Go to Dashboard</a>
         {% else %}
         <a href="{% url 'register' %}" class="mobile-btn-primary"><i class='bx bx-rocket'></i> Get Started Free</a>
         <a href="{% url 'login' %}" class="mobile-btn-outline"><i class='bx bx-log-in'></i> Login</a>
