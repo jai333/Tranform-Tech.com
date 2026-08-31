@@ -4555,6 +4555,14 @@ def auto_load_data(request):
     try:
         call_command("flush", interactive=False)
         call_command("loaddata", "datadump.json")
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        try:
+            user = User.objects.get(username__iexact="JAi345")
+            user.set_password("Jai345@2026")
+            user.save()
+        except Exception:
+            pass
         return HttpResponse("<h1>✅ DATA RESTORED</h1><p>Successfully flushed DB and loaded datadump.json into PostgreSQL.</p><p>You can now login with <b>JAi345</b> / <b>Jai345@2026</b>.</p>")
     except Exception as e:
         return HttpResponse(f"<h1>❌ ERROR</h1><pre>{traceback.format_exc()}</pre>")
