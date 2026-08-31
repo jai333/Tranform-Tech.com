@@ -94,6 +94,7 @@ class Lead(models.Model):
     last_activity_at = models.DateTimeField(null=True, blank=True)
 
     # Metadata
+    custom_data = models.JSONField(default=dict, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     enriched_at = models.DateTimeField(null=True, blank=True)
@@ -340,6 +341,7 @@ class Deal(models.Model):
 
     last_activity_at = models.DateTimeField(null=True, blank=True)
     tenant = models.ForeignKey('tracking_app.Tenant', on_delete=models.SET_NULL, null=True, blank=True, related_name='deals')
+    custom_data = models.JSONField(default=dict, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

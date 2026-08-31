@@ -17,6 +17,80 @@
     <div class="row g-4">
         
         
+        
+        <!-- DYNAMIC CUSTOM FIELDS SECTION -->
+        <div class="col-12">
+            <div class="dev-card">
+                <div class="dev-card-header">
+                    <div class="card-title"><i class="fa-solid fa-database text-warning"></i> Dynamic Custom Fields Engine</div>
+                    <span class="badge bg-warning bg-opacity-25 text-warning">Included in Enterprise Plan</span>
+                </div>
+                <div class="p-4">
+                    <p style="color: var(--apple-text-secondary);">Create your own custom data fields for Leads, Deals, Candidates, and IT Tickets without needing a database migration.</p>
+                    
+                    <!-- Example Custom Field Builder UI -->
+                    <div class="table-responsive mb-4">
+                        <table class="table table-dark table-borderless" style="background: transparent;">
+                            <thead>
+                                <tr style="border-bottom: 1px solid var(--apple-border);">
+                                    <th style="color: var(--apple-text-secondary); font-weight: normal;">Module</th>
+                                    <th style="color: var(--apple-text-secondary); font-weight: normal;">Field Name</th>
+                                    <th style="color: var(--apple-text-secondary); font-weight: normal;">Data Type</th>
+                                    <th style="color: var(--apple-text-secondary); font-weight: normal;">Required</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="customFieldsTable">
+                                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                    <td><span class="badge bg-dark border">Lead</span></td>
+                                    <td><span style="color: white;">Industry Vertical</span></td>
+                                    <td><span style="color: #00E5FF;">Text</span></td>
+                                    <td><i class="fa-solid fa-check text-success"></i></td>
+                                    <td><button class="btn btn-sm btn-outline-danger"><i class="fa-solid fa-trash"></i></button></td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                    <td><span class="badge bg-dark border">IT Ticket</span></td>
+                                    <td><span style="color: white;">Software License Key</span></td>
+                                    <td><span style="color: #00E5FF;">Encrypted Text</span></td>
+                                    <td><i class="fa-solid fa-xmark text-secondary"></i></td>
+                                    <td><button class="btn btn-sm btn-outline-danger"><i class="fa-solid fa-trash"></i></button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="row g-3 align-items-end p-3" style="background: rgba(255,255,255,0.02); border: 1px dashed var(--apple-border); border-radius: 8px;">
+                        <div class="col-md-3">
+                            <label class="form-label" style="color: white; font-size: 0.85rem;">Module</label>
+                            <select class="form-select form-select-sm" style="background: var(--apple-input-bg); border-color: var(--apple-border); color: white;">
+                                <option>Lead (Sales)</option>
+                                <option>Deal (Sales)</option>
+                                <option>Candidate (ATS)</option>
+                                <option>IT Ticket (Helpdesk)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" style="color: white; font-size: 0.85rem;">Field Name</label>
+                            <input type="text" class="form-control form-control-sm" style="background: var(--apple-input-bg); border-color: var(--apple-border); color: white;" placeholder="e.g. Budget Range">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label" style="color: white; font-size: 0.85rem;">Data Type</label>
+                            <select class="form-select form-select-sm" style="background: var(--apple-input-bg); border-color: var(--apple-border); color: white;">
+                                <option>Text</option>
+                                <option>Number</option>
+                                <option>Date</option>
+                                <option>Dropdown</option>
+                                <option>Encrypted Text</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button class="btn btn-sm btn-warning w-100"><i class="fa-solid fa-plus"></i> Add Field</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- ADVANCED EMAIL SYNC SECTION -->
         <div class="col-12">
             <div class="dev-card">
