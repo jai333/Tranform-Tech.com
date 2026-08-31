@@ -2589,6 +2589,11 @@ body:not(.light-theme) #spotlight-layer { opacity: 1; }
             const cy = rect.height / 2;
             const rotX = ((y - cy) / cy) * -8;
             const rotY = ((x - cx) / cx) * 8;
+            
+            // Set mouse vars for spotlight pseudo-element
+            card.style.setProperty('--mouse-x', `${x}px`);
+            card.style.setProperty('--mouse-y', `${y}px`);
+            
             card.style.transform = `translateY(-4px) perspective(1000px) rotateX(${rotX}deg) rotateY(${rotY}deg)`;
         });
         card.addEventListener('mouseleave', () => {
