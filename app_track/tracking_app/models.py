@@ -269,6 +269,7 @@ class User(AbstractUser):
     ROLE_SALES = 'sales'
     ROLE_IT = 'it'
     ROLE_ADMIN = 'admin'
+    ROLE_CLIENT = 'client'
     
     ROLE_CHOICES = [
         (ROLE_JOBSEEKER, 'Job Seeker'),
@@ -276,6 +277,7 @@ class User(AbstractUser):
         (ROLE_SALES, 'Sales Professional'),
         (ROLE_IT, 'IT Helpdesk Agent'),
         (ROLE_ADMIN, 'Administrator'),
+        (ROLE_CLIENT, 'External Client'),
     ]
     
     # Add role field to User model

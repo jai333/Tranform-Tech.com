@@ -46,7 +46,12 @@ def get_tenant_filter(user):
 @login_required
 def standard_ops_dashboard(request):
     """The main unified dashboard for authenticated users (Standard Ops)."""
+
+    if getattr(request.user, "role", None) == "client":
+        return redirect("client-portal")
+        
     tenant_filter = get_tenant_filter(request.user)
+
     
     context = {'page_title': 'Standard Operations'}
     
@@ -1858,7 +1863,12 @@ def threat_dashboard(request):
     if category_filter:
         incidents = incidents.filter(category=category_filter)
     from django.utils import timezone
+
+    if getattr(request.user, "role", None) == "client":
+        return redirect("client-portal")
+        
     tenant_filter = get_tenant_filter(request.user)
+
     stats = {
         'critical': ThreatIncident.objects.filter(**tenant_filter, severity='critical').exclude(status__in=['resolved', 'false_positive']).count(),
         'high': ThreatIncident.objects.filter(**tenant_filter, severity='high').exclude(status__in=['resolved', 'false_positive']).count(),

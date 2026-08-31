@@ -1,0 +1,53 @@
+
+{% extends "tracking_app/base.html" %}
+{% block title %}Client Portal{% endblock %}
+{% block content %}
+<div class="container-fluid p-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 style="color: white; font-weight: 600;"><i class="fa-solid fa-building text-primary"></i> Client Portal</h2>
+            <p style="color: var(--apple-text-secondary);">Welcome back, {{ request.user.get_full_name|default:request.user.username }}. Manage your support requests here.</p>
+        </div>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newTicketModal">
+            <i class="fa-solid fa-plus"></i> Submit IT Ticket
+        </button>
+    </div>
+
+    <div class="dev-card">
+        <div class="dev-card-header d-flex justify-content-between align-items-center">
+            <div class="card-title">My Support Tickets</div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-dark table-hover align-middle mb-0" style="background: transparent;">
+                <thead>
+                    <tr style="border-bottom: 1px solid var(--apple-border);">
+                        <th style="color: var(--apple-text-secondary); font-weight: normal;">ID</th>
+                        <th style="color: var(--apple-text-secondary); font-weight: normal;">Subject</th>
+                        <th style="color: var(--apple-text-secondary); font-weight: normal;">Status</th>
+                        <th style="color: var(--apple-text-secondary); font-weight: normal;">Priority</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for t in tickets %}
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                        <td><span style="color: var(--apple-text-secondary);">#{{ t.id }}</span></td>
+                        <td><strong style="color: white;">{{ t.title }}</strong></td>
+                        <td>
+                            {% if t.status == "open" %}<span class="badge bg-warning text-dark">Open</span>
+                            {% elif t.status == "in_progress" %}<span class="badge bg-primary">In Progress</span>
+                            {% elif t.status == "resolved" %}<span class="badge bg-success">Resolved</span>
+                            {% else %}<span class="badge bg-secondary">{{ t.get_status_display }}</span>{% endif %}
+                        </td>
+                        <td><span style="color: var(--apple-text-secondary);">{{ t.get_priority_display }}</span></td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center py-4" style="color: var(--apple-text-secondary);">You have no support tickets.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -4,7 +4,7 @@ from django.contrib.auth import views as auth_views
 from . import views
 from . import ai_views
 from . import sales_views
-from . import billing_views
+from . import billing_views, portal_views
 from .sales_urls import sales_urlpatterns
 
 urlpatterns = [
