@@ -4547,3 +4547,14 @@ def auto_setup_admin(request):
     user.role = 'admin'
     user.save()
     return HttpResponse('<h1>SUCCESS!</h1><p>Master account JAI345 created successfully in the PostgreSQL database.</p><p>You can now go back to <a href="/login/">/login/</a> and login with <b>JAI345</b> and <b>Jai345@2026</b>.</p>')
+
+from django.core.management import call_command
+import traceback
+
+def auto_load_data(request):
+    try:
+        call_command("flush", interactive=False)
+        call_command("loaddata", "datadump.json")
+        return HttpResponse("<h1>✅ DATA RESTORED</h1><p>Successfully flushed DB and loaded datadump.json into PostgreSQL.</p><p>You can now login with <b>JAi345</b> / <b>Jai345@2026</b>.</p>")
+    except Exception as e:
+        return HttpResponse(f"<h1>❌ ERROR</h1><pre>{traceback.format_exc()}</pre>")
