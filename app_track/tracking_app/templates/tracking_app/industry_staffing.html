@@ -1,0 +1,43 @@
+{% extends "tracking_app/base_public.html" %}
+{% load static %}
+
+{% block title %}Transform-Tech for Staffing Agencies{% endblock %}
+
+{% block content %}
+<div style="background-color: #0F172A; min-height: 100vh; color: #F8FAFC; font-family: 'Inter', sans-serif;">
+    <div style="max-width: 1200px; margin: 0 auto; padding: 120px 24px; text-align: center;">
+        <h1 style="font-size: 4rem; font-weight: 800; line-height: 1.1; margin-bottom: 24px; letter-spacing: -0.04em;">
+            Run your Staffing Agency on a<br>
+            <span style="background: linear-gradient(135deg, #00E5FF 0%, #0077FF 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">single, unified operating system.</span>
+        </h1>
+        
+        <p style="font-size: 1.25rem; color: #94A3B8; max-width: 800px; margin: 0 auto 48px; line-height: 1.6;">
+            Stop forcing your recruiters and account executives to use two different systems. Transform-Tech seamlessly fuses your CRM and ATS together, giving your agency an unfair speed advantage.
+        </p>
+
+        <div style="display: flex; gap: 16px; justify-content: center; margin-bottom: 80px;">
+            <a href="{% url 'register' %}" style="background-color: #00E5FF; color: #0F172A; font-weight: 600; padding: 16px 32px; border-radius: 8px; text-decoration: none; font-size: 1.125rem;">Start Your Free Trial</a>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 32px; text-align: left; margin-top: 80px;">
+            <div style="background: rgba(255,255,255,0.03); padding: 32px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1);">
+                <div style="font-size: 2rem; margin-bottom: 16px;">🎯</div>
+                <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 12px;">Unified CRM & ATS</h3>
+                <p style="color: #94A3B8; line-height: 1.6;">Sales enters a new Job Order, and it instantly routes to your Recruiting team. No Zapier required. No data gets lost in translation.</p>
+            </div>
+            
+            <div style="background: rgba(255,255,255,0.03); padding: 32px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1);">
+                <div style="font-size: 2rem; margin-bottom: 16px;">🧠</div>
+                <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 12px;">AI Candidate Matching</h3>
+                <p style="color: #94A3B8; line-height: 1.6;">Our Sourcing Engine automatically parses 100+ resumes and matches the best talent to your open jobs instantly based on latent skill detection.</p>
+            </div>
+
+            <div style="background: rgba(255,255,255,0.03); padding: 32px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1);">
+                <div style="font-size: 2rem; margin-bottom: 16px;">⚡</div>
+                <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 12px;">Visual Automations</h3>
+                <p style="color: #94A3B8; line-height: 1.6;">Trigger background checks or follow-up emails the second a candidate moves stages. Automate your entire placement workflow visually.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

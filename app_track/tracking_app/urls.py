@@ -21,6 +21,8 @@ urlpatterns = [
     path('platform/ai/', TemplateView.as_view(template_name='tracking_app/public_ai.html'), name='public-ai'),
     path('platform/workflow/', TemplateView.as_view(template_name='tracking_app/public_workflow.html'), name='public-workflow'),
     path('platform/telemetry/', TemplateView.as_view(template_name='tracking_app/public_telemetry.html'), name='public-telemetry'),
+    path('solutions/it-services/', TemplateView.as_view(template_name='tracking_app/industry_it_services.html'), name='industry-it'),
+    path('solutions/staffing/', TemplateView.as_view(template_name='tracking_app/industry_staffing.html'), name='industry-staffing'),
     path('solutions/tech/', TemplateView.as_view(template_name='tracking_app/industry_tech.html'), name='industry-tech'),
     path('solutions/healthcare/', TemplateView.as_view(template_name='tracking_app/industry_health.html'), name='industry-health'),
     path('solutions/executive/', TemplateView.as_view(template_name='tracking_app/industry_exec.html'), name='industry-exec'),

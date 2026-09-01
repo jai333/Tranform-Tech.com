@@ -1,0 +1,43 @@
+{% extends "tracking_app/base_public.html" %}
+{% load static %}
+
+{% block title %}Transform-Tech for IT Services & MSPs{% endblock %}
+
+{% block content %}
+<div style="background-color: #0F172A; min-height: 100vh; color: #F8FAFC; font-family: 'Inter', sans-serif;">
+    <div style="max-width: 1200px; margin: 0 auto; padding: 120px 24px; text-align: center;">
+        <h1 style="font-size: 4rem; font-weight: 800; line-height: 1.1; margin-bottom: 24px; letter-spacing: -0.04em;">
+            Run your IT Services firm on a<br>
+            <span style="background: linear-gradient(135deg, #00E5FF 0%, #0077FF 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">single, unified operating system.</span>
+        </h1>
+        
+        <p style="font-size: 1.25rem; color: #94A3B8; max-width: 800px; margin: 0 auto 48px; line-height: 1.6;">
+            Stop duct-taping Salesforce to Zendesk. Transform-Tech natively combines your CRM, IT Helpdesk, and Project Management into one enterprise-grade platform. Built specifically for growing MSPs.
+        </p>
+
+        <div style="display: flex; gap: 16px; justify-content: center; margin-bottom: 80px;">
+            <a href="{% url 'register' %}" style="background-color: #00E5FF; color: #0F172A; font-weight: 600; padding: 16px 32px; border-radius: 8px; text-decoration: none; font-size: 1.125rem;">Start Your Free Trial</a>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 32px; text-align: left; margin-top: 80px;">
+            <div style="background: rgba(255,255,255,0.03); padding: 32px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1);">
+                <div style="font-size: 2rem; margin-bottom: 16px;">💼</div>
+                <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 12px;">Unified Sales Pipeline</h3>
+                <p style="color: #94A3B8; line-height: 1.6;">Track MRR, project deals, and client communications natively. When a deal closes, the support team is instantly notified.</p>
+            </div>
+            
+            <div style="background: rgba(255,255,255,0.03); padding: 32px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1);">
+                <div style="font-size: 2rem; margin-bottom: 16px;">🎫</div>
+                <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 12px;">Native IT Helpdesk</h3>
+                <p style="color: #94A3B8; line-height: 1.6;">Manage support tickets, track SLA compliance, and route issues to your engineers without leaving the CRM context.</p>
+            </div>
+
+            <div style="background: rgba(255,255,255,0.03); padding: 32px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1);">
+                <div style="font-size: 2rem; margin-bottom: 16px;">🤖</div>
+                <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 12px;">Predictive AI Churn</h3>
+                <p style="color: #94A3B8; line-height: 1.6;">Our AI monitors ticket volume and client sentiment across your book of business to alert you before an IT contract cancels.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
