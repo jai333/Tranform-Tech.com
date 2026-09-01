@@ -33,13 +33,13 @@ class Command(BaseCommand):
             self.stdout.write(f"Tenant {tenant.name} already exists.")
 
         # 2. Create the Master Admin User
-        admin_email = "jai@transform-tech.com"
+        admin_email = "j@transform-tech.com"
         admin_user, admin_created = User.objects.get_or_create(
             email=admin_email,
             defaults={
-                "username": "jaisukhwal",
-                "first_name": "Jai",
-                "last_name": "Sukhwal",
+                "username": "jmartin",
+                "first_name": "J",
+                "last_name": "Martin",
                 "is_staff": True,
                 "is_superuser": True,
                 "role": "admin",
@@ -117,6 +117,6 @@ class Command(BaseCommand):
             self.stdout.write(self.style.SUCCESS("Activated Visual Workflow Automation: Auto-Welcome New Leads."))
 
         self.stdout.write(self.style.SUCCESS("MASTER WORKSPACE PROVISIONING COMPLETE!"))
-        self.stdout.write("Login: jai@transform-tech.com")
+        self.stdout.write("Login: j@transform-tech.com")
         self.stdout.write("Password: Admin123!Transform")
 
