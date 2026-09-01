@@ -19,9 +19,21 @@ class TenantIsolatingViewSet(viewsets.ModelViewSet):
             return self.queryset.none()
         return self.queryset.filter(tenant=self.request.user.tenant)
 
+    def _validate_foreign_keys(self, serializer):
+        from rest_framework.exceptions import PermissionDenied
+        # Ensure any related model instances being assigned belong to the same tenant
+        for field_name, value in serializer.validated_data.items():
+            if hasattr(value, 'tenant') and value.tenant != self.request.user.tenant:
+                raise PermissionDenied(f"Cannot assign {field_name} from a different workspace.")
+
     def perform_create(self, serializer):
-        # Automatically assign the tenant to the new object
+        self._validate_foreign_keys(serializer)
         serializer.save(tenant=self.request.user.tenant)
+
+    def perform_update(self, serializer):
+        self._validate_foreign_keys(serializer)
+        serializer.save()
+
 
 
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
