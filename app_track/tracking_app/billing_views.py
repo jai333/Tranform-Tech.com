@@ -71,7 +71,6 @@ PLANS = {
         "color": "#9333ea",
     }
 }
-}
 
 
 def _get_stripe():
