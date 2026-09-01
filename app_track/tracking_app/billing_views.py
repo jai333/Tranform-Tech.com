@@ -27,12 +27,13 @@ logger = logging.getLogger(__name__)
 PLANS = {
     "starter": {
         "name": "Starter Plan",
-        "price": "$99",
-        "period": "/ month",
+        "price": "",
+        "period": "/ user / month",
         "features": [
-            "ATS & Candidate Tracking",
-            "CRM & Account Management",
-            "Up to 10 users",
+            "Unified CRM & ATS",
+            "Email Thread Syncing",
+            "Standard Reporting",
+            "Standard Roles (Admin, Sales, Recruiter)",
             "Email support",
         ],
         "stripe_price_id": getattr(settings, "STRIPE_PRICE_STARTER", ""),
@@ -40,14 +41,14 @@ PLANS = {
     },
     "growth": {
         "name": "Pro Plan",
-        "price": "$299",
-        "period": "/ month",
+        "price": "",
+        "period": "/ user / month",
         "features": [
             "Everything in Starter",
-            "IT Helpdesk & Asset Management",
-            "AI Sales Automation",
-            "Unified Inbox",
-            "Up to 50 users",
+            "Visual Workflow Automation",
+            "Dynamic Custom Fields",
+            "AI Autonomous Sales Agent",
+            "IT Helpdesk & Ticket Routing",
             "Priority support",
         ],
         "stripe_price_id": getattr(settings, "STRIPE_PRICE_GROWTH", ""),
@@ -56,22 +57,20 @@ PLANS = {
     },
     "enterprise": {
         "name": "Enterprise Plan",
-        "price": "$799",
-        "period": "/ month",
+        "price": "",
+        "period": "/ user / month",
         "features": [
-            "Developer API & Webhooks Console",
-            "Real-Time HMAC Streams",
-            "Everything in Growth",
-            "SOC Threat Dashboard",
-            "Executive Analytics",
-            "Workflow Automation",
-            "Unlimited users",
+            "Everything in Pro",
+            "Predictive AI Churn Modeling",
+            "Strategic Insight Engine (Live Radar)",
+            "External Client Portal Extranet",
+            "Multi-Tenant Developer API",
             "Dedicated account manager",
-            "Custom integrations",
         ],
         "stripe_price_id": getattr(settings, "STRIPE_PRICE_ENTERPRISE", ""),
-        "color": "#8b5cf6",
-    },
+        "color": "#9333ea",
+    }
+}
 }
 
 
