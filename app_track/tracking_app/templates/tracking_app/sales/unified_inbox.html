@@ -230,7 +230,7 @@
                         <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
                             <div>
                                 <label style="display:block; font-size:0.85rem; color:var(--apple-text-secondary); margin-bottom:6px; font-weight:600;">Registered Email Address <span style="color:#FF6B6B;">*</span></label>
-                                <input type="email" name="mail_registered_email" value="{{ tenant.mail_registered_email|default:'' }}" required placeholder="outreach@yourdomain.com" style="width:100%; background:var(--apple-input-bg); border:1px solid var(--apple-border); border-radius:8px; padding:10px 12px; color:var(--apple-text); font-size:0.9rem; outline:none;">
+                                <input type="email" name="mail_registered_email" value="{{ tenant.mail_registered_email|default:request.user.email }}" required placeholder="outreach@yourdomain.com" style="width:100%; background:var(--apple-input-bg); border:1px solid var(--apple-border); border-radius:8px; padding:10px 12px; color:var(--apple-text); font-size:0.9rem; outline:none;">
                                 <span style="font-size:0.75rem; color:var(--apple-text-muted); margin-top:4px; display:block;">Primary registered address for all outbound calls & inbound replies.</span>
                             </div>
                             <div>
@@ -255,14 +255,14 @@
                             </div>
                             <div>
                                 <label style="display:block; font-size:0.85rem; color:var(--apple-text-secondary); margin-bottom:6px; font-weight:600;">Port</label>
-                                <input type="number" name="mail_smtp_port" value="{{ tenant.mail_smtp_port|default:587 }}" style="width:100%; background:var(--apple-input-bg); border:1px solid var(--apple-border); border-radius:8px; padding:10px 12px; color:var(--apple-text); font-size:0.9rem; outline:none;">
+                                <input type="number" name="mail_smtp_port" value="{{ tenant.mail_smtp_port|default:465 }}" style="width:100%; background:var(--apple-input-bg); border:1px solid var(--apple-border); border-radius:8px; padding:10px 12px; color:var(--apple-text); font-size:0.9rem; outline:none;">
                             </div>
                         </div>
 
                         <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px;">
                             <div>
                                 <label style="display:block; font-size:0.85rem; color:var(--apple-text-secondary); margin-bottom:6px; font-weight:600;">SMTP Username / Account</label>
-                                <input type="text" name="mail_smtp_username" value="{{ tenant.mail_smtp_username|default:'' }}" placeholder="Optional (e.g., apikey or email)" style="width:100%; background:var(--apple-input-bg); border:1px solid var(--apple-border); border-radius:8px; padding:10px 12px; color:var(--apple-text); font-size:0.9rem; outline:none;">
+                                <input type="text" name="mail_smtp_username" value="{{ tenant.mail_smtp_username|default:request.user.email }}" placeholder="Optional (e.g., apikey or email)" style="width:100%; background:var(--apple-input-bg); border:1px solid var(--apple-border); border-radius:8px; padding:10px 12px; color:var(--apple-text); font-size:0.9rem; outline:none;">
                             </div>
                             <div>
                                 <label style="display:block; font-size:0.85rem; color:var(--apple-text-secondary); margin-bottom:6px; font-weight:600;">SMTP Password / App Secret</label>
