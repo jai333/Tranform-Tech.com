@@ -210,7 +210,23 @@ def execute_email(run, lead, tenant):
                 logger.warning("Twilio Email API failed (status %s): %s. Falling back to SMTP.", resp.status_code, resp.text)
                 account_sid = None
         
-        if not account_sid or not auth_token:
+                sendgrid_key = os.environ.get("SENDGRID_API_KEY")
+        if sendgrid_key:
+            import requests
+            url = "https://api.sendgrid.com/v3/mail/send"
+            from_email = os.environ.get("DEFAULT_FROM_EMAIL", "j@transform-tech.com")
+            payload = {
+                "personalizations": [{"to": [{"email": lead.email}]}],
+                "from": {"email": from_email, "name": "J Martin | Transform-Tech"},
+                "subject": run.email_subject,
+                "content": [{"type": "text/html", "value": run.email_body}]
+            }
+            resp = requests.post(url, json=payload, headers={"Authorization": f"Bearer {sendgrid_key}"}, timeout=10)
+            if resp.status_code >= 400:
+                logger.error(f"SendGrid failed: {resp.text}")
+                raise Exception(f"SendGrid HTTP Error: {resp.text}")
+        else:
+            if not account_sid or not auth_token:
             from_email = (
                 os.environ.get("DEFAULT_FROM_EMAIL")
                 or os.environ.get("EMAIL_HOST_USER")
