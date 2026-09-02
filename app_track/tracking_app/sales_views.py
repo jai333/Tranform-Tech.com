@@ -1028,9 +1028,9 @@ def unified_inbox(request):
                 tenant.mail_auto_sync = ('mail_auto_sync' in request.POST)
                 tenant.mail_integration_status = 'connected' if tenant.mail_registered_email else 'unconfigured'
                 tenant.save()
-                messages.success(request, f"Successfully updated your Tenant Mail Integration Profile! Registered Email: {tenant.mail_registered_email or 'None'}.")
+                messages.success(request, f"Successfully updated your Workspace Mail Integration Profile! Registered Email: {tenant.mail_registered_email or 'None'}.")
             else:
-                messages.error(request, "Your account is not assigned to a company tenant organization.")
+                messages.error(request, "Your account is not assigned to a company workspace organization.")
             return redirect('unified-inbox')
 
         elif action == 'test_send':
@@ -1054,10 +1054,10 @@ def unified_inbox(request):
                     else:
                         connection = None
                         
-                    email_body = f"Hello {tenant.name} Team,\n\nYour Advanced Tenant Mail Integration is active and securely configured!\n\nRegistered Sender: {tenant.mail_sender_name or tenant.name} <{tenant.mail_registered_email}>\nSMTP Server: {tenant.mail_smtp_host}:{tenant.mail_smtp_port}\nData Isolation: LOCKED & ENFORCED.\n\nYou can now send cold outreach and receive AI-classified replies in two-way real time.\n\nBest,\nTransform-Tech Mail Engine"
+                    email_body = f"Hello {tenant.name} Team,\n\nYour Advanced Workspace Mail Integration is active and securely configured!\n\nRegistered Sender: {tenant.mail_sender_name or tenant.name} <{tenant.mail_registered_email}>\nSMTP Server: {tenant.mail_smtp_host}:{tenant.mail_smtp_port}\nData Isolation: LOCKED & ENFORCED.\n\nYou can now send cold outreach and receive AI-classified replies in two-way real time.\n\nBest,\nTransform-Tech Mail Engine"
 
                     msg = EmailMessage(
-                        subject="✨ [Transform-Tech] Verification: Tenant Mail Integration Active!",
+                        subject="✨ [Transform-Tech] Verification: Workspace Mail Integration Active!",
                         body=email_body,
                         from_email=tenant.mail_registered_email,
                         to=[tenant.mail_registered_email],
@@ -1077,7 +1077,7 @@ def unified_inbox(request):
                         lead=test_lead,
                         tenant=tenant,
                         sender_email=tenant.mail_registered_email,
-                        subject="✨ [Transform-Tech] Verification: Tenant Mail Integration Active!",
+                        subject="✨ [Transform-Tech] Verification: Workspace Mail Integration Active!",
                         body=email_body,
                         status='sent',
                         sent_at=timezone.now()
@@ -1132,7 +1132,7 @@ def unified_inbox(request):
                         status=status
                     )
                     if status == 'draft':
-                        messages.success(request, "Draft saved successfully in tenant mailbox.")
+                        messages.success(request, "Draft saved successfully in workspace mailbox.")
                     else:
                         try:
                             if tenant and tenant.mail_registered_email and tenant.mail_smtp_password:
