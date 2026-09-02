@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from tracking_app.outreach_agent import OutreachAgentLog
+from tracking_app.sales_models import OutreachAgentLog
 
 class Command(BaseCommand):
     help = "Prints the latest outreach agent errors to diagnose email failures."
