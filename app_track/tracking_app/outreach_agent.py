@@ -42,7 +42,7 @@ def _get_ai_client():
         api_key  = os.environ.get("OPENAI_API_KEY", "")
         base_url = os.environ.get("OPENAI_BASE_URL", "")
         if api_key and base_url:
-            return OpenAI(api_key=api_key, base_url=base_url), "gemini-1.5-flash"
+            return OpenAI(api_key=api_key, base_url=base_url), "gemini-1.5-flash-latest"
         if api_key:
             return OpenAI(api_key=api_key), "gpt-4o-mini"
     except Exception as e:
