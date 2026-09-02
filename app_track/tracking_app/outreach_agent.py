@@ -227,19 +227,33 @@ def execute_email(run, lead, tenant):
                 raise Exception(f"SendGrid HTTP Error: {resp.text}")
         else:
             if not account_sid or not auth_token:
-            from_email = (
-                os.environ.get("DEFAULT_FROM_EMAIL")
-                or os.environ.get("EMAIL_HOST_USER")
-                or "sales@transform.io"
-            )
-            send_mail(
-                subject=run.email_subject,
-                message=plain_body,
-                html_message=run.email_body,
-                from_email=from_email,
-                recipient_list=[lead.email],
-                fail_silently=False,
-            )
+                from django.core.mail import get_connection, send_mail
+                connection = None
+                if tenant and tenant.mail_smtp_host and tenant.mail_smtp_username and tenant.mail_smtp_password:
+                    connection = get_connection(
+                        host=tenant.mail_smtp_host,
+                        port=tenant.mail_smtp_port,
+                        username=tenant.mail_smtp_username,
+                        password=tenant.mail_smtp_password,
+                        use_tls=tenant.mail_use_tls
+                    )
+                    from_email = tenant.mail_registered_email or tenant.mail_smtp_username
+                else:
+                    from_email = (
+                        os.environ.get("DEFAULT_FROM_EMAIL")
+                        or os.environ.get("EMAIL_HOST_USER")
+                        or "sales@transform.io"
+                    )
+                
+                send_mail(
+                    subject=run.email_subject,
+                    message=plain_body,
+                    html_message=run.email_body,
+                    from_email=from_email,
+                    recipient_list=[lead.email],
+                    fail_silently=False,
+                    connection=connection,
+                )
 
         run.email_status  = "sent"
         run.email_sent_at = tz.now()
