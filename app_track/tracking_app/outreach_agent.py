@@ -230,12 +230,15 @@ def execute_email(run, lead, tenant):
                 from django.core.mail import get_connection, send_mail
                 connection = None
                 if tenant and tenant.mail_smtp_host and tenant.mail_smtp_username and tenant.mail_smtp_password:
+                    use_ssl = (tenant.mail_smtp_port == 465)
+                    use_tls = tenant.mail_use_tls if not use_ssl else False
                     connection = get_connection(
                         host=tenant.mail_smtp_host,
                         port=tenant.mail_smtp_port,
                         username=tenant.mail_smtp_username,
                         password=tenant.mail_smtp_password,
-                        use_tls=tenant.mail_use_tls
+                        use_tls=use_tls,
+                        use_ssl=use_ssl
                     )
                     from_email = tenant.mail_registered_email or tenant.mail_smtp_username
                 else:
