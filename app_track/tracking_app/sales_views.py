@@ -1039,13 +1039,16 @@ def unified_inbox(request):
                 try:
                     # Attempt SMTP dispatch if configured, else use default backend to verify it works
                     if tenant.mail_smtp_host and tenant.mail_smtp_username:
+                        use_ssl = (tenant.mail_smtp_port == 465)
+                        use_tls = tenant.mail_use_tls if not use_ssl else False
                         connection = get_connection(
                             backend='django.core.mail.backends.smtp.EmailBackend',
                             host=tenant.mail_smtp_host,
                             port=tenant.mail_smtp_port,
                             username=tenant.mail_smtp_username,
                             password=tenant.mail_smtp_password,
-                            use_tls=tenant.mail_use_tls,
+                            use_tls=use_tls,
+                            use_ssl=use_ssl,
                             fail_silently=False,
                         )
                     else:
