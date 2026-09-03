@@ -272,16 +272,19 @@ CACHES = {
     }
 }
 
-# ── Celery Configuration ──────────────────────────────────────
-# CELERY_BROKER_URL = 'memory://'
-CELERY_RESULT_BACKEND = 'django-db'
-CELERY_ACCEPT_CONTENT = ['json']
-CELERY_TASK_SERIALIZER = 'json'
-
-# Fallback to Eager mode if Redis isn't installed locally
-# This runs background tasks synchronously so the MVP works without a separate worker
-CELERY_TASK_ALWAYS_EAGER = True
+# ── Celery Eager Mode (LOCAL DEV ONLY) ────────────────────────
+# In production (DEBUG=False + Redis available), tasks run async in the worker.
+# Only fall back to eager if explicitly forced via env var.
+CELERY_TASK_ALWAYS_EAGER = os.getenv('CELERY_ALWAYS_EAGER', 'false').lower() == 'true'
 CELERY_TASK_STORE_EAGER_RESULT = True
+
+# ── 24/7 Autonomous Outreach Beat Task ────────────────────────
+CELERY_BEAT_SCHEDULE.update({
+    'autonomous-outreach-drip': {
+        'task': 'tracking_app.tasks.run_outreach_drip',
+        'schedule': 300.0,  # every 5 minutes — processes up to 10 leads per tick
+    },
+})
 
 # ── Production Security Settings ──────────────────────────────
 import sys

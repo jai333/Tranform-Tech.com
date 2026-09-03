@@ -10,6 +10,7 @@ Tasks:
   - send_weekly_digest       : Weekly summary email every Monday 08:00
   - cleanup_old_sessions     : Purge expired sessions daily
   - push_notification        : Utility — push a WebSocket notification to a user
+  - run_outreach_drip        : 24/7 autonomous outreach — processes 10 leads every 5 min
 """
 
 import logging
@@ -424,3 +425,124 @@ def launch_ai_voice_call(lead_id, script_prompt):
     except Exception as e:
         logger.error(f"Voice AI Call Failed: {e}")
         return {"error": str(e)}
+
+
+# ─────────────────────────────────────────────────────────────
+# Task: 24/7 Autonomous Outreach Drip (runs every 5 minutes via Beat)
+# Picks up to 10 fresh leads that have never been contacted and runs the full AI agent on each.
+# ─────────────────────────────────────────────────────────────
+
+@shared_task(name="tracking_app.tasks.run_outreach_drip")
+def run_outreach_drip():
+    """
+    24/7 drip: picks the next batch of un-contacted leads belonging to any
+    active campaign and runs the full AI outreach agent on each one.
+    Processes up to 10 leads per run (every 5 minutes = up to 2,880 leads/day).
+    """
+    from .sales_models import Lead, OutreachCampaign, OutreachAgentRun
+    from .outreach_agent import run_full_outreach
+    from .models import Tenant
+
+    try:
+        # Only process leads that have never been touched by the agent
+        already_contacted = OutreachAgentRun.objects.values_list('lead_id', flat=True).distinct()
+
+        # Find un-contacted leads from active campaigns, ordered oldest first
+        active_campaigns = OutreachCampaign.objects.filter(status='active', channel_email=True)
+        if not active_campaigns.exists():
+            logger.info("run_outreach_drip: No active campaigns found, skipping.")
+            return {"status": "skipped", "reason": "no_active_campaigns"}
+
+        # Get leads belonging to active campaign tenants
+        tenant_ids = active_campaigns.values_list('tenant_id', flat=True).distinct()
+        leads = (
+            Lead.objects
+            .filter(tenant_id__in=tenant_ids, status__in=['new', 'contacted'])
+            .exclude(id__in=already_contacted)
+            .exclude(email='')
+            .order_by('id')[:10]  # Process 10 per tick
+        )
+
+        if not leads:
+            logger.info("run_outreach_drip: No pending leads found.")
+            return {"status": "idle", "leads_processed": 0}
+
+        processed = 0
+        errors = 0
+        for lead in leads:
+            try:
+                # Find the best active campaign for this lead's tenant
+                campaign = active_campaigns.filter(tenant_id=lead.tenant_id).first()
+                if not campaign:
+                    continue
+
+                result = run_full_outreach(
+                    lead_id=lead.id,
+                    campaign_id=campaign.id,
+                    channels=['email'],
+                    tenant=lead.tenant
+                )
+
+                if result and result.get('email') == 'sent':
+                    processed += 1
+                    logger.info(f"run_outreach_drip: Sent to lead {lead.id} ({lead.email})")
+                else:
+                    errors += 1
+                    logger.warning(f"run_outreach_drip: Agent returned non-sent for lead {lead.id}: {result}")
+
+            except Exception as e:
+                errors += 1
+                logger.error(f"run_outreach_drip: Error on lead {lead.id}: {e}")
+
+        logger.info(f"run_outreach_drip: Completed. Sent={processed}, Errors={errors}")
+        return {"status": "ok", "leads_processed": processed, "errors": errors}
+
+    except Exception as e:
+        logger.error(f"run_outreach_drip: Fatal error: {e}")
+        return {"status": "error", "message": str(e)}
+
+
+# ─────────────────────────────────────────────────────────────
+# Task: Trigger Outreach for a Single Lead (called from UI button)
+# ─────────────────────────────────────────────────────────────
+
+@shared_task(name="tracking_app.tasks.trigger_single_lead_outreach")
+def trigger_single_lead_outreach(lead_id, tenant_id):
+    """
+    Triggered directly from the Lead Detail page 'Run AI Outreach' button.
+    Finds the best active campaign and immediately runs the full agent.
+    """
+    from .sales_models import OutreachCampaign
+    from .outreach_agent import run_full_outreach
+    from .models import Tenant
+
+    try:
+        tenant = Tenant.objects.get(id=tenant_id)
+        campaign = OutreachCampaign.objects.filter(
+            tenant=tenant, status='active', channel_email=True
+        ).first()
+
+        if not campaign:
+            # Auto-create a default campaign so the button always works
+            campaign, _ = OutreachCampaign.objects.get_or_create(
+                tenant=tenant,
+                name="Default Outreach Campaign",
+                defaults={
+                    "goal": "Book demos and generate pipeline.",
+                    "status": "active",
+                    "channel_email": True,
+                    "channel_sms": False,
+                }
+            )
+
+        result = run_full_outreach(
+            lead_id=lead_id,
+            campaign_id=campaign.id,
+            channels=['email'],
+            tenant=tenant
+        )
+        return result
+
+    except Exception as e:
+        logger.error(f"trigger_single_lead_outreach: Error for lead {lead_id}: {e}")
+        return {"status": "error", "message": str(e)}

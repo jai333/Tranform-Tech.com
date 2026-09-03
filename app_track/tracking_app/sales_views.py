@@ -1413,28 +1413,34 @@ def api_radar_poll(request):
 @require_POST
 def api_run_outreach(request, lead_id):
     """
-    Trigger a full outreach sequence for a lead (Email → SMS → Call).
-    Uses outreach_agent.run_full_outreach under the hood.
+    Trigger a full AI email outreach for a specific lead from the UI button.
+    Resolves the tenant from the lead itself, auto-creates a campaign if none exists.
     """
-    from tracking_app import outreach_agent
+    from tracking_app.tasks import trigger_single_lead_outreach
+
     lead = get_object_or_404(Lead, id=lead_id)
     try:
-        data = json.loads(request.body) if request.body else {}
-        channels = data.get('channels', ['email', 'sms', 'call'])
-        campaign_id = data.get('campaign_id', None)
-        tenant = getattr(request.user, 'tenant', None)
+        tenant = lead.tenant
+        if not tenant:
+            return JsonResponse({'success': False, 'error': 'Lead has no workspace assigned.'}, status=400)
 
-        run = outreach_agent.run_full_outreach(
-            lead_id=lead_id,
-            campaign_id=campaign_id,
-            channels=channels,
-            tenant=tenant,
-        )
+        if not (tenant.mail_smtp_host and tenant.mail_smtp_username and tenant.mail_smtp_password):
+            return JsonResponse({
+                'success': False,
+                'error': 'No email configured. Go to Mail Settings → configure SMTP first.'
+            }, status=400)
+
+        # Run synchronously in production (task calls run_full_outreach directly)
+        result = trigger_single_lead_outreach(lead_id=lead_id, tenant_id=tenant.id)
+
+        email_status = result.get('email', 'unknown') if result else 'unknown'
+        success = email_status == 'sent'
 
         return JsonResponse({
-            'success': True,
-            'message': f'Outreach sequence started for {lead.name}.',
-            'run_id': run.id if run else None,
+            'success': success,
+            'status': email_status,
+            'message': f'Email {"sent successfully" if success else "failed: " + str(result)} to {lead.email}.',
+            'details': result,
         })
     except Exception as e:
         logger.error("api_run_outreach error for lead %s: %s", lead_id, e)

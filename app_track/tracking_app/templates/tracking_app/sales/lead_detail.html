@@ -152,7 +152,11 @@
             </div>
         </div>
         
-        <div style="margin-left:auto;">
+        <div style="margin-left:auto; display:flex; gap:10px; align-items:center;">
+            <button class="btn-sm" id="btn-run-outreach" onclick="runOutreach({{ lead.id }})"
+                style="background: linear-gradient(135deg,#00E5FF,#0A84FF); color:#000; font-weight:700;">
+                <i class='bx bx-send'></i> Run AI Outreach
+            </button>
             <button class="btn-sm cyan" id="btn-score-lead" onclick="scoreLead({{ lead.id }})">
                 <i class='bx bx-brain'></i> AI ICP Score
             </button>
@@ -233,22 +237,6 @@
                     </div>
                 </div>
 
-                
-                <!-- AI Voice Calling Panel -->
-                <div class="panel">
-                    <div class="panel-header">
-                        <span class="panel-title"><i class='bx bx-phone-call'></i> AI Voice Receptionist</span>
-                        <button class="btn-sm cyan" onclick="triggerAiCall({{ lead.id }})" id="btn-ai-call">
-                            <i class='bx bx-phone'></i> Dispatch Call
-                        </button>
-                    </div>
-                    <div class="panel-body">
-                        <p style="font-size:0.8rem; color:var(--text-dark-gray); margin-bottom: 12px;">
-                            Dispatch an autonomous AI voice agent to call this lead directly. The agent will follow the script below and record the conversation.
-                        </p>
-                        <textarea id="ai-call-script" style="width:100%; height:100px; background:rgba(0,0,0,0.2); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:12px; color:#fff; font-family:var(--font-mono); font-size:0.8rem;" placeholder="Enter call script... E.g. You are an AI assistant for Transform-Tech calling to schedule a demo...">You are an AI assistant for Transform-Tech calling {{ lead.contact_name }} at {{ lead.company_name }}. Your goal is to schedule a 10-minute demo for our unified software platform.</textarea>
-                    </div>
-                </div>
 
                 <!-- Outreach Drip Email Sequence -->
             <div class="panel">
@@ -432,6 +420,33 @@
 
 <script>
 let draftEmailId = null;
+
+async function runOutreach(leadId) {
+    const btn = document.getElementById('btn-run-outreach');
+    const old = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> Sending...";
+
+    try {
+        const res = await fetch(`/api/sales/leads/${leadId}/outreach/`, {
+            method: 'POST',
+            headers: {'X-CSRFToken': getCsrf(), 'Content-Type': 'application/json'},
+            body: JSON.stringify({channels: ['email']})
+        });
+        const data = await res.json();
+        if (data.success) {
+            showToast('✅ AI email sent successfully to ' + '{{ lead.email }}', 'success');
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            showToast('❌ ' + (data.error || data.message || 'Outreach failed'), 'error');
+        }
+    } catch(e) {
+        showToast('❌ Network error — check your mail settings.', 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = old;
+    }
+}
 
 async function scoreLead(leadId) {
     const btn = document.getElementById('btn-score-lead');
