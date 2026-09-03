@@ -2,6 +2,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- SEO & Open Graph Tags -->
+    <meta name="description" content="Transform-Tech: The unified Business Operating System. Manage sales, recruiting, cybersecurity, and IT ops all in one intelligent platform.">
+    <meta property="og:title" content="Transform-Tech - Unified Business OS">
+    <meta property="og:description" content="Stop paying for fragmented software. Run your entire business on a single, AI-powered platform.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.transform-tech.com">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Transform-Tech">
+    <meta name="twitter:description" content="The unified Business Operating System.">
+    
+    <!-- End SEO -->
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Transform-Tech — The One Platform for IT, Recruitment, Security & Development</title>
@@ -729,6 +741,9 @@ html, body {
                     </div>
                 </div>
             </li>
+            <li>
+                <a href="{% url 'founder-story' %}">FOUNDER'S VISION</a>
+            </li>
         </ul>
 
         <div class="flex gap-sm" id="desktop-nav-actions">
@@ -770,6 +785,9 @@ html, body {
 
     <div class="mobile-nav-section">RESOURCES</div>
     <a href="{% url 'public-blog' %}"><i class='bx bx-book-open'></i> Articles & Guides</a>
+
+    <div class="mobile-nav-section">VISION</div>
+    <a href="{% url 'founder-story' %}"><i class='bx bx-rocket'></i> Founder's Story</a>
 
     <div class="mobile-nav-cta">
         {% if user.is_authenticated %}

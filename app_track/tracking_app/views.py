@@ -4698,3 +4698,41 @@ def workflow_builder(request):
 
 def founder_story(request):
     return render(request, 'tracking_app/founder_story.html')
+
+from django.http import HttpResponse
+
+def robots_txt(request):
+    lines = [
+        "User-Agent: *",
+        "Disallow: /admin/",
+        "Disallow: /inbox/",
+        "Disallow: /executive-dashboard/",
+        "Disallow: /saas-admin/",
+        "Disallow: /billing/",
+        "Allow: /",
+        "Sitemap: https://www.transform-tech.com/sitemap.xml"
+    ]
+    return HttpResponse("\n".join(lines), content_type="text/plain")
+
+def sitemap_xml(request):
+    xml = """<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://www.transform-tech.com/</loc>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://www.transform-tech.com/story/</loc>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.transform-tech.com/pricing/</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.transform-tech.com/blog/</loc>
+    <priority>0.8</priority>
+  </url>
+</urlset>
+"""
+    return HttpResponse(xml, content_type="application/xml")
