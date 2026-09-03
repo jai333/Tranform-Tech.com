@@ -215,7 +215,15 @@ SERP_API_KEY = os.getenv('SERP_API_KEY', '')
 
 
 # ── Celery Configuration ──────────────────────────────────────
-CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', _REDIS_URL)
+# Use Redis if available (Railway injects REDIS_URL), otherwise fall back to
+# the Postgres DB as the broker so the worker never crashes.
+_DATABASE_URL = os.getenv('DATABASE_URL', '')
+_DB_BROKER_URL = (
+    _DATABASE_URL.replace('postgres://', 'db+postgresql://', 1)
+    if _DATABASE_URL
+    else 'sqla+sqlite:///celery.sqlite3'
+)
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL') or (_REDIS_URL if _USE_REDIS else _DB_BROKER_URL)
 CELERY_RESULT_BACKEND = 'django-db'           # via django-celery-results
 CELERY_CACHE_BACKEND = 'default'
 CELERY_ACCEPT_CONTENT = ['json']

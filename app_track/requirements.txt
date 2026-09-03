@@ -47,6 +47,8 @@ openai>=1.0.0
 celery>=5.0
 django-celery-beat
 django-celery-results
+kombu[sqlalchemy]
+sqlalchemy>=1.4
 
 # Initiative D — Billing & Stripe
 stripe
