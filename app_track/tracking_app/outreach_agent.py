@@ -37,22 +37,55 @@ Your tone: confident, warm, human — never corporate or spammy.
 # ─────────────────────────────────────────────────────────────────
 
 def _get_ai_client():
-    try:
-        from openai import OpenAI
-        api_key  = os.environ.get("OPENAI_API_KEY", "")
-        base_url = os.environ.get("OPENAI_BASE_URL", "")
-        if api_key and base_url:
-            return OpenAI(api_key=api_key, base_url=base_url), "gemini-1.5-flash"
-        if api_key:
-            return OpenAI(api_key=api_key), "gpt-4o-mini"
-    except Exception as e:
-        logger.warning("AI client unavailable: %s", e)
-    return None, None
-
+    pass  # Deprecated
 
 def _ai(system, user, max_tokens=600):
-    client, model = _get_ai_client()
-    if not client:
+    import os
+    import requests
+    api_key  = os.environ.get("OPENAI_API_KEY", "").strip()
+    base_url = os.environ.get("OPENAI_BASE_URL", "").strip()
+    
+    if not api_key:
+        return ""
+        
+    try:
+        # Native Gemini API Call (Supports new AQ. keys and legacy AIza keys)
+        if "generativelanguage" in base_url or api_key.startswith("AQ.") or api_key.startswith("AIza"):
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+            payload = {
+                "contents": [
+                    {"role": "user", "parts": [{"text": f"{system}
+
+{user}"}]}
+                ],
+                "generationConfig": {
+                    "temperature": 0.78,
+                    "maxOutputTokens": max_tokens
+                }
+            }
+            resp = requests.post(url, json=payload, headers={"Content-Type": "application/json"}, timeout=15)
+            if resp.status_code == 200:
+                data = resp.json()
+                return data["candidates"][0]["content"]["parts"][0]["text"].strip()
+            else:
+                logger.error(f"Gemini API failed: {resp.status_code} - {resp.text}")
+                return ""
+        else:
+            # Fallback to standard OpenAI SDK
+            from openai import OpenAI
+            client = OpenAI(api_key=api_key)
+            resp = client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {"role": "system", "content": system},
+                    {"role": "user",   "content": user},
+                ],
+                temperature=0.78,
+                max_tokens=max_tokens,
+            )
+            return resp.choices[0].message.content.strip()
+    except Exception as e:
+        logger.error("AI call failed: %s", e)
         return ""
     try:
         resp = client.chat.completions.create(
