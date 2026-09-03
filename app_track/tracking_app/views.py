@@ -4695,3 +4695,6 @@ def workflow_builder(request):
     return render(request, 'tracking_app/workflow_builder.html', {
         'rules': rules
     })
+
+def founder_story(request):
+    return render(request, 'tracking_app/founder_story.html')

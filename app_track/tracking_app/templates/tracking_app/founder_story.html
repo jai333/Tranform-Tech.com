@@ -1,0 +1,103 @@
+{% extends 'tracking_app/base_public.html' %}
+
+{% block title %}Our Story | Transform-Tech.com{% endblock %}
+
+{% block public_content %}
+<div style="background: linear-gradient(135deg, var(--apple-bg) 0%, #000 100%); color: var(--apple-text); padding: 80px 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+    <div style="max-width: 900px; margin: 0 auto;">
+        
+        <!-- Header -->
+        <div style="text-align: center; margin-bottom: 60px;">
+            <h1 style="font-size: 3.5rem; font-weight: 800; background: -webkit-linear-gradient(45deg, #0A84FF, #00FF66); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 20px;">
+                The Vision Behind Transform-Tech
+            </h1>
+            <p style="font-size: 1.2rem; color: var(--apple-text-secondary); max-width: 700px; margin: 0 auto; line-height: 1.6;">
+                A letter from Jai Sukhwal, Founder & CEO
+            </p>
+        </div>
+
+        <!-- Founder Image & Intro -->
+        <div style="display: flex; flex-direction: column; md:flex-row; gap: 40px; margin-bottom: 60px; background: rgba(255,255,255,0.02); padding: 40px; border-radius: 24px; border: 1px solid var(--apple-border); backdrop-filter: blur(20px);">
+            <div style="flex: 1;">
+                <h2 style="font-size: 2rem; margin-top: 0; margin-bottom: 20px; color: #fff;">Why I Built This Platform</h2>
+                <p style="font-size: 1.1rem; line-height: 1.8; color: rgba(255,255,255,0.8); margin-bottom: 20px;">
+                    Modern businesses are drowning in software. To run a company today, you are forced to stitch together a CRM, an ATS, an email outreach tool, and a dashboarding suite. You end up paying thousands of dollars a month for fragmented tools that don't even talk to each other.
+                </p>
+                <p style="font-size: 1.1rem; line-height: 1.8; color: rgba(255,255,255,0.8); margin-bottom: 20px;">
+                    <strong>I realized this was completely broken.</strong>
+                </p>
+                <p style="font-size: 1.1rem; line-height: 1.8; color: rgba(255,255,255,0.8);">
+                    I designed and engineered Transform-Tech.com from the ground up to solve this exact problem. My vision was simple: build a single, unified Business Operating System powered by Artificial Intelligence. One codebase. One interface. Infinite scalability.
+                </p>
+                <div style="margin-top: 30px; display: flex; align-items: center; gap: 15px;">
+                    <div style="width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #0A84FF, #00FF66); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 800; color: #000;">
+                        JS
+                    </div>
+                    <div>
+                        <p style="margin: 0; font-size: 1.2rem; font-weight: 700; color: #0A84FF;">Jai Sukhwal</p>
+                        <p style="margin: 4px 0 0 0; font-size: 0.9rem; color: var(--apple-text-muted);">Founder, CEO & Chief Architect</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- The Engineering Proof -->
+        <div style="margin-bottom: 60px;">
+            <h2 style="font-size: 2.5rem; font-weight: 700; margin-bottom: 30px; text-align: center;">The Unified Architecture</h2>
+            <p style="text-align: center; font-size: 1.1rem; color: var(--apple-text-secondary); margin-bottom: 40px;">
+                I didn't just build an app; I built an entire commercial ecosystem. Here is what is running under the hood of Transform-Tech.com:
+            </p>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px;">
+                <!-- Feature 1 -->
+                <div style="background: var(--apple-card-bg); padding: 30px; border-radius: 16px; border: 1px solid var(--apple-border);">
+                    <i class="bx bx-brain" style="font-size: 2.5rem; color: #00FF66; margin-bottom: 16px;"></i>
+                    <h3 style="font-size: 1.3rem; margin-top: 0; margin-bottom: 12px;">Autonomous AI Sales Engine</h3>
+                    <p style="color: var(--apple-text-secondary); font-size: 0.95rem; line-height: 1.6;">
+                        A proprietary celery-backed outreach agent that scrapes leads, dynamically drafts hyper-personalized emails via Google AI Studio, and autonomously dispatches them through a unified workspace inbox.
+                    </p>
+                </div>
+                
+                <!-- Feature 2 -->
+                <div style="background: var(--apple-card-bg); padding: 30px; border-radius: 16px; border: 1px solid var(--apple-border);">
+                    <i class="bx bx-network-chart" style="font-size: 2.5rem; color: #0A84FF; margin-bottom: 16px;"></i>
+                    <h3 style="font-size: 1.3rem; margin-top: 0; margin-bottom: 12px;">Multi-Workspace Isolation</h3>
+                    <p style="color: var(--apple-text-secondary); font-size: 0.95rem; line-height: 1.6;">
+                        An enterprise-grade SaaS backend. I engineered strict cryptographic data separation ensuring zero cross-workspace visibility, enabling us to securely host thousands of B2B clients simultaneously.
+                    </p>
+                </div>
+
+                <!-- Feature 3 -->
+                <div style="background: var(--apple-card-bg); padding: 30px; border-radius: 16px; border: 1px solid var(--apple-border);">
+                    <i class="bx bx-user-pin" style="font-size: 2.5rem; color: #FF3B30; margin-bottom: 16px;"></i>
+                    <h3 style="font-size: 1.3rem; margin-top: 0; margin-bottom: 12px;">Unified ATS & CRM</h3>
+                    <p style="color: var(--apple-text-secondary); font-size: 0.95rem; line-height: 1.6;">
+                        I unified candidate tracking and sales pipelines into a single data model. Our clients can manage applicants, convert deals, and parse resumes instantly without switching tabs.
+                    </p>
+                </div>
+
+                <!-- Feature 4 -->
+                <div style="background: var(--apple-card-bg); padding: 30px; border-radius: 16px; border: 1px solid var(--apple-border);">
+                    <i class="bx bx-envelope" style="font-size: 2.5rem; color: #FF9F0A; margin-bottom: 16px;"></i>
+                    <h3 style="font-size: 1.3rem; margin-top: 0; margin-bottom: 12px;">Advanced Mail Engine</h3>
+                    <p style="color: var(--apple-text-secondary); font-size: 0.95rem; line-height: 1.6;">
+                        Built from scratch to bypass PaaS firewalls, supporting dynamic SSL/TLS port routing and native SendGrid HTTP integrations for flawless transactional delivery.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Call to Action -->
+        <div style="text-align: center; margin-top: 60px; padding: 40px; background: linear-gradient(135deg, rgba(10, 132, 255, 0.1), rgba(0, 255, 102, 0.1)); border-radius: 20px; border: 1px solid rgba(10,132,255,0.3);">
+            <h2 style="font-size: 2rem; margin-top: 0; margin-bottom: 20px;">Ready to consolidate your software?</h2>
+            <p style="font-size: 1.1rem; color: var(--apple-text-secondary); margin-bottom: 30px;">
+                Experience the platform I built to change how businesses operate.
+            </p>
+            <a href="{% url 'register' %}" style="background: #0A84FF; color: #fff; padding: 14px 32px; border-radius: 30px; text-decoration: none; font-weight: 600; font-size: 1.1rem; display: inline-block; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 14px rgba(10, 132, 255, 0.4);">
+                Start Your Free Trial
+            </a>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
