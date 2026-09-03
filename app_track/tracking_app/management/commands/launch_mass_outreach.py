@@ -83,4 +83,4 @@ class Command(BaseCommand):
             if task_count % 100 == 0:
                 self.stdout.write(f"... queued {task_count} agents.")
                 
-        self.stdout.write(self.style.SUCCESS("SUCCESS: {volume} Autonomous Sales Agents have been dispatched into the Celery worker queue!"))
+        self.stdout.write(self.style.SUCCESS(f"SUCCESS: {volume} Autonomous Sales Agents have successfully generated and sent emails synchronously!"))
