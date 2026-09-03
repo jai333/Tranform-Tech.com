@@ -1569,3 +1569,20 @@ def api_deploy_autonomous_agent(request):
     except Exception as e:
         logger.error(f"Failed to deploy autonomous agent: {e}")
         return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from .tasks import launch_ai_voice_call
+
+@login_required
+@require_POST
+def api_trigger_ai_call(request, lead_id):
+    import json
+    try:
+        data = json.loads(request.body)
+        script = data.get('script', 'You are an AI assistant for Transform-Tech calling to schedule a demo.')
+        # Dispatch to celery
+        launch_ai_voice_call.delay(lead_id, script)
+        return JsonResponse({"status": "queued", "message": "AI Voice Call Dispatched Successfully."})
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=400)

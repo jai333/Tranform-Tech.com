@@ -209,6 +209,7 @@ urlpatterns = [
 
     path('sales/buying-signals/', views.sales_buying_radar, name='sales-buying-radar'),
     path('api/sales/radar/poll/', views.api_sales_radar_poll, name='api-sales-radar-poll'),
+    path('api/sales/lead/<int:lead_id>/call/', sales_views.api_trigger_ai_call, name='api-trigger-ai-call'),
     *sales_urlpatterns,
     path('robots.txt', views.robots_txt, name='robots_txt'),
     path('sitemap.xml', views.sitemap_xml, name='sitemap_xml'),

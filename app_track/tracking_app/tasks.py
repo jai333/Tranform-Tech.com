@@ -385,3 +385,42 @@ def evaluate_account_churn():
         predict_deal_churn(deal.id)
         
     return {"evaluated_deals": deals.count()}
+
+@shared_task(name="tracking_app.tasks.launch_ai_voice_call")
+def launch_ai_voice_call(lead_id, script_prompt):
+    """
+    Connects to a Voice AI Provider (e.g. Bland AI, Retell, or Twilio) to initiate a scripted call.
+    """
+    from .sales_models import Lead
+    import requests
+    import os
+    
+    try:
+        lead = Lead.objects.get(id=lead_id)
+        if not lead.phone:
+            return {"error": "Lead has no phone number"}
+            
+        # Example using Bland AI API (Standard for AI Outbound Calls)
+        bland_api_key = os.environ.get("BLAND_API_KEY", "")
+        if not bland_api_key:
+            logger.warning("No BLAND_API_KEY set. Simulating AI call.")
+            return {"status": "simulated", "message": "Voice AI simulated (No API key)"}
+            
+        headers = {'authorization': bland_api_key, 'Content-Type': 'application/json'}
+        payload = {
+            'phone_number': lead.phone,
+            'task': script_prompt,
+            'voice': 'josh',
+            'reduce_latency': True,
+            'record': True
+        }
+        
+        response = requests.post('https://api.bland.ai/v1/calls', json=payload, headers=headers)
+        if response.status_code == 200:
+            return {"status": "success", "call_id": response.json().get('call_id')}
+        else:
+            return {"error": response.text}
+            
+    except Exception as e:
+        logger.error(f"Voice AI Call Failed: {e}")
+        return {"error": str(e)}

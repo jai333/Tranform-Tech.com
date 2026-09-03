@@ -216,7 +216,41 @@
                 </div>
             </div>
 
-            <!-- Outreach Drip Email Sequence -->
+            
+                <!-- AI Voice Calling Panel -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <span class="panel-title"><i class='bx bx-phone-call'></i> AI Voice Receptionist</span>
+                        <button class="btn-sm cyan" onclick="triggerAiCall({{ lead.id }})" id="btn-ai-call">
+                            <i class='bx bx-phone'></i> Dispatch Call
+                        </button>
+                    </div>
+                    <div class="panel-body">
+                        <p style="font-size:0.8rem; color:var(--text-dark-gray); margin-bottom: 12px;">
+                            Dispatch an autonomous AI voice agent to call this lead directly. The agent will follow the script below and record the conversation.
+                        </p>
+                        <textarea id="ai-call-script" style="width:100%; height:100px; background:rgba(0,0,0,0.2); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:12px; color:#fff; font-family:var(--font-mono); font-size:0.8rem;" placeholder="Enter call script... E.g. You are an AI assistant for Transform-Tech calling to schedule a demo...">You are an AI assistant for Transform-Tech calling {{ lead.contact_name }} at {{ lead.company_name }}. Your goal is to schedule a 10-minute demo for our unified software platform.</textarea>
+                    </div>
+                </div>
+
+                
+                <!-- AI Voice Calling Panel -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <span class="panel-title"><i class='bx bx-phone-call'></i> AI Voice Receptionist</span>
+                        <button class="btn-sm cyan" onclick="triggerAiCall({{ lead.id }})" id="btn-ai-call">
+                            <i class='bx bx-phone'></i> Dispatch Call
+                        </button>
+                    </div>
+                    <div class="panel-body">
+                        <p style="font-size:0.8rem; color:var(--text-dark-gray); margin-bottom: 12px;">
+                            Dispatch an autonomous AI voice agent to call this lead directly. The agent will follow the script below and record the conversation.
+                        </p>
+                        <textarea id="ai-call-script" style="width:100%; height:100px; background:rgba(0,0,0,0.2); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:12px; color:#fff; font-family:var(--font-mono); font-size:0.8rem;" placeholder="Enter call script... E.g. You are an AI assistant for Transform-Tech calling to schedule a demo...">You are an AI assistant for Transform-Tech calling {{ lead.contact_name }} at {{ lead.company_name }}. Your goal is to schedule a 10-minute demo for our unified software platform.</textarea>
+                    </div>
+                </div>
+
+                <!-- Outreach Drip Email Sequence -->
             <div class="panel">
                 <div class="panel-header">
                     <span class="panel-title"><i class='bx bx-mail-send'></i> Automated Outreach Sequence</span>
