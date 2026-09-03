@@ -42,7 +42,7 @@ def _get_ai_client():
         api_key  = os.environ.get("OPENAI_API_KEY", "")
         base_url = os.environ.get("OPENAI_BASE_URL", "")
         if api_key and base_url:
-            return OpenAI(api_key=api_key, base_url=base_url), "gemini-1.5-flash-latest"
+            return OpenAI(api_key=api_key, base_url=base_url), "gemini-1.5-flash"
         if api_key:
             return OpenAI(api_key=api_key), "gpt-4o-mini"
     except Exception as e:
@@ -181,82 +181,36 @@ def execute_email(run, lead, tenant):
             return False
 
         plain_body = re.sub(r'<[^>]+>', '', run.email_body).strip()
-        account_sid = os.environ.get("TWILIO_ACCOUNT_SID")
-        auth_token  = os.environ.get("TWILIO_AUTH_TOKEN")
-        
-        if account_sid and auth_token:
-            import requests
-            from requests.auth import HTTPBasicAuth
-            url = "https://comms.twilio.com/v1/Emails"
-            
-            payload = {
-                "from": {
-                    "address": f"{account_sid}@twilio.email", 
-                    "name": tenant.name if tenant else "AI Sales Agent"
-                },
-                "to": [{"address": lead.email}],
-                "content": {
-                    "subject": run.email_subject,
-                    "html": run.email_body
-                }
-            }
-            resp = requests.post(
-                url, 
-                json=payload, 
-                auth=HTTPBasicAuth(account_sid, auth_token),
-                timeout=10
-            )
-            if resp.status_code >= 400:
-                logger.warning("Twilio Email API failed (status %s): %s. Falling back to SMTP.", resp.status_code, resp.text)
-                account_sid = None
-        
-                sendgrid_key = os.environ.get("SENDGRID_API_KEY")
-        if sendgrid_key:
-            import requests
-            url = "https://api.sendgrid.com/v3/mail/send"
-            from_email = os.environ.get("DEFAULT_FROM_EMAIL", "j@transform-tech.com")
-            payload = {
-                "personalizations": [{"to": [{"email": lead.email}]}],
-                "from": {"email": from_email, "name": "J Martin | Transform-Tech"},
-                "subject": run.email_subject,
-                "content": [{"type": "text/html", "value": run.email_body}]
-            }
-            resp = requests.post(url, json=payload, headers={"Authorization": f"Bearer {sendgrid_key}"}, timeout=10)
-            if resp.status_code >= 400:
-                logger.error(f"SendGrid failed: {resp.text}")
-                raise Exception(f"SendGrid HTTP Error: {resp.text}")
-        else:
-            if not account_sid or not auth_token:
-                from django.core.mail import get_connection, send_mail
-                connection = None
-                if tenant and tenant.mail_smtp_host and tenant.mail_smtp_username and tenant.mail_smtp_password:
-                    use_ssl = (tenant.mail_smtp_port == 465)
-                    use_tls = tenant.mail_use_tls if not use_ssl else False
-                    connection = get_connection(
-                        host=tenant.mail_smtp_host,
-                        port=tenant.mail_smtp_port,
-                        username=tenant.mail_smtp_username,
-                        password=tenant.mail_smtp_password,
-                        use_tls=use_tls,
-                        use_ssl=use_ssl
-                    )
-                    from_email = tenant.mail_registered_email or tenant.mail_smtp_username
-                else:
-                    from_email = (
-                        os.environ.get("DEFAULT_FROM_EMAIL")
-                        or os.environ.get("EMAIL_HOST_USER")
-                        or "sales@transform.io"
-                    )
-                
-                send_mail(
-                    subject=run.email_subject,
-                    message=plain_body,
-                    html_message=run.email_body,
-                    from_email=from_email,
-                    recipient_list=[lead.email],
-                    fail_silently=False,
-                    connection=connection,
+                    from django.core.mail import get_connection, send_mail
+            connection = None
+            if tenant and tenant.mail_smtp_host and tenant.mail_smtp_username and tenant.mail_smtp_password:
+                use_ssl = (tenant.mail_smtp_port == 465)
+                use_tls = tenant.mail_use_tls if not use_ssl else False
+                connection = get_connection(
+                    host=tenant.mail_smtp_host,
+                    port=tenant.mail_smtp_port,
+                    username=tenant.mail_smtp_username,
+                    password=tenant.mail_smtp_password,
+                    use_tls=use_tls,
+                    use_ssl=use_ssl
                 )
+                from_email = tenant.mail_registered_email or tenant.mail_smtp_username
+            else:
+                from_email = (
+                    os.environ.get("DEFAULT_FROM_EMAIL")
+                    or os.environ.get("EMAIL_HOST_USER")
+                    or "sales@transform-tech.com"
+                )
+            
+            send_mail(
+                subject=run.email_subject,
+                message=plain_body,
+                html_message=run.email_body,
+                from_email=from_email,
+                recipient_list=[lead.email],
+                fail_silently=False,
+                connection=connection,
+            )
 
         run.email_status  = "sent"
         run.email_sent_at = tz.now()
