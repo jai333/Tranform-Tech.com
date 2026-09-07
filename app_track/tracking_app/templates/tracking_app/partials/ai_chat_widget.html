@@ -300,9 +300,14 @@ async function ttFetch(msg){
             body:JSON.stringify({message:msg,history:hist.slice(-14)})
         });
         rmTyping();
-        if(!r.ok){ttBot('⚠️ Service temporarily unavailable. Please try again.');return;}
-        var d=await r.json();
-        ttBot(d.reply||(d.error?'⚠️ '+d.error:'⚠️ Unexpected error.'));
+        var d;
+        try { d = await r.json(); } catch(e) {}
+        
+        if(!r.ok){
+            ttBot('⚠️ ' + (d && d.error ? d.error : 'Service temporarily unavailable. Please try again.'));
+            return;
+        }
+        ttBot(d.reply||(d&&d.error?'⚠️ '+d.error:'⚠️ Unexpected error.'));
     }catch(e){rmTyping();ttBot('⚠️ Connection error. Check your internet connection.');}
     finally{busy=false;btn.disabled=false;}
 }

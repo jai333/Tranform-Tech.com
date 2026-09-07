@@ -4762,6 +4762,7 @@ CHATBOT_SYSTEM = (
 )
 
 
+@csrf_exempt
 @require_POST
 def api_ai_chat(request):
     """
