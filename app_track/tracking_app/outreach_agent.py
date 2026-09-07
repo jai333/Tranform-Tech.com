@@ -51,7 +51,7 @@ def _ai(system, user, max_tokens=600):
     try:
         # Native Gemini API Call (Supports new AQ. keys and legacy AIza keys)
         if "generativelanguage" in base_url or api_key.startswith("AQ.") or api_key.startswith("AIza"):
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key={api_key}"
             payload = {
                 "contents": [
                     {"role": "user", "parts": [{"text": f"{system}

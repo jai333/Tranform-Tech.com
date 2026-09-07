@@ -4803,7 +4803,7 @@ def api_ai_chat(request):
 
         endpoint = (
             "https://generativelanguage.googleapis.com/v1beta/models/"
-            "gemini-1.5-flash:generateContent?key=" + gemini_key
+            "gemini-3.6-flash:generateContent?key=" + gemini_key
         )
         payload = {
             "contents": contents,
@@ -4813,8 +4813,15 @@ def api_ai_chat(request):
         resp = _gemini_requests.post(endpoint, json=payload, timeout=30)
 
         if resp.status_code != 200:
-            logger.error("Gemini API error %s: %s", resp.status_code, resp.text[:300])
-            return JsonResponse({"error": "AI service error: " + str(resp.status_code)}, status=502)
+            logger.error("Gemini API error %s: %s", resp.status_code, resp.text)
+            err_msg = "AI service error: " + str(resp.status_code)
+            try:
+                err_json = resp.json()
+                if "error" in err_json and "message" in err_json["error"]:
+                    err_msg = "AI Error: " + err_json["error"]["message"]
+            except:
+                pass
+            return JsonResponse({"error": err_msg}, status=502)
 
         candidates = resp.json().get("candidates", [])
         if not candidates:
