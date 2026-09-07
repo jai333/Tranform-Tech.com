@@ -4736,3 +4736,92 @@ def sitemap_xml(request):
 </urlset>
 """
     return HttpResponse(xml, content_type="application/xml")
+
+
+# ── AI Chatbot API ────────────────────────────────────────────────────────────
+import requests as _gemini_requests
+
+CHATBOT_SYSTEM = (
+    "You are the official AI Assistant for Transform-Tech.com, a Unified Business Operating System "
+    "built by Jai Sukhwal (J Martin), Founder and CEO.\n\n"
+    "PLATFORM FEATURES:\n"
+    "1. AI Autonomous Sales Engine - Gemini-powered lead scoring, personalized email drafting, 24/7 outreach.\n"
+    "2. Unified CRM - Lead pipeline, deal tracking, ICP scoring, buying signals, forecasting.\n"
+    "3. ATS (Applicant Tracking System) - Candidate management, resume parsing, interview scheduling.\n"
+    "4. AI Voice Receptionist - Outbound AI calls to leads via Bland AI integration.\n"
+    "5. Unified Inbox and Mail Engine - SMTP outreach with open/click tracking. Supports Google Workspace.\n"
+    "6. Executive Analytics Dashboard - Pipeline forecasting, churn prediction, SaaS revenue metrics.\n"
+    "7. IT Helpdesk - Full ITSM: tickets, SLAs, knowledge base, asset management.\n"
+    "8. Automation Engine - Event-triggered workflow automation.\n"
+    "9. Custom App and Web Development - End-to-end custom software development services.\n\n"
+    "PRICING: Starter $99/mo | Growth $299/mo | Enterprise $799/mo\n"
+    "WEBSITE: transform-tech.com\n\n"
+    "PERSONALITY: Confident, intelligent, warm, concise. Give direct actionable answers. "
+    "Use bullet points and emojis when helpful. Never write walls of text. "
+    "If asked something outside the platform scope, give expert general advice."
+)
+
+
+@require_POST
+def api_ai_chat(request):
+    """
+    AI Chatbot endpoint - proxies messages to Google Gemini.
+    Accepts: {message: str, history: list}
+    Returns: {reply: str}
+    """
+    import json
+    try:
+        data = json.loads(request.body)
+        user_msg = data.get("message", "").strip()[:2000]
+        history = data.get("history", [])
+
+        if not user_msg:
+            return JsonResponse({"error": "Empty message"}, status=400)
+
+        import os
+        gemini_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("OPENAI_API_KEY", "")
+        if not gemini_key:
+            return JsonResponse({"error": "AI not configured. Set GEMINI_API_KEY in Railway variables."}, status=503)
+
+        # Build Gemini contents array with system context
+        contents = [
+            {"role": "user", "parts": [{"text": CHATBOT_SYSTEM + "\n\n(Begin the conversation.)"}]},
+            {"role": "model", "parts": [{"text": "Understood. I am the Transform-Tech AI Assistant. Ready to help!"}]}
+        ]
+
+        # Add conversation history
+        for h in history[-12:]:
+            role = h.get("role", "user")
+            parts = h.get("parts", [])
+            text = parts[0].get("text", "") if parts else ""
+            if text and role in ("user", "model"):
+                contents.append({"role": role, "parts": [{"text": text}]})
+
+        # Add current message
+        contents.append({"role": "user", "parts": [{"text": user_msg}]})
+
+        endpoint = (
+            "https://generativelanguage.googleapis.com/v1beta/models/"
+            "gemini-1.5-flash:generateContent?key=" + gemini_key
+        )
+        payload = {
+            "contents": contents,
+            "generationConfig": {"temperature": 0.7, "maxOutputTokens": 800}
+        }
+
+        resp = _gemini_requests.post(endpoint, json=payload, timeout=30)
+
+        if resp.status_code != 200:
+            logger.error("Gemini API error %s: %s", resp.status_code, resp.text[:300])
+            return JsonResponse({"error": "AI service error: " + str(resp.status_code)}, status=502)
+
+        candidates = resp.json().get("candidates", [])
+        if not candidates:
+            return JsonResponse({"error": "No response from AI"}, status=502)
+
+        reply = candidates[0]["content"]["parts"][0]["text"].strip()
+        return JsonResponse({"reply": reply})
+
+    except Exception as exc:
+        logger.error("api_ai_chat error: %s", exc)
+        return JsonResponse({"error": str(exc)}, status=500)

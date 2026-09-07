@@ -208,6 +208,8 @@ SERVER_EMAIL = os.getenv('SERVER_EMAIL', 'it@transform-tech.com')
 # ── AI / OpenAI ───────────────────────────────────────────────
 # Set OPENAI_API_KEY in your environment (never hardcode keys)
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY', '')
+# Google AI Studio / Gemini API key (AQ. format keys go here)
+GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', os.getenv('OPENAI_API_KEY', ''))
 
 # ── SerpAPI (Google Maps Lead Scraper) ────────────────────────
 # Sign up at https://serpapi.com — free tier: 100 searches/month
