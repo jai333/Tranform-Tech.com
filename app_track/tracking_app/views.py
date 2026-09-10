@@ -4802,58 +4802,47 @@ def api_ai_chat(request):
         # Append current user message
         contents.append({"role": "user", "parts": [{"text": user_msg}]})
 
-        # Use gemini-flash-latest — fastest model, supports thinkingConfig
-        endpoint = (
-            "https://generativelanguage.googleapis.com/v1beta/models/"
-            "gemini-flash-latest:generateContent?key=" + gemini_key
-        )
-        payload = {
-            "contents": contents,
-            "generationConfig": {
-                "temperature": 0.65,
-                "maxOutputTokens": 1024,
-                "topP": 0.9,
-            }
-        }
+        # Model cascade: fastest → fallback on overload/503/429/404
+        MODELS = ["gemini-flash-latest", "gemini-3.7-flash", "gemini-3.6-flash"]
+        resp = None
+        last_err = "AI service unavailable"
 
-        resp = _gemini_requests.post(endpoint, json=payload, timeout=30)
-
-        if resp.status_code != 200:
-            logger.error("Gemini API error %s: %s", resp.status_code, resp.text)
-            err_msg = "AI service error: " + str(resp.status_code)
+        for model in MODELS:
+            _ep = (
+                "https://generativelanguage.googleapis.com/v1beta/models/"
+                + model + ":generateContent?key=" + gemini_key
+            )
             try:
-                err_json = resp.json()
-                if "error" in err_json and "message" in err_json["error"]:
-                    err_msg = err_json["error"]["message"]
-                    # If model not supported, fall back to gemini-3.6-flash
-                    if "NOT_FOUND" in err_json["error"].get("status", ""):
-                        fallback_ep = (
-                            "https://generativelanguage.googleapis.com/v1beta/models/"
-                            "gemini-3.6-flash:generateContent?key=" + gemini_key
-                        )
-                        payload.pop("thinkingConfig", None)
-                        resp2 = _gemini_requests.post(fallback_ep, json=payload, timeout=30)
-                        if resp2.status_code == 200:
-                            cands2 = resp2.json().get("candidates", [])
-                            if cands2:
-                                return JsonResponse({"reply": cands2[0]["content"]["parts"][0]["text"].strip()})
+                resp = _gemini_requests.post(_ep, json=payload, timeout=25)
+            except Exception as _req_exc:
+                logger.warning("Gemini %s request failed: %s", model, _req_exc)
+                last_err = str(_req_exc)
+                continue
+
+            if resp.status_code == 200:
+                break  # success
+
+            try:
+                last_err = resp.json().get("error", {}).get("message", f"HTTP {resp.status_code}")
             except Exception:
-                pass
-            return JsonResponse({"error": err_msg}, status=502)
+                last_err = f"HTTP {resp.status_code}"
+            logger.warning("Gemini %s returned %s: %s", model, resp.status_code, last_err)
+
+            if resp.status_code in (401, 403):
+                break  # auth error — no point retrying
+
+        if resp is None or resp.status_code != 200:
+            return JsonResponse({"error": last_err}, status=502)
 
         candidates = resp.json().get("candidates", [])
         if not candidates:
             return JsonResponse({"error": "No response from AI"}, status=502)
 
-        # Extract text from parts (skip thought parts)
-        reply_parts = []
-        for part in candidates[0]["content"].get("parts", []):
-            if not part.get("thought") and part.get("text"):
-                reply_parts.append(part["text"])
-        reply = "".join(reply_parts).strip()
-        if not reply:
-            reply = candidates[0]["content"]["parts"][0].get("text", "").strip()
-
+        reply_parts = [
+            p["text"] for p in candidates[0]["content"].get("parts", [])
+            if not p.get("thought") and p.get("text")
+        ]
+        reply = "".join(reply_parts).strip() or candidates[0]["content"]["parts"][0].get("text", "").strip()
         return JsonResponse({"reply": reply})
 
     except Exception as exc:
