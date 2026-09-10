@@ -62,17 +62,24 @@
     flex-shrink:0;
 }
 .tt-logo {
-    position:relative; width:40px; height:40px; flex-shrink:0;
-    border-radius:12px;
-    background:linear-gradient(135deg,#00E5FF 0%,#0A84FF 100%);
-    display:flex; align-items:center; justify-content:center; font-size:18px;
-    box-shadow:0 4px 16px rgba(0,229,255,.3);
+    position:relative; width:42px; height:42px; flex-shrink:0;
+    border-radius:50%;
+    background:radial-gradient(circle at 35% 35%, #0d1a2e, #020c1a);
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 0 0 1.5px rgba(0,229,255,.4), 0 4px 20px rgba(0,229,255,.25);
 }
 .tt-logo::after {
-    content:''; position:absolute; bottom:-2px; right:-2px;
-    width:12px; height:12px; border-radius:50%;
+    content:''; position:absolute; bottom:-1px; right:-1px;
+    width:11px; height:11px; border-radius:50%;
     background:#34C759; border:2px solid #08080c;
+    box-shadow:0 0 6px rgba(52,199,89,.6);
 }
+.tt-logo-svg { width:26px; height:26px; }
+@keyframes tt-orbit {
+    from { transform:rotate(0deg); }
+    to   { transform:rotate(360deg); }
+}
+.tt-orbit-ring { animation:tt-orbit 3s linear infinite; transform-origin:13px 13px; }
 .tt-hinfo { flex:1; min-width:0; }
 .tt-hname { font-weight:700; font-size:.9rem; color:#fff; letter-spacing:-.01em; }
 .tt-hsub  { font-size:.7rem; color:#00E5FF; margin-top:1px; opacity:.85; }
@@ -196,7 +203,25 @@
 <div id="tt-panel" role="dialog" aria-label="Transform-Tech AI Assistant">
     <!-- Header -->
     <div id="tt-header">
-        <div class="tt-logo">🤖</div>
+        <div class="tt-logo">
+            <!-- Transform-Tech Atom Logo SVG -->
+            <svg class="tt-logo-svg" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- Nucleus -->
+                <circle cx="13" cy="13" r="2.8" fill="#00E5FF" opacity="0.95"/>
+                <circle cx="13" cy="13" r="1.4" fill="#fff"/>
+                <!-- Orbit ring 1 (animated) -->
+                <g class="tt-orbit-ring">
+                    <ellipse cx="13" cy="13" rx="10" ry="3.8" stroke="#00E5FF" stroke-width="1.2" fill="none" opacity="0.7"/>
+                    <circle cx="23" cy="13" r="1.3" fill="#00E5FF"/>
+                </g>
+                <!-- Orbit ring 2 (static, tilted) -->
+                <ellipse cx="13" cy="13" rx="10" ry="3.8" stroke="#0A84FF" stroke-width="1" fill="none" opacity="0.45"
+                    transform="rotate(60 13 13)"/>
+                <!-- Orbit ring 3 (static, tilted other way) -->
+                <ellipse cx="13" cy="13" rx="10" ry="3.8" stroke="#00E5FF" stroke-width="1" fill="none" opacity="0.3"
+                    transform="rotate(-60 13 13)"/>
+            </svg>
+        </div>
         <div class="tt-hinfo">
             <div class="tt-hname">Transform-Tech AI</div>
             <div class="tt-hsub">⚡ Powered by Google Gemini</div>
@@ -276,7 +301,9 @@ function ttUser(t){
 
 function ttBot(t){
     var d=mkRow('bot');
-    d.innerHTML='<div class="tt-av bot">🤖</div><div class="tt-bub">'+fmt(t)+'</div>';
+    d.innerHTML='<div class="tt-av bot" style="background:radial-gradient(circle at 35% 35%,#0d1a2e,#020c1a);box-shadow:0 0 0 1px rgba(0,229,255,.35);">'
+        +'<svg width="16" height="16" viewBox="0 0 26 26" fill="none"><circle cx="13" cy="13" r="2.8" fill="#00E5FF" opacity="0.95"/><circle cx="13" cy="13" r="1.4" fill="#fff"/><ellipse cx="13" cy="13" rx="10" ry="3.8" stroke="#00E5FF" stroke-width="1.2" fill="none" opacity="0.7"/><ellipse cx="13" cy="13" rx="10" ry="3.8" stroke="#0A84FF" stroke-width="1" fill="none" opacity="0.45" transform="rotate(60 13 13)"/><ellipse cx="13" cy="13" rx="10" ry="3.8" stroke="#00E5FF" stroke-width="1" fill="none" opacity="0.3" transform="rotate(-60 13 13)"/></svg>'
+        +'</div><div class="tt-bub">'+fmt(t)+'</div>';
     msgs.appendChild(d);scroll();
     hist.push({role:'model',parts:[{text:t}]});
 }
@@ -285,7 +312,9 @@ function mkRow(cls){var d=document.createElement('div');d.className='tt-row '+cl
 
 function ttTyping(){
     var d=mkRow('bot');d.id='tt-typing';
-    d.innerHTML='<div class="tt-av bot">🤖</div><div class="tt-bub"><div class="tt-dots"><span></span><span></span><span></span></div></div>';
+    d.innerHTML='<div class="tt-av bot" style="background:radial-gradient(circle at 35% 35%,#0d1a2e,#020c1a);box-shadow:0 0 0 1px rgba(0,229,255,.35);">'
+        +'<svg width="16" height="16" viewBox="0 0 26 26" fill="none"><circle cx="13" cy="13" r="2.8" fill="#00E5FF" opacity="0.95"/><circle cx="13" cy="13" r="1.4" fill="#fff"/><ellipse cx="13" cy="13" rx="10" ry="3.8" stroke="#00E5FF" stroke-width="1.2" fill="none" opacity="0.7"/><ellipse cx="13" cy="13" rx="10" ry="3.8" stroke="#0A84FF" stroke-width="1" fill="none" opacity="0.45" transform="rotate(60 13 13)"/></svg>'
+        +'</div><div class="tt-bub"><div class="tt-dots"><span></span><span></span><span></span></div></div>';
     msgs.appendChild(d);scroll();
 }
 

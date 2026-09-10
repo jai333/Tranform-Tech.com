@@ -4766,7 +4766,8 @@ CHATBOT_SYSTEM = (
 @require_POST
 def api_ai_chat(request):
     """
-    AI Chatbot endpoint - proxies messages to Google Gemini.
+    AI Chatbot endpoint — proxies to Google Gemini (gemini-flash-latest).
+    Uses thinkingConfig for proper reasoning before answering.
     Accepts: {message: str, history: list}
     Returns: {reply: str}
     """
@@ -4784,30 +4785,39 @@ def api_ai_chat(request):
         if not gemini_key:
             return JsonResponse({"error": "AI not configured. Set GEMINI_API_KEY in Railway variables."}, status=503)
 
-        # Build Gemini contents array with system context
+        # Build Gemini contents with system context priming
         contents = [
-            {"role": "user", "parts": [{"text": CHATBOT_SYSTEM + "\n\n(Begin the conversation.)"}]},
-            {"role": "model", "parts": [{"text": "Understood. I am the Transform-Tech AI Assistant. Ready to help!"}]}
+            {"role": "user", "parts": [{"text": CHATBOT_SYSTEM + "\n\n(Conversation begins now.)"}]},
+            {"role": "model", "parts": [{"text": "Understood. I am the Transform-Tech AI Assistant, powered by Google Gemini. Ready to help!"}]}
         ]
 
-        # Add conversation history
-        for h in history[-12:]:
+        # Append conversation history (last 14 turns)
+        for h in history[-14:]:
             role = h.get("role", "user")
             parts = h.get("parts", [])
-            text = parts[0].get("text", "") if parts else ""
+            text = parts[0].get("text", "") if isinstance(parts, list) and parts else ""
             if text and role in ("user", "model"):
                 contents.append({"role": role, "parts": [{"text": text}]})
 
-        # Add current message
+        # Append current user message
         contents.append({"role": "user", "parts": [{"text": user_msg}]})
 
+        # Use gemini-flash-latest — fastest model, supports thinkingConfig
         endpoint = (
             "https://generativelanguage.googleapis.com/v1beta/models/"
-            "gemini-3.6-flash:generateContent?key=" + gemini_key
+            "gemini-flash-latest:generateContent?key=" + gemini_key
         )
         payload = {
             "contents": contents,
-            "generationConfig": {"temperature": 0.7, "maxOutputTokens": 800}
+            "generationConfig": {
+                "temperature": 0.65,
+                "maxOutputTokens": 1024,
+                "topP": 0.9,
+            },
+            "thinkingConfig": {
+                "thinkingBudget": 512,   # tokens of internal reasoning before replying
+                "includeThoughts": False  # don't expose thinking in output
+            }
         }
 
         resp = _gemini_requests.post(endpoint, json=payload, timeout=30)
@@ -4818,8 +4828,20 @@ def api_ai_chat(request):
             try:
                 err_json = resp.json()
                 if "error" in err_json and "message" in err_json["error"]:
-                    err_msg = "AI Error: " + err_json["error"]["message"]
-            except:
+                    err_msg = err_json["error"]["message"]
+                    # If model not supported, fall back to gemini-3.6-flash
+                    if "NOT_FOUND" in err_json["error"].get("status", ""):
+                        fallback_ep = (
+                            "https://generativelanguage.googleapis.com/v1beta/models/"
+                            "gemini-3.6-flash:generateContent?key=" + gemini_key
+                        )
+                        payload.pop("thinkingConfig", None)
+                        resp2 = _gemini_requests.post(fallback_ep, json=payload, timeout=30)
+                        if resp2.status_code == 200:
+                            cands2 = resp2.json().get("candidates", [])
+                            if cands2:
+                                return JsonResponse({"reply": cands2[0]["content"]["parts"][0]["text"].strip()})
+            except Exception:
                 pass
             return JsonResponse({"error": err_msg}, status=502)
 
@@ -4827,7 +4849,15 @@ def api_ai_chat(request):
         if not candidates:
             return JsonResponse({"error": "No response from AI"}, status=502)
 
-        reply = candidates[0]["content"]["parts"][0]["text"].strip()
+        # Extract text from parts (skip thought parts)
+        reply_parts = []
+        for part in candidates[0]["content"].get("parts", []):
+            if not part.get("thought") and part.get("text"):
+                reply_parts.append(part["text"])
+        reply = "".join(reply_parts).strip()
+        if not reply:
+            reply = candidates[0]["content"]["parts"][0].get("text", "").strip()
+
         return JsonResponse({"reply": reply})
 
     except Exception as exc:
