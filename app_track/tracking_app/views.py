@@ -4813,10 +4813,6 @@ def api_ai_chat(request):
                 "temperature": 0.65,
                 "maxOutputTokens": 1024,
                 "topP": 0.9,
-            },
-            "thinkingConfig": {
-                "thinkingBudget": 512,   # tokens of internal reasoning before replying
-                "includeThoughts": False  # don't expose thinking in output
             }
         }
 
