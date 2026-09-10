@@ -4802,6 +4802,16 @@ def api_ai_chat(request):
         # Append current user message
         contents.append({"role": "user", "parts": [{"text": user_msg}]})
 
+        # Build request payload
+        payload = {
+            "contents": contents,
+            "generationConfig": {
+                "temperature": 0.65,
+                "maxOutputTokens": 1024,
+                "topP": 0.9,
+            }
+        }
+
         # Model cascade: fastest → fallback on overload/503/429/404
         MODELS = ["gemini-flash-latest", "gemini-3.7-flash", "gemini-3.6-flash"]
         resp = None
