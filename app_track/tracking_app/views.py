@@ -4858,3 +4858,10 @@ def api_ai_chat(request):
     except Exception as exc:
         logger.error("api_ai_chat error: %s", exc)
         return JsonResponse({"error": str(exc)}, status=500)
+
+
+def privacy_policy(request):
+    return render(request, 'tracking_app/privacy_policy.html')
+
+def terms_of_service(request):
+    return render(request, 'tracking_app/terms_of_service.html')

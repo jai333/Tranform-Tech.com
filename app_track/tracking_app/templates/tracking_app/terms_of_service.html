@@ -1,0 +1,89 @@
+{% extends 'tracking_app/base_public.html' %}
+{% load static %}
+
+{% block title %}Terms of Service | Transform-Tech{% endblock %}
+
+{% block extra_head %}
+<style>
+    .legal-container {
+        max-width: 800px;
+        margin: 6rem auto;
+        padding: 2rem;
+        background: rgba(10,15,25,0.7);
+        border: 1px solid rgba(0,229,255,0.1);
+        border-radius: 12px;
+        color: rgba(255,255,255,0.85);
+        font-family: var(--font-sans);
+    }
+    .legal-container h1 {
+        color: #fff;
+        margin-bottom: 1rem;
+        font-weight: 700;
+        font-size: 2.5rem;
+    }
+    .legal-container h2 {
+        color: #00E5FF;
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+        font-size: 1.5rem;
+    }
+    .legal-container p {
+        line-height: 1.6;
+        margin-bottom: 1rem;
+    }
+    .legal-container ul {
+        margin-left: 2rem;
+        margin-bottom: 1rem;
+    }
+    .legal-container li {
+        margin-bottom: 0.5rem;
+    }
+    .legal-last-updated {
+        font-size: 0.9rem;
+        color: rgba(255,255,255,0.5);
+        margin-bottom: 3rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="legal-container">
+    <h1>Terms of Service</h1>
+    <div class="legal-last-updated">Last Updated: September 2026</div>
+
+    <p>These Terms of Service ("Terms") govern your access to and use of the Transform-Tech website (transform-tech.com) and the associated enterprise software, services, and applications (collectively, the "Service"). Please read these Terms carefully.</p>
+
+    <h2>1. Acceptance of Terms</h2>
+    <p>By creating an account, signing in (including via Google Workspace or SSO), or otherwise using the Service, you agree to be bound by these Terms. If you do not agree, do not use the Service.</p>
+
+    <h2>2. Description of Service</h2>
+    <p>Transform-Tech provides a unified enterprise operating system offering CRM, ATS, IT Helpdesk, AI Sales Engine, and Analytics tools. The features and functionality of the Service may be updated or modified over time.</p>
+
+    <h2>3. User Accounts</h2>
+    <ul>
+        <li>You are responsible for safeguarding the password or credentials that you use to access the Service.</li>
+        <li>You agree not to disclose your password to any third party.</li>
+        <li>You must notify us immediately upon becoming aware of any breach of security or unauthorized use of your account.</li>
+    </ul>
+
+    <h2>4. Acceptable Use</h2>
+    <p>You agree not to misuse the Service. For example, you must not:</p>
+    <ul>
+        <li>Interfere with, disrupt, or attempt to gain unauthorized access to the servers or networks connected to the Service.</li>
+        <li>Use the Service for any illegal or unauthorized purpose.</li>
+        <li>Transmit any viruses, malware, or other malicious code.</li>
+    </ul>
+
+    <h2>5. Intellectual Property</h2>
+    <p>The Service and its original content, features, and functionality are and will remain the exclusive property of Transform-Tech and its licensors. Our trademarks and trade dress may not be used in connection with any product or service without our prior written consent.</p>
+
+    <h2>6. Limitation of Liability</h2>
+    <p>In no event shall Transform-Tech, nor its directors, employees, partners, agents, suppliers, or affiliates, be liable for any indirect, incidental, special, consequential or punitive damages, including without limitation, loss of profits, data, use, goodwill, or other intangible losses, resulting from your access to or use of or inability to access or use the Service.</p>
+
+    <h2>7. Changes to Terms</h2>
+    <p>We reserve the right, at our sole discretion, to modify or replace these Terms at any time. We will provide notice of any material changes prior to their effective date. By continuing to access or use our Service after those revisions become effective, you agree to be bound by the revised terms.</p>
+
+    <h2>8. Contact Us</h2>
+    <p>If you have any questions about these Terms, please contact us at: <strong>j@transform-tech.com</strong></p>
+</div>
+{% endblock %}
