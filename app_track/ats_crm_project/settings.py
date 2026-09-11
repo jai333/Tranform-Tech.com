@@ -334,24 +334,39 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 SITE_ID = 1
-# Deprecated settings replaced below
 
-ACCOUNT_LOGIN_METHODS = {'email'}
+# ── django-allauth settings ─────────────────────────────────────
+ACCOUNT_LOGIN_METHODS = {'email', 'username'}
 ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
-ACCOUNT_EMAIL_VERIFICATION = 'none' # For dev/mvp
+ACCOUNT_EMAIL_VERIFICATION = 'none'  # For MVP — no email confirmation required
+ACCOUNT_UNIQUE_EMAIL = True
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
+ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
+SOCIALACCOUNT_AUTO_SIGNUP = True
+SOCIALACCOUNT_EMAIL_REQUIRED = True
+SOCIALACCOUNT_STORE_TOKENS = True
+SOCIALACCOUNT_LOGIN_ON_GET = True
+
+# ── Google OAuth Credentials (set GOOGLE_CLIENT_ID + GOOGLE_CLIENT_SECRET in Railway) ──
+GOOGLE_CLIENT_ID     = os.getenv('GOOGLE_CLIENT_ID', '')
+GOOGLE_CLIENT_SECRET = os.getenv('GOOGLE_CLIENT_SECRET', '')
 
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
-        'SCOPE': [
-            'profile',
-            'email',
-        ],
+        'APP': {
+            'client_id': GOOGLE_CLIENT_ID,
+            'secret':    GOOGLE_CLIENT_SECRET,
+            'key':       '',
+        },
+        'SCOPE': ['profile', 'email', 'openid'],
         'AUTH_PARAMS': {
             'access_type': 'online',
-        }
+            'prompt': 'select_account',   # Always show account picker
+        },
+        'FETCH_USERINFO': True,
     },
     'saml': {
-        # Configured via database or workspace settings
+        # Configured per-workspace via Django admin
     }
 }
 
