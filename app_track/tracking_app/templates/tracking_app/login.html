@@ -1,515 +1,409 @@
+{% extends 'tracking_app/base_public.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Sign In · Transform-Tech</title>
-<meta name="description" content="Sign in to your Transform-Tech workspace — the unified business OS.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+{% block title %}Sign In · Transform-Tech{% endblock %}
+
+{% block extra_head %}
 <style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/* ── Hide nav & footer on auth pages ─────────────────────── */
+nav.navbar, .mobile-nav-drawer, footer, .site-footer,
+#mobile-nav-close, .tt-fab, #tt-panel { display: none !important; }
 
-:root {
-    --cyan: #00E5FF;
-    --cyan-dim: rgba(0,229,255,0.12);
-    --cyan-glow: rgba(0,229,255,0.25);
-    --blue: #0A84FF;
-    --bg: #060912;
-    --card: rgba(12,16,28,0.95);
-    --border: rgba(0,229,255,0.14);
-    --border-soft: rgba(255,255,255,0.07);
-    --text: #fff;
-    --text-muted: rgba(255,255,255,0.45);
-    --error: #FF453A;
-    --success: #34C759;
-    --font: 'Inter', -apple-system, sans-serif;
-    --mono: 'JetBrains Mono', monospace;
-}
+/* ── Full-page layout ────────────────────────────────────── */
+body, html { margin:0; padding:0; height:100%; overflow-x:hidden; }
 
-html, body {
-    height: 100%; min-height: 100dvh;
-    font-family: var(--font);
-    background: var(--bg);
-    color: var(--text);
-    -webkit-font-smoothing: antialiased;
-}
-
-/* ── Background ── */
-.bg-layer {
-    position: fixed; inset: 0; z-index: 0; overflow: hidden;
-}
-.bg-layer::before {
-    content: '';
-    position: absolute; top: -30%; left: -20%;
-    width: 80vw; height: 80vw; border-radius: 50%;
-    background: radial-gradient(circle, rgba(0,229,255,0.07) 0%, transparent 65%);
-}
-.bg-layer::after {
-    content: '';
-    position: absolute; bottom: -20%; right: -15%;
-    width: 60vw; height: 60vw; border-radius: 50%;
-    background: radial-gradient(circle, rgba(10,132,255,0.06) 0%, transparent 65%);
-}
-.grid-overlay {
-    position: absolute; inset: 0;
-    background-image:
-        linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px);
-    background-size: 40px 40px;
-}
-
-/* ── Layout ── */
-.page {
-    position: relative; z-index: 1;
-    min-height: 100dvh;
+.auth-split-layout {
     display: flex;
-    align-items: stretch;
+    min-height: 100vh;
+    background: #050a12;
 }
 
-/* ── Brand panel (desktop left) ── */
-.brand-panel {
+/* ── Left visual panel ───────────────────────────────────── */
+.auth-visuals {
+    flex: 1.2;
+    position: relative;
     display: none;
-    flex: 1.1;
-    padding: 3rem;
-    flex-direction: column;
-    justify-content: space-between;
-    border-right: 1px solid var(--border-soft);
-    background: rgba(0,0,0,0.2);
+    background-image: url('{% static "tracking_app/images/auth_bg.jpg" %}');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }
-@media (min-width: 900px) {
-    .brand-panel { display: flex; }
+@media (min-width: 992px) {
+    .auth-visuals { display: flex; align-items: center; justify-content: center; }
 }
-.brand-logo {
-    display: flex; align-items: center; gap: 12px;
-    text-decoration: none;
+.auth-visuals-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(5,10,18,0.78) 0%, rgba(0,229,255,0.08) 100%);
+    backdrop-filter: blur(1px);
 }
-.brand-logo svg { flex-shrink: 0; }
-.brand-logo-text { font-family: var(--mono); font-size: 1.1rem; color: var(--text); font-weight: 600; }
-
-.brand-hero { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 2rem 0; }
-.brand-hero h2 {
-    font-size: clamp(2rem, 3vw, 3rem);
-    font-weight: 700; line-height: 1.1;
-    margin-bottom: 1.25rem;
+.auth-brand-content {
+    position: relative; z-index: 2;
+    padding: 4rem; max-width: 560px; color: #fff;
 }
-.brand-hero h2 em { font-style: normal; color: var(--cyan); }
-.brand-hero p { color: var(--text-muted); font-size: 1rem; line-height: 1.65; max-width: 380px; margin-bottom: 2.5rem; }
-
-.feature-list { display: flex; flex-direction: column; gap: 14px; }
-.feature-item {
-    display: flex; align-items: center; gap: 12px;
-    padding: 12px 16px;
-    background: rgba(0,229,255,0.04);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    font-size: 0.88rem; color: rgba(255,255,255,0.8);
+.auth-brand-content h1 {
+    font-size: clamp(2.2rem, 3.5vw, 3.2rem);
+    font-weight: 800; line-height: 1.1; margin-bottom: 1.25rem;
 }
+.auth-brand-content h1 span { color: #00E5FF; }
+.auth-brand-content > p {
+    font-size: 1.05rem; color: rgba(255,255,255,0.75);
+    line-height: 1.65; margin-bottom: 2.5rem;
+}
+.feature-row {
+    display: flex; align-items: center; gap: 14px;
+    padding: 13px 18px; margin-bottom: 10px;
+    background: rgba(0,229,255,0.05);
+    border: 1px solid rgba(0,229,255,0.15);
+    border-radius: 12px;
+    font-size: 0.9rem; color: rgba(255,255,255,0.85);
+    transition: background .2s;
+}
+.feature-row:hover { background: rgba(0,229,255,0.10); }
 .feature-icon {
-    width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0;
-    background: var(--cyan-dim);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 15px;
+    width: 34px; height: 34px; border-radius: 9px; flex-shrink: 0;
+    background: rgba(0,229,255,0.12);
+    display: flex; align-items: center; justify-content: center; font-size: 16px;
+}
+.brand-footer-line {
+    margin-top: 2.5rem; font-size: 0.78rem; color: rgba(255,255,255,0.3);
 }
 
-.brand-footer { color: var(--text-muted); font-size: 0.78rem; }
-
-/* ── Auth panel ── */
-.auth-panel {
-    flex: 0 0 auto; width: 100%;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    padding: clamp(1.5rem, 5vw, 3rem);
-    min-height: 100dvh;
-}
-@media (min-width: 900px) {
-    .auth-panel { flex: 0 0 480px; }
+/* ── Right form panel ─────────────────────────────────────── */
+.auth-form-container {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    padding: clamp(1.5rem, 4vw, 3rem);
+    background: radial-gradient(circle at top right, rgba(0,229,255,0.05), transparent 55%);
 }
 
-/* mobile top logo */
-.mobile-logo {
-    display: flex; align-items: center; gap: 10px;
-    margin-bottom: 2.5rem;
-    text-decoration: none;
-}
-@media (min-width: 900px) { .mobile-logo { display: none; } }
-.mobile-logo-text { font-family: var(--mono); font-size: 1rem; color: var(--text); font-weight: 600; }
-
-/* ── Card ── */
 .auth-card {
-    width: 100%; max-width: 420px;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: clamp(1.75rem, 5vw, 2.5rem);
-    box-shadow: 0 24px 64px rgba(0,0,0,0.6), 0 0 0 1px rgba(0,229,255,0.06), inset 0 1px 0 rgba(255,255,255,0.05);
+    background: rgba(10,15,25,0.85);
     backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(0,229,255,0.16);
+    border-radius: 20px;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05);
+    width: 100%; max-width: 440px;
+    overflow: hidden;
 }
-/* Top accent line */
-.auth-card::before {
-    content: '';
-    display: block;
+/* Top gradient accent */
+.auth-card-accent {
     height: 2px;
-    margin: -2.5rem -2.5rem 2rem;
-    border-radius: 20px 20px 0 0;
-    background: linear-gradient(90deg, transparent, var(--cyan), var(--blue), transparent);
+    background: linear-gradient(90deg, transparent, #00E5FF, #0A84FF, transparent);
 }
+.auth-card-body { padding: clamp(1.75rem, 4vw, 2.5rem); }
 
-.card-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; }
-.card-sub { color: var(--text-muted); font-size: 0.87rem; margin-bottom: 2rem; }
+/* Logo inside card */
+.auth-logo-row {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 1.75rem; text-decoration: none;
+}
+.auth-logo-text { font-weight: 700; font-size: 1rem; color: #fff; letter-spacing: -.01em; }
 
-/* ── Alerts ── */
-.alert {
-    display: flex; align-items: flex-start; gap: 10px;
-    padding: 12px 14px; border-radius: 10px; margin-bottom: 1.25rem;
-    font-size: 0.84rem; line-height: 1.5;
+.auth-header { margin-bottom: 1.75rem; }
+.auth-header h2 {
+    font-size: 1.5rem; font-weight: 800;
+    color: #fff; margin-bottom: 4px;
+    letter-spacing: -.02em;
 }
-.alert-error {
-    background: rgba(255,69,58,0.1);
-    border: 1px solid rgba(255,69,58,0.3);
-    color: var(--error);
-}
-.alert-success {
-    background: rgba(52,199,89,0.1);
-    border: 1px solid rgba(52,199,89,0.3);
-    color: var(--success);
-}
-.alert-info {
-    background: var(--cyan-dim);
-    border: 1px solid var(--border);
-    color: var(--cyan);
-}
+.auth-header p { color: rgba(255,255,255,0.45); font-size: 0.87rem; }
 
-/* ── Form ── */
-.form-group { margin-bottom: 1.25rem; }
+/* Alerts */
+.auth-alert {
+    display: flex; align-items: flex-start; gap: 9px;
+    padding: 11px 14px; border-radius: 10px; margin-bottom: 1.25rem;
+    font-size: 0.83rem; line-height: 1.5;
+}
+.auth-alert-error  { background: rgba(255,69,58,.1); border:1px solid rgba(255,69,58,.3); color:#FF453A; }
+.auth-alert-success{ background: rgba(52,199,89,.1); border:1px solid rgba(52,199,89,.3); color:#34C759; }
+.auth-alert-info   { background: rgba(0,229,255,.08); border:1px solid rgba(0,229,255,.2); color:#00E5FF; }
+
+/* Form fields */
+.form-group { margin-bottom: 1.15rem; }
+.form-label-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:7px; }
 .form-label {
-    display: block;
-    font-size: 0.74rem; font-weight: 600;
-    letter-spacing: .08em; text-transform: uppercase;
-    color: var(--text-muted); margin-bottom: 7px;
-    font-family: var(--mono);
+    font-size: 0.72rem; font-weight: 700; letter-spacing: .08em;
+    text-transform: uppercase; color: rgba(255,255,255,0.45);
 }
+.forgot-link { font-size: 0.78rem; color: #00E5FF; text-decoration: none; opacity:.8; }
+.forgot-link:hover { opacity:1; }
 .input-wrap { position: relative; }
 .input-icon {
-    position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
-    color: var(--text-muted); font-size: 16px; pointer-events: none;
-    display: flex; align-items: center;
+    position: absolute; left: 13px; top: 50%; transform: translateY(-50%);
+    color: rgba(255,255,255,0.3); display:flex; align-items:center; pointer-events:none;
 }
-.form-input {
-    width: 100%;
-    background: rgba(0,0,0,0.4);
+.form-control-auth {
+    width: 100%; padding: 12px 44px 12px 40px;
+    background: rgba(0,0,0,0.45);
     border: 1px solid rgba(255,255,255,0.09);
-    border-radius: 10px;
-    color: var(--text);
-    font-size: 0.95rem;
-    padding: 13px 14px 13px 42px;
-    font-family: var(--font);
-    transition: border-color .2s, box-shadow .2s;
-    -webkit-appearance: none;
+    border-radius: 10px; color: #fff; font-size: 0.93rem;
+    outline: none; transition: border-color .2s, box-shadow .2s;
+    box-sizing: border-box; -webkit-appearance: none;
 }
-.form-input:focus {
-    outline: none;
+.form-control-auth:focus {
     border-color: rgba(0,229,255,0.5);
     box-shadow: 0 0 0 3px rgba(0,229,255,0.1);
 }
-.form-input::placeholder { color: rgba(255,255,255,0.2); }
-.field-error { color: var(--error); font-size: 0.78rem; margin-top: 5px; display: block; }
-
-/* Password row */
-.pw-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 7px; }
-.forgot-link { font-size: 0.78rem; color: var(--cyan); text-decoration: none; opacity: 0.8; }
-.forgot-link:hover { opacity: 1; }
-
-/* Show/hide password toggle */
-.pw-toggle {
-    position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
-    background: none; border: none; color: var(--text-muted); cursor: pointer;
-    padding: 4px; display: flex; align-items: center;
+.form-control-auth::placeholder { color: rgba(255,255,255,0.2); }
+.pw-toggle-btn {
+    position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+    background: none; border: none; color: rgba(255,255,255,0.3);
+    cursor: pointer; padding: 4px; display:flex; align-items:center;
 }
-.pw-toggle:hover { color: var(--text); }
+.pw-toggle-btn:hover { color: rgba(255,255,255,.7); }
+.field-error { color: #FF453A; font-size: 0.77rem; display:block; margin-top:5px; }
 
 /* Remember me */
 .remember-row {
-    display: flex; align-items: center; gap: 8px;
-    margin-bottom: 1.5rem;
-    font-size: 0.84rem; color: var(--text-muted); cursor: pointer;
+    display:flex; align-items:center; gap:8px; margin-bottom:1.4rem;
+    font-size: 0.83rem; color: rgba(255,255,255,0.4); cursor:pointer;
 }
-.remember-row input[type="checkbox"] {
-    width: 16px; height: 16px; border-radius: 4px;
-    accent-color: var(--cyan); cursor: pointer;
-}
+.remember-row input[type="checkbox"] { width:16px; height:16px; accent-color:#00E5FF; cursor:pointer; }
 
-/* ── Primary button ── */
-.btn-primary {
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-    width: 100%; padding: 14px;
-    background: linear-gradient(135deg, var(--cyan), var(--blue));
+/* Main CTA */
+.btn-authenticate {
+    width: 100%; padding: 13px;
+    background: linear-gradient(135deg,#00E5FF,#0A84FF);
     border: none; border-radius: 10px;
-    color: #000; font-size: 0.95rem; font-weight: 700;
-    font-family: var(--mono); letter-spacing: .05em; cursor: pointer;
+    color: #000; font-size: 0.95rem; font-weight: 800;
+    letter-spacing: .06em; cursor: pointer;
+    box-shadow: 0 4px 20px rgba(0,229,255,.3);
     transition: opacity .2s, transform .15s, box-shadow .2s;
-    box-shadow: 0 4px 20px rgba(0,229,255,0.3);
+    display:flex; align-items:center; justify-content:center; gap:8px;
     -webkit-appearance: none;
 }
-.btn-primary:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 6px 28px rgba(0,229,255,0.4); }
-.btn-primary:active { transform: translateY(0); }
-
-/* ── Divider ── */
-.divider {
-    display: flex; align-items: center; gap: 12px;
-    margin: 1.5rem 0;
+.btn-authenticate:hover { opacity:.9; transform:translateY(-1px); box-shadow:0 6px 28px rgba(0,229,255,.4); }
+.btn-authenticate:active { transform:translateY(0); }
+.btn-authenticate.loading { opacity:.65; pointer-events:none; }
+.auth-spinner {
+    display:none; width:15px; height:15px; border-radius:50%;
+    border:2px solid rgba(0,0,0,.3); border-top-color:#000;
+    animation:auth-spin .7s linear infinite;
 }
-.divider::before, .divider::after {
-    content: ''; flex: 1; height: 1px;
-    background: var(--border-soft);
-}
-.divider span { font-size: 0.74rem; color: var(--text-muted); white-space: nowrap; letter-spacing: .06em; }
+.loading .auth-spinner { display:block; }
+@keyframes auth-spin { to { transform:rotate(360deg); } }
 
-/* ── Social buttons ── */
+/* Divider */
+.auth-divider {
+    display:flex; align-items:center; gap:12px; margin:1.4rem 0;
+}
+.auth-divider::before,.auth-divider::after {
+    content:''; flex:1; height:1px; background:rgba(255,255,255,.07);
+}
+.auth-divider span { font-size:.72rem; color:rgba(255,255,255,.3); letter-spacing:.06em; white-space:nowrap; }
+
+/* Social buttons */
 .social-btn {
-    display: flex; align-items: center; justify-content: center; gap: 10px;
-    width: 100%; padding: 13px 16px; border-radius: 10px;
-    font-size: 0.88rem; font-weight: 500; cursor: pointer;
-    text-decoration: none; transition: all .2s; margin-bottom: 10px;
-    -webkit-appearance: none;
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    width:100%; padding:12px 16px; border-radius:10px; margin-bottom:10px;
+    font-size:.88rem; font-weight:500; cursor:pointer;
+    text-decoration:none; transition:all .18s; -webkit-appearance:none;
 }
-.social-btn-google {
+.social-google {
     background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.1);
-    color: var(--text);
+    border: 1px solid rgba(255,255,255,0.1); color:#fff;
 }
-.social-btn-google:hover {
-    background: rgba(255,255,255,0.1);
-    border-color: rgba(255,255,255,0.2);
+.social-google:hover { background:rgba(255,255,255,0.1); border-color:rgba(255,255,255,0.2); color:#fff; }
+.social-sso {
+    background: rgba(0,229,255,0.06);
+    border: 1px solid rgba(0,229,255,0.2); color:#00E5FF;
 }
-.social-btn-sso {
-    background: var(--cyan-dim);
-    border: 1px solid var(--border);
-    color: var(--cyan);
-}
-.social-btn-sso:hover {
-    background: rgba(0,229,255,0.18);
-    border-color: rgba(0,229,255,0.4);
-}
-.social-icon {
-    width: 20px; height: 20px; flex-shrink: 0;
-    display: flex; align-items: center; justify-content: center;
-}
+.social-sso:hover { background:rgba(0,229,255,0.14); border-color:rgba(0,229,255,0.4); }
 
-/* Google G SVG inline */
-.google-g { width: 18px; height: 18px; }
-
-/* ── Footer ── */
+/* Footer */
 .auth-footer {
-    margin-top: 1.75rem; padding-top: 1.5rem;
-    border-top: 1px solid var(--border-soft);
-    text-align: center;
-    font-size: 0.84rem; color: var(--text-muted);
+    margin-top:1.5rem; padding-top:1.5rem;
+    border-top:1px solid rgba(255,255,255,0.06);
+    text-align:center; font-size:.83rem; color:rgba(255,255,255,.4);
 }
-.auth-footer a { color: var(--cyan); text-decoration: none; font-weight: 500; }
-.auth-footer a:hover { text-decoration: underline; }
+.auth-footer a { color:#00E5FF; text-decoration:none; font-weight:600; }
+.auth-footer a:hover { text-decoration:underline; }
 
-/* ── Loading state ── */
-.btn-primary.loading { opacity: 0.7; pointer-events: none; }
-.spinner {
-    width: 16px; height: 16px; border-radius: 50%;
-    border: 2px solid rgba(0,0,0,0.3);
-    border-top-color: #000;
-    animation: spin .7s linear infinite;
-    display: none;
+/* Mobile: full-width card on small screens */
+@media (max-width:991px) {
+    .auth-form-container { padding: 1.25rem; align-items: flex-start; padding-top: 2rem; }
+    .auth-card { max-width: 100%; }
 }
-.loading .spinner { display: block; }
-.loading .btn-text { opacity: 0.7; }
-@keyframes spin { to { transform: rotate(360deg); } }
 
-/* ── Atom logo SVG ── */
-@keyframes orbit { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-.orbit-ring { animation: orbit 4s linear infinite; transform-origin: 20px 20px; }
+/* Atom logo orbit animation */
+@keyframes auth-orbit { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+.auth-orbit { animation: auth-orbit 4s linear infinite; transform-origin: 20px 20px; }
 </style>
-</head>
-<body>
-<div class="bg-layer"><div class="grid-overlay"></div></div>
+{% endblock %}
 
-<div class="page">
+{% block content %}
+<div class="auth-split-layout">
 
-    <!-- Brand panel (desktop only) -->
-    <div class="brand-panel">
-        <a href="/" class="brand-logo">
-            <!-- Atom logo -->
-            <svg width="36" height="36" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="20" cy="20" r="4" fill="#00E5FF" opacity=".95"/>
-                <circle cx="20" cy="20" r="2" fill="#fff"/>
-                <g class="orbit-ring">
-                    <ellipse cx="20" cy="20" rx="17" ry="6" stroke="#00E5FF" stroke-width="1.5" fill="none" opacity=".7"/>
-                    <circle cx="37" cy="20" r="2" fill="#00E5FF"/>
-                </g>
-                <ellipse cx="20" cy="20" rx="17" ry="6" stroke="#0A84FF" stroke-width="1.2" fill="none" opacity=".4" transform="rotate(60 20 20)"/>
-                <ellipse cx="20" cy="20" rx="17" ry="6" stroke="#00E5FF" stroke-width="1" fill="none" opacity=".25" transform="rotate(-60 20 20)"/>
-            </svg>
-            <span class="brand-logo-text">Transform-Tech</span>
-        </a>
+    <!-- ── Left: Brand visuals with background image ── -->
+    <div class="auth-visuals">
+        <div class="auth-visuals-overlay"></div>
+        <div class="auth-brand-content">
+            <h1>Your Enterprise<br><span>OS</span> Awaits.</h1>
+            <p>One login. Every tool your business needs —<br>
+               CRM, ATS, IT Helpdesk, AI Sales Engine, Analytics — all unified.</p>
 
-        <div class="brand-hero">
-            <h2>Your Enterprise<br><em>OS</em> Awaits.</h2>
-            <p>One login. Every tool your business needs — CRM, ATS, IT Helpdesk, AI Sales Engine, Analytics — all unified.</p>
-
-            <div class="feature-list">
-                <div class="feature-item">
-                    <div class="feature-icon">🤖</div>
-                    <span><strong>AI Sales Engine</strong> — Autonomous outreach 24/7</span>
-                </div>
-                <div class="feature-item">
-                    <div class="feature-icon">📊</div>
-                    <span><strong>Unified CRM</strong> — Pipeline, deals & forecasting</span>
-                </div>
-                <div class="feature-item">
-                    <div class="feature-icon">🎯</div>
-                    <span><strong>ATS & HR</strong> — Hire faster with AI matching</span>
-                </div>
-                <div class="feature-item">
-                    <div class="feature-icon">🛡️</div>
-                    <span><strong>IT Helpdesk</strong> — Tickets, SLAs, asset management</span>
-                </div>
+            <div class="feature-row">
+                <div class="feature-icon">🤖</div>
+                <span><strong>AI Sales Engine</strong> — Autonomous outreach 24/7</span>
             </div>
-        </div>
+            <div class="feature-row">
+                <div class="feature-icon">📊</div>
+                <span><strong>Unified CRM</strong> — Pipeline, deals &amp; forecasting</span>
+            </div>
+            <div class="feature-row">
+                <div class="feature-icon">🎯</div>
+                <span><strong>ATS &amp; HR</strong> — Hire faster with AI matching</span>
+            </div>
+            <div class="feature-row">
+                <div class="feature-icon">🛡️</div>
+                <span><strong>IT Helpdesk</strong> — Tickets, SLAs, asset management</span>
+            </div>
+            <div class="feature-row">
+                <div class="feature-icon">⚡</div>
+                <span><strong>Productivity</strong> — Unified Inbox &amp; Workflow Automation</span>
+            </div>
 
-        <div class="brand-footer">
-            © 2025 Transform-Tech.com · <em>Build Less. Sell More.</em>
+            <p class="brand-footer-line">© 2025 Transform-Tech.com · <em>Build Less. Sell More.</em></p>
         </div>
     </div>
 
-    <!-- Auth panel -->
-    <div class="auth-panel">
-        <!-- Mobile logo -->
-        <a href="/" class="mobile-logo">
-            <svg width="30" height="30" viewBox="0 0 40 40" fill="none">
-                <circle cx="20" cy="20" r="4" fill="#00E5FF" opacity=".95"/>
-                <circle cx="20" cy="20" r="2" fill="#fff"/>
-                <ellipse cx="20" cy="20" rx="17" ry="6" stroke="#00E5FF" stroke-width="1.5" fill="none" opacity=".7"/>
-                <ellipse cx="20" cy="20" rx="17" ry="6" stroke="#0A84FF" stroke-width="1.2" fill="none" opacity=".4" transform="rotate(60 20 20)"/>
-            </svg>
-            <span class="mobile-logo-text">Transform-Tech</span>
-        </a>
-
+    <!-- ── Right: Auth form ── -->
+    <div class="auth-form-container">
         <div class="auth-card">
-            <p class="card-title">/SIGN_IN</p>
-            <p class="card-sub">Authenticate to access your workspace</p>
+            <div class="auth-card-accent"></div>
+            <div class="auth-card-body">
 
-            <!-- Error messages -->
-            {% if form.non_field_errors %}
-            <div class="alert alert-error">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                <span>{{ form.non_field_errors|join:', ' }}</span>
-            </div>
-            {% endif %}
+                <!-- Logo inside card -->
+                <a href="/" class="auth-logo-row">
+                    <svg width="28" height="28" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="20" cy="20" r="4.5" fill="#00E5FF" opacity=".95"/>
+                        <circle cx="20" cy="20" r="2.2" fill="#fff"/>
+                        <g class="auth-orbit">
+                            <ellipse cx="20" cy="20" rx="16" ry="6" stroke="#00E5FF" stroke-width="1.4" fill="none" opacity=".75"/>
+                            <circle cx="36" cy="20" r="2" fill="#00E5FF"/>
+                        </g>
+                        <ellipse cx="20" cy="20" rx="16" ry="6" stroke="#0A84FF" stroke-width="1.1" fill="none" opacity=".4" transform="rotate(60 20 20)"/>
+                        <ellipse cx="20" cy="20" rx="16" ry="6" stroke="#00E5FF" stroke-width="1" fill="none" opacity=".22" transform="rotate(-60 20 20)"/>
+                    </svg>
+                    <span class="auth-logo-text">Transform-Tech</span>
+                </a>
 
-            {% if messages %}
-            {% for message in messages %}
-            <div class="alert {% if 'error' in message.tags %}alert-error{% elif 'success' in message.tags %}alert-success{% else %}alert-info{% endif %}">
-                {{ message }}
-            </div>
-            {% endfor %}
-            {% endif %}
-
-            <!-- Login form -->
-            <form method="post" id="loginForm">
-                {% csrf_token %}
-
-                <div class="form-group">
-                    <label class="form-label" for="username">Username or Email</label>
-                    <div class="input-wrap">
-                        <span class="input-icon">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                        </span>
-                        <input type="text" name="username" id="username" class="form-input"
-                            placeholder="your@email.com" autocomplete="username" required autofocus
-                            value="{{ form.username.value|default:'' }}">
-                    </div>
-                    {% if form.username.errors %}<span class="field-error">{{ form.username.errors|join:', ' }}</span>{% endif %}
+                <div class="auth-header">
+                    <h2>/SIGN_IN</h2>
+                    <p>Authenticate to access your workspace</p>
                 </div>
 
-                <div class="form-group">
-                    <div class="pw-row">
-                        <label class="form-label" for="password" style="margin-bottom:0">Password</label>
-                        <a href="{% url 'account_reset_password' %}" class="forgot-link">Forgot password?</a>
-                    </div>
-                    <div class="input-wrap">
-                        <span class="input-icon">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                        </span>
-                        <input type="password" name="password" id="password" class="form-input"
-                            placeholder="••••••••••" autocomplete="current-password" required>
-                        <button type="button" class="pw-toggle" onclick="togglePw()" aria-label="Show password" id="pwToggle">
-                            <svg id="eyeIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                        </button>
-                    </div>
-                    {% if form.password.errors %}<span class="field-error">{{ form.password.errors|join:', ' }}</span>{% endif %}
+                <!-- Error / success messages -->
+                {% if form.non_field_errors %}
+                <div class="auth-alert auth-alert-error">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    <span>{{ form.non_field_errors|join:', ' }}</span>
                 </div>
+                {% endif %}
+                {% if messages %}
+                {% for message in messages %}
+                <div class="auth-alert {% if 'error' in message.tags %}auth-alert-error{% elif 'success' in message.tags %}auth-alert-success{% else %}auth-alert-info{% endif %}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+                {% endif %}
 
-                <label class="remember-row">
-                    <input type="checkbox" name="remember_me">
-                    Keep me signed in for 30 days
-                </label>
+                <!-- Login form -->
+                <form method="post" id="auth-form">
+                    {% csrf_token %}
 
-                <button type="submit" class="btn-primary" id="loginBtn">
-                    <div class="spinner"></div>
-                    <span class="btn-text">/AUTHENTICATE</span>
-                </button>
-            </form>
+                    <!-- Username -->
+                    <div class="form-group">
+                        <label class="form-label" for="username">Username or Email</label>
+                        <div class="input-wrap">
+                            <span class="input-icon">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                            </span>
+                            <input type="text" name="username" id="username"
+                                class="form-control-auth" placeholder="your@email.com"
+                                autocomplete="username" required autofocus
+                                value="{{ form.username.value|default:'' }}">
+                        </div>
+                        {% if form.username.errors %}<span class="field-error">{{ form.username.errors|join:', ' }}</span>{% endif %}
+                    </div>
 
-            <!-- Divider -->
-            <div class="divider"><span>OR CONTINUE WITH</span></div>
+                    <!-- Password -->
+                    <div class="form-group">
+                        <div class="form-label-row">
+                            <label class="form-label" for="password">Password</label>
+                            <a href="{% url 'account_reset_password' %}" class="forgot-link">Forgot password?</a>
+                        </div>
+                        <div class="input-wrap">
+                            <span class="input-icon">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                            </span>
+                            <input type="password" name="password" id="password"
+                                class="form-control-auth" placeholder="••••••••••"
+                                autocomplete="current-password" required>
+                            <button type="button" class="pw-toggle-btn" onclick="togglePassword()" aria-label="Toggle password visibility">
+                                <svg id="eye-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                                </svg>
+                            </button>
+                        </div>
+                        {% if form.password.errors %}<span class="field-error">{{ form.password.errors|join:', ' }}</span>{% endif %}
+                    </div>
 
-            <!-- Social logins -->
-            <a href="{% url 'google_login' %}" class="social-btn social-btn-google">
-                <!-- Official Google G SVG (inline, no CDN) -->
-                <div class="social-icon">
-                    <svg class="google-g" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Remember me -->
+                    <label class="remember-row">
+                        <input type="checkbox" name="remember_me">
+                        Keep me signed in for 30 days
+                    </label>
+
+                    <button type="submit" class="btn-authenticate" id="auth-btn">
+                        <div class="auth-spinner"></div>
+                        <span>/AUTHENTICATE</span>
+                    </button>
+                </form>
+
+                <!-- Social sign-in -->
+                <div class="auth-divider"><span>OR SIGN IN WITH</span></div>
+
+                <a href="{% url 'google_login' %}" class="social-btn social-google">
+                    <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
                         <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
                         <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
                         <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
                     </svg>
-                </div>
-                Sign in with Google Workspace
-            </a>
+                    Sign in with Google Workspace
+                </a>
 
-            <a href="#sso-info" class="social-btn social-btn-sso">
-                <div class="social-icon">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="3" y="3" width="18" height="18" rx="3"/>
-                        <path d="M9 9h6M9 12h6M9 15h4"/>
-                        <circle cx="17" cy="15" r="2" fill="currentColor"/>
+                <a href="#" class="social-btn social-sso">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 9h6M9 12h6M9 15h4"/>
+                        <circle cx="17" cy="15" r="2" fill="currentColor" stroke="none"/>
                     </svg>
-                </div>
-                Enterprise SSO (SAML)
-            </a>
+                    Enterprise SSO (SAML)
+                </a>
 
-            <div class="auth-footer">
-                No workspace yet? <a href="{% url 'register' %}">/INITIALIZE_NOW</a>
+                <div class="auth-footer">
+                    No workspace yet? <a href="{% url 'register' %}">/INITIALIZE_NOW</a>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-function togglePw() {
+function togglePassword() {
     var inp = document.getElementById('password');
-    var icon = document.getElementById('eyeIcon');
+    var icon = document.getElementById('eye-icon');
     if (inp.type === 'password') {
         inp.type = 'text';
-        icon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>';
+        icon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>';
     } else {
         inp.type = 'password';
         icon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
     }
 }
-
-document.getElementById('loginForm').addEventListener('submit', function() {
-    var btn = document.getElementById('loginBtn');
+document.getElementById('auth-form').addEventListener('submit', function() {
+    var btn = document.getElementById('auth-btn');
     btn.classList.add('loading');
 });
 </script>
-</body>
-</html>
+{% endblock %}
