@@ -353,11 +353,6 @@ GOOGLE_CLIENT_SECRET = os.getenv('GOOGLE_CLIENT_SECRET', '')
 
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
-        'APP': {
-            'client_id': GOOGLE_CLIENT_ID,
-            'secret':    GOOGLE_CLIENT_SECRET,
-            'key':       '',
-        },
         'SCOPE': ['profile', 'email', 'openid'],
         'AUTH_PARAMS': {
             'access_type': 'online',
