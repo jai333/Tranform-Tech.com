@@ -4869,24 +4869,64 @@ def terms_of_service(request):
 
 def oauth_debug(request):
     """Temporary diagnostic — shows what client_id Django is using for Google OAuth."""
-    import json
-    from django.http import JsonResponse
+    from django.http import HttpResponse
     from django.conf import settings
 
     google_cfg = settings.SOCIALACCOUNT_PROVIDERS.get('google', {})
     app_cfg = google_cfg.get('APP', {})
     client_id = app_cfg.get('client_id', '')
+    secret = app_cfg.get('secret', '')
 
-    # Check DB too
     try:
         from allauth.socialaccount.models import SocialApp
         db_apps = list(SocialApp.objects.filter(provider='google').values('client_id', 'name'))
     except Exception as e:
-        db_apps = [str(e)]
+        db_apps = [{'error': str(e)}]
 
-    return JsonResponse({
-        'settings_client_id': client_id,
-        'settings_client_id_length': len(client_id),
-        'settings_secret_set': bool(app_cfg.get('secret', '')),
-        'db_records': db_apps,
-    })
+    expected = '10843470968-ue8878esot1j0sq270ihocv15muut7ls.apps.googleusercontent.com'
+    is_match = client_id.strip() == expected.strip()
+
+    html = f"""<!DOCTYPE html>
+<html><head><title>OAuth Debug</title>
+<style>
+body{{font-family:monospace;background:#0a0f1a;color:#fff;padding:2rem;line-height:1.6;}}
+h1{{color:#00E5FF;margin-bottom:1.5rem;}}
+.row{{margin-bottom:1rem;padding:0.75rem 1rem;background:#111;border-radius:8px;border-left:3px solid #333;}}
+.label{{color:#888;font-size:.85rem;text-transform:uppercase;letter-spacing:.05em;}}
+.value{{color:#fff;word-break:break-all;margin-top:.25rem;font-size:1rem;}}
+.ok{{color:#34C759;}} .err{{color:#FF453A;}} .warn{{color:#FF9F0A;}}
+</style></head><body>
+<h1>&#128269; OAuth Debug &mdash; Transform-Tech</h1>
+
+<div class="row">
+  <div class="label">settings_client_id (what Django sends to Google)</div>
+  <div class="value">{"<span class='err'>&#10060; EMPTY &mdash; GOOGLE_CLIENT_ID env var not set or not reaching Django!</span>" if not client_id else client_id}</div>
+</div>
+
+<div class="row">
+  <div class="label">Client ID length</div>
+  <div class="value">{len(client_id)} characters</div>
+</div>
+
+<div class="row">
+  <div class="label">Client Secret set?</div>
+  <div class="value">{"<span class='ok'>&#10003; Yes</span>" if secret else "<span class='err'>&#10060; No &mdash; GOOGLE_CLIENT_SECRET not set!</span>"}</div>
+</div>
+
+<div class="row">
+  <div class="label">DB SocialApp records (should be 0)</div>
+  <div class="value">{len(db_apps)} record(s) &mdash; {db_apps}</div>
+</div>
+
+<div class="row">
+  <div class="label">Expected Client ID (from Google Cloud Console)</div>
+  <div class="value warn">{expected}</div>
+</div>
+
+<div class="row">
+  <div class="label">Match?</div>
+  <div class="value">{"<span class='ok'>&#10003; MATCH &mdash; Client ID is correct!</span>" if is_match else "<span class='err'>&#10060; MISMATCH &mdash; Update GOOGLE_CLIENT_ID in Railway Variables to the expected value above.</span>"}</div>
+</div>
+
+</body></html>"""
+    return HttpResponse(html)
