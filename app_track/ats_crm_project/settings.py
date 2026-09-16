@@ -347,22 +347,26 @@ SOCIALACCOUNT_EMAIL_REQUIRED = True
 SOCIALACCOUNT_STORE_TOKENS = True
 SOCIALACCOUNT_LOGIN_ON_GET = True
 
-# ── Google OAuth Credentials (set GOOGLE_CLIENT_ID + GOOGLE_CLIENT_SECRET in Railway) ──
+# ── Google OAuth Credentials ──────────────────────────────────────────────────
+# Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in Railway Variables
 GOOGLE_CLIENT_ID     = os.getenv('GOOGLE_CLIENT_ID', '')
 GOOGLE_CLIENT_SECRET = os.getenv('GOOGLE_CLIENT_SECRET', '')
 
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
+        'APP': {
+            'client_id': GOOGLE_CLIENT_ID,
+            'secret':    GOOGLE_CLIENT_SECRET,
+            'key':       '',
+        },
         'SCOPE': ['profile', 'email', 'openid'],
         'AUTH_PARAMS': {
             'access_type': 'online',
-            'prompt': 'select_account',   # Always show account picker
+            'prompt': 'select_account',
         },
         'FETCH_USERINFO': True,
     },
-    'saml': {
-        # Configured per-workspace via Django admin
-    }
+    'saml': {}
 }
 
 # Stripe API Keys (Replace with your own in Railway)
