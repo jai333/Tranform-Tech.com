@@ -569,7 +569,7 @@ html, body {
 
     <style>
         :root {
-            --brand-primary: {% if request.user.is_authenticated and request.user.tenant and request.user.tenant.primary_color %}{{ request.user.tenant.primary_color }}{% else %}var(--brand-primary){% endif %};
+            --brand-primary: {% if request.user.is_authenticated and request.user.tenant and request.user.tenant.primary_color %}{{ request.user.tenant.primary_color }}{% else %}#00E5FF{% endif %};
         }
     </style>
 </head>
