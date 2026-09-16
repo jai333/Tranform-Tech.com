@@ -4865,3 +4865,28 @@ def privacy_policy(request):
 
 def terms_of_service(request):
     return render(request, 'tracking_app/terms_of_service.html')
+
+
+def oauth_debug(request):
+    """Temporary diagnostic — shows what client_id Django is using for Google OAuth."""
+    import json
+    from django.http import JsonResponse
+    from django.conf import settings
+
+    google_cfg = settings.SOCIALACCOUNT_PROVIDERS.get('google', {})
+    app_cfg = google_cfg.get('APP', {})
+    client_id = app_cfg.get('client_id', '')
+
+    # Check DB too
+    try:
+        from allauth.socialaccount.models import SocialApp
+        db_apps = list(SocialApp.objects.filter(provider='google').values('client_id', 'name'))
+    except Exception as e:
+        db_apps = [str(e)]
+
+    return JsonResponse({
+        'settings_client_id': client_id,
+        'settings_client_id_length': len(client_id),
+        'settings_secret_set': bool(app_cfg.get('secret', '')),
+        'db_records': db_apps,
+    })

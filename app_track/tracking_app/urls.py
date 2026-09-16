@@ -216,4 +216,5 @@ urlpatterns = [
     path('sitemap.xml', views.sitemap_xml, name='sitemap_xml'),
     path('privacy-policy/', views.privacy_policy, name='privacy-policy'),
     path('terms-of-service/', views.terms_of_service, name='terms-of-service'),
+    path('_oauth-debug/', views.oauth_debug, name='oauth-debug'),
 ]
