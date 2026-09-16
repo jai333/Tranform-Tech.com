@@ -813,6 +813,28 @@ def demo_booking_page(request):
             deal=deal,
         )
 
+        # Email Notification
+        try:
+            from django.core.mail import send_mail
+            email_body = (
+                f"🎉 NEW DEMO BOOKED!\n\n"
+                f"Name: {name}\n"
+                f"Email: {email}\n"
+                f"Company: {company}\n"
+                f"Team Size: {team_size or 'Not specified'}\n"
+                f"Current ATS: {current_ats or 'Not specified'}\n"
+                f"Biggest Challenge: {pain or 'Not specified'}"
+            )
+            send_mail(
+                subject=f"🚀 NEW DEMO: {company} ({name})",
+                message=email_body,
+                from_email='it@transform-tech.com',
+                recipient_list=['j@transform-tech.com', 'it@transform-tech.com'],
+                fail_silently=True,
+            )
+        except Exception as e:
+            logger.error(f"Failed to send demo notification email: {e}")
+
         return render(request, 'tracking_app/sales/demo_confirmed.html', {
             'booking': booking,
             'lead': lead,
