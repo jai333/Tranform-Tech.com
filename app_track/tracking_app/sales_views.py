@@ -1507,8 +1507,11 @@ def autonomous_agent_view(request):
     """
     return render(request, 'tracking_app/sales/autonomous_agent.html')
 
+from django.views.decorators.csrf import csrf_exempt
+
 @login_required
 @require_POST
+@csrf_exempt
 def api_deploy_autonomous_agent(request):
     """
     Receives raw lead data (Name, Company, Email, Phone), creates the Lead in DB,
@@ -1543,6 +1546,7 @@ def api_deploy_autonomous_agent(request):
                 phone=phone,
                 source='manual',
                 status='new',
+                tenant_id=tenant_id
             )
         else:
             # Update existing lead with new info if provided
