@@ -1369,11 +1369,21 @@ def api_radar_poll(request):
     qs = Lead.objects.filter(tenant=tenant).exclude(company_name='')
     
     if not qs.exists():
-        return JsonResponse({'signals': [], 'message': 'No leads to scan.'})
-        
-    leads_pool = list(qs[:100])
-    num_signals = min(len(leads_pool), 3) # process up to 3 in parallel
-    leads = random.sample(leads_pool, num_signals) if len(leads_pool) >= num_signals else leads_pool
+        # Fallback for empty database: create a dummy lead so the radar shows data
+        dummy_lead = Lead.objects.create(
+            contact_name="Demo User",
+            company_name="Acme Corp",
+            email="demo@acme.com",
+            industry="Technology",
+            tenant=tenant,
+            source="manual",
+            status="new"
+        )
+        leads = [dummy_lead]
+    else:
+        leads_pool = list(qs[:100])
+        num_signals = min(len(leads_pool), 3) # process up to 3 in parallel
+        leads = random.sample(leads_pool, num_signals) if len(leads_pool) >= num_signals else leads_pool
 
     def process_lead(lead):
         company_name = lead.company_name
