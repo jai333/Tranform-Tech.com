@@ -59,9 +59,16 @@ def require_it_access(view_func):
 def require_executive_access(view_func):
     @wraps(view_func)
     def _wrapped_view(request, *args, **kwargs):
-        if not (request.user.is_superuser or request.user.can_view_executive):
-            messages.error(request, "You do not have permission to access the Executive Dashboard.")
-            return redirect('home')
+        if not (request.user.is_superuser or getattr(request.user, 'can_view_executive', False)):
+            # Smart redirect to the first available dashboard they have access to
+            if getattr(request.user, 'can_view_sales', False):
+                return redirect('sales-dashboard')
+            elif getattr(request.user, 'can_view_ats', False):
+                return redirect('talent-pipeline')
+            elif getattr(request.user, 'can_view_it', False):
+                return redirect('it-helpdesk-list')
+            else:
+                return redirect('home')
         return view_func(request, *args, **kwargs)
     return _wrapped_view
 

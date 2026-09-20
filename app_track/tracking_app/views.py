@@ -3441,10 +3441,7 @@ Return JSON: {{"suggestions": [{{"title": "...", "url": "/...", "icon": "bx bx-.
 @require_executive_access
 def executive_dashboard(request):
     """A high-level dashboard aggregating stats from Sales,ATS,IT,and Security."""
-    if not (request.user.is_staff or getattr(request.user,'is_admin_role',False) or getattr(request.user,'can_view_executive',False)):
-        messages.error(request,"You don't have permission to view the executive dashboard.")
-        return redirect('home')
-        
+    # Permission check is handled by the @require_executive_access decorator
     from django.db.models import Sum,Count,Avg
     from django.db.models.functions import TruncMonth
     from .sales_models import Deal,Account
