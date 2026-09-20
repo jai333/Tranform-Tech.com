@@ -37,3 +37,19 @@ def candidate_post_save(sender, instance, created, **kwargs):
     event_type = 'candidate.created' if created else 'candidate.updated'
     if hasattr(instance, 'tenant'):
         dispatch_event(instance.tenant, event_type, serialize_instance(instance))
+
+from allauth.account.signals import user_signed_up
+from .models import Tenant
+
+@receiver(user_signed_up)
+def populate_profile(request, user, **kwargs):
+    user.can_view_ats = True
+    user.can_view_sales = True
+    user.can_view_it = True
+    user.can_view_executive = True
+    user.role = 'admin'
+    tenant_name = f"{user.username or user.email}'s Workspace"
+    tenant = Tenant.objects.create(name=tenant_name, subscription_plan='free')
+    user.tenant = tenant
+    user.save()
+

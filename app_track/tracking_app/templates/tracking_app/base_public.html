@@ -799,6 +799,22 @@ html, body {
     </div>
 </div>
 
+{% if messages %}
+<div class="public-messages" style="position: fixed; top: 80px; right: 20px; z-index: 99999;">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }}" style="background: rgba(20,20,20,0.9); border-left: 4px solid var(--brand-primary); color: white; padding: 16px; margin-bottom: 8px; border-radius: 4px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+        {{ message }}
+    </div>
+    {% endfor %}
+</div>
+<script>
+    setTimeout(() => {
+        const msgs = document.querySelector('.public-messages');
+        if(msgs) msgs.style.display = 'none';
+    }, 5000);
+</script>
+{% endif %}
+
 {% block content %}
 {% endblock %}
 
