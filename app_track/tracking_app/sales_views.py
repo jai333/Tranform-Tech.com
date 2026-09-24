@@ -214,7 +214,15 @@ def lead_create(request):
     """Manually add a new lead."""
     if request.method == 'POST':
         data = request.POST
+        
+        tenant_id = getattr(request.user, 'tenant_id', None)
+        if request.user.is_superuser and not tenant_id:
+            from tracking_app.models import Tenant
+            tenant = Tenant.objects.first()
+            tenant_id = tenant.id if tenant else None
+            
         lead = Lead.objects.create(
+            tenant_id=tenant_id,
             contact_name=data.get('contact_name', ''),
             email=data.get('email', ''),
             linkedin_url=data.get('linkedin_url', ''),
@@ -1486,7 +1494,22 @@ def api_run_outreach(request, lead_id):
     try:
         tenant = lead.tenant
         if not tenant:
-            return JsonResponse({'success': False, 'error': 'Lead has no workspace assigned.'}, status=400)
+            # Auto-fix orphaned leads (created manually before patch)
+            user_tenant_id = getattr(request.user, 'tenant_id', None)
+            if user_tenant_id:
+                lead.tenant_id = user_tenant_id
+                lead.save(update_fields=['tenant'])
+                tenant = lead.tenant
+            elif request.user.is_superuser:
+                from tracking_app.models import Tenant
+                t = Tenant.objects.first()
+                if t:
+                    lead.tenant = t
+                    lead.save(update_fields=['tenant'])
+                    tenant = lead.tenant
+                    
+            if not tenant:
+                return JsonResponse({'success': False, 'error': 'Lead has no workspace assigned.'}, status=400)
 
         if not (tenant.mail_smtp_host and tenant.mail_smtp_username and tenant.mail_smtp_password):
             return JsonResponse({
