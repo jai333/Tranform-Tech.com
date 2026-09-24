@@ -54,9 +54,7 @@ def _ai(system, user, max_tokens=600):
             url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key={api_key}"
             payload = {
                 "contents": [
-                    {"role": "user", "parts": [{"text": f"{system}
-
-{user}"}]}
+                    {"role": "user", "parts": [{"text": f"{system}\n\n{user}"}]}
                 ],
                 "generationConfig": {
                     "temperature": 0.78,
@@ -214,22 +212,22 @@ def execute_email(run, lead, tenant):
             return False
 
         plain_body = re.sub(r'<[^>]+>', '', run.email_body).strip()
-                    from django.core.mail import get_connection, send_mail
-            connection = None
-            if tenant and tenant.mail_smtp_host and tenant.mail_smtp_username and tenant.mail_smtp_password:
-                use_ssl = (tenant.mail_smtp_port == 465)
-                use_tls = tenant.mail_use_tls if not use_ssl else False
-                connection = get_connection(
-                    host=tenant.mail_smtp_host,
-                    port=tenant.mail_smtp_port,
-                    username=tenant.mail_smtp_username,
-                    password=tenant.mail_smtp_password,
-                    use_tls=use_tls,
-                    use_ssl=use_ssl
-                )
-                from_email = tenant.mail_registered_email or tenant.mail_smtp_username
-            else:
-                from_email = (
+        from django.core.mail import get_connection, send_mail
+        connection = None
+        if tenant and tenant.mail_smtp_host and tenant.mail_smtp_username and tenant.mail_smtp_password:
+            use_ssl = (tenant.mail_smtp_port == 465)
+            use_tls = tenant.mail_use_tls if not use_ssl else False
+            connection = get_connection(
+                host=tenant.mail_smtp_host,
+                port=tenant.mail_smtp_port,
+                username=tenant.mail_smtp_username,
+                password=tenant.mail_smtp_password,
+                use_tls=use_tls,
+                use_ssl=use_ssl
+            )
+            from_email = tenant.mail_registered_email or tenant.mail_smtp_username
+        else:
+            from_email = (
                     os.environ.get("DEFAULT_FROM_EMAIL")
                     or os.environ.get("EMAIL_HOST_USER")
                     or "sales@transform-tech.com"

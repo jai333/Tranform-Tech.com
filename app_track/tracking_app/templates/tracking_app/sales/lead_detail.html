@@ -627,6 +627,37 @@ function showToast(msg, type) {
     setTimeout(() => t.remove(), 3500);
 }
 
+async function triggerAiCall(leadId) {
+    const btn = document.getElementById('btn-ai-call');
+    const old = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> Dispatching...";
+
+    try {
+        const res = await fetch(`/api/twilio/call/`, {
+            method: 'POST',
+            headers: {'X-CSRFToken': getCsrf(), 'Content-Type': 'application/json'},
+            body: JSON.stringify({phone: '{{ lead.phone|default_if_none:"" }}'})
+        });
+        const data = await res.json();
+        if (data.status === 'success') {
+            if (data.simulated) {
+                showToast('⚠️ Call simulated (Twilio credentials missing)', 'success');
+            } else {
+                showToast('✅ AI Voice Call dispatched!', 'success');
+            }
+        } else {
+            showToast('❌ ' + (data.message || 'Call failed'), 'error');
+        }
+    } catch(e) {
+        showToast('❌ Network error dispatching call.', 'error');
+    }
+    setTimeout(() => {
+        btn.disabled = false;
+        btn.innerHTML = old;
+    }, 2000);
+}
+
 function getCsrf() {
     const m = document.cookie.match(/csrftoken=([^;]+)/);
     return m ? m[1] : '';

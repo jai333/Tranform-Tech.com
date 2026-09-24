@@ -929,7 +929,6 @@ def import_leads(request):
         messages.error(request, 'Could not read headers. Make sure the first line contains column names.')
         return redirect('import-leads')
 
-    # Column aliases
     ALIASES = {
         'name': 'contact_name',
         'full_name': 'contact_name',
@@ -941,71 +940,104 @@ def import_leads(request):
         'location': 'company_location',
         'city': 'company_location',
     }
-    reader.fieldnames = [ALIASES.get(h, h) for h in reader.fieldnames]
 
-    created, skipped, errors = 0, 0, []
+    leads_to_create = []
+    skipped = 0
+    from tracking_app.management.commands.global_sales_import import score_lead
+    import re
+    
+    tenant_id = getattr(request.user, 'tenant_id', None)
+    
+    deploy_agents = request.POST.get('deploy_agents') == 'on'
+    hot_emails = []
+
     for row in reader:
-        contact_name = (row.get('contact_name') or '').strip()
-        email = (row.get('email') or '').strip().lower()
-        company_name = (row.get('company_name') or '').strip()
+        # Resolve aliases
+        for k_alias, k_real in ALIASES.items():
+            if k_alias in row and row[k_alias] and not row.get(k_real):
+                row[k_real] = row[k_alias]
 
-        if not email:
-            errors.append(f'Row missing email: {dict(row)}')
-            continue
-        if not contact_name:
-            contact_name = email.split('@')[0].replace('.', ' ').title()
-
-        status = (row.get('status') or 'new').strip().lower()
-        valid_statuses = [s[0] for s in Lead.STATUS_CHOICES]
-        if status not in valid_statuses:
-            status = 'new'
-
-        source = (row.get('source') or 'manual').strip().lower()
-        valid_sources = [s[0] for s in Lead.SOURCE_CHOICES]
-        if source not in valid_sources:
-            source = 'manual'
-
-        try:
-            lead, created_flag = Lead.objects.get_or_create(
-                email=email,
-                defaults={
-                    'contact_name': contact_name,
-                    'company_name': company_name or 'Unknown',
-                    'phone': (row.get('phone') or '').strip() or None,
-                    'linkedin_url': (row.get('linkedin_url') or '').strip() or None,
-                    'industry': (row.get('industry') or '').strip() or None,
-                    'company_location': (row.get('company_location') or '').strip() or None,
-                    'status': status,
-                    'source': source,
-                }
-            )
-            if created_flag:
-                created += 1
+        first_contact = row.get("contact_person", "") or row.get("contact_name", "")
+        match = re.search(r'^(?:Mr\.|Ms\.|Mrs\.)?\s*([^(]+?)\s*(?:\((.*?)\))?$', first_contact)
+        if match:
+            name = match.group(1).strip()
+            title = match.group(2)
+            row["title"] = title.strip() if title else ""
+            parts = name.split()
+            if len(parts) >= 2:
+                row["first_name"] = parts[0]
+                row["last_name"] = " ".join(parts[1:])
             else:
-                skipped += 1
-        except Exception as exc:
-            errors.append(f'{email}: {exc}')
+                row["first_name"] = name
+                row["last_name"] = ""
+        else:
+            row["first_name"] = first_contact
+            row["last_name"] = ""
+            row["title"] = ""
+            
+        email = row.get("corporate_email", "")
+        if not email:
+            email = row.get("generic_email", "")
+        if not email:
+            email = row.get("email", "")
+            
+        email = email.split(",")[0].strip()
+        email = re.sub(r'\(.*?\)', '', email).strip()
+        row["email"] = email
+        row["company_name"] = row.get("business_name", "") or row.get("company_name", "")
+        row["phone"] = row.get("phone", "")
+        
+        if not row.get("industry"):
+            row["industry"] = "Staffing"
 
-    # Build result message
-    parts = []
-    if created:
-        parts.append(f'✅ {created} lead{"s" if created != 1 else ""} imported successfully.')
-    if skipped:
-        parts.append(f'⚠️ {skipped} duplicate{"s" if skipped != 1 else ""} skipped (already exist).')
-    if errors:
-        parts.append(f'❌ {len(errors)} error{"s" if len(errors) != 1 else ""} encountered.')
+        score, breakdown = score_lead(row)
 
-    msg = ' '.join(parts) if parts else 'Nothing to import.'
+        if not email and not row.get('phone'):
+            skipped += 1
+            continue
+            
+        if email and Lead.objects.filter(tenant_id=tenant_id, email=email).exists():
+            skipped += 1
+            continue
 
-    if created:
-        messages.success(request, msg)
-    elif skipped and not errors:
-        messages.warning(request, msg)
-    else:
-        messages.error(request, msg)
+        first = row.get("first_name","")
+        last = row.get("last_name","")
+        contact_name = f"{first} {last}".strip() or row.get("contact_name", "Unknown")
 
-    for err in errors[:5]:   # show at most 5 individual errors
-        messages.warning(request, err)
+        lead = Lead(
+            tenant_id=tenant_id,
+            contact_name=contact_name,
+            email=email or None,
+            company_name=row.get('company_name', ''),
+            phone=row.get('phone', '') or None,
+            linkedin_url=row.get('linkedin_url', '') or None,
+            industry=row.get('industry', ''),
+            company_location=row.get('company_location', ''),
+            status='new',
+            source='manual',
+            icp_score=float(score),
+            icp_score_breakdown=breakdown,
+            custom_data={"notes": "Title: " + row.get("title","")}
+        )
+        leads_to_create.append(lead)
+        
+        if score >= 70 and email:
+            hot_emails.append(email)
+
+    with transaction.atomic():
+        Lead.objects.bulk_create(leads_to_create, ignore_conflicts=True)
+
+    imported = len(leads_to_create)
+    messages.success(request, f'Successfully imported {imported} leads. ({skipped} skipped/duplicates).')
+    
+    if deploy_agents and hot_emails:
+        from tracking_app.tasks import run_autonomous_agent
+        hot_db = Lead.objects.filter(tenant_id=tenant_id, email__in=hot_emails).order_by("-id")
+        for lead in hot_db:
+            run_autonomous_agent.delay(lead_id=lead.id, channels=["email"], tenant_id=tenant_id)
+            lead.status = "in_sequence"
+            lead.save(update_fields=["status"])
+        messages.success(request, f'Launched AI Outreach for {hot_db.count()} HOT leads!')
 
     return redirect('lead-list')
 

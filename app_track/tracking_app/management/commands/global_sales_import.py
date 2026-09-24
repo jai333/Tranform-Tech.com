@@ -162,7 +162,7 @@ class Command(BaseCommand):
                 linkedin_url=row.get("linkedin_url","") or row.get("linkedin","") or None,
                 company_location=location, source="apollo", status="new",
                 icp_score=float(score), icp_score_breakdown=breakdown,
-                notes=("Title: " + row.get("title","") + " | Country: " + country),
+                custom_data={"notes": "Title: " + row.get("title","") + " | Country: " + country},
             )
             leads_to_create.append(lead)
             if tier == "hot" and email:
