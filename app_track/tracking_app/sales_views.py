@@ -907,6 +907,8 @@ def import_leads(request):
         contact_name / name, email, company_name / company,
         phone, linkedin_url / linkedin, industry,
         company_location / location, status, source
+    Also handles the user's custom CSV format with:
+        Business Name, Contact Person, Corporate Email, Generic Email, Phone
     """
 
     if request.method == 'GET':
@@ -921,7 +923,12 @@ def import_leads(request):
         try:
             raw_text = uploaded_file.read().decode('utf-8-sig')
         except UnicodeDecodeError:
-            raw_text = uploaded_file.read().decode('latin-1')
+            try:
+                uploaded_file.seek(0)
+                raw_text = uploaded_file.read().decode('latin-1')
+            except Exception:
+                messages.error(request, 'Could not read the file. Please ensure it is a valid CSV.')
+                return redirect('import-leads')
     else:
         raw_text = request.POST.get('csv_text', '').strip()
 
@@ -929,124 +936,215 @@ def import_leads(request):
         messages.error(request, 'No data provided. Please upload a CSV file or paste CSV text.')
         return redirect('import-leads')
 
-    # ── Parse CSV ─────────────────────────────────────────────────
-    reader = csv.DictReader(io.StringIO(raw_text))
-    # Normalise headers to lowercase, strip whitespace
     try:
-        reader.fieldnames = [h.strip().lower().replace(' ', '_') for h in reader.fieldnames]
-    except TypeError:
-        messages.error(request, 'Could not read headers. Make sure the first line contains column names.')
-        return redirect('import-leads')
+        # ── Parse CSV ─────────────────────────────────────────────
+        reader = csv.DictReader(io.StringIO(raw_text))
+        try:
+            reader.fieldnames = [h.strip().lower().replace(' ', '_') for h in (reader.fieldnames or [])]
+        except TypeError:
+            messages.error(request, 'Could not read headers. Make sure the first line contains column names.')
+            return redirect('import-leads')
 
-    ALIASES = {
-        'name': 'contact_name',
-        'full_name': 'contact_name',
-        'company': 'company_name',
-        'organisation': 'company_name',
-        'organization': 'company_name',
-        'linkedin': 'linkedin_url',
-        'linkedin_profile': 'linkedin_url',
-        'location': 'company_location',
-        'city': 'company_location',
-    }
+        ALIASES = {
+            'name': 'contact_name',
+            'full_name': 'contact_name',
+            'company': 'company_name',
+            'organisation': 'company_name',
+            'organization': 'company_name',
+            'linkedin': 'linkedin_url',
+            'linkedin_profile': 'linkedin_url',
+            'location': 'company_location',
+            'city': 'company_location',
+            'business_name': 'company_name',
+            'contact_person': 'contact_name',
+            'corporate_email': 'email',
+        }
 
-    leads_to_create = []
-    skipped = 0
-    from tracking_app.management.commands.global_sales_import import score_lead
-    import re
-    
-    tenant_id = getattr(request.user, 'tenant_id', None)
-    
-    deploy_agents = request.POST.get('deploy_agents') == 'on'
-    hot_emails = []
+        # Inline ICP scoring — no external imports needed
+        HIGH_VALUE_TITLES = {'ceo', 'cto', 'coo', 'cfo', 'founder', 'owner', 'president',
+                             'vp', 'director', 'head', 'managing director', 'md', 'partner'}
+        HIGH_VALUE_INDUSTRIES = {'staffing', 'recruiting', 'hr', 'saas', 'technology', 'fintech',
+                                 'healthcare', 'consulting', 'it services'}
 
-    for row in reader:
-        # Resolve aliases
-        for k_alias, k_real in ALIASES.items():
-            if k_alias in row and row[k_alias] and not row.get(k_real):
-                row[k_real] = row[k_alias]
+        def simple_icp_score(row):
+            score = 0
+            title = (row.get('title') or row.get('contact_name') or '').lower()
+            industry = (row.get('industry') or '').lower()
+            email = row.get('email') or ''
+            phone = row.get('phone') or ''
 
-        first_contact = row.get("contact_person", "") or row.get("contact_name", "")
-        match = re.search(r'^(?:Mr\.|Ms\.|Mrs\.)?\s*([^(]+?)\s*(?:\((.*?)\))?$', first_contact)
-        if match:
-            name = match.group(1).strip()
-            title = match.group(2)
-            row["title"] = title.strip() if title else ""
-            parts = name.split()
-            if len(parts) >= 2:
-                row["first_name"] = parts[0]
-                row["last_name"] = " ".join(parts[1:])
+            # Title score (0-35)
+            for t in HIGH_VALUE_TITLES:
+                if t in title:
+                    score += 35
+                    break
             else:
-                row["first_name"] = name
-                row["last_name"] = ""
-        else:
-            row["first_name"] = first_contact
-            row["last_name"] = ""
-            row["title"] = ""
-            
-        email = row.get("corporate_email", "")
-        if not email:
-            email = row.get("generic_email", "")
-        if not email:
-            email = row.get("email", "")
-            
-        email = email.split(",")[0].strip()
-        email = re.sub(r'\(.*?\)', '', email).strip()
-        row["email"] = email
-        row["company_name"] = row.get("business_name", "") or row.get("company_name", "")
-        row["phone"] = row.get("phone", "")
-        
-        if not row.get("industry"):
-            row["industry"] = "Staffing"
+                score += 10  # any title
 
-        score, breakdown = score_lead(row)
+            # Industry score (0-25)
+            for ind in HIGH_VALUE_INDUSTRIES:
+                if ind in industry:
+                    score += 25
+                    break
 
-        if not email and not row.get('phone'):
-            skipped += 1
-            continue
-            
-        if email and Lead.objects.filter(tenant_id=tenant_id, email=email).exists():
-            skipped += 1
-            continue
+            # Email quality (0-20)
+            if email and '@' in email:
+                if not any(x in email for x in ['gmail', 'yahoo', 'hotmail', 'outlook']):
+                    score += 20  # corporate email
+                else:
+                    score += 8
 
-        first = row.get("first_name","")
-        last = row.get("last_name","")
-        contact_name = f"{first} {last}".strip() or row.get("contact_name", "Unknown")
+            # Phone present (0-10)
+            if phone and len(phone.strip()) >= 7:
+                score += 10
 
-        lead = Lead(
-            tenant_id=tenant_id,
-            contact_name=contact_name,
-            email=email or None,
-            company_name=row.get('company_name', ''),
-            phone=row.get('phone', '') or None,
-            linkedin_url=row.get('linkedin_url', '') or None,
-            industry=row.get('industry', ''),
-            company_location=row.get('company_location', ''),
-            status='new',
-            source='manual',
-            icp_score=float(score),
-            icp_score_breakdown=breakdown,
-            custom_data={"notes": "Title: " + row.get("title","")}
-        )
-        leads_to_create.append(lead)
-        
-        if score >= 70 and email:
-            hot_emails.append(email)
+            # Cap at 100
+            return min(score, 100)
 
-    with transaction.atomic():
-        Lead.objects.bulk_create(leads_to_create, ignore_conflicts=True)
+        tenant_id = getattr(request.user, 'tenant_id', None)
+        deploy_agents = request.POST.get('deploy_agents') == 'on'
 
-    imported = len(leads_to_create)
-    messages.success(request, f'Successfully imported {imported} leads. ({skipped} skipped/duplicates).')
-    
-    if deploy_agents and hot_emails:
-        from tracking_app.tasks import run_autonomous_agent
-        hot_db = Lead.objects.filter(tenant_id=tenant_id, email__in=hot_emails).order_by("-id")
-        for lead in hot_db:
-            run_autonomous_agent.delay(lead_id=lead.id, channels=["email"], tenant_id=tenant_id)
-            lead.status = "in_sequence"
-            lead.save(update_fields=["status"])
-        messages.success(request, f'Launched AI Outreach for {hot_db.count()} HOT leads!')
+        leads_to_create = []
+        skipped = 0
+        hot_lead_ids = []
+        errors = []
+
+        rows = list(reader)
+        if not rows:
+            messages.warning(request, 'The CSV appears to be empty (no data rows found).')
+            return redirect('import-leads')
+
+        for row in rows:
+            try:
+                # Resolve aliases on headers
+                for k_alias, k_real in ALIASES.items():
+                    if k_alias in row and row.get(k_alias) and not row.get(k_real):
+                        row[k_real] = row[k_alias]
+
+                # Parse Contact Person field (e.g. "Mr. John Smith (CEO)")
+                contact_raw = (row.get('contact_name') or '').strip()
+                import re as _re
+                m = _re.search(r'^(?:Mr\.|Ms\.|Mrs\.|Dr\.)?\s*([^(]+?)\s*(?:\(([^)]*)\))?$', contact_raw)
+                if m:
+                    name_clean = m.group(1).strip()
+                    title = (m.group(2) or '').strip()
+                else:
+                    name_clean = contact_raw
+                    title = ''
+                row['title'] = title
+                contact_name = name_clean or 'Unknown'
+
+                # Resolve email — prefer corporate, fall back to generic
+                email = (row.get('email') or '').strip()
+                if not email:
+                    email = (row.get('generic_email') or '').strip()
+                # Clean: strip (Accept_all) notes and take first value if comma-separated
+                email = email.split(',')[0]
+                email = _re.sub(r'\([^)]*\)', '', email).strip().lower()
+                if email and '@' not in email:
+                    email = ''
+
+                phone = _re.sub(r'[^0-9+\-\s()]', '', (row.get('phone') or '')).strip() or None
+                company = (row.get('company_name') or '').strip()
+                industry = (row.get('industry') or 'Staffing').strip()
+                location = (row.get('company_location') or row.get('location') or '').strip()
+                linkedin = (row.get('linkedin_url') or '').strip() or None
+                source_raw = (row.get('source') or 'manual').strip().lower()
+                valid_sources = [s[0] for s in Lead.SOURCE_CHOICES]
+                source = source_raw if source_raw in valid_sources else 'manual'
+
+                # Skip rows with no contact method at all
+                if not email and not phone:
+                    skipped += 1
+                    continue
+
+                # Skip duplicates (same email in this tenant)
+                if email and Lead.objects.filter(tenant_id=tenant_id, email=email).exists():
+                    skipped += 1
+                    continue
+
+                row['title'] = title
+                row['email'] = email
+                row['industry'] = industry
+                icp_score = simple_icp_score(row)
+
+                lead_obj = Lead(
+                    tenant_id=tenant_id,
+                    contact_name=contact_name,
+                    email=email or None,
+                    company_name=company or 'Unknown',
+                    phone=phone,
+                    linkedin_url=linkedin,
+                    industry=industry,
+                    company_location=location,
+                    status='new',
+                    source=source,
+                    icp_score=float(icp_score),
+                    custom_data={'title': title, 'notes': f'Imported via CSV. Title: {title}'},
+                )
+                leads_to_create.append(lead_obj)
+
+            except Exception as row_err:
+                errors.append(str(row_err))
+                continue
+
+        # ── Bulk insert ──────────────────────────────────────────
+        with transaction.atomic():
+            created_objs = Lead.objects.bulk_create(leads_to_create, ignore_conflicts=True)
+
+        imported = len(leads_to_create)
+        msg = f'✅ {imported} lead{"s" if imported != 1 else ""} imported'
+        if skipped:
+            msg += f', {skipped} duplicate{"s" if skipped != 1 else ""} skipped'
+        if errors:
+            msg += f', {len(errors)} row{"s" if len(errors) != 1 else ""} had errors'
+        msg += '.'
+        messages.success(request, msg)
+
+        # ── Optionally launch AI outreach for hot leads ──────────
+        if deploy_agents and imported > 0:
+            try:
+                import threading
+                hot_leads = Lead.objects.filter(
+                    tenant_id=tenant_id, icp_score__gte=70, status='new'
+                ).order_by('-icp_score')[:50]  # cap at 50
+
+                from tracking_app.outreach_agent import run_full_outreach
+                from tracking_app.models import Tenant
+
+                tenant_obj = None
+                if tenant_id:
+                    try:
+                        tenant_obj = Tenant.objects.get(id=tenant_id)
+                    except Exception:
+                        pass
+
+                hot_count = 0
+                for hl in hot_leads:
+                    hl.status = 'in_sequence'
+                    hl.save(update_fields=['status'])
+                    t = threading.Thread(
+                        target=run_full_outreach,
+                        kwargs={'lead_id': hl.id, 'channels': ['email'], 'tenant': tenant_obj},
+                        daemon=True,
+                    )
+                    t.start()
+                    hot_count += 1
+
+                if hot_count:
+                    messages.success(request, f'🔥 AI Outreach launched for {hot_count} hot lead{"s" if hot_count != 1 else ""}!')
+            except Exception as agent_err:
+                # Never let agent dispatch crash the whole import
+                messages.warning(request, f'Leads imported OK, but agent dispatch had an issue: {agent_err}')
+
+        for err in errors[:3]:
+            messages.warning(request, f'Row error: {err}')
+
+    except Exception as e:
+        import traceback
+        logger.error(f'import_leads crash: {traceback.format_exc()}')
+        messages.error(request, f'Import failed: {e}')
+        return redirect('import-leads')
 
     return redirect('lead-list')
 
