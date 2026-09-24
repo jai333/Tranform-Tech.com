@@ -936,12 +936,16 @@ def import_leads(request):
         messages.error(request, 'No data provided. Please upload a CSV file or paste CSV text.')
         return redirect('import-leads')
 
-    # ── Normalize line endings (Windows \r\n, old Mac \r → Unix \n) ──
+    # ── Normalize line endings: strip ALL carriage returns before CSV parsing ──
     raw_text = raw_text.replace('\r\n', '\n').replace('\r', '\n')
+    # Strip blank lines that can confuse the parser
+    raw_text = '\n'.join(line for line in raw_text.splitlines() if line.strip())
 
     try:
         # ── Parse CSV ─────────────────────────────────────────────
-        reader = csv.DictReader(io.StringIO(raw_text))
+        # newline='' tells StringIO not to do any newline translation;
+        # the csv module handles all variants itself
+        reader = csv.DictReader(io.StringIO(raw_text, newline=''))
         try:
             reader.fieldnames = [h.strip().lower().replace(' ', '_') for h in (reader.fieldnames or [])]
         except TypeError:
