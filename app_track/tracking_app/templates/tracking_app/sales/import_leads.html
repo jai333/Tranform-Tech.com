@@ -107,6 +107,18 @@
             background: none; border: none; cursor: pointer; padding: 0; transition: color .2s;
             display: inline-flex; align-items: center; gap: 4px; margin-left: auto; }
         .paste-example-btn:hover { color: var(--primary); }
+
+        /* ── Nav buttons (Dashboard / Leads links in top bar) ── */
+        .btn-sm {
+            padding: 6px 12px; font-size: 0.8rem; border-radius: 6px;
+            border: 1px solid var(--secondary); background: none;
+            color: var(--text-gray); cursor: pointer; text-decoration: none;
+            display: inline-flex; align-items: center; gap: 4px;
+            transition: all 0.2s;
+        }
+        .btn-sm:hover { border-color: var(--primary); color: var(--primary); }
+        .btn-sm.cyan { background: var(--primary); color: #000; border-color: var(--primary); font-weight: 600; }
+        .btn-sm.cyan:hover { background: #00c4d8; }
     </style>
 </head>
 <body>
