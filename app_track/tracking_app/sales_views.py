@@ -936,6 +936,9 @@ def import_leads(request):
         messages.error(request, 'No data provided. Please upload a CSV file or paste CSV text.')
         return redirect('import-leads')
 
+    # ── Normalize line endings (Windows \r\n, old Mac \r → Unix \n) ──
+    raw_text = raw_text.replace('\r\n', '\n').replace('\r', '\n')
+
     try:
         # ── Parse CSV ─────────────────────────────────────────────
         reader = csv.DictReader(io.StringIO(raw_text))
