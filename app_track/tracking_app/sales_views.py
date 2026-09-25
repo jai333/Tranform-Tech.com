@@ -1050,12 +1050,17 @@ def import_leads(request):
                 email = _re.sub(r'\([^)]*\)', '', email).strip().lower()
                 if email and '@' not in email:
                     email = ''
+                email = email[:254]  # RFC 5321 max email length
 
-                phone = _re.sub(r'[^0-9+\-\s()]', '', (row.get('phone') or '')).strip() or None
-                company = (row.get('company_name') or '').strip()
-                industry = (row.get('industry') or 'Staffing').strip()
-                location = (row.get('company_location') or row.get('location') or '').strip()
-                linkedin = (row.get('linkedin_url') or '').strip() or None
+                phone_raw = _re.sub(r'[^0-9+\-\s()]', '', (row.get('phone') or '')).strip()
+                phone = phone_raw[:30] if phone_raw else None  # DB max_length=30
+                contact_name = contact_name[:200]
+                company = (row.get('company_name') or '').strip()[:200]
+                industry = (row.get('industry') or 'Staffing').strip()[:100]
+                location = (row.get('company_location') or row.get('location') or '').strip()[:255]
+                linkedin = ((row.get('linkedin_url') or '').strip() or None)
+                if linkedin:
+                    linkedin = linkedin[:500]  # URLField, generous limit
                 source_raw = (row.get('source') or 'manual').strip().lower()
                 valid_sources = [s[0] for s in Lead.SOURCE_CHOICES]
                 source = source_raw if source_raw in valid_sources else 'manual'
