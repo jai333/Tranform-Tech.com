@@ -69,10 +69,10 @@
 
             <div class="flex gap-sm">
                 {% if user.is_authenticated %}
-                <a href="{% url 'it-helpdesk-list' %}" class="btn btn-cyan font-mono">/DASHBOARD</a>
+                <a href="{% url 'it-helpdesk-list' %}" class="btn btn-cyan font-mono">DASHBOARD</a>
                 {% else %}
-                <a href="{% url 'login' %}" style="color:var(--text-gray); margin-right:16px; padding-top:10px;" class="font-mono text-sm">/LOGIN</a>
-                <a href="{% url 'register' %}" class="btn btn-outline font-mono">/GET_STARTED</a>
+                <a href="{% url 'login' %}" style="color:var(--text-gray); margin-right:16px; padding-top:10px;" class="font-mono text-sm">LOGIN</a>
+                <a href="{% url 'register' %}" class="btn btn-outline font-mono">GET STARTED</a>
                 {% endif %}
             </div>
         </div>
