@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy, reverse
 from django.contrib.auth.decorators import login_required, user_passes_test
-from .decorators import paid_required, require_ats_access, require_it_access, require_executive_access, require_tier
+from .decorators import paid_required, require_ats_access, require_it_access, require_sales_access, require_executive_access, require_tier
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth import login, authenticate
 from django.contrib import messages
@@ -3271,12 +3271,16 @@ def api_global_search(request):
         return JsonResponse({'results': []})
         
     results = []
+    tenant = getattr(request.user, 'tenant', None)
+    tenant_filter = models.Q(tenant=tenant) if tenant else models.Q(tenant__isnull=True)
     
     # 1. Search Candidates
     candidates = Candidate.objects.filter(
-        models.Q(first_name__icontains=query) | 
-        models.Q(last_name__icontains=query) | 
-        models.Q(email__icontains=query)
+        tenant_filter & (
+            models.Q(first_name__icontains=query) | 
+            models.Q(last_name__icontains=query) | 
+            models.Q(email__icontains=query)
+        )
     )[:3]
     for c in candidates:
         results.append({
@@ -3291,8 +3295,10 @@ def api_global_search(request):
     # 2. Search IT Tickets (if IT agent/admin)
     if request.user.is_it_agent or request.user.is_it_admin or request.user.is_staff:
         tickets = ITTicket.objects.filter(
-            models.Q(title__icontains=query) | 
-            models.Q(description__icontains=query)
+            tenant_filter & (
+                models.Q(title__icontains=query) | 
+                models.Q(description__icontains=query)
+            )
         )[:3]
         for t in tickets:
             results.append({
@@ -3306,7 +3312,7 @@ def api_global_search(request):
             
     # 3. Search B2B Accounts
     from .sales_models import Account as SalesAccount, Deal
-    accounts = SalesAccount.objects.filter(name__icontains=query)[:3]
+    accounts = SalesAccount.objects.filter(tenant_filter, name__icontains=query)[:3]
     for a in accounts:
         results.append({
             'type': 'Account',
@@ -3318,7 +3324,7 @@ def api_global_search(request):
         })
         
     # 4. Search Deals
-    deals = Deal.objects.filter(lead__company_name__icontains=query)[:3]
+    deals = Deal.objects.filter(tenant_filter, lead__company_name__icontains=query)[:3]
     for d in deals:
         results.append({
             'type': 'Deal',
@@ -3331,7 +3337,7 @@ def api_global_search(request):
         
     # 5. Search IT Assets
     from tracking_app.models import ITAsset, ITVendor, ThreatIncident
-    assets = ITAsset.objects.filter(name__icontains=query)[:3]
+    assets = ITAsset.objects.filter(tenant_filter, name__icontains=query)[:3]
     for ast in assets:
         results.append({
             'type': 'IT Asset',
@@ -3343,7 +3349,7 @@ def api_global_search(request):
         })
 
     # 6. Search IT Vendors
-    vendors = ITVendor.objects.filter(name__icontains=query)[:3]
+    vendors = ITVendor.objects.filter(tenant_filter, name__icontains=query)[:3]
     for v in vendors:
         results.append({
             'type': 'IT Vendor',
@@ -3355,7 +3361,7 @@ def api_global_search(request):
         })
 
     # 7. Search Security Threats
-    threats = ThreatIncident.objects.filter(title__icontains=query)[:3]
+    threats = ThreatIncident.objects.filter(tenant_filter, title__icontains=query)[:3]
     for t in threats:
         results.append({
             'type': 'Security Threat',

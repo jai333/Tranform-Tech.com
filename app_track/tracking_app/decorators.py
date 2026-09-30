@@ -5,15 +5,14 @@ from functools import wraps
 def paid_required(view_func):
     """
     Decorator for views that checks that the user's tenant has an active paid subscription.
-    If the user is an admin or staff, they bypass this check.
     If the user's tenant is on a 'free' plan, redirects to the billing page.
     """
     @wraps(view_func)
     def _wrapped_view(request, *args, **kwargs):
         user = request.user
         
-        # Admins or users with explicit permissions bypass the paywall
-        if user.is_staff or user.is_superuser or user.is_admin_role or user.can_view_it or user.can_view_ats or user.can_view_sales or user.can_view_executive:
+        # Only global platform admins/staff bypass the paywall
+        if user.is_staff or user.is_superuser:
             return view_func(request, *args, **kwargs)
             
         # Ensure user has a tenant
@@ -82,7 +81,7 @@ def require_tier(min_tier):
     def decorator(view_func):
         @wraps(view_func)
         def _wrapped_view(request, *args, **kwargs):
-            if request.user.is_superuser or request.user.is_staff or request.user.is_admin_role or request.user.can_view_it or request.user.can_view_ats or request.user.can_view_sales or request.user.can_view_executive:
+            if request.user.is_superuser or request.user.is_staff:
                 return view_func(request, *args, **kwargs)
                 
             tenant = request.user.tenant
