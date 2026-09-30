@@ -46,8 +46,8 @@ def _ai(system, user, max_tokens=600):
     base_url = os.environ.get("OPENAI_BASE_URL", "").strip()
     
     if not api_key:
+        logger.error("AI Generation Skipped — OPENAI_API_KEY / GEMINI_API_KEY is not configured.")
         return ""
-        
     try:
         # Native Gemini API Call (Supports new AQ. keys and legacy AIza keys)
         if "generativelanguage" in base_url or api_key.startswith("AQ.") or api_key.startswith("AIza"):
@@ -284,39 +284,24 @@ def execute_sms(run, lead, tenant):
         account_sid = os.environ.get("TWILIO_ACCOUNT_SID")
         auth_token  = os.environ.get("TWILIO_AUTH_TOKEN")
         from_phone  = os.environ.get("TWILIO_PHONE_NUMBER")
-        simulated   = False
-        sid         = None
 
-        if account_sid and auth_token and from_phone and from_phone != "+1234567890":
-            # Normalize phone for Twilio (assumes India +91 if exactly 10 digits)
-            target_phone = lead.phone.strip()
-            if len(target_phone) == 10 and target_phone.isdigit():
-                target_phone = "+91" + target_phone
-            elif not target_phone.startswith("+"):
-                target_phone = "+" + target_phone
+        if not account_sid or not auth_token or not from_phone or from_phone == "+1234567890":
+            run.sms_status = "skipped"
+            run.save(update_fields=["sms_status"])
+            _log(run, lead, tenant, "warning", "sms", "SMS skipped — Twilio not configured")
+            return False
 
-            try:
-                from twilio.rest import Client
-                client  = Client(account_sid, auth_token)
-                message = client.messages.create(body=run.sms_body, to=target_phone, from_=from_phone)
-                sid     = message.sid
-            except Exception as err:
-                # Retry with Trial Template if restricted
-                if "predefined SMS templates" in str(err) or "trial" in str(err).lower():
-                    try:
-                        message = client.messages.create(body="sms_appointment_reminders", to=target_phone, from_=from_phone)
-                        sid = message.sid
-                    except Exception as fallback_err:
-                        logger.warning("Twilio Trial SMS also failed, simulating: %s", fallback_err)
-                        simulated = True
-                        sid = "SIM_" + target_phone.replace("+","")
-                else:
-                    logger.warning("Twilio SMS failed, simulating: %s", err)
-                    simulated = True
-                    sid = "SIM_" + target_phone.replace("+","")
-        else:
-            simulated = True
-            sid = "SIM_" + lead.phone.replace("+","").replace(" ","")
+        # Normalize phone for Twilio (assumes India +91 if exactly 10 digits)
+        target_phone = lead.phone.strip()
+        if len(target_phone) == 10 and target_phone.isdigit():
+            target_phone = "+91" + target_phone
+        elif not target_phone.startswith("+"):
+            target_phone = "+" + target_phone
+
+        from twilio.rest import Client
+        client  = Client(account_sid, auth_token)
+        message = client.messages.create(body=run.sms_body, to=target_phone, from_=from_phone)
+        sid     = message.sid
 
         run.sms_status  = "sent"
         run.sms_sent_at = tz.now()
@@ -324,7 +309,7 @@ def execute_sms(run, lead, tenant):
         run.save(update_fields=["sms_status", "sms_sent_at", "sms_sid"])
         _log(run, lead, tenant, "success", "sms",
              f"SMS sent to {lead.phone}",
-             {"phone": lead.phone, "sid": sid, "simulated": simulated})
+             {"phone": lead.phone, "sid": sid})
         return True
 
     except Exception as e:
@@ -346,42 +331,35 @@ def execute_call(run, lead, tenant):
         account_sid = os.environ.get("TWILIO_ACCOUNT_SID")
         auth_token  = os.environ.get("TWILIO_AUTH_TOKEN")
         from_phone  = os.environ.get("TWILIO_PHONE_NUMBER")
-        simulated   = False
-        sid         = None
+
+        if not account_sid or not auth_token or not from_phone or from_phone == "+1234567890":
+            run.call_status = "skipped"
+            run.save(update_fields=["call_status"])
+            _log(run, lead, tenant, "warning", "call", "Call skipped — Twilio not configured")
+            return False
 
         script_safe = (run.call_script
                        .replace("&","&amp;").replace("<","&lt;").replace(">","&gt;"))
         twiml = f"<Response><Say voice='Polly.Joanna'>{script_safe}</Say></Response>"
 
-        if account_sid and auth_token and from_phone and from_phone != "+1234567890":
-            # Normalize phone
-            target_phone = lead.phone.strip()
-            if len(target_phone) == 10 and target_phone.isdigit():
-                target_phone = "+91" + target_phone
-            elif not target_phone.startswith("+"):
-                target_phone = "+" + target_phone
+        # Normalize phone
+        target_phone = lead.phone.strip()
+        if len(target_phone) == 10 and target_phone.isdigit():
+            target_phone = "+91" + target_phone
+        elif not target_phone.startswith("+"):
+            target_phone = "+" + target_phone
 
-            try:
-                from twilio.rest import Client
-                client = Client(account_sid, auth_token)
-                call   = client.calls.create(twiml=twiml, to=target_phone, from_=from_phone)
-                sid    = call.sid
-            except Exception as err:
-                if "trial" in str(err).lower() or "disallowed" in str(err).lower():
-                    try:
-                        call = client.calls.create(url="https://webhooks.twilio.com/v1/Voice/Template/voice_speech_recognition", to=target_phone, from_=from_phone)
-                        sid = call.sid
-                    except Exception as fallback_err:
-                        logger.warning("Twilio Trial call also failed, simulating: %s", fallback_err)
-                        simulated = True
-                        sid = "SIM_CALL_" + target_phone.replace("+","")
-                else:
-                    logger.warning("Twilio call failed, simulating: %s", err)
-                    simulated = True
-                    sid = "SIM_CALL_" + target_phone.replace("+","")
-        else:
-            simulated = True
-            sid = "SIM_CALL_" + lead.phone.replace("+","").replace(" ","")
+        from twilio.rest import Client
+        client = Client(account_sid, auth_token)
+        try:
+            call = client.calls.create(twiml=twiml, to=target_phone, from_=from_phone)
+        except Exception as err:
+            if "trial" in str(err).lower() or "disallowed" in str(err).lower():
+                call = client.calls.create(url="https://webhooks.twilio.com/v1/Voice/Template/voice_speech_recognition", to=target_phone, from_=from_phone)
+            else:
+                raise err
+                
+        sid = call.sid
 
         run.call_status       = "initiated"
         run.call_sid          = sid
@@ -389,7 +367,7 @@ def execute_call(run, lead, tenant):
         run.save(update_fields=["call_status", "call_sid", "call_initiated_at"])
         _log(run, lead, tenant, "success", "call",
              f"Call initiated to {lead.phone}",
-             {"phone": lead.phone, "sid": sid, "simulated": simulated})
+             {"phone": lead.phone, "sid": sid})
         return True
 
     except Exception as e:

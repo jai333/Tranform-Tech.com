@@ -1514,7 +1514,6 @@ def api_radar_poll(request):
         search_company_news,
         analyze_signal_and_draft_email,
         generate_synthetic_signal_and_draft_email,
-        _hardcoded_fallback,
     )
     import random
 
@@ -1524,22 +1523,9 @@ def api_radar_poll(request):
     qs = Lead.objects.filter(tenant=tenant).exclude(company_name='').exclude(company_name__isnull=True)
     leads_pool = list(qs.order_by('?')[:30])   # random sample without Python shuffle
 
-    # If no real leads at all, create plausible dummy companies
+    # If no real leads at all, return empty
     if not leads_pool:
-        dummy_companies = [
-            {'name': 'Acme Staffing Solutions', 'industry': 'Staffing'},
-            {'name': 'TechHire Inc', 'industry': 'Technology'},
-            {'name': 'Global Recruit Partners', 'industry': 'Recruiting'},
-        ]
-        results = []
-        for dc in dummy_companies[:3]:
-            try:
-                sig = _hardcoded_fallback(dc['name'])
-                sig['source'] = 'Transform-Tech Intelligence'
-                results.append(sig)
-            except Exception:
-                pass
-        return JsonResponse({'signals': results, 'count': len(results)})
+        return JsonResponse({'signals': [], 'count': 0})
 
     # Sample up to 3 leads
     num_signals = min(len(leads_pool), 3)
@@ -1550,7 +1536,7 @@ def api_radar_poll(request):
         company_name = (lead.company_name or 'Unknown').strip()
         industry = lead.industry or ''
         try:
-            # Try live news → AI analysis → synthetic AI → hardcoded fallback
+            # Try live news → AI analysis → synthetic AI
             signal_data = None
             try:
                 news_text = search_company_news(company_name)
@@ -1566,7 +1552,7 @@ def api_radar_poll(request):
                     pass
 
             if not signal_data:
-                signal_data = _hardcoded_fallback(company_name)
+                return None
 
             # ── Try to persist draft email (best-effort, never crash if it fails) ──
             email_id = None
@@ -1599,11 +1585,7 @@ def api_radar_poll(request):
             }
         except Exception as e:
             logger.error(f"Radar: fatal error processing {company_name}: {e}")
-            # Last resort — return a hardcoded signal so the radar NEVER shows empty
-            try:
-                return _hardcoded_fallback(company_name)
-            except Exception:
-                return None
+            return None
 
     # Run in parallel with fallback to sequential if ThreadPoolExecutor fails
     results = []
@@ -1625,14 +1607,12 @@ def api_radar_poll(request):
             if res:
                 results.append(res)
 
-    # If we still somehow have nothing, return hardcoded signals for 3 random leads
     if not results:
-        for lead in selected_leads[:3]:
-            try:
-                sig = _hardcoded_fallback(lead.company_name or 'Target Company')
-                results.append(sig)
-            except Exception:
-                pass
+        return JsonResponse({
+            'signals': [],
+            'count': 0,
+            'config_error': 'GEMINI_API_KEY or OPENAI_API_KEY is not configured. Add an API key to enable live AI signals.'
+        })
 
     return JsonResponse({'signals': results, 'count': len(results)})
 

@@ -210,41 +210,4 @@ Return EXACTLY a JSON object with the following structure, and nothing else. Do 
 
     except Exception as e:
         logger.error(f"Error generating synthetic signal for {company_name}: {e}")
-        return _hardcoded_fallback(company_name)
-
-
-def _hardcoded_fallback(company_name):
-    """Last-resort fallback when all AI calls fail."""
-    import random
-    events = [
-        ("Planning to double local headcount next year.", "Hiring Surge"),
-        ("Undergoing digital transformation of HR systems.", "Digital Transformation"),
-        ("Recently secured private funding for expansion.", "Funding Round"),
-        ("Opening a new regional office in the upcoming quarter.", "Expansion"),
-        ("Revamping executive leadership team with new C-suite hires.", "Leadership Change"),
-        ("Launching a new product line requiring significant talent acquisition.", "Product Launch"),
-    ]
-
-    event, signal_type = random.choice(events)
-    is_hot   = random.random() < 0.3
-    confidence = random.randint(50, 80)
-    source   = random.choice(SIGNAL_SOURCES)
-
-    draft = (
-        f"Hi there,\n\nI noticed {company_name} is {event.lower()} "
-        f"This is a critical time for scaling your talent acquisition.\n\n"
-        f"Transform-Tech is an enterprise ATS & CRM platform designed specifically "
-        f"to streamline these exact scenarios. I'd love to show you how we can help "
-        f"{company_name} achieve its growth goals more efficiently.\n\n"
-        f"Are you open to a brief chat next week?\n\nBest,\nThe Transform-Tech Team"
-    )
-
-    return {
-        "company":     company_name,
-        "event":       event,
-        "hot":         is_hot,
-        "confidence":  confidence,
-        "signal_type": signal_type,
-        "source":      source,
-        "draft":       draft,
-    }
+        return None

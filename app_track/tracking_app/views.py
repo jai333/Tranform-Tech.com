@@ -4351,29 +4351,9 @@ def api_sales_radar_poll(request):
             except Exception:
                 pass
 
-        # Tier 3: Hardcoded plausible signal — no API needed
+        # If AI didn't work (no API key), log and skip to next
         if not signal_data:
-            try:
-                signal_data = _hardcoded_fallback(company)
-            except Exception:
-                pass
-
-        # Tier 4: Emergency static signal
-        if not signal_data:
-            signal_data = {
-                'company': company,
-                'event': f'{company} is expanding operations and hiring aggressively.',
-                'hot': True,
-                'confidence': 72,
-                'signal_type': 'Hiring Surge',
-                'source': 'Transform-Tech Intelligence',
-                'draft': (
-                    f"Hi,\n\nI noticed {company} appears to be scaling up significantly. "
-                    f"Transform-Tech's ATS & CRM can help you manage that growth efficiently — "
-                    f"from automated sourcing to AI-scored candidates.\n\n"
-                    f"Would you be open to a 10-minute demo?\n\nBest,\nTransform-Tech Team"
-                ),
-            }
+            continue
 
         # Save draft email (best-effort — never crash the whole response)
         email_id = None
@@ -4401,6 +4381,13 @@ def api_sales_radar_poll(request):
             'signal_type': signal_data.get('signal_type', 'Market Signal'),
             'source':      signal_data.get('source', 'Transform-Tech Intelligence'),
             'lead_id':     lead.id,
+        })
+
+    if not signals:
+        return JsonResponse({
+            'signals': [],
+            'count': 0,
+            'config_error': 'GEMINI_API_KEY or OPENAI_API_KEY is not configured. Add an API key to enable live AI signals.'
         })
 
     return JsonResponse({'signals': signals, 'count': len(signals)})

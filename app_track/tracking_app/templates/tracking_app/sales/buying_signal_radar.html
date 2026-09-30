@@ -773,6 +773,25 @@ async function pollForSignals() {
             sigList = [data.signal];
         }
 
+        if (data.config_error) {
+            console.error('Config Error:', data.config_error);
+            const feed = document.getElementById('feed-container');
+            if (feed && !document.getElementById('config-banner')) {
+                const banner = document.createElement('div');
+                banner.id = 'config-banner';
+                banner.style.padding = '15px';
+                banner.style.marginBottom = '20px';
+                banner.style.background = 'rgba(255, 60, 60, 0.1)';
+                banner.style.border = '1px solid var(--accent-red)';
+                banner.style.borderRadius = '8px';
+                banner.style.color = '#fff';
+                banner.innerHTML = `<strong>⚠️ AI Not Configured</strong><br>${data.config_error}`;
+                feed.prepend(banner);
+            }
+            isPolling = false;
+            return;
+        }
+
         if (!sigList.length) {
             console.log('Radar poll:', data.message);
             isPolling = false;

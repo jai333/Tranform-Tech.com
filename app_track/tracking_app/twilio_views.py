@@ -37,13 +37,12 @@ def api_twilio_call(request):
         from_phone = os.environ.get('TWILIO_PHONE_NUMBER')
 
         if not client or not from_phone:
-            logger.warning(f"Simulating Twilio Call to {to_phone} (Missing Credentials)")
+            logger.error("Twilio not configured.")
             return JsonResponse({
-                'status':    'success',
-                'message':   'Simulated call initiated.',
-                'call_sid':  'SIM_' + to_phone.replace('+', '').replace(' ', ''),
-                'simulated': True
-            })
+                'status': 'error',
+                'message': 'Twilio is not configured. Please add TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, and TWILIO_PHONE_NUMBER to your environment variables.',
+                'action_required': True
+            }, status=400)
 
         call = client.calls.create(
             twiml='<Response><Say>Hello from Transform dot I O. We are connecting you to an enterprise sales representative.</Say></Response>',
@@ -69,13 +68,9 @@ def api_twilio_call_status(request):
         if not call_sid:
             return JsonResponse({'status': 'error', 'message': 'call_sid required.'}, status=400)
 
-        # Simulated call — return synthetic status progression
-        if call_sid.startswith('SIM_'):
-            return JsonResponse({'status': 'success', 'call_status': 'in-progress', 'simulated': True})
-
         client = get_twilio_client()
         if not client:
-            return JsonResponse({'status': 'success', 'call_status': 'in-progress', 'simulated': True})
+            return JsonResponse({'status': 'error', 'message': 'Twilio is not configured.'}, status=400)
 
         call = client.calls(call_sid).fetch()
         return JsonResponse({'status': 'success', 'call_status': call.status})
@@ -101,13 +96,12 @@ def api_twilio_sms(request):
         from_phone = os.environ.get('TWILIO_PHONE_NUMBER')
 
         if not client or not from_phone:
-            logger.warning(f"Simulating Twilio SMS to {to_phone}: {message_body}")
+            logger.error("Twilio not configured.")
             return JsonResponse({
-                'status':      'success',
-                'message':     'Simulated SMS sent.',
-                'message_sid': 'SIM_MSG_' + to_phone.replace('+', '').replace(' ', ''),
-                'simulated':   True
-            })
+                'status': 'error',
+                'message': 'Twilio is not configured. Please add TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, and TWILIO_PHONE_NUMBER to your environment variables.',
+                'action_required': True
+            }, status=400)
 
         message = client.messages.create(
             body=message_body,
