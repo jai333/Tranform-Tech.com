@@ -39,14 +39,18 @@ Your tone: confident, warm, human — never corporate or spammy.
 def _get_ai_client():
     pass  # Deprecated
 
-def _ai(system, user, max_tokens=600):
+def _ai(system, user, max_tokens=600, tenant=None):
     import os
     import requests
-    api_key  = os.environ.get("OPENAI_API_KEY", "").strip()
+    api_key  = (tenant.openai_api_key if tenant and tenant.openai_api_key else None) or \
+               (tenant.gemini_api_key if tenant and tenant.gemini_api_key else None) or \
+               os.environ.get("OPENAI_API_KEY", "").strip() or \
+               os.environ.get("GEMINI_API_KEY", "").strip()
+               
     base_url = os.environ.get("OPENAI_BASE_URL", "").strip()
     
     if not api_key:
-        logger.error("AI Generation Skipped — OPENAI_API_KEY / GEMINI_API_KEY is not configured.")
+        logger.error("AI Generation Skipped — API key is not configured for this tenant or globally.")
         return ""
     try:
         # Native Gemini API Call (Supports new AQ. keys and legacy AIza keys)
@@ -85,19 +89,6 @@ def _ai(system, user, max_tokens=600):
     except Exception as e:
         logger.error("AI call failed: %s", e)
         return ""
-    try:
-        resp = client.chat.completions.create(
-            model=model,
-            messages=[
-                {"role": "system", "content": system},
-                {"role": "user",   "content": user},
-            ],
-            temperature=0.78,
-            max_tokens=max_tokens,
-        )
-        return resp.choices[0].message.content.strip()
-    except Exception as e:
-        logger.error("AI call failed: %s", e)
         return ""
 
 
@@ -135,7 +126,7 @@ def generate_email_content(lead):
         f"Return EXACTLY this JSON (no markdown fences):\n"
         f'{{ "subject": "<compelling subject under 60 chars>", "body": "<3-4 short paragraphs, use {first_name}>" }}'
     )
-    raw = _ai(system, user, max_tokens=800)
+    raw = _ai(system, user, max_tokens=800, tenant=lead.tenant)
     try:
         clean = raw.strip().removeprefix("```json").removeprefix("```").removesuffix("```").strip()
         data  = json.loads(clean)
@@ -168,7 +159,7 @@ def generate_sms_content(lead):
         f"Must be under 160 characters, conversational, invite a quick call. "
         f"Return ONLY the SMS text."
     )
-    result = _ai(system, user, max_tokens=100)
+    result = _ai(system, user, max_tokens=100, tenant=lead.tenant)
     if result and len(result) <= 200:
         return result[:160]
     return (
@@ -186,7 +177,7 @@ def generate_call_script(lead):
         f"Write a voicemail drop script for {first_name} at {company} ({industry}). "
         f"Should sound natural when spoken. Return ONLY the script text."
     )
-    result = _ai(system, user, max_tokens=200)
+    result = _ai(system, user, max_tokens=200, tenant=lead.tenant)
     if result and len(result) > 30:
         return result
     return (
@@ -281,9 +272,9 @@ def execute_sms(run, lead, tenant):
             _log(run, lead, tenant, "warning", "sms", "No phone number — skipped")
             return False
 
-        account_sid = os.environ.get("TWILIO_ACCOUNT_SID")
-        auth_token  = os.environ.get("TWILIO_AUTH_TOKEN")
-        from_phone  = os.environ.get("TWILIO_PHONE_NUMBER")
+        account_sid = (tenant.twilio_account_sid if tenant and tenant.twilio_account_sid else None) or os.environ.get("TWILIO_ACCOUNT_SID")
+        auth_token  = (tenant.twilio_auth_token if tenant and tenant.twilio_auth_token else None) or os.environ.get("TWILIO_AUTH_TOKEN")
+        from_phone  = (tenant.twilio_phone_number if tenant and tenant.twilio_phone_number else None) or os.environ.get("TWILIO_PHONE_NUMBER")
 
         if not account_sid or not auth_token or not from_phone or from_phone == "+1234567890":
             run.sms_status = "skipped"
@@ -328,9 +319,9 @@ def execute_call(run, lead, tenant):
             _log(run, lead, tenant, "warning", "call", "No phone number — skipped")
             return False
 
-        account_sid = os.environ.get("TWILIO_ACCOUNT_SID")
-        auth_token  = os.environ.get("TWILIO_AUTH_TOKEN")
-        from_phone  = os.environ.get("TWILIO_PHONE_NUMBER")
+        account_sid = (tenant.twilio_account_sid if tenant and tenant.twilio_account_sid else None) or os.environ.get("TWILIO_ACCOUNT_SID")
+        auth_token  = (tenant.twilio_auth_token if tenant and tenant.twilio_auth_token else None) or os.environ.get("TWILIO_AUTH_TOKEN")
+        from_phone  = (tenant.twilio_phone_number if tenant and tenant.twilio_phone_number else None) or os.environ.get("TWILIO_PHONE_NUMBER")
 
         if not account_sid or not auth_token or not from_phone or from_phone == "+1234567890":
             run.call_status = "skipped"

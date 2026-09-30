@@ -611,18 +611,9 @@ def import_ghost_profile(request):
             pass
             
     elif "linkedin.com/in/" in url:
-        # It's a LinkedIn URL (Mock AI Generation)
-        slug = url.split("/in/")[1].replace("/", "").split("?")[0]
-        parts = slug.split("-")
-        full_name = " ".join([p.capitalize() for p in parts[:2]]) if len(parts) >= 2 else slug.capitalize()
-        company = "Confidential Inc."
-        location = "San Francisco, CA"
-        skills = ["Leadership", "Agile", "Cross-functional Team Leadership", "Product Management"]
-        about = f"Senior professional identified via LinkedIn scraping. Strong background based on profile footprint."
-        score = 88
-        email = f"{slug.replace('-', '.')}@linkedin.local"
+        return JsonResponse({'error': 'LinkedIn scraping requires a dedicated external API key. Please use GitHub URLs for candidate sourcing.'}, status=400)
     else:
-        return JsonResponse({'error': 'Please provide a valid GitHub or LinkedIn URL'}, status=400)
+        return JsonResponse({'error': 'Please provide a valid GitHub URL'}, status=400)
         
     if not email:
         email = f"ghost_{abs(hash(url))}@ghost.local"
@@ -3950,6 +3941,18 @@ def developer_settings_dashboard(request):
             except WebhookEndpoint.DoesNotExist:
                 messages.error(request, "Webhook not found.")
                 
+        elif action == 'save_api_keys':
+            tenant.openai_api_key = request.POST.get('openai_api_key') or ''
+            tenant.gemini_api_key = request.POST.get('gemini_api_key') or ''
+            tenant.twilio_account_sid = request.POST.get('twilio_account_sid') or ''
+            tenant.twilio_auth_token = request.POST.get('twilio_auth_token') or ''
+            tenant.twilio_phone_number = request.POST.get('twilio_phone_number') or ''
+            tenant.save(update_fields=[
+                'openai_api_key', 'gemini_api_key', 
+                'twilio_account_sid', 'twilio_auth_token', 'twilio_phone_number'
+            ])
+            messages.success(request, "External API keys saved successfully.")
+                
         return redirect('developer-settings')
         
     endpoints = WebhookEndpoint.objects.filter(tenant=tenant).order_by('-created_at')
@@ -4340,14 +4343,14 @@ def api_sales_radar_poll(request):
         try:
             news = search_company_news(company)
             if news:
-                signal_data = analyze_signal_and_draft_email(company, news)
+                signal_data = analyze_signal_and_draft_email(company, news, tenant=tenant)
         except Exception:
             pass
 
         # Tier 2: Synthetic AI signal
         if not signal_data:
             try:
-                signal_data = generate_synthetic_signal_and_draft_email(company, industry)
+                signal_data = generate_synthetic_signal_and_draft_email(company, industry, tenant=tenant)
             except Exception:
                 pass
 

@@ -462,6 +462,59 @@ axios.post('https://app.transform.io/api/parse-resume/', form, {
                 </div>
             </div>
         </div>
+
+        <!-- BYOK (Bring Your Own Key) Section -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="dev-card mb-5">
+                    <div class="dev-card-header bg-dark border-bottom border-secondary">
+                        <h5 class="mb-0 fw-bold text-white"><i class="fa-solid fa-key me-2 text-warning"></i> Bring Your Own Keys (BYOK)</h5>
+                        <small class="text-white-50">Configure your own OpenAI, Gemini, and Twilio API keys to power the Autonomous AI agents directly from your own billing accounts.</small>
+                    </div>
+                    <div class="p-4" style="background: var(--apple-card-bg);">
+                        <form method="POST" action="{% url 'developer-settings' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="save_api_keys">
+                            
+                            <h6 class="fw-bold mb-3 mt-2" style="color: var(--apple-text);">AI Generation Models</h6>
+                            <div class="row mb-4">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-secondary small fw-bold text-uppercase">OpenAI API Key (GPT-4o)</label>
+                                    <input type="password" name="openai_api_key" class="form-control" placeholder="sk-..." value="{{ request.user.tenant.openai_api_key|default_if_none:'' }}">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-secondary small fw-bold text-uppercase">Google Gemini API Key</label>
+                                    <input type="password" name="gemini_api_key" class="form-control" placeholder="AIza..." value="{{ request.user.tenant.gemini_api_key|default_if_none:'' }}">
+                                </div>
+                            </div>
+
+                            <hr style="border-color: var(--apple-border-subtle);">
+
+                            <h6 class="fw-bold mb-3 mt-4" style="color: var(--apple-text);">Twilio (Voice & SMS)</h6>
+                            <div class="row mb-3">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label text-secondary small fw-bold text-uppercase">Account SID</label>
+                                    <input type="text" name="twilio_account_sid" class="form-control" placeholder="AC..." value="{{ request.user.tenant.twilio_account_sid|default_if_none:'' }}">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label text-secondary small fw-bold text-uppercase">Auth Token</label>
+                                    <input type="password" name="twilio_auth_token" class="form-control" placeholder="Your Auth Token" value="{{ request.user.tenant.twilio_auth_token|default_if_none:'' }}">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label text-secondary small fw-bold text-uppercase">Phone Number</label>
+                                    <input type="text" name="twilio_phone_number" class="form-control" placeholder="+1234567890" value="{{ request.user.tenant.twilio_phone_number|default_if_none:'' }}">
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-end mt-4">
+                                <button type="submit" class="btn dev-btn-theme px-4"><i class="fa-solid fa-save me-2"></i> Save External Keys</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
 

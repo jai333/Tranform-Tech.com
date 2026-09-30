@@ -7,23 +7,23 @@ from openai import OpenAI
 logger = logging.getLogger(__name__)
 
 # ── Gemini-compatible OpenAI client ──────────────────────────────────────────
-def _get_ai_client():
+def _get_ai_client(tenant=None):
     """
     Returns an OpenAI-SDK client pointed at the Gemini OpenAI-compatible
     endpoint. Falls back to native OpenAI if GEMINI_API_KEY is not set.
     """
-    gemini_key = os.environ.get('GEMINI_API_KEY')
+    gemini_key = (tenant.gemini_api_key if tenant and tenant.gemini_api_key else None) or os.environ.get('GEMINI_API_KEY')
     if gemini_key:
         return OpenAI(
             api_key=gemini_key,
             base_url="https://generativelanguage.googleapis.com/v1beta/openai/"
         ), "gemini-1.5-flash"
 
-    openai_key = os.environ.get('OPENAI_API_KEY')
+    openai_key = (tenant.openai_api_key if tenant and tenant.openai_api_key else None) or os.environ.get('OPENAI_API_KEY')
     if openai_key:
         return OpenAI(api_key=openai_key), "gpt-4o-mini"
 
-    logger.error("No AI API key found (GEMINI_API_KEY or OPENAI_API_KEY).")
+    logger.error("No AI API key found for this tenant or globally (GEMINI_API_KEY or OPENAI_API_KEY).")
     return None, None
 
 
@@ -77,11 +77,11 @@ def search_company_news(company_name):
         return None
 
 
-def analyze_signal_and_draft_email(company_name, news_text):
+def analyze_signal_and_draft_email(company_name, news_text, tenant=None):
     """
     Uses AI to analyze raw news text and generate the enriched JSON signal.
     """
-    client, model = _get_ai_client()
+    client, model = _get_ai_client(tenant)
     if not client:
         return None
 
@@ -149,7 +149,7 @@ def generate_synthetic_signal_and_draft_email(company_name, industry=""):
     email when real news isn't found. Ensures the Strategic Insight Engine
     always has data flowing.
     """
-    client, model = _get_ai_client()
+    client, model = _get_ai_client(tenant)
     if not client:
         return _hardcoded_fallback(company_name)
 

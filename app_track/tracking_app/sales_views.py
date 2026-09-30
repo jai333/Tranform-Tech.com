@@ -1021,6 +1021,12 @@ def import_leads(request):
             messages.warning(request, 'The CSV appears to be empty (no data rows found).')
             return redirect('import-leads')
 
+        # Pre-fetch existing emails to avoid N+1 query timeout (502 error) on large uploads
+        existing_emails = set(Lead.objects.filter(
+            tenant_id=tenant_id, 
+            email__isnull=False
+        ).exclude(email='').values_list('email', flat=True))
+
         for row in rows:
             try:
                 # Resolve aliases on headers
@@ -1071,7 +1077,7 @@ def import_leads(request):
                     continue
 
                 # Skip duplicates (same email in this tenant)
-                if email and Lead.objects.filter(tenant_id=tenant_id, email=email).exists():
+                if email and email in existing_emails:
                     skipped += 1
                     continue
 
@@ -1175,12 +1181,18 @@ def unified_inbox(request):
         action = request.POST.get('action')
         
         if action == 'generate_ai':
-            # AI cold outreach writer
             prompt = request.POST.get('prompt', '')
-            import time
             sender_nm = (tenant.mail_sender_name if tenant and tenant.mail_sender_name else (tenant.name if tenant else "Executive Sales"))
-            generated_text = f"Subject: Following up regarding AI infrastructure scalability\n\nHi there,\n\nI noticed your organization recently explored our enterprise architecture and wanted to reach out directly. Based on your target goals ({prompt}), our cutting-edge AI pipeline offers immediate, measurable acceleration for your team.\n\nWould you be open to a brief 10-minute executive briefing next week to explore alignment?\n\nBest regards,\n{sender_nm}"
             
+            from tracking_app.outreach_agent import _ai
+            system_prompt = "You are an expert sales executive writing a cold outreach email. Keep it concise, professional, and invite them to a 10-minute briefing."
+            user_prompt = f"Write an email based on these target goals: {prompt}. Sign it off as {sender_nm}."
+            
+            generated_text = _ai(system_prompt, user_prompt, max_tokens=300, tenant=tenant)
+            
+            if not generated_text:
+                generated_text = "Error: AI generation failed. Please check your API keys in Developer Settings."
+                
             from django.http import JsonResponse
             return JsonResponse({'generated_text': generated_text})
 
@@ -1264,21 +1276,14 @@ def unified_inbox(request):
 
         elif action == 'sync_replies':
             if tenant and tenant.mail_registered_email:
-                recent_email = OutreachEmail.objects.filter(Q(tenant=tenant) | Q(lead__tenant=tenant), status='sent').exclude(lead__email=tenant.mail_registered_email).first()
-                if recent_email and not EmailReply.objects.filter(email=recent_email).exists():
-                    EmailReply.objects.create(
-                        email=recent_email,
-                        lead=recent_email.lead,
-                        tenant=tenant,
-                        raw_content=f"Hi {tenant.mail_sender_name or 'Team'},\n\nWe received your message from {tenant.mail_registered_email}. We are very interested in deploying Transform-Tech across our organization! Let's arrange a deep-dive call next week.\n\nBest,\n{recent_email.lead.contact_name}",
-                        ai_intent='interested'
-                    )
-                    recent_email.replied_at = timezone.now()
-                    recent_email.status = 'replied'
-                    recent_email.save()
-                    messages.success(request, f"🔄 Synchronized inbound replies to {tenant.mail_registered_email}! New lead response classified as 'Interested'.")
-                else:
-                    messages.info(request, f"🔄 Checked inbound mail for {tenant.mail_registered_email}: Inbox is up to date with zero unparsed replies.")
+                try:
+                    import threading
+                    from tracking_app.tasks import sync_imap_inbox
+                    thread = threading.Thread(target=sync_imap_inbox)
+                    thread.start()
+                    messages.success(request, f"Initiated secure real-time IMAP sync for {tenant.mail_registered_email}. Replies will appear shortly.")
+                except Exception as e:
+                    messages.error(request, f"IMAP Sync Failed: {e}")
             else:
                 messages.error(request, "Configure your Registered Email to initialize two-way AI reply synchronization.")
             return redirect('unified-inbox')
@@ -1541,13 +1546,13 @@ def api_radar_poll(request):
             try:
                 news_text = search_company_news(company_name)
                 if news_text:
-                    signal_data = analyze_signal_and_draft_email(company_name, news_text)
+                    signal_data = analyze_signal_and_draft_email(company_name, news_text, tenant=tenant)
             except Exception:
                 pass
 
             if not signal_data:
                 try:
-                    signal_data = generate_synthetic_signal_and_draft_email(company_name, industry)
+                    signal_data = generate_synthetic_signal_and_draft_email(company_name, industry, tenant=tenant)
                 except Exception:
                     pass
 

@@ -14,13 +14,17 @@ logger = logging.getLogger(__name__)
 
 
 # ── Twilio client helper ──────────────────────────────────────────────────────
-def get_twilio_client():
-    account_sid = os.environ.get('TWILIO_ACCOUNT_SID')
-    auth_token  = os.environ.get('TWILIO_AUTH_TOKEN')
+def get_twilio_credentials(tenant=None):
+    account_sid = (tenant.twilio_account_sid if tenant and tenant.twilio_account_sid else None) or os.environ.get('TWILIO_ACCOUNT_SID')
+    auth_token  = (tenant.twilio_auth_token if tenant and tenant.twilio_auth_token else None) or os.environ.get('TWILIO_AUTH_TOKEN')
+    from_phone  = (tenant.twilio_phone_number if tenant and tenant.twilio_phone_number else None) or os.environ.get('TWILIO_PHONE_NUMBER')
+    return account_sid, auth_token, from_phone
+
+def get_twilio_client(tenant=None):
+    account_sid, auth_token, _ = get_twilio_credentials(tenant)
     if account_sid and auth_token and Client:
         return Client(account_sid, auth_token)
     return None
-
 
 # ── Call Initiation ───────────────────────────────────────────────────────────
 @csrf_exempt
@@ -29,18 +33,20 @@ def api_twilio_call(request):
     try:
         data      = json.loads(request.body)
         to_phone  = data.get('phone')
+        
+        tenant = getattr(request.user, 'tenant', None) if hasattr(request, 'user') and request.user.is_authenticated else None
 
         if not to_phone:
             return JsonResponse({'status': 'error', 'message': 'Phone number is required.'}, status=400)
 
-        client     = get_twilio_client()
-        from_phone = os.environ.get('TWILIO_PHONE_NUMBER')
+        client = get_twilio_client(tenant)
+        _, _, from_phone = get_twilio_credentials(tenant)
 
         if not client or not from_phone:
             logger.error("Twilio not configured.")
             return JsonResponse({
                 'status': 'error',
-                'message': 'Twilio is not configured. Please add TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, and TWILIO_PHONE_NUMBER to your environment variables.',
+                'message': 'Twilio is not configured. Please add keys in Developer Settings or environment.',
                 'action_required': True
             }, status=400)
 
@@ -92,14 +98,16 @@ def api_twilio_sms(request):
         if not to_phone or not message_body:
             return JsonResponse({'status': 'error', 'message': 'Phone and message are required.'}, status=400)
 
-        client     = get_twilio_client()
-        from_phone = os.environ.get('TWILIO_PHONE_NUMBER')
+        tenant = getattr(request.user, 'tenant', None) if hasattr(request, 'user') and request.user.is_authenticated else None
+        
+        client = get_twilio_client(tenant)
+        _, _, from_phone = get_twilio_credentials(tenant)
 
         if not client or not from_phone:
             logger.error("Twilio not configured.")
             return JsonResponse({
                 'status': 'error',
-                'message': 'Twilio is not configured. Please add TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, and TWILIO_PHONE_NUMBER to your environment variables.',
+                'message': 'Twilio is not configured. Please add keys in Developer Settings or environment.',
                 'action_required': True
             }, status=400)
 

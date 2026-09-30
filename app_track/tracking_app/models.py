@@ -253,6 +253,13 @@ class Tenant(models.Model):
         default='unconfigured'
     )
 
+    # --- Phase 4 — BYOK (Bring Your Own Key) Integration ---
+    openai_api_key = models.CharField(max_length=255, blank=True, null=True, help_text="Tenant's OpenAI API Key")
+    gemini_api_key = models.CharField(max_length=255, blank=True, null=True, help_text="Tenant's Gemini API Key")
+    twilio_account_sid = models.CharField(max_length=255, blank=True, null=True)
+    twilio_auth_token = models.CharField(max_length=255, blank=True, null=True)
+    twilio_phone_number = models.CharField(max_length=30, blank=True, null=True)
+
     def __str__(self):
         return self.name
 
