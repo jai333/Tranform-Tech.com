@@ -3,16 +3,59 @@
 <html lang="en">
 <head>
     <!-- SEO & Open Graph Tags -->
-    <meta name="description" content="Transform-Tech: The unified Business Operating System. Manage sales, recruiting, cybersecurity, and IT ops all in one intelligent platform.">
-    <meta property="og:title" content="Transform-Tech - Unified Business OS">
-    <meta property="og:description" content="Stop paying for fragmented software. Run your entire business on a single, AI-powered platform.">
+    <meta name="description" content="Transform-Tech is the unified Business Operating System founded by Jai Sukhwal. Manage sales, recruiting, cybersecurity, and IT ops — all in one AI-powered platform.">
+    <meta property="og:title" content="Transform-Tech - Unified Business OS | Jai Sukhwal, Founder & CEO">
+    <meta property="og:description" content="Transform-Tech is the unified AI-powered Business OS for modern enterprises. Founded by Jai Sukhwal.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://www.transform-tech.com">
+    <meta property="og:site_name" content="Transform-Tech">
+    <meta property="og:image" content="https://www.transform-tech.com/static/images/transform_tech_logo_hq.png">
+    <meta property="og:image:width" content="800">
+    <meta property="og:image:height" content="800">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Transform-Tech">
-    <meta name="twitter:description" content="The unified Business Operating System.">
+    <meta name="twitter:site" content="@TransformTechHQ">
+    <meta name="twitter:title" content="Transform-Tech — Unified Business OS">
+    <meta name="twitter:description" content="The unified AI-powered Business Operating System. Founded by Jai Sukhwal.">
+    <meta name="twitter:image" content="https://www.transform-tech.com/static/images/transform_tech_logo_hq.png">
+    <link rel="canonical" href="https://www.transform-tech.com{{ request.path }}">
     
     <!-- End SEO -->
+
+    <!-- Organization Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Transform-Tech",
+      "url": "https://www.transform-tech.com",
+      "logo": "https://www.transform-tech.com/static/images/transform_tech_logo_hq.png",
+      "description": "Unified AI-powered Business Operating System for modern enterprises. Covers CRM, ATS, IT Helpdesk, Cybersecurity, Sales Engine, and Executive Analytics.",
+      "foundingDate": "2024",
+      "founder": {
+        "@type": "Person",
+        "name": "Jai Sukhwal",
+        "jobTitle": "Founder & CEO",
+        "url": "https://www.transform-tech.com/story/",
+        "sameAs": ["https://www.linkedin.com/in/jai-sukhwal-b63429215"]
+      },
+      "contactPoint": [
+        {
+          "@type": "ContactPoint",
+          "telephone": "+91-9664131355",
+          "contactType": "CEO / Founder",
+          "email": "j@transform-tech.com"
+        },
+        {
+          "@type": "ContactPoint",
+          "email": "it@transform-tech.com",
+          "contactType": "Technical Support"
+        }
+      ],
+      "sameAs": [
+        "https://www.linkedin.com/company/transform-in"
+      ]
+    }
+    </script>
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -849,7 +892,7 @@ html, body {
 
         <div class="footer-col">
             <h4 class="font-mono text-white">COMPANY</h4>
-            <a href="{% url 'founder-story' %}">Founder's Story</a>
+            <a href="{% url 'jai-sukhwal' %}">Jai Sukhwal, Founder</a>
             <a href="{% url 'demo-booking' %}">Book A Demo</a>
             <a href="{% url 'public-blog' %}">Resources</a>
             <a href="{% url 'register' %}">Get Started</a>

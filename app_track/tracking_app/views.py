@@ -4774,30 +4774,147 @@ def robots_txt(request):
         "Disallow: /executive-dashboard/",
         "Disallow: /saas-admin/",
         "Disallow: /billing/",
+        "Disallow: /api/",
+        "Disallow: /it/",
+        "Disallow: /candidates/",
+        "Disallow: /sales/",
+        "",
+        "# Explicitly allow public-facing SEO pages",
         "Allow: /",
-        "Sitemap: https://www.transform-tech.com/sitemap.xml"
+        "Allow: /story/",
+        "Allow: /jai-sukhwal/",
+        "Allow: /pricing/",
+        "Allow: /blog/",
+        "Allow: /register/",
+        "Allow: /login/",
+        "Allow: /platform/",
+        "Allow: /industry/",
+        "Allow: /static/",
+        "",
+        "# Sitemap",
+        "Sitemap: https://www.transform-tech.com/sitemap.xml",
     ]
     return HttpResponse("\n".join(lines), content_type="text/plain")
 
 def sitemap_xml(request):
-    xml = """<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    from datetime import date
+    today = date.today().isoformat()
+    xml = f"""<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+
+  <!-- Homepage -->
   <url>
     <loc>https://www.transform-tech.com/</loc>
+    <lastmod>{today}</lastmod>
+    <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
+
+  <!-- Founder Page — highest personal-brand priority -->
   <url>
     <loc>https://www.transform-tech.com/story/</loc>
-    <priority>0.9</priority>
+    <lastmod>{today}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
   </url>
+
+  <!-- SEO: Personal name URL alias -->
+  <url>
+    <loc>https://www.transform-tech.com/jai-sukhwal/</loc>
+    <lastmod>{today}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.95</priority>
+  </url>
+
+  <!-- Platform features -->
+  <url>
+    <loc>https://www.transform-tech.com/platform/ats/</loc>
+    <lastmod>{today}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.transform-tech.com/platform/crm/</loc>
+    <lastmod>{today}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.transform-tech.com/platform/ai/</loc>
+    <lastmod>{today}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.transform-tech.com/platform/workflow/</loc>
+    <lastmod>{today}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://www.transform-tech.com/platform/telemetry/</loc>
+    <lastmod>{today}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+  </url>
+
+  <!-- Pricing & Demo -->
   <url>
     <loc>https://www.transform-tech.com/pricing/</loc>
-    <priority>0.8</priority>
+    <lastmod>{today}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
   </url>
   <url>
+    <loc>https://www.transform-tech.com/sales/demo/book/</loc>
+    <lastmod>{today}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+  </url>
+
+  <!-- Blog -->
+  <url>
     <loc>https://www.transform-tech.com/blog/</loc>
+    <lastmod>{today}</lastmod>
+    <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
+
+  <!-- Industry pages -->
+  <url>
+    <loc>https://www.transform-tech.com/industry/tech/</loc>
+    <lastmod>{today}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.transform-tech.com/industry/health/</loc>
+    <lastmod>{today}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.transform-tech.com/industry/exec/</loc>
+    <lastmod>{today}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Auth -->
+  <url>
+    <loc>https://www.transform-tech.com/register/</loc>
+    <lastmod>{today}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://www.transform-tech.com/login/</loc>
+    <lastmod>{today}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
 </urlset>
 """
     return HttpResponse(xml, content_type="application/xml")
