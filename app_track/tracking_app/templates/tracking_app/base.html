@@ -1488,7 +1488,7 @@
                 {% if request.user.tenant and request.user.tenant.logo_url %}
                 <img src="{{ request.user.tenant.logo_url }}" alt="{{ request.user.tenant.name }} Logo" style="height: 48px; width: auto; max-width: 250px; border-radius: 4px; box-shadow: 0 0 10px rgba(0, 229, 255, 0.5); object-fit: contain;">
                 {% else %}
-                <img src="{% static 'tracking_app/assets/logo-333.png' %}" alt="Transform-Tech 333 Logo" style="height: 48px; width: auto; max-width: 250px; border-radius: 4px; box-shadow: 0 0 10px rgba(0, 229, 255, 0.5);">
+                {% include 'tracking_app/partials/new_logo.html' %}
                 {% endif %}
 
             </a>

@@ -274,17 +274,7 @@ body, html { margin:0; padding:0; height:100%; overflow-x:hidden; }
 
                 <!-- Logo inside card -->
                 <a href="/" class="auth-logo-row">
-                    <svg width="28" height="28" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <circle cx="20" cy="20" r="4.5" fill="#00E5FF" opacity=".95"/>
-                        <circle cx="20" cy="20" r="2.2" fill="#fff"/>
-                        <g class="auth-orbit">
-                            <ellipse cx="20" cy="20" rx="16" ry="6" stroke="#00E5FF" stroke-width="1.4" fill="none" opacity=".75"/>
-                            <circle cx="36" cy="20" r="2" fill="#00E5FF"/>
-                        </g>
-                        <ellipse cx="20" cy="20" rx="16" ry="6" stroke="#0A84FF" stroke-width="1.1" fill="none" opacity=".4" transform="rotate(60 20 20)"/>
-                        <ellipse cx="20" cy="20" rx="16" ry="6" stroke="#00E5FF" stroke-width="1" fill="none" opacity=".22" transform="rotate(-60 20 20)"/>
-                    </svg>
-                    <span class="auth-logo-text">Transform-Tech</span>
+                    {% include 'tracking_app/partials/new_logo.html' %}
                 </a>
 
                 <div class="auth-header">

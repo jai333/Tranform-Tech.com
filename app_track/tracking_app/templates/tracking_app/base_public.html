@@ -593,7 +593,7 @@ html, body {
 <nav class="navbar border-bottom relative">
     <div class="container nav-content">
         <a href="{% url 'home' %}" class="logo font-mono" style="text-decoration: none; display: flex; align-items: center; gap: 12px; position: relative; z-index: 100;">
-            <img src="{% static 'tracking_app/assets/logo-333.png' %}" alt="Transform-Tech" style="height: 48px; width: auto; max-width: 250px; border-radius: 4px; box-shadow: 0 0 10px rgba(0, 229, 255, 0.5);">
+            {% include 'tracking_app/partials/new_logo.html' %}
             <span style="font-size: 1.5rem; font-weight: 800; color: var(--text-white); letter-spacing: -0.02em;">Transform-Tech</span>
         </a>
         
@@ -825,7 +825,7 @@ html, body {
     <div class="container footer-mega-grid">
         <div class="footer-brand footer-col">
             <a href="{% url 'home' %}" class="logo text-xl mb-md" style="text-decoration: none; display: flex; align-items: center; gap: 12px;">
-                <img src="{% static 'tracking_app/assets/logo-333.png' %}" alt="Transform-Tech" style="height: 48px; width: auto; max-width: 250px; border-radius: 4px; box-shadow: 0 0 10px rgba(0, 229, 255, 0.5);">
+                {% include 'tracking_app/partials/new_logo.html' %}
                 <span class="footer-brand-name">Transform-Tech</span>
             </a>
             <p class="text-gray text-xs mb-md" style="line-height:1.6;">The unified platform for IT, Sales, Security, Recruiting, Development, and Operations. One partner. Every solution.</p>
