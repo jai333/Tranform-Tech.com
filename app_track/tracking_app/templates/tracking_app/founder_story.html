@@ -1,74 +1,45 @@
 {% extends 'tracking_app/base_public.html' %}
 
-{% block title %}Jai Sukhwal - Founder & CEO | Transform-Tech
-<!-- Structured Data for SEO -->
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "Person",
-  "name": "Jai Sukhwal",
-  "jobTitle": "Founder & CEO",
-  "worksFor": {
-    "@type": "Organization",
-    "name": "Transform-Tech"
-  },
-  "url": "https://www.transform-tech.com/story/",
-  "sameAs": [
-    "https://www.linkedin.com/in/jai-sukhwal",
-    "https://twitter.com/jaisukhwal"
-  ]
-}
-</script>
-
-{% endblock %}
+{% block title %}Jai Sukhwal - Founder & CEO | Transform-Tech{% endblock %}
 
 {% block meta %}
 <meta name="description" content="Read the founder story of Jai Sukhwal, CEO and Chief Architect behind Transform-Tech.com. Learn how we are building the central nervous system for the modern enterprise.">
-<meta name="keywords" content="Jai Sukhwal, Transform-Tech CEO, Founder of Transform-Tech, Jai Sukhwal Founder, Business OS">
+<meta name="keywords" content="Jai Sukhwal, Transform-Tech CEO, Founder of Transform-Tech, Jai Sukhwal Founder, Business OS, Jai Sukhwal LinkedIn, Transform-Tech Jaipur">
 <meta property="og:title" content="Jai Sukhwal - Founder & CEO | Transform-Tech">
 <meta property="og:description" content="Read the founder story of Jai Sukhwal, CEO and Chief Architect behind Transform-Tech.com.">
 <meta property="og:type" content="profile">
 <meta property="profile:first_name" content="Jai">
 <meta property="profile:last_name" content="Sukhwal">
-
-<!-- Structured Data for SEO -->
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "Person",
-  "name": "Jai Sukhwal",
-  "jobTitle": "Founder & CEO",
-  "worksFor": {
-    "@type": "Organization",
-    "name": "Transform-Tech"
-  },
-  "url": "https://www.transform-tech.com/story/",
-  "sameAs": [
-    "https://www.linkedin.com/in/jai-sukhwal",
-    "https://twitter.com/jaisukhwal"
-  ]
-}
-</script>
-
 {% endblock %}
 
 
 {% block content %}
-<div style="background: linear-gradient(135deg, var(--apple-bg) 0%, #000 100%); color: var(--apple-text); padding: 80px 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+<style>
+/* ── Mobile-first responsive overrides ─────────── */
+@media (max-width: 768px) {
+    .founder-hero-h1  { font-size: 2.2rem !important; }
+    .founder-section  { padding: 24px !important; }
+    .founder-grid     { grid-template-columns: 1fr !important; }
+    .contact-grid     { grid-template-columns: 1fr !important; }
+    .founder-page     { padding: 40px 16px !important; }
+}
+</style>
+
+<div class="founder-page" style="background: linear-gradient(135deg, var(--apple-bg) 0%, #000 100%); color: var(--apple-text); padding: 80px 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
     <div style="max-width: 900px; margin: 0 auto;">
         
         <!-- Header -->
         <div style="text-align: center; margin-bottom: 60px;">
-            <h1 style="font-size: 3.5rem; font-weight: 800; background: -webkit-linear-gradient(45deg, #0A84FF, #00FF66); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 20px;">
+            <h1 class="founder-hero-h1" style="font-size: 3.5rem; font-weight: 800; background: -webkit-linear-gradient(45deg, #0A84FF, #00FF66); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 20px;">
                 The Vision Behind Transform-Tech
             </h1>
             <p style="font-size: 1.2rem; color: var(--apple-text-secondary); max-width: 700px; margin: 0 auto; line-height: 1.6;">
-                A letter from Jai Sukhwal, Founder & CEO
+                A letter from Jai Sukhwal, Founder &amp; CEO
             </p>
         </div>
 
-        <!-- Founder Image & Intro -->
-        <div style="display: flex; flex-direction: column; md:flex-row; gap: 40px; margin-bottom: 60px; background: rgba(255,255,255,0.02); padding: 40px; border-radius: 24px; border: 1px solid var(--apple-border); backdrop-filter: blur(20px);">
+        <!-- Founder Intro -->
+        <div class="founder-section" style="display: flex; flex-direction: column; gap: 40px; margin-bottom: 60px; background: rgba(255,255,255,0.02); padding: 40px; border-radius: 24px; border: 1px solid var(--apple-border); backdrop-filter: blur(20px);">
             <div style="flex: 1;">
                 <h2 style="font-size: 2rem; margin-top: 0; margin-bottom: 20px; color: #fff;">Why I Built This Platform</h2>
                 <p style="font-size: 1.1rem; line-height: 1.8; color: rgba(255,255,255,0.8); margin-bottom: 20px;">
@@ -81,12 +52,12 @@
                     I architected Transform-Tech.com from the ground up to unlock that exact potential for firms worldwide. The objective was clear: engineer a single, unified Business Operating System powered natively by Artificial Intelligence. One codebase. One interface. Infinite scalability. We didn't just build a new platform—we engineered the central nervous system for the next generation of industry leaders.
                 </p>
                 <div style="margin-top: 30px; display: flex; align-items: center; gap: 15px;">
-                    <div style="width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #0A84FF, #00FF66); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 800; color: #000;">
+                    <div style="width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #0A84FF, #00FF66); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 800; color: #000; flex-shrink: 0;">
                         JS
                     </div>
                     <div>
                         <p style="margin: 0; font-size: 1.2rem; font-weight: 700; color: #0A84FF;">Jai Sukhwal</p>
-                        <p style="margin: 4px 0 0 0; font-size: 0.9rem; color: var(--apple-text-muted);">Founder & CEO</p>
+                        <p style="margin: 4px 0 0 0; font-size: 0.9rem; color: var(--apple-text-muted);">Founder &amp; CEO</p>
                     </div>
                 </div>
             </div>
@@ -99,8 +70,7 @@
                 I didn't just build an app; I built an entire commercial ecosystem. Here is what is running under the hood of Transform-Tech.com:
             </p>
 
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px;">
-                <!-- Feature 1 -->
+            <div class="founder-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px;">
                 <div style="background: var(--apple-card-bg); padding: 30px; border-radius: 16px; border: 1px solid var(--apple-border);">
                     <i class="bx bx-brain" style="font-size: 2.5rem; color: #00FF66; margin-bottom: 16px;"></i>
                     <h3 style="font-size: 1.3rem; margin-top: 0; margin-bottom: 12px;">Autonomous AI Sales Engine</h3>
@@ -109,7 +79,6 @@
                     </p>
                 </div>
                 
-                <!-- Feature 2 -->
                 <div style="background: var(--apple-card-bg); padding: 30px; border-radius: 16px; border: 1px solid var(--apple-border);">
                     <i class="bx bx-network-chart" style="font-size: 2.5rem; color: #0A84FF; margin-bottom: 16px;"></i>
                     <h3 style="font-size: 1.3rem; margin-top: 0; margin-bottom: 12px;">Multi-Workspace Isolation</h3>
@@ -118,54 +87,107 @@
                     </p>
                 </div>
 
-                <!-- Feature 3 -->
                 <div style="background: var(--apple-card-bg); padding: 30px; border-radius: 16px; border: 1px solid var(--apple-border);">
-                    <i class="bx bx-user-pin" style="font-size: 2.5rem; color: #FF3B30; margin-bottom: 16px;"></i>
-                    <h3 style="font-size: 1.3rem; margin-top: 0; margin-bottom: 12px;">Unified ATS & CRM</h3>
+                    <i class="bx bx-shield-quarter" style="font-size: 2.5rem; color: #FF453A; margin-bottom: 16px;"></i>
+                    <h3 style="font-size: 1.3rem; margin-top: 0; margin-bottom: 12px;">Cybersecurity Command Center</h3>
                     <p style="color: var(--apple-text-secondary); font-size: 0.95rem; line-height: 1.6;">
-                        I unified candidate tracking and sales pipelines into a single data model. Our clients can manage applicants, convert deals, and parse resumes instantly without switching tabs.
+                        Real-time threat intelligence, IT asset lifecycle management, SLA-driven helpdesk, and full vendor governance. Enterprise IT operations, unified into a single pane of glass.
                     </p>
                 </div>
 
-                <!-- Feature 4 -->
                 <div style="background: var(--apple-card-bg); padding: 30px; border-radius: 16px; border: 1px solid var(--apple-border);">
-                    <i class="bx bx-envelope" style="font-size: 2.5rem; color: #FF9F0A; margin-bottom: 16px;"></i>
-                    <h3 style="font-size: 1.3rem; margin-top: 0; margin-bottom: 12px;">Advanced Mail Engine</h3>
+                    <i class="bx bx-user-check" style="font-size: 2.5rem; color: #FF9F0A; margin-bottom: 16px;"></i>
+                    <h3 style="font-size: 1.3rem; margin-top: 0; margin-bottom: 12px;">AI-Powered ATS & Recruiting</h3>
                     <p style="color: var(--apple-text-secondary); font-size: 0.95rem; line-height: 1.6;">
-                        Built from scratch to bypass PaaS firewalls, supporting dynamic SSL/TLS port routing and native SendGrid HTTP integrations for flawless transactional delivery.
+                        A proprietary AI Matching Engine that scores, ranks and routes candidates autonomously. Integrated pipeline management, interview scheduling, and sourcing — all in one system.
+                    </p>
+                </div>
+
+                <div style="background: var(--apple-card-bg); padding: 30px; border-radius: 16px; border: 1px solid var(--apple-border);">
+                    <i class="bx bx-radar" style="font-size: 2.5rem; color: #BF5AF2; margin-bottom: 16px;"></i>
+                    <h3 style="font-size: 1.3rem; margin-top: 0; margin-bottom: 12px;">Strategic Intelligence Radar</h3>
+                    <p style="color: var(--apple-text-secondary); font-size: 0.95rem; line-height: 1.6;">
+                        An always-on AI radar that autonomously scans live news, LinkedIn signals, and Crunchbase data across your target accounts, surfacing executive-level insights the moment they matter.
+                    </p>
+                </div>
+
+                <div style="background: var(--apple-card-bg); padding: 30px; border-radius: 16px; border: 1px solid var(--apple-border);">
+                    <i class="bx bx-trending-up" style="font-size: 2.5rem; color: #00E5FF; margin-bottom: 16px;"></i>
+                    <h3 style="font-size: 1.3rem; margin-top: 0; margin-bottom: 12px;">C-Suite Executive Dashboard</h3>
+                    <p style="color: var(--apple-text-secondary); font-size: 0.95rem; line-height: 1.6;">
+                        A boardroom-grade analytics layer that consolidates revenue, hiring velocity, IT health, and team performance into a single, decision-ready command center.
                     </p>
                 </div>
             </div>
         </div>
 
-
-        <!-- Custom Development Services -->
-        <div style="margin-bottom: 60px; background: rgba(10, 132, 255, 0.05); padding: 40px; border-radius: 24px; border: 1px solid rgba(10, 132, 255, 0.2);">
-            <h2 style="font-size: 2rem; margin-top: 0; margin-bottom: 20px; color: #fff; text-align: center;">Need Custom Software & App Development?</h2>
-            <p style="font-size: 1.1rem; line-height: 1.8; color: rgba(255,255,255,0.8); text-align: center; max-width: 800px; margin: 0 auto 30px auto;">
-                Transform-Tech is more than just a SaaS product. The platform you see today is a living proof-of-concept of our engineering capabilities. We provide <strong>End-to-End Custom App Development, Web Development, and AI Integrations</strong> for enterprise clients. 
-            </p>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px;">
-                <div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 12px; border: 1px solid var(--apple-border);">
-                    <i class="bx bx-mobile-alt" style="font-size: 2rem; color: #0A84FF; margin-bottom: 10px;"></i>
-                    <h4 style="margin: 0 0 10px 0; color: #fff;">Mobile App Development</h4>
-                    <p style="margin: 0; font-size: 0.9rem; color: var(--apple-text-secondary);">Native & cross-platform iOS/Android applications built for scale.</p>
-                </div>
-                <div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 12px; border: 1px solid var(--apple-border);">
-                    <i class="bx bx-code-alt" style="font-size: 2rem; color: #00FF66; margin-bottom: 10px;"></i>
-                    <h4 style="margin: 0 0 10px 0; color: #fff;">Custom Web Platforms</h4>
-                    <p style="margin: 0; font-size: 0.9rem; color: var(--apple-text-secondary);">Complex SaaS architectures, internal tools, and CRM/ERP systems.</p>
-                </div>
-                <div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 12px; border: 1px solid var(--apple-border);">
-                    <i class="bx bx-bot" style="font-size: 2rem; color: #FF9F0A; margin-bottom: 10px;"></i>
-                    <h4 style="margin: 0 0 10px 0; color: #fff;">AI & Automation</h4>
-                    <p style="margin: 0; font-size: 0.9rem; color: var(--apple-text-secondary);">LLM integrations, autonomous agents, and workflow automation.</p>
-                </div>
-            </div>
-            <div style="text-align: center;">
-                <a href="{% url 'dev-project-request' %}" style="background: transparent; color: #0A84FF; padding: 12px 28px; border-radius: 30px; text-decoration: none; font-weight: 600; font-size: 1rem; display: inline-block; border: 1px solid #0A84FF; transition: all 0.2s;">
-                    Discuss Your Development Project
+        <!-- Connect With Me -->
+        <div class="founder-section" style="margin-bottom: 60px; background: rgba(255,255,255,0.02); padding: 40px; border-radius: 24px; border: 1px solid var(--apple-border);">
+            <h2 style="font-size: 2rem; font-weight: 700; margin-top: 0; margin-bottom: 8px; text-align: center;">Connect with Me</h2>
+            <p style="text-align: center; color: rgba(255,255,255,0.6); margin-bottom: 36px; font-size: 1rem;">Reach out directly — whether you want to discuss a partnership, a demo, or share a bold idea.</p>
+            
+            <div class="contact-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;">
+                
+                <!-- LinkedIn Personal -->
+                <a href="https://www.linkedin.com/in/jai-sukhwal-b63429215" target="_blank" rel="noopener"
+                   style="display: flex; align-items: center; gap: 14px; background: rgba(10, 102, 194, 0.1); border: 1px solid rgba(10, 102, 194, 0.4); padding: 20px; border-radius: 14px; text-decoration: none; color: #fff;">
+                    <div style="width: 46px; height: 46px; border-radius: 10px; background: #0A66C2; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <i class="bx bxl-linkedin" style="font-size: 1.6rem; color: #fff;"></i>
+                    </div>
+                    <div>
+                        <p style="margin: 0; font-size: 0.72rem; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.08em;">LinkedIn Profile</p>
+                        <p style="margin: 4px 0 0 0; font-size: 0.95rem; font-weight: 600; color: #fff;">Jai Sukhwal</p>
+                    </div>
                 </a>
+
+                <!-- Company LinkedIn -->
+                <a href="https://www.linkedin.com/company/transform-in" target="_blank" rel="noopener"
+                   style="display: flex; align-items: center; gap: 14px; background: rgba(10, 102, 194, 0.1); border: 1px solid rgba(10, 102, 194, 0.4); padding: 20px; border-radius: 14px; text-decoration: none; color: #fff;">
+                    <div style="width: 46px; height: 46px; border-radius: 10px; background: #0A66C2; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <i class="bx bxl-linkedin" style="font-size: 1.6rem; color: #fff;"></i>
+                    </div>
+                    <div>
+                        <p style="margin: 0; font-size: 0.72rem; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.08em;">Company Page</p>
+                        <p style="margin: 4px 0 0 0; font-size: 0.95rem; font-weight: 600; color: #fff;">Transform-Tech</p>
+                    </div>
+                </a>
+
+                <!-- Email Founder -->
+                <a href="mailto:j@transform-tech.com"
+                   style="display: flex; align-items: center; gap: 14px; background: rgba(0, 229, 255, 0.07); border: 1px solid rgba(0, 229, 255, 0.3); padding: 20px; border-radius: 14px; text-decoration: none; color: #fff;">
+                    <div style="width: 46px; height: 46px; border-radius: 10px; background: linear-gradient(135deg, #00E5FF, #0A84FF); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <i class="bx bx-envelope" style="font-size: 1.6rem; color: #000;"></i>
+                    </div>
+                    <div>
+                        <p style="margin: 0; font-size: 0.72rem; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.08em;">Founder Email</p>
+                        <p style="margin: 4px 0 0 0; font-size: 0.9rem; font-weight: 600; color: #00E5FF;">j@transform-tech.com</p>
+                    </div>
+                </a>
+
+                <!-- IT & Support Email -->
+                <a href="mailto:it@transform-tech.com"
+                   style="display: flex; align-items: center; gap: 14px; background: rgba(0, 229, 255, 0.07); border: 1px solid rgba(0, 229, 255, 0.3); padding: 20px; border-radius: 14px; text-decoration: none; color: #fff;">
+                    <div style="width: 46px; height: 46px; border-radius: 10px; background: linear-gradient(135deg, #00E5FF, #0A84FF); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <i class="bx bx-envelope" style="font-size: 1.6rem; color: #000;"></i>
+                    </div>
+                    <div>
+                        <p style="margin: 0; font-size: 0.72rem; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.08em;">IT &amp; Support</p>
+                        <p style="margin: 4px 0 0 0; font-size: 0.9rem; font-weight: 600; color: #00E5FF;">it@transform-tech.com</p>
+                    </div>
+                </a>
+
+                <!-- Phone -->
+                <a href="tel:+919664131355"
+                   style="display: flex; align-items: center; gap: 14px; background: rgba(0, 255, 102, 0.07); border: 1px solid rgba(0, 255, 102, 0.3); padding: 20px; border-radius: 14px; text-decoration: none; color: #fff;">
+                    <div style="width: 46px; height: 46px; border-radius: 10px; background: linear-gradient(135deg, #00FF66, #00E5FF); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <i class="bx bx-phone-call" style="font-size: 1.6rem; color: #000;"></i>
+                    </div>
+                    <div>
+                        <p style="margin: 0; font-size: 0.72rem; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.08em;">Call Direct</p>
+                        <p style="margin: 4px 0 0 0; font-size: 0.95rem; font-weight: 600; color: #00FF66;">+91 96641 31355</p>
+                    </div>
+                </a>
+
             </div>
         </div>
 
@@ -173,7 +195,7 @@
         <div style="text-align: center; margin-top: 60px; padding: 40px; background: linear-gradient(135deg, rgba(10, 132, 255, 0.1), rgba(0, 255, 102, 0.1)); border-radius: 20px; border: 1px solid rgba(10,132,255,0.3);">
             <h2 style="font-size: 2rem; margin-top: 0; margin-bottom: 20px;">Ready to consolidate your software?</h2>
             <p style="font-size: 1.1rem; color: var(--apple-text-secondary); margin-bottom: 30px;">
-                Experience the platform I built to change how businesses operate.
+                Experience the platform built to power the next generation of industry leaders.
             </p>
             <a href="{% url 'register' %}" style="background: #0A84FF; color: #fff; padding: 14px 32px; border-radius: 30px; text-decoration: none; font-weight: 600; font-size: 1.1rem; display: inline-block; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 14px rgba(10, 132, 255, 0.4);">
                 Start Your Free Trial
@@ -183,21 +205,25 @@
     </div>
 </div>
 
-<!-- Structured Data for SEO -->
+<!-- Structured Data for SEO (Updated with full contact info) -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "Person",
   "name": "Jai Sukhwal",
   "jobTitle": "Founder & CEO",
+  "email": ["j@transform-tech.com", "it@transform-tech.com"],
+  "telephone": "+91-9664131355",
   "worksFor": {
     "@type": "Organization",
-    "name": "Transform-Tech"
+    "name": "Transform-Tech",
+    "url": "https://www.transform-tech.com",
+    "sameAs": "https://www.linkedin.com/company/transform-in"
   },
   "url": "https://www.transform-tech.com/story/",
   "sameAs": [
-    "https://www.linkedin.com/in/jai-sukhwal",
-    "https://twitter.com/jaisukhwal"
+    "https://www.linkedin.com/in/jai-sukhwal-b63429215",
+    "https://www.linkedin.com/company/transform-in"
   ]
 }
 </script>
