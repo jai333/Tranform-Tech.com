@@ -204,6 +204,7 @@ urlpatterns = [
     path('workspace/settings/', views.workspace_settings, name='workspace-settings'),
     path('workflow/builder/', views.workflow_builder, name='workflow-builder'),
     path('developer/', views.developer_settings_dashboard, name='developer_settings'),
+    path('developer-settings/', views.developer_settings_dashboard, name='developer-settings'),
     path('api/mail/test/', views.send_test_mail, name='send-test-mail'),
     path('api/mail/save/', views.save_mail_settings, name='save-mail-settings'),
     path('api/webhooks/<int:endpoint_id>/simulate/', views.simulate_webhook_payload, name='simulate-webhook-payload'),

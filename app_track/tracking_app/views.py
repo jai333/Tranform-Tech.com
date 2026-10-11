@@ -3919,13 +3919,21 @@ from .decorators import require_tier
 @login_required
 def developer_settings_dashboard(request):
     """Developer API & Webhooks dashboard restricted to Enterprise plan tenants."""
-    from .models import WebhookEndpoint, WebhookLog
+    from .models import WebhookEndpoint, WebhookLog, Tenant
     from django.contrib import messages
     from django.shortcuts import redirect
     
     tenant = getattr(request.user, 'tenant', None)
     
-    # Enforce strict Enterprise plan requirement for companies & users
+    # Auto-assign or create default workspace for superusers if not assigned
+    if not tenant and request.user.is_superuser:
+        tenant = Tenant.objects.first()
+        if not tenant:
+            tenant = Tenant.objects.create(name="Transform-Tech Enterprise", subscription_plan="Enterprise")
+        request.user.tenant = tenant
+        request.user.save(update_fields=['tenant'])
+
+    # Enforce strict Enterprise plan requirement for regular companies & users
     if not request.user.is_superuser:
         if not tenant or getattr(tenant, 'subscription_plan', 'free').lower() != 'enterprise':
             messages.info(request, "Developer API & Webhooks Console is an exclusive Enterprise feature. Please upgrade your plan to gain instant access!")
@@ -3979,7 +3987,7 @@ def developer_settings_dashboard(request):
             ])
             messages.success(request, "External API keys saved successfully.")
                 
-        return redirect('developer-settings')
+        return redirect('developer_settings')
         
     endpoints = WebhookEndpoint.objects.filter(tenant=tenant).order_by('-created_at')
     

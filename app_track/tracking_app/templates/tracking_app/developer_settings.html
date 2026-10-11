@@ -472,7 +472,7 @@ axios.post('https://app.transform.io/api/parse-resume/', form, {
                         <small class="text-white-50">Configure your own OpenAI, Gemini, and Twilio API keys to power the Autonomous AI agents directly from your own billing accounts.</small>
                     </div>
                     <div class="p-4" style="background: var(--apple-card-bg);">
-                        <form method="POST" action="{% url 'developer-settings' %}">
+                        <form method="POST" action="{% url 'developer_settings' %}">
                             {% csrf_token %}
                             <input type="hidden" name="action" value="save_api_keys">
                             
