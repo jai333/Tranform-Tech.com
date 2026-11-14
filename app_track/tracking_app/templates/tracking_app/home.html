@@ -1,139 +1,4 @@
 {% extends 'tracking_app/base_public.html' %}
-<style>
-/* Base theme variables and resets are in base_public.html */
-
-/* --- TALENT SECTION --- */
-.talent-section {
-    padding: 6rem 0;
-    position: relative;
-    background: var(--bg-surface);
-    border-top: 1px solid var(--border-subtle);
-    border-bottom: 1px solid var(--border-subtle);
-    overflow: hidden;
-}
-.talent-glow {
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    width: 800px; height: 400px;
-    background: radial-gradient(circle, rgba(139, 92, 246, 0.08) 0%, transparent 60%);
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 0;
-}
-.talent-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 2rem;
-    position: relative;
-    z-index: 1;
-    margin-top: 3rem;
-}
-.talent-card {
-    background: var(--bg-elevated);
-    border: 1px solid var(--border-subtle);
-    border-radius: 24px;
-    padding: 2.5rem 2rem;
-    transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
-    backdrop-filter: blur(10px);
-}
-.talent-card:hover {
-    transform: translateY(-5px);
-    border-color: rgba(139, 92, 246, 0.4);
-    box-shadow: 0 10px 40px rgba(139, 92, 246, 0.1);
-}
-.tc-icon {
-    width: 60px; height: 60px;
-    border-radius: 16px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.8rem;
-    margin-bottom: 1.5rem;
-}
-.tc-title {
-    font-size: 1.4rem; font-weight: 700; color: var(--text-white);
-    margin-bottom: 1rem;
-}
-.tc-desc {
-    font-size: 1rem; color: var(--text-gray);
-    line-height: 1.6; margin-bottom: 1.5rem;
-}
-.tc-tags {
-    display: flex; gap: 8px; flex-wrap: wrap;
-}
-.tc-tag {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid var(--border-subtle);
-    color: var(--text-gray);
-    font-size: 0.75rem; font-weight: 600;
-    padding: 4px 10px; border-radius: 20px;
-}
-
-
-/* --- TALENT SECTION --- */
-.talent-section {
-    padding: 6rem 0;
-    position: relative;
-    background: var(--bg-surface);
-    border-top: 1px solid var(--border-subtle);
-    border-bottom: 1px solid var(--border-subtle);
-    overflow: hidden;
-}
-.talent-glow {
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    width: 800px; height: 400px;
-    background: radial-gradient(circle, rgba(139, 92, 246, 0.08) 0%, transparent 60%);
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 0;
-}
-.talent-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 2rem;
-    position: relative;
-    z-index: 1;
-}
-.talent-card {
-    background: var(--bg-elevated);
-    border: 1px solid var(--border-subtle);
-    border-radius: 24px;
-    padding: 2.5rem 2rem;
-    transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
-    backdrop-filter: blur(10px);
-}
-.talent-card:hover {
-    transform: translateY(-5px);
-    border-color: rgba(139, 92, 246, 0.4);
-    box-shadow: 0 10px 40px rgba(139, 92, 246, 0.1);
-}
-.tc-icon {
-    width: 60px; height: 60px;
-    border-radius: 16px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.8rem;
-    margin-bottom: 1.5rem;
-}
-.tc-title {
-    font-size: 1.4rem; font-weight: 700; color: var(--text-white);
-    margin-bottom: 1rem;
-}
-.tc-desc {
-    font-size: 1rem; color: var(--text-gray);
-    line-height: 1.6; margin-bottom: 1.5rem;
-}
-.tc-tags {
-    display: flex; gap: 8px; flex-wrap: wrap;
-}
-.tc-tag {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid var(--border-subtle);
-    color: var(--text-gray);
-    font-size: 0.75rem; font-weight: 600;
-    padding: 4px 10px; border-radius: 20px;
-}
-</style>
 {% load static %}
 {% block content %}
 
@@ -2398,6 +2263,75 @@ body:not(.light-theme) #spotlight-layer { opacity: 1; }
 .sc-badge-cyan { background: rgba(0,229,255,0.1); color: #00E5FF; border: 1px solid rgba(0,229,255,0.2); }
 .sc-cyan { background: rgba(0,229,255,0.1); color: #00E5FF; }
 .btn-showcase-cyan:hover { background: linear-gradient(135deg, #06b6d4, #22d3ee) !important; color: #ffffff !important; box-shadow: 0 8px 32px rgba(6,182,212,0.55) !important; transform: translateY(-2px); }
+
+/* ══════════════════════════════════════════════════════════════
+   MOBILE / ANDROID ANTI-FLICKER & GPU STABILIZATION
+   ══════════════════════════════════════════════════════════════ */
+@media screen and (max-width: 1024px) {
+    /* 1. Disable SVG fractalNoise filter on mobile — eliminates Android GPU compositing stutters/flickers */
+    .hero-cinematic::after {
+        display: none !important;
+    }
+
+    /* 2. Hide fixed canvas and spotlight layers on mobile to free compositor buffers */
+    #particle-canvas,
+    #spotlight-layer {
+        display: none !important;
+    }
+
+    /* 3. Tame heavy 900px blur drift animations on mobile */
+    .hero-radial-glow {
+        filter: blur(40px) !important;
+        animation: none !important;
+        transform: none !important;
+        opacity: 0.45 !important;
+        pointer-events: none !important;
+    }
+    .hero-glow-1 {
+        width: 280px !important;
+        height: 280px !important;
+        top: -40px !important;
+        right: -40px !important;
+    }
+    .hero-glow-2 {
+        width: 220px !important;
+        height: 220px !important;
+        bottom: 10px !important;
+        left: -30px !important;
+    }
+    .hero-glow-3 {
+        display: none !important;
+    }
+
+    /* 4. Stabilize animated gradient text on Android - stop 5s gradient-flow position shift */
+    .animated-gradient-text {
+        animation: none !important;
+        background-size: 100% 100% !important;
+        background: linear-gradient(135deg, #818cf8 0%, #06b6d4 50%, #10b981 100%) !important;
+        -webkit-background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+        background-clip: text !important;
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+        transform: translateZ(0);
+    }
+
+    /* 5. Fix mobile address bar 100vh height resizing jitter */
+    .hero-cinematic {
+        min-height: auto !important;
+        padding-top: 85px !important;
+        padding-bottom: 40px !important;
+        -webkit-transform: translate3d(0, 0, 0);
+        transform: translate3d(0, 0, 0);
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+    }
+
+    /* 6. Clean chip pulse on mobile */
+    .chip-pulse::after {
+        display: none !important;
+    }
+}
 </style>
 
 <script>
@@ -2582,6 +2516,9 @@ body:not(.light-theme) #spotlight-layer { opacity: 1; }
    3D CARD TILT + SPOTLIGHT CURSOR
    ══════════════════════════════════════════════════════════════ */
 (function() {
+    // Disable on mobile — saves GPU/CPU and prevents touch lag
+    if (window.innerWidth < 1025) return;
+
     // 3D tilt effect for bento cards and pillar cards
     const tiltCards = document.querySelectorAll('.bp-card, .pillar-card');
     tiltCards.forEach(card => {

@@ -110,6 +110,9 @@
         opacity: 0;
         pointer-events: none;
     }
+    @media (max-width: 1024px) {
+        #page-loader { display: none !important; }
+    }
     .loader-logo {
         font-size: 1.6rem;
         font-weight: 900;
@@ -559,6 +562,20 @@ html, body {
     .logo img { height: 36px !important; }
     /* Hide desktop CTA buttons — they live in the mobile drawer instead */
     #desktop-nav-actions { display: none !important; }
+
+    /* Disable heavy fixed ambient orbs on mobile to eliminate 140px GPU blur repainting */
+    .orb, .orb-1, .orb-2, .orb-3 { display: none !important; }
+
+    /* Stabilize mobile navbar & remove backdrop-filter blur jitter on mobile Android */
+    .navbar {
+        background: rgba(8, 9, 15, 0.98) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        -webkit-transform: translate3d(0, 0, 0) !important;
+        transform: translate3d(0, 0, 0) !important;
+        -webkit-backface-visibility: hidden !important;
+        backface-visibility: hidden !important;
+    }
 
     /* Hero */
     .hero-cine-inner {
