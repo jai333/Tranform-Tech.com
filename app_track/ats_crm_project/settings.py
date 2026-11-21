@@ -102,10 +102,25 @@ ASGI_APPLICATION = 'ats_crm_project.asgi.application'
 
 # ── Database ─────────────────────────────────────────────────
 import dj_database_url
+import shutil
+
+# On Vercel / AWS Lambda serverless environments, the deployment directory is read-only.
+# Writable SQLite fallback must reside in /tmp.
+if os.getenv('VERCEL') or os.getenv('AWS_LAMBDA_FUNCTION_NAME'):
+    _tmp_db = Path('/tmp') / 'db.sqlite3'
+    _seed_db = BASE_DIR / 'db_seed.sqlite3'
+    if not _tmp_db.exists() and _seed_db.exists():
+        try:
+            shutil.copy2(_seed_db, _tmp_db)
+        except Exception:
+            pass
+    _DEFAULT_DB_URL = f"sqlite:///{_tmp_db}"
+else:
+    _DEFAULT_DB_URL = f"sqlite:///{BASE_DIR / 'db.sqlite3'}"
 
 DATABASES = {
     'default': dj_database_url.config(
-        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
+        default=_DEFAULT_DB_URL,
         conn_max_age=600,
         conn_health_checks=True,
     )
