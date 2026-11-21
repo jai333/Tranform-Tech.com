@@ -6,16 +6,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function applyTheme(theme) {
         if (theme === 'light') {
-            bodyElement.classList.add('light-theme');
+            if (bodyElement) bodyElement.classList.add('light-theme');
             document.documentElement.classList.add('light-theme');
+            document.documentElement.setAttribute('data-theme', 'light');
             themeIcons.forEach(icon => {
                 icon.className = 'fas fa-sun';
                 icon.style.color = '#f59e0b';
             });
             themeToggles.forEach(t => t.title = 'Switch to dark mode');
         } else {
-            bodyElement.classList.remove('light-theme');
+            if (bodyElement) bodyElement.classList.remove('light-theme');
             document.documentElement.classList.remove('light-theme');
+            document.documentElement.setAttribute('data-theme', 'dark');
             themeIcons.forEach(icon => {
                 icon.className = 'fas fa-moon';
                 icon.style.color = '';
@@ -27,8 +29,11 @@ document.addEventListener('DOMContentLoaded', () => {
     applyTheme(localStorage.getItem('theme') || 'dark');
 
     themeToggles.forEach(toggle => {
-        toggle.addEventListener('click', function () {
-            const isLight = bodyElement.classList.contains('light-theme');
+        if (toggle.dataset.themeBound) return;
+        toggle.dataset.themeBound = 'true';
+        toggle.addEventListener('click', function (e) {
+            e.preventDefault();
+            const isLight = document.documentElement.classList.contains('light-theme') || (bodyElement && bodyElement.classList.contains('light-theme'));
             const newTheme = isLight ? 'dark' : 'light';
             localStorage.setItem('theme', newTheme);
             applyTheme(newTheme);

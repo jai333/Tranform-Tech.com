@@ -1,0 +1,71 @@
+Django>=4.2
+asgiref
+sqlparse
+tzdata
+
+# Django channels for WebSockets
+channels
+channels-redis
+daphne
+redis
+
+# Additional channels dependencies
+autobahn
+twisted
+txaio
+
+# Cryptography and security
+cryptography
+pyOpenSSL
+service-identity
+
+# Image handling
+Pillow
+
+# Document parsing
+python-docx
+pypdf
+
+# Frontend assets
+whitenoise
+
+# WebRTC and Real-time communication
+websockets
+
+# Development tools
+django-debug-toolbar
+
+# Production ready
+gunicorn
+
+# AI Integration
+openai>=1.0.0
+
+# Background Workers
+celery>=5.0
+django-celery-beat
+django-celery-results
+kombu[sqlalchemy]
+sqlalchemy>=1.4
+
+# Billing & Stripe
+stripe
+dj-stripe
+
+# Production Database
+dj-database-url
+psycopg2-binary
+
+# Environment Variables
+python-dotenv
+uvicorn[standard]
+
+# Twilio — Voice & SMS
+twilio>=8.0.0
+requests==2.31.0
+djangorestframework
+markdown
+django-filter
+django-allauth
+python3-saml
+sentry-sdk==2.13.0

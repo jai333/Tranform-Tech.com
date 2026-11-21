@@ -129,6 +129,7 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+WHITENOISE_MANIFEST_STRICT = False
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
@@ -146,20 +147,37 @@ ALLOWED_HOSTS = [
     'www.transform-tech.com',
     'localhost',
     '127.0.0.1',
-    # Railway / Render / Heroku auto-domain
+    '192.168.0.100',
+    '.vercel.app',
+    '.now.sh',
+    '.loca.lt',
+    '.ngrok-free.app',
+    '.ngrok.io',
+    # Vercel / Railway / Render auto-domains
+    os.getenv('VERCEL_URL', ''),
     os.getenv('RAILWAY_STATIC_URL', '').replace('https://', '').split('/')[0],
     os.getenv('RENDER_EXTERNAL_HOSTNAME', ''),
 ]
+if os.getenv('ALLOWED_HOSTS'):
+    ALLOWED_HOSTS.extend([h.strip() for h in os.getenv('ALLOWED_HOSTS').split(',') if h.strip()])
+if DEBUG:
+    ALLOWED_HOSTS.append('*')
 # Remove empty strings from ALLOWED_HOSTS
-ALLOWED_HOSTS = [h for h in ALLOWED_HOSTS if h]
+ALLOWED_HOSTS = list(dict.fromkeys([h for h in ALLOWED_HOSTS if h]))
+
 CSRF_TRUSTED_ORIGINS = [
     'https://transform-tech.com',
     'https://www.transform-tech.com',
+    'https://*.vercel.app',
     # Keep dev tunnels for local testing
     'https://26464c660ea8.ngrok-free.app',
     'https://preview-jaisu-8000.loca.lt',
     'https://campsite-december-flatly.ngrok-free.dev',
-    # Dynamic Railway/Render URLs
+    # Dynamic Vercel/Railway/Render URLs
+    *(
+        [f"https://{os.getenv('VERCEL_URL')}"]
+        if os.getenv('VERCEL_URL') else []
+    ),
     *(
         [f"https://{os.getenv('RAILWAY_STATIC_URL', '').replace('https://', '').split('/')[0]}"]
         if os.getenv('RAILWAY_STATIC_URL') else []
@@ -169,6 +187,9 @@ CSRF_TRUSTED_ORIGINS = [
         if os.getenv('RENDER_EXTERNAL_HOSTNAME') else []
     ),
 ]
+if os.getenv('CSRF_TRUSTED_ORIGINS'):
+    CSRF_TRUSTED_ORIGINS.extend([origin.strip() for origin in os.getenv('CSRF_TRUSTED_ORIGINS').split(',') if origin.strip()])
+CSRF_TRUSTED_ORIGINS = list(dict.fromkeys(CSRF_TRUSTED_ORIGINS))
 
 # ── WebSocket Channel Layers ──────────────────────────────────
 # Uses Redis when REDIS_URL is set, otherwise InMemory (dev fallback)

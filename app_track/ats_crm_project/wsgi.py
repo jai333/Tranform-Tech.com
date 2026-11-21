@@ -8,9 +8,19 @@ https://docs.djangoproject.com/en/5.2/howto/deployment/wsgi/
 """
 
 import os
+import sys
+from pathlib import Path
+
+# Ensure project directory is in sys.path for Vercel serverless environment
+BASE_DIR = Path(__file__).resolve().parent.parent
+if str(BASE_DIR) not in sys.path:
+    sys.path.insert(0, str(BASE_DIR))
 
 from django.core.wsgi import get_wsgi_application
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'ats_crm_project.settings')
 
 application = get_wsgi_application()
+
+# Alias for Vercel serverless Python runtime
+app = application
