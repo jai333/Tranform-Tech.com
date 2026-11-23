@@ -4652,7 +4652,14 @@ def error_404(request, exception=None):
     return render(request, '404.html', status=404)
 
 def error_500(request):
+    import sys, traceback
     from django.shortcuts import render
+    exc_type, exc_value, exc_traceback = sys.exc_info()
+    tb_str = "".join(traceback.format_exception(exc_type, exc_value, exc_traceback)) if exc_type else "No traceback"
+    logger.error(f"500 Error: {tb_str}")
+    if request.GET.get('debug') == '1':
+        from django.http import HttpResponse
+        return HttpResponse(f"<pre style='background:#111;color:#f55;padding:20px;'>500 TRACEBACK:\n{tb_str}</pre>", status=500)
     return render(request, '500.html', status=500)
 
 def error_403(request, exception=None):
