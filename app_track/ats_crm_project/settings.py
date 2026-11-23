@@ -121,7 +121,7 @@ else:
 DATABASES = {
     'default': dj_database_url.config(
         default=_DEFAULT_DB_URL,
-        conn_max_age=600,
+        conn_max_age=0 if (os.getenv('VERCEL') or os.getenv('AWS_LAMBDA_FUNCTION_NAME')) else 600,
         conn_health_checks=True,
     )
 }
@@ -141,10 +141,11 @@ USE_I18N = True
 USE_TZ = True
 
 # ── Static / Media ────────────────────────────────────────────
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 WHITENOISE_MANIFEST_STRICT = False
+WHITENOISE_MAX_AGE = 31536000 if not DEBUG else 0
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 

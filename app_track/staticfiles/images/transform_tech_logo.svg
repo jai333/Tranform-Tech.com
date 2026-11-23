@@ -1,0 +1,14 @@
+<svg width="800" height="800" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <style>
+        @keyframes orbit { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+        .orbit { animation: orbit 4s linear infinite; transform-origin: 20px 20px; }
+    </style>
+    <circle cx="20" cy="20" r="4.5" fill="#00E5FF" opacity=".95"/>
+    <circle cx="20" cy="20" r="2.2" fill="#fff"/>
+    <g class="orbit">
+        <ellipse cx="20" cy="20" rx="16" ry="6" stroke="#00E5FF" stroke-width="1.4" fill="none" opacity=".75"/>
+        <circle cx="36" cy="20" r="1.5" fill="#fff"/>
+    </g>
+    <ellipse cx="20" cy="20" rx="16" ry="6" stroke="#00E5FF" stroke-width="1" fill="none" opacity=".35" transform="rotate(60 20 20)"/>
+    <ellipse cx="20" cy="20" rx="16" ry="6" stroke="#00E5FF" stroke-width="1" fill="none" opacity=".22" transform="rotate(-60 20 20)"/>
+</svg>
