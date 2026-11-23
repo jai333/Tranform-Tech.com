@@ -9,7 +9,7 @@ from django.contrib.auth import login, authenticate
 from django.contrib import messages
 from django.http import Http404, JsonResponse
 from django.core.exceptions import PermissionDenied
-from .models import Candidate, Job, Interview, InterviewScorecard, User, Application, Friendship, Message, Notification, JobSeekerApplication, Note, ITTicket, ITTicketComment, ThreatIncident, DevProjectRequest, ScheduledReport, AutomationRun, ResumeData, ITAsset, ITVendor, KBArticle, TicketSurvey, TicketAuditLog, RoutingRule, SLAConfiguration, TicketMacro, TicketWorkLog, ITProblem, ITChangeRequest, ChangeApprovalBoard, ServiceCatalogItem, ServiceRequest, TicketRoutingRule, AssetRelationship, SystemOutage, BusinessHoursSchedule, HolidayCalendar, VulnerabilityScan, IPBlocklist, PhishingReport
+from .models import Candidate, Job, Interview, InterviewScorecard, User, Application, Friendship, Message, Notification, JobSeekerApplication, Note, ITTicket, ITTicketComment, ThreatIncident, DevProjectRequest, ScheduledReport, AutomationRun, ResumeData, ITAsset, ITVendor, KBArticle, TicketSurvey, TicketAuditLog, RoutingRule, SLAConfiguration, TicketMacro, TicketWorkLog, ITProblem, ITChangeRequest, ChangeApprovalBoard, ServiceCatalogItem, ServiceRequest, TicketRoutingRule, AssetRelationship, SystemOutage, BusinessHoursSchedule, HolidayCalendar, VulnerabilityScan, IPBlocklist, PhishingReport, AutomationRule, AutomationLog
 from .forms import UserRegistrationForm, ProfileUpdateForm, JobSeekerApplicationForm, JobForm
 from django.db import models
 from django.views.decorators.http import require_POST
@@ -2185,13 +2185,12 @@ import uuid
 
 @login_required
 def scheduled_report_list(request):
-    from django.db.models import Count, Sum
-    reports = ScheduledReport.objects.prefetch_related('runs').order_by('-created_at')
-    active_count = reports.filter(is_active=True).count()
+    reports = ScheduledReport.objects.all().order_by('-created_at')
+    active_count = reports.count()
     total_runs = AutomationRun.objects.count()
     success_runs = AutomationRun.objects.filter(status='success').count()
     failed_runs = AutomationRun.objects.filter(status='failed').count()
-    recent_runs = AutomationRun.objects.select_related('report', 'triggered_by').order_by('-ran_at')[:10]
+    recent_runs = AutomationRun.objects.order_by('-timestamp')[:10]
     context = {
         'reports': reports,
         'active_count': active_count,
@@ -2205,27 +2204,22 @@ def scheduled_report_list(request):
 
 @login_required
 def run_report_now(request, pk):
-    """Manually trigger a report run (simulated)."""
+    """Manually trigger a report run."""
     from django.utils import timezone
     import time, random
     report = get_object_or_404(ScheduledReport, pk=pk)
-    if not (request.user.is_staff or request.user.is_admin_role):
+    if not (request.user.is_staff or getattr(request.user, 'is_admin_role', False)):
         messages.error(request, 'Staff access required.')
         return redirect('scheduled-report-list')
-    # Simulate a run
     duration = round(random.uniform(0.8, 4.5), 2)
     run = AutomationRun.objects.create(
-        report=report,
-        triggered_by=request.user,
+        run_type=report.report_type,
         status='success',
-        output_log=f'Report "{report.name}" generated successfully.\nType: {report.get_report_type_display()}\nFrequency: {report.get_frequency_display()}\nRecipients: {report.recipients}\nTimestamp: {timezone.now().isoformat()}',
-        duration_seconds=duration,
+        log_output=f'Report "{report.title}" generated successfully.\nType: {report.get_report_type_display()}\nFrequency: {report.get_frequency_display()}\nRecipients: {report.recipients}\nTimestamp: {timezone.now().isoformat()}',
     )
-    report.run_count += 1
-    report.last_sent = timezone.now()
-    report.last_status = 'success'
-    report.save(update_fields=['run_count', 'last_sent', 'last_status'])
-    messages.success(request, f'Report "{report.name}" triggered successfully in {duration}s.')
+    report.last_run = timezone.now()
+    report.save(update_fields=['last_run'])
+    messages.success(request, f'Report "{report.title}" triggered successfully in {duration}s.')
     return redirect('scheduled-report-list')
 
 @login_required
@@ -2235,14 +2229,12 @@ def scheduled_report_create(request):
         report_type = request.POST.get('report_type')
         frequency = request.POST.get('frequency')
         recipients = request.POST.get('recipients')
-        is_active = request.POST.get('is_active') == 'on'
         
         report = ScheduledReport.objects.create(
-            name=name,
+            title=name or 'Report',
             report_type=report_type,
             frequency=frequency,
-            recipients=recipients,
-            is_active=is_active,
+            recipients=recipients or request.user.email,
             created_by=request.user
         )
         
@@ -2405,6 +2397,44 @@ def it_vendor_create(request):
             )
             messages.success(request, f'Vendor {name} added.')
     return redirect('it-asset-list')
+
+@login_required
+def it_vendor_list(request):
+    tenant_filter = get_tenant_filter(request.user)
+    vendors = ITVendor.objects.filter(**tenant_filter).order_by('name')
+    return render(request, 'tracking_app/it_vendor_list.html', {'vendors': vendors, 'page_title': 'IT Vendors'})
+
+@login_required
+def it_vendor_detail(request, pk):
+    tenant_filter = get_tenant_filter(request.user)
+    vendor = get_object_or_404(ITVendor, pk=pk, **tenant_filter)
+    return render(request, 'tracking_app/it_vendor_detail.html', {'vendor': vendor, 'page_title': f'Vendor: {vendor.name}'})
+
+@login_required
+def it_vendor_update(request, pk):
+    tenant_filter = get_tenant_filter(request.user)
+    vendor = get_object_or_404(ITVendor, pk=pk, **tenant_filter)
+    if request.method == 'POST':
+        vendor.name = request.POST.get('name', vendor.name).strip()
+        vendor.contact_name = request.POST.get('contact_name', vendor.contact_name).strip()
+        vendor.contact_email = request.POST.get('contact_email', vendor.contact_email).strip()
+        vendor.contact_phone = request.POST.get('contact_phone', vendor.contact_phone).strip()
+        vendor.support_portal_url = request.POST.get('support_portal_url', vendor.support_portal_url).strip()
+        vendor.save()
+        messages.success(request, f'Vendor {vendor.name} updated.')
+        return redirect('it-vendor-detail', pk=vendor.pk)
+    return render(request, 'tracking_app/it_vendor_detail.html', {'vendor': vendor, 'page_title': f'Edit Vendor: {vendor.name}'})
+
+@login_required
+def it_vendor_delete(request, pk):
+    tenant_filter = get_tenant_filter(request.user)
+    vendor = get_object_or_404(ITVendor, pk=pk, **tenant_filter)
+    if request.method == 'POST':
+        name = vendor.name
+        vendor.delete()
+        messages.success(request, f'Vendor {name} deleted.')
+        return redirect('it-vendor-list')
+    return render(request, 'tracking_app/it_vendor_confirm_delete.html', {'vendor': vendor, 'page_title': f'Delete Vendor: {vendor.name}'})
 
 @login_required
 def it_asset_detail(request, pk):

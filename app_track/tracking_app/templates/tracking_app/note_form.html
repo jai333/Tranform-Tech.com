@@ -39,10 +39,12 @@
                                 Add Note
                             {% endif %}
                         </button>
-                        {% if form.instance.id %}
+                        {% if form.instance.id and form.instance.candidate %}
                             <a href="{% url 'candidate-detail' form.instance.candidate.id %}" class="btn btn-secondary">Cancel</a>
-                        {% else %}
+                        {% elif candidate and candidate.id %}
                             <a href="{% url 'candidate-detail' candidate.id %}" class="btn btn-secondary">Cancel</a>
+                        {% else %}
+                            <a href="{% url 'candidate-list' %}" class="btn btn-secondary">Cancel</a>
                         {% endif %}
                     </form>
                 </div>

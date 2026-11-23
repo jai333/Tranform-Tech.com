@@ -143,7 +143,34 @@ Return EXACTLY a JSON object with the following structure, and nothing else. Do 
         return None
 
 
-def generate_synthetic_signal_and_draft_email(company_name, industry=""):
+def _hardcoded_fallback(company_name):
+    """
+    Generates a realistic fallback buying signal dictionary when no AI API key is configured.
+    """
+    import random
+    source = random.choice(SIGNAL_SOURCES)
+    signal_type = random.choice(SIGNAL_TYPES)
+    templates = [
+        (f"{company_name} actively expanding engineering & sales headcount across regions.", 88, True,
+         f"Hi team at {company_name},\n\nI noticed your recent expansion and hiring initiative. Transform-Tech's unified ATS & CRM platform can streamline your candidate screening and pipeline management.\n\nWould you be open to a quick 10-minute walkthrough this week?"),
+        (f"{company_name} announced infrastructure modernization and tech stack consolidation.", 79, False,
+         f"Hi {company_name} Leadership,\n\nCongratulations on your recent infrastructure updates. We help modern enterprises unify their sales, IT operations, and recruitment into a single AI-powered OS.\n\nLet me know if you'd like to explore how we can support your growth."),
+        (f"{company_name} leadership team restructuring to accelerate product delivery.", 84, True,
+         f"Hi team,\n\nSaw the recent leadership updates at {company_name}. Transform-Tech provides real-time business intelligence and automated sales orchestration to keep teams aligned during rapid growth.\n\nWorth a brief conversation?")
+    ]
+    event, conf, hot, draft = random.choice(templates)
+    return {
+        "company": company_name,
+        "event": event,
+        "hot": hot,
+        "confidence": conf,
+        "signal_type": signal_type,
+        "source": source,
+        "draft": draft
+    }
+
+
+def generate_synthetic_signal_and_draft_email(company_name, industry="", tenant=None):
     """
     Uses AI to generate a highly plausible synthetic Buying Signal and draft
     email when real news isn't found. Ensures the Strategic Insight Engine

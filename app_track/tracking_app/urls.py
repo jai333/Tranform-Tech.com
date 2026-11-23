@@ -37,6 +37,10 @@ urlpatterns = [
     path('jai-sukhwal/', views.founder_story, name='jai-sukhwal'),  # SEO: rank for personal name search
     path('login/', auth_views.LoginView.as_view(template_name='tracking_app/login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(template_name='tracking_app/logout.html'), name='logout'),
+    path('password-reset/', auth_views.PasswordResetView.as_view(template_name='tracking_app/password_reset.html'), name='password_reset'),
+    path('password-reset/done/', auth_views.PasswordResetDoneView.as_view(template_name='tracking_app/password_reset_done.html'), name='password_reset_done'),
+    path('password-reset-confirm/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(template_name='tracking_app/password_reset_confirm.html'), name='password_reset_confirm'),
+    path('password-reset-complete/', auth_views.PasswordResetCompleteView.as_view(template_name='tracking_app/password_reset_complete.html'), name='password_reset_complete'),
     path('profile/', views.profile, name='profile'),
     path('public-profile/<str:username>/', views.public_profile, name='public-profile'),
     
@@ -131,7 +135,11 @@ urlpatterns = [
     path('it/api/tickets/<int:pk>/ai-heal/', views.api_it_ai_heal, name='api-it-ai-heal'),
     path('it/assets/', views.it_asset_list, name='it-asset-list'),
     path('it/assets/new/', views.it_asset_create, name='it-asset-create'),
+    path('it/vendors/', views.it_vendor_list, name='it-vendor-list'),
     path('it/vendors/new/', views.it_vendor_create, name='it-vendor-create'),
+    path('it/vendors/<int:pk>/', views.it_vendor_detail, name='it-vendor-detail'),
+    path('it/vendors/<int:pk>/edit/', views.it_vendor_update, name='it-vendor-update'),
+    path('it/vendors/<int:pk>/delete/', views.it_vendor_delete, name='it-vendor-delete'),
     path('it/assets/<int:pk>/', views.it_asset_detail, name='it-asset-detail'),
     path('it/admin/settings/', views.it_admin_settings, name='it-admin-settings'),
     path('it/reports/', views.it_reports, name='it-reports'),

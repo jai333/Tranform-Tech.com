@@ -946,6 +946,13 @@ class TicketAuditLog(models.Model):
         return f"{self.ticket.id} - {self.field_changed} changed at {self.timestamp}"
 
 class KBArticle(models.Model):
+    CATEGORY_CHOICES = [
+        ('general', 'General'),
+        ('hardware', 'Hardware'),
+        ('software', 'Software'),
+        ('network', 'Network & VPN'),
+        ('security', 'Security & Access'),
+    ]
     title = models.CharField(max_length=255)
     content = models.TextField()
     tags = models.CharField(max_length=255, null=True, blank=True, help_text="Comma-separated tags")
@@ -1193,24 +1200,31 @@ class DevProjectRequest(models.Model):
 # =============================================================================
 
 class ScheduledReport(models.Model):
-    title = models.CharField(max_length=255)
-    description = models.TextField(null=True, blank=True)
-    report_type = models.CharField(max_length=50, choices=[
+    REPORT_TYPES = [
         ('it_metrics', 'IT Helpdesk Metrics'),
         ('sec_summary', 'Security Incident Summary'),
         ('sla_breach', 'SLA Breach Report')
-    ])
-    frequency = models.CharField(max_length=20, choices=[
+    ]
+    FREQUENCY_CHOICES = [
         ('daily', 'Daily'),
         ('weekly', 'Weekly'),
         ('monthly', 'Monthly')
-    ])
+    ]
+
+    title = models.CharField(max_length=255)
+    description = models.TextField(null=True, blank=True)
+    report_type = models.CharField(max_length=50, choices=REPORT_TYPES)
+    frequency = models.CharField(max_length=20, choices=FREQUENCY_CHOICES)
     format = models.CharField(max_length=10, choices=[('pdf', 'PDF'), ('csv', 'CSV'), ('json', 'JSON')], default='pdf')
     recipients = models.TextField(help_text="Comma separated email addresses")
     created_by = models.ForeignKey('User', on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     last_run = models.DateTimeField(null=True, blank=True)
     next_run = models.DateTimeField(null=True, blank=True)
+
+    @property
+    def name(self):
+        return self.title
 
     def __str__(self):
         return f"{self.title} ({self.get_frequency_display()})"
