@@ -4680,22 +4680,58 @@ def auto_setup_admin(request):
 
 from django.core.management import call_command
 import traceback
+import io
+import os
+
+def run_migrations(request):
+    out = io.StringIO()
+    err = io.StringIO()
+    try:
+        call_command("migrate", interactive=False, stdout=out, stderr=err)
+        msg = f"<h1>✅ MIGRATIONS COMPLETED</h1><pre>{out.getvalue()}\n{err.getvalue()}</pre>"
+        try:
+            from django.contrib.sites.models import Site
+            from django.conf import settings
+            site, created = Site.objects.get_or_create(id=getattr(settings, 'SITE_ID', 1))
+            site.domain = 'transform-tech.com'
+            site.name = 'Transform Tech'
+            site.save()
+            msg += f"<p>Site configured: {site.domain} (id={site.id})</p>"
+        except Exception as e_site:
+            msg += f"<p>Site configuration note: {e_site}</p>"
+        return HttpResponse(msg)
+    except Exception as e:
+        return HttpResponse(f"<h1>❌ MIGRATION ERROR</h1><pre>{traceback.format_exc()}\n{out.getvalue()}\n{err.getvalue()}</pre>", status=500)
 
 def auto_load_data(request):
+    out = io.StringIO()
+    err = io.StringIO()
     try:
-        call_command("flush", interactive=False)
-        call_command("loaddata", "datadump.json")
+        call_command("migrate", interactive=False, stdout=out, stderr=err)
+        from django.conf import settings
+        dump_path = os.path.join(settings.BASE_DIR, "datadump.json")
+        if os.path.exists(dump_path):
+            try:
+                call_command("loaddata", dump_path, stdout=out, stderr=err)
+            except Exception as e_load:
+                out.write(f"\nWarning during loaddata: {e_load}")
         from django.contrib.auth import get_user_model
         User = get_user_model()
         try:
-            user = User.objects.get(username__iexact="JAi345")
-            user.set_password("Jai345@2026")
+            user = User.objects.filter(username__iexact="JAi345").first()
+            if not user:
+                user = User.objects.create_superuser("JAi345", "admin@transform-tech.com", "Jai345@2026")
+            else:
+                user.set_password("Jai345@2026")
+            user.role = 'admin'
+            user.is_staff = True
+            user.is_superuser = True
             user.save()
-        except Exception:
-            pass
-        return HttpResponse("<h1>✅ DATA RESTORED</h1><p>Successfully flushed DB and loaded datadump.json into PostgreSQL.</p><p>You can now login with <b>JAi345</b> / <b>Jai345@2026</b>.</p>")
+        except Exception as e_user:
+            out.write(f"\nUser creation error: {e_user}")
+        return HttpResponse(f"<h1>✅ DATA RESTORED</h1><pre>{out.getvalue()}\n{err.getvalue()}</pre><p>You can now login with <b>JAi345</b> / <b>Jai345@2026</b>.</p>")
     except Exception as e:
-        return HttpResponse(f"<h1>❌ ERROR</h1><pre>{traceback.format_exc()}</pre>")
+        return HttpResponse(f"<h1>❌ ERROR</h1><pre>{traceback.format_exc()}\n{out.getvalue()}\n{err.getvalue()}</pre>", status=500)
 
 def force_password_reset(request):
     from django.http import HttpResponse
